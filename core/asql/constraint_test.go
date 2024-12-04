@@ -1,7 +1,7 @@
 package asql_test
 
 import (
-	"github.com/aarioai/airis/pkg/asql"
+	"github.com/aarioai/airis/core/asql"
 	"testing"
 )
 

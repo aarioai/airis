@@ -48,7 +48,7 @@ func RegisterGlobalServeContentTypes(contentTypes []string) {
 	}
 	globalServeContentTypes = contentTypes
 }
-func RegisterGlobalErrorHandler(f func(ictx iris.Context, contentType string, d Response) (int, error)) {
+func RegisterGlobalErrorHandler(f func(w *Writer, contentType string, d Response) (int, error)) {
 	globalErrorHandler = f
 }
 func RegisterGlobalBeforeSerialize(f func(ictx iris.Context, contentType string, d Response) Response) {

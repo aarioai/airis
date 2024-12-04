@@ -1,7 +1,7 @@
 package afmt_test
 
 import (
-	"github.com/aarioai/airis/afmt"
+	"github.com/aarioai/airis/pkg/afmt"
 	"testing"
 	"time"
 )

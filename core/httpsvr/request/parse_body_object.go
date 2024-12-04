@@ -30,7 +30,21 @@ func (r *Request) BodyAnyMap(p string, requireds ...bool) (map[string]any, *ae.E
 	}
 	return b, nil
 }
-
+func (r *Request) BodyFloat64Map(p string, requireds ...bool) (map[string]float64, *ae.Error) {
+	b, e := r.BodyAnyMap(p, requireds...)
+	if e != nil {
+		return nil, e
+	}
+	maps, err := conv.AnyFloat64Map(b)
+	if err != nil {
+		return nil, ae.BadParam(p)
+	}
+	required := len(requireds) == 0 || requireds[0]
+	if required && maps == nil {
+		return nil, ae.BadParam(p)
+	}
+	return maps, nil
+}
 func (r *Request) BodyAnySlice(p string, requireds ...bool) ([]any, *ae.Error) {
 	required := len(requireds) == 0 || requireds[0]
 	x, e := r.Body(p, required)

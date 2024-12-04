@@ -120,7 +120,7 @@ func (r *Request) BodyInt24s(p string, required, allowZero bool) ([]atype.Int24,
 }
 
 func (r *Request) BodyLocation(p string, required ...bool) (atype.Location, *ae.Error) {
-	x, e := r.BodyInterfaceMap(p, required...)
+	x, e := r.BodyAnyMap(p, required...)
 	if e != nil || x == nil {
 		return atype.Location{}, e
 	}

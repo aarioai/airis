@@ -64,7 +64,7 @@ func TestString(t *testing.T) {
 		t.Errorf("atype.Abyte(A) ==> string(%s)", atype.String(atype.Abyte('A')))
 	}
 
-	if atype.String([]byte{'I', 'w', 'i'}) != "Aario" {
+	if atype.String([]byte{'A', 'a', 'r', 'i', 'o'}) != "Aario" {
 		t.Errorf("[]byte(Aario) ==> string(%s)", atype.String([]byte{'I', 'w', 'i'}))
 	}
 
@@ -94,8 +94,8 @@ func TestString(t *testing.T) {
 	if atype.String(float32(100.0)) != "100" {
 		t.Errorf("float32(100.0) ==> string(%s)", atype.String(float32(100.0)))
 	}
-	if atype.String(float64(100.0)) != "100" {
-		t.Errorf("float64(100.0) ==> string(%s)", atype.String(float64(100.0)))
+	if atype.String(100.0) != "100" {
+		t.Errorf("float64(100.0) ==> string(%s)", atype.String(100.0))
 	}
 
 	b := 234242342342423.3

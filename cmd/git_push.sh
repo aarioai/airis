@@ -86,7 +86,6 @@ pushAndUpgradeMod() {
     # 更新依赖
     if [ $noUpdate -eq 0 ]; then
         log_info "Updating dependencies..."
-        go build || log_error "Build failed"
         go get -u -v ./... || log_error "Failed to update dependencies"
     fi
 
@@ -131,7 +130,8 @@ handle_tags() {
 main() {
     build
     pushAndUpgradeMod
-    log_info "All operations completed successfully"
+    log_info "All operations completed successfully."
+    log_info "--> Remember to use -u to upgrade all dependencies once a day"
 }
 
 # 执行主流程
