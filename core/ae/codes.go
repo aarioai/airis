@@ -40,6 +40,7 @@ const (
 	CodeServiceUnavailable = http.StatusServiceUnavailable  // 服务不可用
 	CodeGatewayTimeout     = http.StatusGatewayTimeout      // 网关超时
 	CodeBandwidthLimit     = 509                            // 带宽限制
+	CodeStatusException    = 555                            // http 状态码出错，未达到程序阶段
 )
 
 // 预定义错误
@@ -76,4 +77,5 @@ var (
 	ServiceUnavailable  = New(CodeServiceUnavailable, http.StatusText(CodeServiceUnavailable))
 	GatewayTimeout      = New(CodeGatewayTimeout, http.StatusText(CodeGatewayTimeout))
 	BandwidthLimit      = New(CodeBandwidthLimit, "Bandwidth Limit Exceeded") // 自定义状态码
+	StatusException     = New(CodeStatusException, "Server Status Exception") // 自定义状态码
 )
