@@ -1,4 +1,4 @@
-package redisclient
+package redishelper
 
 import (
 	"context"
@@ -11,8 +11,8 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func (r *RedisClient) HSet(ctx context.Context, expires time.Duration, k string, values ...any) *ae.Error {
-	_, err := r.rdb.Pipelined(ctx, func(pipe redis.Pipeliner) error {
+func HSet(ctx context.Context, rdb *redis.Client, expires time.Duration, k string, values ...any) *ae.Error {
+	_, err := rdb.Pipelined(ctx, func(pipe redis.Pipeliner) error {
 		err1 := pipe.HSet(ctx, k, values...).Err()
 		err2 := pipe.Expire(ctx, k, expires).Err()
 		return ae.CatchError(err1, err2)
@@ -21,7 +21,7 @@ func (r *RedisClient) HSet(ctx context.Context, expires time.Duration, k string,
 	return ae.NewRedisError(err)
 }
 
-func (r *RedisClient) HMSet(ctx context.Context, expires time.Duration, k string, values ...any) *ae.Error {
+func HMSet(ctx context.Context, rdb *redis.Client, expires time.Duration, k string, values ...any) *ae.Error {
 	keys := make(map[string]struct{}, len(values)/2)
 	for i := 0; i < len(values); i += 2 {
 		f := fmt.Sprintf("%v", values[i])
@@ -33,7 +33,7 @@ func (r *RedisClient) HMSet(ctx context.Context, expires time.Duration, k string
 		}
 		keys[f] = struct{}{}
 	}
-	_, err := r.rdb.Pipelined(ctx, func(pipe redis.Pipeliner) error {
+	_, err := rdb.Pipelined(ctx, func(pipe redis.Pipeliner) error {
 		err1 := pipe.HMSet(ctx, k, values...).Err()
 		err2 := pipe.Expire(ctx, k, expires).Err()
 		return ae.CatchError(err1, err2)
@@ -42,8 +42,8 @@ func (r *RedisClient) HMSet(ctx context.Context, expires time.Duration, k string
 	return ae.NewRedisError(err)
 }
 
-func (r *RedisClient) HScan(ctx context.Context, dest any, k string, fields ...string) *ae.Error {
-	c := r.rdb.HMGet(ctx, k, fields...)
+func HScan(ctx context.Context, rdb *redis.Client, dest any, k string, fields ...string) *ae.Error {
+	c := rdb.HMGet(ctx, k, fields...)
 	v, err := c.Result()
 	if err != nil {
 		return ae.NewRedisError(err)
@@ -60,8 +60,8 @@ func (r *RedisClient) HScan(ctx context.Context, dest any, k string, fields ...s
 	return e
 }
 
-func (r *RedisClient) HGetAll(ctx context.Context, k string, dest any) *ae.Error {
-	c := r.rdb.HGetAll(ctx, k)
+func HGetAll(ctx context.Context, rdb *redis.Client, k string, dest any) *ae.Error {
+	c := rdb.HGetAll(ctx, k)
 	result, err := c.Result()
 	if err != nil {
 		return ae.NewRedisError(err)
@@ -73,8 +73,8 @@ func (r *RedisClient) HGetAll(ctx context.Context, k string, dest any) *ae.Error
 	return e
 }
 
-func (r *RedisClient) HGetAllInt(ctx context.Context, k string, restrict bool) (map[string]int, *ae.Error) {
-	c := r.rdb.HGetAll(ctx, k)
+func HGetAllInt(ctx context.Context, rdb *redis.Client, k string, restrict bool) (map[string]int, *ae.Error) {
+	c := rdb.HGetAll(ctx, k)
 	result, err := c.Result()
 	if err != nil {
 		return nil, ae.NewRedisError(err)
@@ -98,8 +98,8 @@ func (r *RedisClient) HGetAllInt(ctx context.Context, k string, restrict bool) (
 }
 
 // 只要存在一个，就不报错；全是nil，返回 ae.NotFound
-func (r *RedisClient) TryHMGet(ctx context.Context, k string, fields ...string) ([]any, bool, *ae.Error) {
-	v, err := r.rdb.HMGet(ctx, k, fields...).Result()
+func TryHMGet(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]any, bool, *ae.Error) {
+	v, err := rdb.HMGet(ctx, k, fields...).Result()
 	if err != nil {
 		return nil, false, ae.NewRedisError(err)
 	}
@@ -126,8 +126,8 @@ func (r *RedisClient) TryHMGet(ctx context.Context, k string, fields ...string) 
 }
 
 // 只要存在一个，就不报错；全是nil，返回 ae.NotFound
-func (r *RedisClient) TryHMGetString(ctx context.Context, k string, fields ...string) ([]string, bool, *ae.Error) {
-	iv, ok, e := r.TryHMGet(ctx, k, fields...)
+func TryHMGetString(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]string, bool, *ae.Error) {
+	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
 	if e != nil {
 		return nil, ok, e
 	}
@@ -141,8 +141,8 @@ func (r *RedisClient) TryHMGetString(ctx context.Context, k string, fields ...st
 	}
 	return v, ok, nil
 }
-func (r *RedisClient) TryHMGetUint64(ctx context.Context, k string, fields []string, defaultValue uint64) ([]uint64, bool, *ae.Error) {
-	iv, ok, e := r.TryHMGet(ctx, k, fields...)
+func TryHMGetUint64(ctx context.Context, rdb *redis.Client, k string, fields []string, defaultValue uint64) ([]uint64, bool, *ae.Error) {
+	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
 	if e != nil {
 		return nil, ok, e
 	}
@@ -156,8 +156,8 @@ func (r *RedisClient) TryHMGetUint64(ctx context.Context, k string, fields []str
 	}
 	return v, ok, nil
 }
-func (r *RedisClient) TryHMGetUint(ctx context.Context, k string, fields []string, defaultValue uint) ([]uint, bool, *ae.Error) {
-	iv, ok, e := r.TryHMGet(ctx, k, fields...)
+func TryHMGetUint(ctx context.Context, rdb *redis.Client, k string, fields []string, defaultValue uint) ([]uint, bool, *ae.Error) {
+	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
 	if e != nil {
 		return nil, ok, e
 	}
@@ -171,8 +171,8 @@ func (r *RedisClient) TryHMGetUint(ctx context.Context, k string, fields []strin
 	}
 	return v, ok, nil
 }
-func (r *RedisClient) TryHMGetUint32(ctx context.Context, k string, fields []string, defaultValue uint32) ([]uint32, bool, *ae.Error) {
-	iv, ok, e := r.TryHMGet(ctx, k, fields...)
+func TryHMGetUint32(ctx context.Context, rdb *redis.Client, k string, fields []string, defaultValue uint32) ([]uint32, bool, *ae.Error) {
+	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
 	if e != nil {
 		return nil, ok, e
 	}
@@ -186,8 +186,8 @@ func (r *RedisClient) TryHMGetUint32(ctx context.Context, k string, fields []str
 	}
 	return v, ok, nil
 }
-func (r *RedisClient) TryHMGetUint24(ctx context.Context, k string, fields []string, defaultValue atype.Uint24) ([]atype.Uint24, bool, *ae.Error) {
-	iv, ok, e := r.TryHMGet(ctx, k, fields...)
+func TryHMGetUint24(ctx context.Context, rdb *redis.Client, k string, fields []string, defaultValue atype.Uint24) ([]atype.Uint24, bool, *ae.Error) {
+	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
 	if e != nil {
 		return nil, ok, e
 	}
@@ -201,8 +201,8 @@ func (r *RedisClient) TryHMGetUint24(ctx context.Context, k string, fields []str
 	}
 	return v, ok, nil
 }
-func (r *RedisClient) TryHMGetUint16(ctx context.Context, k string, fields []string, defaultValue uint16) ([]uint16, bool, *ae.Error) {
-	iv, ok, e := r.TryHMGet(ctx, k, fields...)
+func TryHMGetUint16(ctx context.Context, rdb *redis.Client, k string, fields []string, defaultValue uint16) ([]uint16, bool, *ae.Error) {
+	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
 	if e != nil {
 		return nil, ok, e
 	}
@@ -216,8 +216,8 @@ func (r *RedisClient) TryHMGetUint16(ctx context.Context, k string, fields []str
 	}
 	return v, ok, nil
 }
-func (r *RedisClient) TryHMGetUint8(ctx context.Context, k string, fields []string, defaultValue uint8) ([]uint8, bool, *ae.Error) {
-	iv, ok, e := r.TryHMGet(ctx, k, fields...)
+func TryHMGetUint8(ctx context.Context, rdb *redis.Client, k string, fields []string, defaultValue uint8) ([]uint8, bool, *ae.Error) {
+	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
 	if e != nil {
 		return nil, ok, e
 	}
@@ -231,8 +231,8 @@ func (r *RedisClient) TryHMGetUint8(ctx context.Context, k string, fields []stri
 	}
 	return v, ok, nil
 }
-func (r *RedisClient) TryHMGetInt64(ctx context.Context, k string, fields []string, defaultValue int64) ([]int64, bool, *ae.Error) {
-	iv, ok, e := r.TryHMGet(ctx, k, fields...)
+func TryHMGetInt64(ctx context.Context, rdb *redis.Client, k string, fields []string, defaultValue int64) ([]int64, bool, *ae.Error) {
+	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
 	if e != nil {
 		return nil, false, e
 	}
@@ -246,8 +246,8 @@ func (r *RedisClient) TryHMGetInt64(ctx context.Context, k string, fields []stri
 	}
 	return v, ok, nil
 }
-func (r *RedisClient) TryHMGetInt(ctx context.Context, k string, fields []string, defaultValue int) ([]int, bool, *ae.Error) {
-	iv, ok, e := r.TryHMGet(ctx, k, fields...)
+func TryHMGetInt(ctx context.Context, rdb *redis.Client, k string, fields []string, defaultValue int) ([]int, bool, *ae.Error) {
+	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
 	if e != nil {
 		return nil, false, e
 	}
@@ -261,8 +261,8 @@ func (r *RedisClient) TryHMGetInt(ctx context.Context, k string, fields []string
 	}
 	return v, ok, nil
 }
-func (r *RedisClient) TryHMGetInt32(ctx context.Context, k string, fields []string, defaultValue int32) ([]int32, bool, *ae.Error) {
-	iv, ok, e := r.TryHMGet(ctx, k, fields...)
+func TryHMGetInt32(ctx context.Context, rdb *redis.Client, k string, fields []string, defaultValue int32) ([]int32, bool, *ae.Error) {
+	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
 	if e != nil {
 		return nil, false, e
 	}
@@ -276,8 +276,8 @@ func (r *RedisClient) TryHMGetInt32(ctx context.Context, k string, fields []stri
 	}
 	return v, ok, nil
 }
-func (r *RedisClient) TryHMGetInt16(ctx context.Context, k string, fields []string, defaultValue int16) ([]int16, bool, *ae.Error) {
-	iv, ok, e := r.TryHMGet(ctx, k, fields...)
+func TryHMGetInt16(ctx context.Context, rdb *redis.Client, k string, fields []string, defaultValue int16) ([]int16, bool, *ae.Error) {
+	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
 	if e != nil {
 		return nil, false, e
 	}
@@ -291,8 +291,8 @@ func (r *RedisClient) TryHMGetInt16(ctx context.Context, k string, fields []stri
 	}
 	return v, ok, nil
 }
-func (r *RedisClient) TryHMGetInt8(ctx context.Context, k string, fields []string, defaultValue int8) ([]int8, bool, *ae.Error) {
-	iv, ok, e := r.TryHMGet(ctx, k, fields...)
+func TryHMGetInt8(ctx context.Context, rdb *redis.Client, k string, fields []string, defaultValue int8) ([]int8, bool, *ae.Error) {
+	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
 	if e != nil {
 		return nil, false, e
 	}
@@ -308,8 +308,8 @@ func (r *RedisClient) TryHMGetInt8(ctx context.Context, k string, fields []strin
 }
 
 // 不能有一个是nil
-func (r *RedisClient) MustHMGet(ctx context.Context, k string, fields ...string) ([]any, *ae.Error) {
-	v, err := r.rdb.HMGet(ctx, k, fields...).Result()
+func MustHMGet(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]any, *ae.Error) {
+	v, err := rdb.HMGet(ctx, k, fields...).Result()
 	if err != nil {
 		return nil, ae.NewRedisError(err)
 	}
@@ -323,8 +323,8 @@ func (r *RedisClient) MustHMGet(ctx context.Context, k string, fields ...string)
 	}
 	return v, nil
 }
-func (r *RedisClient) MustHMGetUint64(ctx context.Context, k string, fields ...string) ([]uint64, *ae.Error) {
-	iv, e := r.MustHMGet(ctx, k, fields...)
+func MustHMGetUint64(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]uint64, *ae.Error) {
+	iv, e := MustHMGet(ctx, rdb, k, fields...)
 	if e != nil {
 		return nil, e
 	}
@@ -334,8 +334,8 @@ func (r *RedisClient) MustHMGetUint64(ctx context.Context, k string, fields ...s
 	}
 	return v, nil
 }
-func (r *RedisClient) MustHMGetUint(ctx context.Context, k string, fields ...string) ([]uint, *ae.Error) {
-	iv, e := r.MustHMGet(ctx, k, fields...)
+func MustHMGetUint(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]uint, *ae.Error) {
+	iv, e := MustHMGet(ctx, rdb, k, fields...)
 	if e != nil {
 		return nil, e
 	}
@@ -345,8 +345,8 @@ func (r *RedisClient) MustHMGetUint(ctx context.Context, k string, fields ...str
 	}
 	return v, nil
 }
-func (r *RedisClient) MustHMGetUint32(ctx context.Context, k string, fields ...string) ([]uint32, *ae.Error) {
-	iv, e := r.MustHMGet(ctx, k, fields...)
+func MustHMGetUint32(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]uint32, *ae.Error) {
+	iv, e := MustHMGet(ctx, rdb, k, fields...)
 	if e != nil {
 		return nil, e
 	}
@@ -356,8 +356,8 @@ func (r *RedisClient) MustHMGetUint32(ctx context.Context, k string, fields ...s
 	}
 	return v, nil
 }
-func (r *RedisClient) MustHMGetUint24(ctx context.Context, k string, fields ...string) ([]atype.Uint24, *ae.Error) {
-	iv, e := r.MustHMGet(ctx, k, fields...)
+func MustHMGetUint24(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]atype.Uint24, *ae.Error) {
+	iv, e := MustHMGet(ctx, rdb, k, fields...)
 	if e != nil {
 		return nil, e
 	}
@@ -367,8 +367,8 @@ func (r *RedisClient) MustHMGetUint24(ctx context.Context, k string, fields ...s
 	}
 	return v, nil
 }
-func (r *RedisClient) MustHMGetUint16(ctx context.Context, k string, fields ...string) ([]uint16, *ae.Error) {
-	iv, e := r.MustHMGet(ctx, k, fields...)
+func MustHMGetUint16(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]uint16, *ae.Error) {
+	iv, e := MustHMGet(ctx, rdb, k, fields...)
 	if e != nil {
 		return nil, e
 	}
@@ -378,8 +378,8 @@ func (r *RedisClient) MustHMGetUint16(ctx context.Context, k string, fields ...s
 	}
 	return v, nil
 }
-func (r *RedisClient) MustHMGetUint8(ctx context.Context, k string, fields ...string) ([]uint8, *ae.Error) {
-	iv, e := r.MustHMGet(ctx, k, fields...)
+func MustHMGetUint8(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]uint8, *ae.Error) {
+	iv, e := MustHMGet(ctx, rdb, k, fields...)
 	if e != nil {
 		return nil, e
 	}
@@ -389,8 +389,8 @@ func (r *RedisClient) MustHMGetUint8(ctx context.Context, k string, fields ...st
 	}
 	return v, nil
 }
-func (r *RedisClient) MustHMGetInt64(ctx context.Context, k string, fields ...string) ([]int64, *ae.Error) {
-	iv, e := r.MustHMGet(ctx, k, fields...)
+func MustHMGetInt64(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]int64, *ae.Error) {
+	iv, e := MustHMGet(ctx, rdb, k, fields...)
 	if e != nil {
 		return nil, e
 	}
@@ -400,8 +400,8 @@ func (r *RedisClient) MustHMGetInt64(ctx context.Context, k string, fields ...st
 	}
 	return v, nil
 }
-func (r *RedisClient) MustHMGetInt(ctx context.Context, k string, fields ...string) ([]int, *ae.Error) {
-	iv, e := r.MustHMGet(ctx, k, fields...)
+func MustHMGetInt(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]int, *ae.Error) {
+	iv, e := MustHMGet(ctx, rdb, k, fields...)
 	if e != nil {
 		return nil, e
 	}
@@ -411,8 +411,8 @@ func (r *RedisClient) MustHMGetInt(ctx context.Context, k string, fields ...stri
 	}
 	return v, nil
 }
-func (r *RedisClient) MustHMGetInt32(ctx context.Context, k string, fields ...string) ([]int32, *ae.Error) {
-	iv, e := r.MustHMGet(ctx, k, fields...)
+func MustHMGetInt32(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]int32, *ae.Error) {
+	iv, e := MustHMGet(ctx, rdb, k, fields...)
 	if e != nil {
 		return nil, e
 	}
@@ -422,8 +422,8 @@ func (r *RedisClient) MustHMGetInt32(ctx context.Context, k string, fields ...st
 	}
 	return v, nil
 }
-func (r *RedisClient) MustHMGetInt16(ctx context.Context, k string, fields ...string) ([]int16, *ae.Error) {
-	iv, e := r.MustHMGet(ctx, k, fields...)
+func MustHMGetInt16(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]int16, *ae.Error) {
+	iv, e := MustHMGet(ctx, rdb, k, fields...)
 	if e != nil {
 		return nil, e
 	}
@@ -434,8 +434,8 @@ func (r *RedisClient) MustHMGetInt16(ctx context.Context, k string, fields ...st
 	return v, nil
 }
 
-func (r *RedisClient) MustHMGetInt8(ctx context.Context, k string, fields ...string) ([]int8, *ae.Error) {
-	iv, e := r.MustHMGet(ctx, k, fields...)
+func MustHMGetInt8(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]int8, *ae.Error) {
+	iv, e := MustHMGet(ctx, rdb, k, fields...)
 	if e != nil {
 		return nil, e
 	}
