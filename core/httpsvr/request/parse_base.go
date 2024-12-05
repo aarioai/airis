@@ -4,12 +4,21 @@ import (
 	"encoding/json"
 	"github.com/aarioai/airis/core/ae"
 	"github.com/aarioai/airis/core/atype"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"io"
 	"mime"
 	"mime/multipart"
 	"net/http"
 	"net/url"
 	"regexp"
+	"strings"
+)
+
+const (
+	maxMultiSize = 32 << 20 // 32M
+	maxInt64     = int64(1<<63 - 1)
+	maxFormSize  = 10 << 20 // 10 MB is a lot of json/form data.
 )
 
 type userDataInterface interface {
@@ -27,32 +36,36 @@ func newRawValue(name string, value any) *RawValue {
 	}
 }
 
-/*
-@param pattern  e.g. `[[:word:]]+` `\w+`
-Filter(pattern string, required bool)
-Filter(required bool)
-Filter(pattern string)
-Filter(default atype.Atype)
-*/
+// Filter 验证并过滤值
+// @param pattern  e.g. `[[:word:]]+` `\w+`
+//	Filter(pattern string, required bool)
+//	Filter(required bool)
+//	Filter(pattern string)
+//	Filter(default atype.Atype)
 func (v *RawValue) Filter(patterns ...any) *ae.Error {
 	required := true
 	pattern := ""
 
-	for i := 0; i < len(patterns); i++ {
-		pat := patterns[i]
-		if s, ok := pat.(string); ok {
-			pattern = s
-		} else if b, ok := pat.(bool); ok {
-			required = b
-		} else if d, ok := pat.(*atype.Atype); ok && v.String() == "" {
-			v.Reload(d.Raw())
+	for _, pat := range patterns {
+		switch p := pat.(type) {
+		case string:
+			pattern = p
+		case bool:
+			required = p
+		case *atype.Atype:
+			if v.String() == "" {
+				v.Reload(p.Raw())
+			}
 		}
 	}
+
 	if v.String() == "" {
 		if required {
 			return ae.BadParam(v.name)
 		}
-	} else if pattern != "" {
+		return nil
+	}
+	if pattern != "" {
 		re, _ := regexp.Compile(pattern)
 		m := re.FindStringSubmatch(v.String())
 		if m == nil || len(m) < 1 {
@@ -72,6 +85,17 @@ func (r *Request) contentMediaType() (mediatype string, params map[string]string
 	}
 	return mime.ParseMediaType(ct)
 }
+
+// ContentType
+// Request是每个请求独立内存，基本不存在并发情况，没有加锁的必要性
+func (r *Request) ContentType() string {
+	if r.contentType != "" {
+		return r.contentType
+	}
+	r.contentType, _, _ = r.contentMediaType()
+	return r.contentType
+}
+
 func (r *Request) Method() string {
 	return r.ictx.Method()
 }
@@ -91,17 +115,6 @@ func (r *Request) Origin() string {
 	host := r.r.Host
 	h := scheme + "//" + host
 	return h
-}
-
-// ContentType
-// Request是每个请求独立内存，基本不存在并发情况，没有加锁的必要性
-func (r *Request) ContentType() string {
-	t := r.contentType
-	if t != "" {
-		return t
-	}
-	r.contentType, _, _ = r.contentMediaType()
-	return t
 }
 
 func (r *Request) query(programData map[string]any, userData userDataInterface, name string, patterns ...any) (*RawValue, *ae.Error) {
@@ -145,12 +158,13 @@ func (r *Request) queries(programData map[string]any, userData map[string][]stri
 	return nil
 }
 
-func (r *Request) Query(param string, patterns ...any) (*RawValue, *ae.Error) {
+// Query 从URL参数获取值
+func (r *Request) Query(name string, patterns ...any) (*RawValue, *ae.Error) {
 	var userData url.Values
 	if r.r != nil {
 		userData = r.r.URL.Query()
 	}
-	return r.query(r.partialQueries, userData, param, patterns...)
+	return r.query(r.partialQueries, userData, name, patterns...)
 }
 
 func (r *Request) Queries() map[string]any {
@@ -174,11 +188,10 @@ func (r *Request) setPartialBodyData(data map[string][]string) {
 	}
 }
 
+// parseBodyStream 解析请求体
 // @see http.parsePostForm()
 func (r *Request) parseBodyStream() *ae.Error {
-	defer func() {
-		r.bodyParsed = true
-	}()
+	defer func() { r.bodyParsed = true }()
 	// body 可以不传数据
 	if r.r == nil || r.r.Body == nil {
 		return nil
@@ -190,47 +203,57 @@ func (r *Request) parseBodyStream() *ae.Error {
 	}
 	switch ct {
 	case CtJSON.String(), CtOctetStream.String(), CtForm.String():
-		var reader io.Reader = r.r.Body
-		maxFormSize := int64(1<<63 - 1)
-		if _, ok := reader.(*maxBytesReader); !ok {
-			maxFormSize = int64(10 << 20) // 10 MB is a lot of json.
-			reader = io.LimitReader(r.r.Body, maxFormSize+1)
-		}
-		b, err := io.ReadAll(reader)
+		return r.parseSimpleBody()
+	case CtFormData.String():
+		return r.parseMultipartBody(params["boundary"])
+	}
+	return nil
+}
+
+// parseSimpleBody 解析简单请求体
+func (r *Request) parseSimpleBody() *ae.Error {
+	var reader io.Reader = r.r.Body
+	maxSize := maxInt64
+	if _, ok := reader.(*maxBytesReader); !ok {
+		maxSize = maxFormSize
+		reader = io.LimitReader(r.r.Body, maxSize+1)
+	}
+	b, err := io.ReadAll(reader)
+	if err != nil {
+		return ae.NewError(err)
+	}
+	if int64(len(b)) > maxSize {
+		return ae.New(ae.CodeRequestEntityTooLarge, "body too large")
+	}
+	switch r.ContentType() {
+	case CtForm.String():
+		values, err := url.ParseQuery(string(b))
 		if err != nil {
-			return ae.NewError(err)
+			return ae.New(ae.CodeBadRequest, "invalid form data")
 		}
-		if int64(len(b)) > maxFormSize {
-			return ae.New(ae.CodeRequestEntityTooLarge, "body is too large")
+		r.setPartialBodyData(values)
+	default:
+		if err := json.Unmarshal(b, &r.partialBodyData); err != nil {
+			return ae.New(ae.CodeBadRequest, "invalid json")
 		}
-		if ct == CtForm.String() {
-			var vs url.Values
-			if vs, err = url.ParseQuery(string(b)); err != nil {
-				return ae.New(ae.CodeBadRequest, "body should encode in application/x-www-form-urlencoded ")
-			}
-			r.setPartialBodyData(vs)
-		} else {
-			if err = json.Unmarshal(b, &r.partialBodyData); err != nil {
-				return ae.New(ae.CodeBadRequest, "body should encode in json")
-			}
-		}
-		// @see http.ParseMultipartForm
-		// .MultipartForm "multipart/form-data" ||  "multipart/mixed"
+	}
+	// @see http.ParseMultipartForm
+	// .MultipartForm "multipart/form-data" ||  "multipart/mixed"
 	// .PostFormValue  "application/x-www-form-urlencoded" url.ParseQuery(body) + .MultipartForm
 	// .FormValue() 调用 .Form  =  url.ParseQuery(r.URL.RawQuery) + .PostFormValue
+	return nil
+}
 
-	case CtFormData.String(), CtMixed.String():
-		boundary, ok := params["boundary"]
-		if !ok {
-			return ae.New(ae.CodeBadRequest, "no multipart boundary param in Content-Type")
-		}
-		var f *multipart.Form
-		f, err = multipart.NewReader(r.r.Body, boundary).ReadForm(32 << 20) // 32M
-		if err != nil {
-			return ae.New(ae.CodeBadRequest, "body should encode in multipart form")
-		}
-		r.setPartialBodyData(f.Value)
+// parseMultipartBody 解析multipart请求体
+func (r *Request) parseMultipartBody(boundary string) *ae.Error {
+	if boundary == "" {
+		return ae.New(ae.CodeBadRequest, "missing boundary")
 	}
+	form, err := multipart.NewReader(r.r.Body, boundary).ReadForm(maxMultiSize)
+	if err != nil {
+		return ae.New(ae.CodeBadRequest, "body should encode in multipart form")
+	}
+	r.setPartialBodyData(form.Value)
 	return nil
 }
 
@@ -262,19 +285,55 @@ func (r *Request) Cookies() []*http.Cookie {
 }
 
 // @warn 尽量不要通过自定义header传参，因为可能某个web server会基于安全禁止某些无法识别的header
-func (r *Request) GetHeader(param string, patterns ...any) (*RawValue, *ae.Error) {
+func (r *Request) GetHeader(name string, patterns ...any) (*RawValue, *ae.Error) {
 	var userData http.Header
 	if r.r != nil {
 		userData = r.r.Header
 	}
-	return r.query(r.partialHeaders, userData, param, patterns...)
+	return r.query(r.partialHeaders, userData, name, patterns...)
 }
-func (r *Request) Header(param string) string {
-	value, e := r.GetHeader(param)
-	if e != nil {
-		return ""
+
+func (r *Request) Header(name string) *RawValue {
+	value, _ := r.GetHeader(name)
+	return value
+}
+
+// HeaderWild 读取 HTTP Header（包括标准格式和 X- 前缀格式）
+//  1. 原始格式 如 name, Name, user_agent
+//  2. 标准格式  如 Referer, User-Agent,
+//  3. X-前缀格式  如 X-Csrf-Token, X-Request-Vuid, X-From, X-Inviter
+//
+// @warn 尽量不要通过自定义header传参，因为可能某个web server会基于安全禁止某些无法识别的header
+func (r *Request) HeaderWild(name string) *RawValue {
+	// 1. 原始格式
+	value := r.Header(name)
+	if value.NotEmpty() {
+		return value
 	}
-	return value.String()
+
+	// 	2. 标准格式
+	key := cases.Title(language.English).String(strings.ReplaceAll(name, "_", "-"))
+	if key != name {
+		value = r.Header(key)
+		if value.NotEmpty() {
+			return value
+		}
+	}
+
+	// 3. X-前缀格式
+	return r.Header("X-" + key)
+}
+
+func (r *Request) UserAgent() string {
+	ua := r.userAgent
+	if ua == "" {
+		ua = r.Header("User-Agent").String()
+		r.userAgent = ua
+	}
+	return ua
+}
+func (r *Request) Accept() string {
+	return r.Header("Accept").String()
 }
 
 // Headers 获取所有headers
@@ -287,11 +346,48 @@ func (r *Request) Headers() map[string]any {
 	return r.queries(r.partialHeaders, userData)
 }
 
-func (r *Request) UserAgent() string {
-	ua := r.userAgent
-	if ua == "" {
-		ua = r.Header("User-Agent")
-		r.userAgent = ua
+// QueryWild 尝试从URL参数、Header（包括标准格式和X-前缀格式）、Cookie读取参数值
+//  1. URL参数
+//  2. HTTP头部 (支持标准和X-前缀格式)
+//  3. Cookie
+//
+// e.g.  csrf_token: in url params? -> Csrf-Token: in header?  X-Csrf-Token: in header-> csrf_token: in cookie
+func (r *Request) QueryWild(name string, patterns ...any) (*RawValue, *ae.Error) {
+	// 1. URL参数直接查询模式
+	v, e := r.Query(name)
+	if e == nil && v.NotEmpty() {
+		return v, v.Filter(patterns...)
 	}
-	return ua
+	// 1.1. URL参数替换格式查询，可能使用的是Header（大写开头）参数名，改为小写下划线模式
+	key := strings.ToLower(strings.ReplaceAll(name, "-", "_"))
+	if key != name {
+		v, e = r.Query(key, patterns...)
+		if e == nil && v.NotEmpty() {
+			return v, v.Filter(patterns...)
+		}
+	}
+
+	// 2. HTTP头部（包括标准格式和 X- 前缀）
+	v = r.HeaderWild(name)
+	if v.NotEmpty() {
+		return v, v.Filter(patterns...)
+	}
+
+	// 3. Cookie
+	if cookie, err := r.Cookie(name); err == nil {
+		v = newRawValue(cookie.Name, cookie.Value)
+		return v, v.Filter(patterns...)
+	}
+	if key != name {
+		if cookie, err := r.Cookie(key); err == nil {
+			v = newRawValue(cookie.Name, cookie.Value)
+			return v, v.Filter(patterns...)
+		}
+	}
+	// 返回空值
+	return v, v.Filter(patterns...)
+}
+func (r *Request) Wild(name string) *RawValue {
+	v, _ := r.QueryWild(name)
+	return v
 }

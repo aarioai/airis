@@ -111,7 +111,7 @@ func (w *Writer) ContentType() string {
 	if serveTypes == nil {
 		serveTypes = globalServeContentTypes
 	}
-	types := []string{w.request.Header("Accept"), w.request.ContentType()}
+	types := []string{w.request.Accept(), w.request.ContentType()}
 	for _, t := range types {
 		if t != "" {
 			if ok := slices.Contains(serveTypes, t); ok {
