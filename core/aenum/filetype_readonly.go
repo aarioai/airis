@@ -88,12 +88,12 @@ var VideoTypes = map[FileType][]string{
     Wav         : {".wav", "video/x-wav"},
     Webm        : {".webm", "video/webm"},
 }
-func NewDataType(mime string) (FileType, bool) {return ParseFileType(mime, DataTypes)}
-func NewImageType(mime string) (FileType, bool) {return ParseFileType(mime, ImageTypes)}
-func NewAudioType(mime string) (FileType, bool) {return ParseFileType(mime, AudioTypes)}
 func NewVideoType(mime string) (FileType, bool) {return ParseFileType(mime, VideoTypes)}
 func NewDocumentType(mime string) (FileType, bool) {return ParseFileType(mime, DocumentTypes)}
 func NewCompressedType(mime string) (FileType, bool) {return ParseFileType(mime, CompressedTypes)}
+func NewDataType(mime string) (FileType, bool) {return ParseFileType(mime, DataTypes)}
+func NewImageType(mime string) (FileType, bool) {return ParseFileType(mime, ImageTypes)}
+func NewAudioType(mime string) (FileType, bool) {return ParseFileType(mime, AudioTypes)}
 func (t FileType) ContentType() string {
     if d, ok := DocumentTypes[t]; ok {return d[1]}
     if d, ok := CompressedTypes[t]; ok {return d[1]}

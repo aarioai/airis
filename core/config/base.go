@@ -10,12 +10,16 @@ import (
 	"time"
 )
 
+// Environment constants
 const (
 	EnvDevelopment = "development"
 	EnvProduction  = "production"
 	EnvTesting     = "testing"
 	EnvStaging     = "staging"
+)
 
+// Configuration keys
+const (
 	CkRsaRoot    = "rsa_root"
 	CkEnv        = "env"
 	CkTimezoneID = "timezone_id"
@@ -54,10 +58,23 @@ type Config struct {
 }
 
 func (c *Config) Log() {
-	msg := fmt.Sprintf("lauching...\nenv: %s\ntimezone_id: %s\nmock: %v\ngit_ver: %s", c.Env, c.TimezoneID, c.Mock, utils.GitVersion())
-	// print on console
-	fmt.Println(msg)
-	log.Println(msg)
+	info := fmt.Sprintf(`
+Launch Configuration:
+Environment: %s
+Timezone: %s
+Mock Enabled: %v
+Git Version: %s
+`,
+		c.Env,
+		c.TimezoneID,
+		c.Mock,
+		utils.GitVersion(),
+	)
+
+	// 方便运行程序时直接显示
+	fmt.Println(info)
+	// 记录进日志，方便通过消息队列通知
+	log.Println(info)
 }
 
 func parseToDuration(d string) time.Duration {
@@ -78,6 +95,8 @@ func parseToDuration(d string) time.Duration {
 	return time.Duration(t) * time.Second
 }
 
+// splitDots splits dot-separated strings into parts
+// @example ["a.b.c", "d.e"] -> ["a", "b", "c", "d", "e"]
 func splitDots(keys ...string) []string {
 	n := make([]string, 0)
 	for _, key := range keys {

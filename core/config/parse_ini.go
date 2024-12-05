@@ -18,32 +18,45 @@ func New(path string) *Config {
 	cfg.Reload()
 	return cfg
 }
-
-func (c *Config) Reload() {
+func (c *Config) reload() {
 	data, err := ini.Load(c.path)
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("failed to load config file %s: %w", c.path, err))
 	}
+	// 写锁范围一定要越小越好
 	cfgMtx.Lock()
-	defer cfgMtx.Unlock()
-
 	c.data = data
+	cfgMtx.Unlock()
+}
 
+func (c *Config) initializeConfig() error {
 	c.Env = Env(c.GetString(CkEnv))
+	c.Mock, _ = c.Get(CkMock).Bool()
+	// 初始化时区配置
+	if err := c.initializeTimezone(); err != nil {
+		return err
+	}
+	return c.loadRsa()
+}
+func (c *Config) initializeTimezone() error {
+	var err error
 	c.TimezoneID, _ = time.Now().Zone()
 	c.TimeLocation = time.Local
+	c.TimeFormat = c.GetString(CkTimeFormat, "2006-02-01 15:04:05")
+
 	if tz := c.GetString(CkTimezoneID); tz != "" {
 		c.TimezoneID = tz
-		c.TimeLocation, err = time.LoadLocation(tz)
-		if err != nil {
-			panic("invalid timezone: " + tz + ", error: " + err.Error())
+		if c.TimeLocation, err = time.LoadLocation(tz); err != nil {
+			return fmt.Errorf("invalid timezone %s: %w", tz, err)
 		}
 	}
-	c.TimeFormat = c.GetString(CkTimeFormat, "2006-02-01 15:04:05")
-	c.Mock, _ = c.Get(CkMock).Bool()
+	return nil
+}
 
-	if err = c.loadRsa(); err != nil {
-		panic(err)
+func (c *Config) Reload() {
+	c.reload()
+	if err := c.initializeConfig(); err != nil {
+		panic(fmt.Errorf("failed to initialize config: %w", err))
 	}
 }
 
@@ -64,32 +77,22 @@ func (c *Config) getIni(key string) string {
 	defer cfgMtx.RUnlock()
 
 	keys := splitDots(key)
-	var s *ini.Section
 	if len(keys) == 1 {
-		if s = c.data.Section(""); s.HasKey(key) {
-			return s.Key(key).String()
-		}
-		return ""
+		return c.data.Section("").Key(key).String()
 	}
-
-	k := strings.Join(keys[1:], "_")
-	if s = c.data.Section(keys[0]); s.HasKey(k) {
-		return s.Key(k).String()
-	}
-	return ""
+	section := c.data.Section(keys[0])
+	return section.Key(strings.Join(keys[1:], "_")).String()
 }
 
 // 不要获取太细分，否则容易导致错误不容易被排查
 func (c *Config) getOtherConfig(key string) string {
 	cfgMtx.RLock()
 	defer cfgMtx.RUnlock()
-	d, _ := c.otherConfig[key]
-	return d
+	return c.otherConfig[key]
 }
 
 func (c *Config) MustGetString(key string) (string, error) {
-	v := c.getIni(key)
-	if v != "" {
+	if v := c.getIni(key); v != "" {
 		return v, nil
 	}
 	// 从RSA读取
@@ -97,10 +100,10 @@ func (c *Config) MustGetString(key string) (string, error) {
 		return string(rsa), nil
 	}
 	// 从其他配置（如数据库下载来的）读取
-	if v = c.getOtherConfig(key); v != "" {
+	if v := c.getOtherConfig(key); v != "" {
 		return v, nil
 	}
-	return "", fmt.Errorf("must set config `%s`", key)
+	return "", fmt.Errorf("required config key not found: %s", key)
 }
 
 func (c *Config) GetString(key string, defaultValue ...string) string {
