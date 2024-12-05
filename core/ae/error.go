@@ -46,21 +46,11 @@ func NewMsg(format string, args ...any) *Error {
 }
 
 // NewError 从标准 error 创建 Error
-func NewError(err error, detail ...string) *Error {
+func NewError(err error, details ...string) *Error {
 	if err == nil {
 		return nil
 	}
-	msg := err.Error()
-	if len(detail) == 1 {
-		msg = detail[0] + " error: " + msg
-	} else if len(detail) > 1 {
-		args := make([]any, len(detail)-1)
-		for i := 1; i < len(detail); i++ {
-			args[i-1] = detail[i]
-		}
-		msg = fmt.Sprintf(detail[0], args...) + " error: " + msg
-	}
-	return NewMsg(msg).WithCaller(2)
+	return NewMsg(err.Error()).WithCaller(2).withDetail(details...)
 }
 
 // WithCaller 添加调用者信息
@@ -69,6 +59,21 @@ func (e *Error) WithCaller(skip int) *Error {
 		return nil
 	}
 	e.Caller = Caller(skip + 1)
+	return e
+}
+func (e *Error) withDetail(details ...string) *Error {
+	if e == nil {
+		return nil
+	}
+	if len(details) == 1 {
+		return e.WithDetail(details[0])
+	} else if len(details) > 1 {
+		args := make([]any, len(details)-1)
+		for i := 1; i < len(details); i++ {
+			args[i-1] = details[i]
+		}
+		return e.WithDetail(details[0], args...)
+	}
 	return e
 }
 
