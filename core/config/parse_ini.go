@@ -64,7 +64,7 @@ func (c *Config) Reload() {
 func (c *Config) AddConfigs(otherConfigs map[string]string) {
 	cfgMtx.Lock()
 	defer cfgMtx.Unlock()
-	if otherConfigs == nil {
+	if c.otherConfig == nil {
 		c.otherConfig = make(map[string]string)
 	}
 	for k, v := range otherConfigs {
