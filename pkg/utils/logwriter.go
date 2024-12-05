@@ -1,6 +1,3 @@
-//go:build !windows && !arm && !arm64
-// +build !windows,!arm,!arm64
-
 package utils
 
 import (
@@ -11,7 +8,6 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
 )
 
@@ -48,13 +44,20 @@ func RedirectLog(logfile, crashfile string, mode os.FileMode) error {
 		return fmt.Errorf("failed to get absolute path: %w", err)
 	}
 
-	if file, err := os.OpenFile(crashfile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.ModePerm); err == nil {
-		syscall.Dup2(int(file.Fd()), 2)
-		defer file.Close()
+    crashFile, err := os.OpenFile(crashfile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.ModePerm)
+    if err != nil {
+        return fmt.Errorf("failed to open crash file: %w", err)
+    }
+    defer crashFile.Close()
+
+    // 重定向标准错误输出
+	if err := redirectStderr(crashFile); err != nil {
+		return fmt.Errorf("failed to redirect stderr: %w", err)
 	}
 
-	log.SetOutput(NewLogWriter(absLogfile))
-	log.SetFlags(log.Lshortfile | log.Ltime | log.Ldate | log.Lmicroseconds)
+	// 设置日志输出
+    log.SetOutput(NewLogWriter(absLogfile))
+    log.SetFlags(log.Lshortfile | log.Ltime | log.Ldate | log.Lmicroseconds)
 	return nil
 }
 
@@ -171,4 +174,20 @@ func (lw *LogWriter) Close() error {
 		return lw.file.Close()
 	}
 	return nil
+}
+
+
+// redirectStderr 重定向标准错误输出
+func redirectStderr(f *os.File) error {
+    // 使用平台特定的系统调用
+    if err := dupFd(f.Fd(), 2); err != nil {
+        return fmt.Errorf("failed to dup fd: %w", err)
+    }
+    return nil
+}
+
+// dupFd 复制文件描述符
+// 根据不同操作系统使用不同的实现
+func dupFd(fd uintptr, newfd int) error {
+    return dup2(fd, newfd)
 }
