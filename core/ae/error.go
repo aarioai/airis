@@ -46,11 +46,21 @@ func NewMsg(format string, args ...any) *Error {
 }
 
 // NewError 从标准 error 创建 Error
-func NewError(err error) *Error {
+func NewError(err error, detail ...string) *Error {
 	if err == nil {
 		return nil
 	}
-	return NewMsg(err.Error()).WithCaller(2)
+	msg := err.Error()
+	if len(detail) == 1 {
+		msg = detail[0] + " error: " + msg
+	} else if len(detail) > 1 {
+		args := make([]any, len(detail)-1)
+		for i := 1; i < len(detail); i++ {
+			args[i-1] = detail[i]
+		}
+		msg = fmt.Sprintf(detail[0], args...) + " error: " + msg
+	}
+	return NewMsg(msg).WithCaller(2)
 }
 
 // WithCaller 添加调用者信息
