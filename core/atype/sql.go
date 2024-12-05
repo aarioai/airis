@@ -418,6 +418,9 @@ func NewDatetime(d string, loc *time.Location) Datetime {
 	}
 	return Datetime(d)
 }
+func Now(loc *time.Location) Datetime {
+	return ToDatetime(time.Now().In(loc))
+}
 func ToDatetime(t time.Time) Datetime                     { return Datetime(t.Format("2006-01-02 15:04:05")) }
 func UnixToDatetime(u int64, loc *time.Location) Datetime { return NewUnixTime(u).Datetime(loc) }
 
