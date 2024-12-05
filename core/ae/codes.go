@@ -11,27 +11,30 @@ const (
 	CodeNotModified = http.StatusNotModified
 
 	// 4xx 客户端错误
-	CodeBadRequest            = http.StatusBadRequest       // 请求参数错误
-	CodeUnauthorized          = http.StatusUnauthorized     // 未授权
-	CodePaymentRequired       = http.StatusPaymentRequired  // 需要支付
-	CodeForbidden             = http.StatusForbidden        // 禁止访问
-	CodeNotFound              = http.StatusNotFound         // 资源不存在
-	CodeMethodNotAllowed      = http.StatusMethodNotAllowed // 方法不允许
-	CodeNotAcceptable         = http.StatusNotAcceptable    // 不接受的请求
-	CodeProxyAuthRequired     = http.StatusProxyAuthRequired
-	CodeRequestTimeout        = http.StatusRequestTimeout        // 请求超时
-	CodeConflict              = http.StatusConflict              // 资源冲突
-	CodeGone                  = http.StatusGone                  // 资源已永久删除
-	CodeLengthRequired        = http.StatusLengthRequired        // 需要Content-Length
+	CodeBadRequest      = http.StatusBadRequest      // 请求参数错误
+	CodeUnauthorized    = http.StatusUnauthorized    // 未授权
+	CodePaymentRequired = http.StatusPaymentRequired // 需要支付
+	CodeForbidden       = http.StatusForbidden       // 禁止访问
+	CodeNotFound        = http.StatusNotFound        // 资源不存在
+	//CodeMethodNotAllowed      = http.StatusMethodNotAllowed // 方法不允许
+	CodeNotAcceptable     = http.StatusNotAcceptable // 不接受的请求
+	CodeProxyAuthRequired = http.StatusProxyAuthRequired
+	CodeRequestTimeout    = http.StatusRequestTimeout // 请求超时
+	CodeConflict          = http.StatusConflict       // 资源冲突
+	CodeGone              = http.StatusGone           // 资源已永久删除
+	//CodeLengthRequired        = http.StatusLengthRequired        // 需要Content-Length
 	CodePreconditionFailed    = http.StatusPreconditionFailed    // 前置条件验证失败
 	CodeRequestEntityTooLarge = http.StatusRequestEntityTooLarge // 请求实体过大
-	CodeRequestURITooLong     = http.StatusRequestURITooLong     // 请求URI过长
-	CodeUnsupportedMedia      = http.StatusUnsupportedMediaType  // 不支持的媒体类型
-	CodeTooManyRequests       = http.StatusTooManyRequests       // 请求过多
-
+	//CodeRequestURITooLong     = http.StatusRequestURITooLong     // 请求URI过长
+	CodeUnsupportedMedia = http.StatusUnsupportedMediaType // 不支持的媒体类型
+	CodeLocked           = http.StatusLocked
+	CodeFailedDependency = http.StatusFailedDependency           // 之前发生错误
+	CodeTooEarly         = http.StatusTooEarly                   // 表示服务器不愿意冒险处理可能被重播的请求。
+	CodeTooManyRequests  = http.StatusTooManyRequests            // 请求过多
+	CodeIllegal          = http.StatusUnavailableForLegalReasons // 该请求因政策法律原因不可用。
 	// 自定义状态码
-	CodeNoRows    = 444 // 【自定义错误码】无数据记录
-	CodeRetryWith = 449 // 需要重试
+	CodeNoRows    = 490 // 【自定义错误码】无数据记录
+	CodeRetryWith = 491 // 【自定义错误码】需要重试
 
 	// 5xx 服务器错误
 	CodeInternalError      = http.StatusInternalServerError // 服务器内部错误
@@ -50,25 +53,30 @@ var (
 	NoContent = New(CodeNoContent, http.StatusText(CodeNoContent))
 
 	// 4xx
-	BadRequest             = New(CodeBadRequest, http.StatusText(CodeBadRequest))
-	Unauthorized           = New(CodeUnauthorized, http.StatusText(CodeUnauthorized))
-	PaymentRequired        = New(CodePaymentRequired, http.StatusText(CodePaymentRequired))
-	Forbidden              = New(CodeForbidden, http.StatusText(CodeForbidden))
-	NotFound               = New(CodeNotFound, http.StatusText(CodeNotFound))
-	MethodNotAllowed       = New(CodeMethodNotAllowed, http.StatusText(CodeMethodNotAllowed))
+	BadRequest      = New(CodeBadRequest, http.StatusText(CodeBadRequest))
+	Unauthorized    = New(CodeUnauthorized, http.StatusText(CodeUnauthorized))
+	PaymentRequired = New(CodePaymentRequired, http.StatusText(CodePaymentRequired))
+	Forbidden       = New(CodeForbidden, http.StatusText(CodeForbidden))
+	NotFound        = New(CodeNotFound, http.StatusText(CodeNotFound))
+	//MethodNotAllowed       = New(CodeMethodNotAllowed, http.StatusText(CodeMethodNotAllowed))
 	NotAcceptable          = New(CodeNotAcceptable, http.StatusText(CodeNotAcceptable))
 	ProxyAuthRequiredError = New(CodeProxyAuthRequired, http.StatusText(CodeProxyAuthRequired))
 	Timeout                = New(CodeRequestTimeout, http.StatusText(CodeRequestTimeout))
 	Conflict               = New(CodeConflict, http.StatusText(CodeConflict))
 	Gone                   = New(CodeGone, http.StatusText(CodeGone))
-	LengthRequired         = New(CodeLengthRequired, http.StatusText(CodeLengthRequired))
-	PreconditionFailed     = New(CodePreconditionFailed, http.StatusText(CodePreconditionFailed))
-	RequestEntityTooLarge  = New(CodeRequestEntityTooLarge, http.StatusText(CodeRequestEntityTooLarge))
-	RequestURITooLong      = New(CodeRequestURITooLong, http.StatusText(CodeRequestURITooLong))
-	UnsupportedMedia       = New(CodeUnsupportedMedia, http.StatusText(CodeUnsupportedMedia))
-	TooManyRequests        = New(CodeTooManyRequests, http.StatusText(CodeTooManyRequests))
-	NoRows                 = New(CodeNoRows, "No Rows")       // 自定义状态码
-	RetryWithError         = New(CodeRetryWith, "Retry With") // 自定义状态码
+	//LengthRequired         = New(CodeLengthRequired, http.StatusText(CodeLengthRequired))
+	PreconditionFailed    = New(CodePreconditionFailed, http.StatusText(CodePreconditionFailed))
+	RequestEntityTooLarge = New(CodeRequestEntityTooLarge, http.StatusText(CodeRequestEntityTooLarge))
+	//RequestURITooLong      = New(CodeRequestURITooLong, http.StatusText(CodeRequestURITooLong))
+	UnsupportedMedia = New(CodeUnsupportedMedia, http.StatusText(CodeUnsupportedMedia))
+	TooManyRequests  = New(CodeTooManyRequests, http.StatusText(CodeTooManyRequests))
+	Locked           = New(CodeLocked, http.StatusText(CodeLocked))
+	FailedDependency = New(CodeFailedDependency, http.StatusText(CodeFailedDependency))
+	TooEarly         = New(CodeTooEarly, http.StatusText(CodeTooEarly))
+	Illegal          = New(CodeIllegal, http.StatusText(CodeIllegal))
+
+	NoRows         = New(CodeNoRows, "No Rows")       // 自定义状态码
+	RetryWithError = New(CodeRetryWith, "Retry With") // 自定义状态码
 
 	// 5xx
 	InternalServerError = New(CodeInternalError, http.StatusText(CodeInternalError))

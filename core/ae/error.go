@@ -133,5 +133,5 @@ func (e *Error) IsServerError() bool {
 }
 
 func (e *Error) IsRetryWith() bool {
-	return e != nil && e.Code == 449 && e.Msg != ""
+	return e != nil && e.Code == CodeRetryWith && e.Msg != ""
 }

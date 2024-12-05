@@ -138,17 +138,16 @@ func (r *Request) query(programData map[string]any, userData userDataInterface, 
 // 这个读取少，直接每次独立解析即可
 func (r *Request) queries(programData map[string]any, userData map[string][]string) map[string]any {
 	data := make(map[string]any)
-	// 优先级最低，读取用户的header
-	if r.r != nil {
-		rhs := r.r.Header
-		for k, vs := range rhs {
+	// 优先级最低，读取用户data
+	if programData != nil {
+		for k, vs := range userData {
 			if len(vs) != 0 && vs[0] != "" {
 				data[k] = vs[0]
 			}
 		}
 	}
 	// 优先级高，读取程序设置的header
-	if r.partialHeaders != nil {
+	if programData != nil {
 		for k, v := range r.partialHeaders {
 			data[k] = v
 		}
@@ -173,7 +172,7 @@ func (r *Request) Queries() map[string]any {
 	if r.r != nil {
 		userData = r.r.URL.Query()
 	}
-	return r.queries(r.partialHeaders, userData)
+	return r.queries(r.partialQueries, userData)
 }
 func (r *Request) setPartialBodyData(data map[string][]string) {
 	if len(data) == 0 {
@@ -200,7 +199,7 @@ func (r *Request) parseBodyStream() *ae.Error {
 
 	ct, params, err := r.contentMediaType()
 	if err != nil {
-		return ae.New(ae.CodeBadRequest, "invalid content media type")
+		return ae.New(ae.CodeUnsupportedMedia, "invalid content media type")
 	}
 	switch ct {
 	case CtJSON.String(), CtOctetStream.String(), CtForm.String():
@@ -224,18 +223,19 @@ func (r *Request) parseSimpleBody() *ae.Error {
 		return ae.NewError(err)
 	}
 	if int64(len(b)) > maxSize {
-		return ae.New(ae.CodeRequestEntityTooLarge, "body too large")
+		return ae.RequestEntityTooLarge
 	}
 	switch r.ContentType() {
 	case CtForm.String():
 		values, err := url.ParseQuery(string(b))
 		if err != nil {
-			return ae.New(ae.CodeBadRequest, "invalid form data")
+			return ae.New(ae.CodeUnsupportedMedia, "invalid form data")
 		}
 		r.setPartialBodyData(values)
 	default:
 		if err := json.Unmarshal(b, &r.partialBodyData); err != nil {
-			return ae.New(ae.CodeBadRequest, "invalid json")
+
+			return ae.New(ae.CodeUnsupportedMedia, "invalid json")
 		}
 	}
 	// @see http.ParseMultipartForm
@@ -248,11 +248,11 @@ func (r *Request) parseSimpleBody() *ae.Error {
 // parseMultipartBody 解析multipart请求体
 func (r *Request) parseMultipartBody(boundary string) *ae.Error {
 	if boundary == "" {
-		return ae.New(ae.CodeBadRequest, "missing boundary")
+		return ae.New(ae.CodePreconditionFailed, "missing boundary")
 	}
 	form, err := multipart.NewReader(r.r.Body, boundary).ReadForm(maxMultiSize)
 	if err != nil {
-		return ae.New(ae.CodeBadRequest, "body should encode in multipart form")
+		return ae.New(ae.CodeUnsupportedMedia, "body should encode in multipart form")
 	}
 	r.setPartialBodyData(form.Value)
 	return nil

@@ -95,12 +95,12 @@ func NewImageType(mime string) (FileType, bool) {return ParseFileType(mime, Imag
 func NewAudioType(mime string) (FileType, bool) {return ParseFileType(mime, AudioTypes)}
 func NewVideoType(mime string) (FileType, bool) {return ParseFileType(mime, VideoTypes)}
 func (t FileType) ContentType() string {
-    if d, ok := AudioTypes[t]; ok {return d[1]}
-    if d, ok := VideoTypes[t]; ok {return d[1]}
     if d, ok := DocumentTypes[t]; ok {return d[1]}
     if d, ok := CompressedTypes[t]; ok {return d[1]}
     if d, ok := DataTypes[t]; ok {return d[1]}
     if d, ok := ImageTypes[t]; ok {return d[1]}
+    if d, ok := AudioTypes[t]; ok {return d[1]}
+    if d, ok := VideoTypes[t]; ok {return d[1]}
     return ""
 }
 func (t FileType) Ext() string {
