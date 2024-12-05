@@ -18,7 +18,7 @@ type Writer struct {
 	beforeFlush     []func(*Writer)
 	beforeSerialize []func(ictx iris.Context, contentType string, d Response) Response
 	serialize       func(contentType string, d Response) (bytes []byte, newContentType string, err error)
-	errorHandler    func(w *Writer, contentType string, d Response) (int, error)
+	errorHandler    func(w *Writer, contentType string, d Response) (int, error, bool)
 
 	ictx    iris.Context
 	request *request.Request
@@ -120,8 +120,8 @@ func (w *Writer) ContentType() string {
 			}
 		}
 	}
-	// ④ 使用注册的第一个ContentType
-	if ct == "" {
+	// ④ 使用注册的第一个ContentType。如果只注册了一个Content-Type，那么即表示只提供一种数据解析（如json）
+	if ct != "" {
 		ct = serveTypes[0]
 	}
 	w.WithHeader("Content-Type", ct)
@@ -133,7 +133,7 @@ func (w *Writer) DeleteHeader(key string) *Writer {
 	}
 	return w
 }
-func (w *Writer) WithErrorHandler(handler func(w *Writer, contentType string, d Response) (int, error)) *Writer {
+func (w *Writer) WithErrorHandler(handler func(w *Writer, contentType string, d Response) (int, error, bool)) *Writer {
 	w.errorHandler = handler
 	return w
 }
@@ -205,10 +205,16 @@ func (w *Writer) writeDTO(d Response) (int, error) {
 	ct := w.ContentType()
 	if d.Code >= ae.CodeBadRequest {
 		if w.errorHandler != nil {
-			return w.errorHandler(w, ct, d)
+			n, err, next := w.errorHandler(w, ct, d)
+			if !next {
+				return n, err
+			}
 		}
 		if globalErrorHandler != nil {
-			return globalErrorHandler(w, ct, d)
+			n, err, next := globalErrorHandler(w, ct, d)
+			if !next {
+				return n, err
+			}
 		}
 		return defaultErrorHandler(w, ct, d)
 	}

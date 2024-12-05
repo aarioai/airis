@@ -9,7 +9,7 @@ import (
 var (
 	// GlobalHideServerError 全局隐藏服务器错误(code>=500)
 	// 优先级：writer.HideServerError > GlobalHideServerError
-	globalErrorHandler      func(w *Writer, contentType string, d Response) (int, error)
+	globalErrorHandler      func(w *Writer, contentType string, d Response) (int, error, bool)
 	globalBeforeSerialize   []func(ictx iris.Context, contentType string, d Response) Response
 	globalSerialize         func(contentType string, d Response) (bytes []byte, newContentType string, err error)
 	log                     = logger.NewDefaultLog()
@@ -48,7 +48,7 @@ func RegisterGlobalServeContentTypes(contentTypes []string) {
 	}
 	globalServeContentTypes = contentTypes
 }
-func RegisterGlobalErrorHandler(f func(w *Writer, contentType string, d Response) (int, error)) {
+func RegisterGlobalErrorHandler(f func(w *Writer, contentType string, d Response) (int, error, bool)) {
 	globalErrorHandler = f
 }
 func RegisterGlobalBeforeSerialize(f func(ictx iris.Context, contentType string, d Response) Response) {
