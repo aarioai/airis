@@ -99,7 +99,7 @@ func filterArrayFields(w any, tagname string, tags ...string) (ret []map[string]
 func (w *Writer) stringifyBigint(payload any, tagname string) (any, *ae.Error) {
 	stringify, _ := w.request.QueryBool(request.ParamStringify)
 	if stringify {
-		return StringifyBigint(payload, tagname)
+		return StringifyBigintFields(payload, tagname)
 	}
 	return payload, nil
 }
@@ -113,7 +113,7 @@ func stringifySlice(v reflect.Value, tagname string) (any, *ae.Error) {
 		if !v.Index(i).CanInterface() {
 			return nil, nil
 		}
-		p[i], e = StringifyBigint(v.Index(i).Interface(), tagname)
+		p[i], e = StringifyBigintFields(v.Index(i).Interface(), tagname)
 		if e != nil {
 			return nil, e
 		}
@@ -138,7 +138,7 @@ func stringifyStruct(t reflect.Type, v reflect.Value, tagname string) (any, *ae.
 		if !v1.CanInterface() {
 			continue
 		}
-		w, e := StringifyBigint(v1.Interface(), tagname)
+		w, e := StringifyBigintFields(v1.Interface(), tagname)
 		if e != nil {
 			return nil, e
 		}
@@ -151,7 +151,7 @@ func stringifyStruct(t reflect.Type, v reflect.Value, tagname string) (any, *ae.
 				continue
 			} else {
 				for y, z := range m {
-					p[y], _ = StringifyBigint(z, tagname)
+					p[y], _ = StringifyBigintFields(z, tagname)
 				}
 			}
 
@@ -174,7 +174,7 @@ func stringifyMap(t reflect.Type, v reflect.Value, tagname string) (any, *ae.Err
 		if ks == "-" {
 			continue
 		}
-		w, e := StringifyBigint(v.MapIndex(key).Interface(), tagname)
+		w, e := StringifyBigintFields(v.MapIndex(key).Interface(), tagname)
 		if e != nil {
 			return nil, e
 		}
@@ -186,7 +186,7 @@ func stringifyMap(t reflect.Type, v reflect.Value, tagname string) (any, *ae.Err
 				p[t.Name()] = w
 			} else {
 				for y, z := range m {
-					p[y], _ = StringifyBigint(z, tagname)
+					p[y], _ = StringifyBigintFields(z, tagname)
 				}
 			}
 		} else {
@@ -197,7 +197,7 @@ func stringifyMap(t reflect.Type, v reflect.Value, tagname string) (any, *ae.Err
 }
 
 // 2.0 版本，仅针对初级原始类型为 int64/uint64 字段转为 string
-func StringifyBigint(payload any, tagname string) (any, *ae.Error) {
+func StringifyBigintFields(payload any, tagname string) (any, *ae.Error) {
 	if payload == nil {
 		return nil, nil
 	}

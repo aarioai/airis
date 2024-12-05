@@ -1,10 +1,10 @@
 package response
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"github.com/aarioai/airis/core/ae"
+	"github.com/aarioai/airis/core/airis"
 	"github.com/aarioai/airis/core/httpsvr/request"
 	"github.com/kataras/iris/v12"
 	"net/http"
@@ -21,7 +21,6 @@ type Writer struct {
 	errorHandler    func(w *Writer, contentType string, d Response) (int, error)
 
 	ictx    iris.Context
-	ctx     context.Context
 	request *request.Request
 
 	code          int
@@ -30,7 +29,7 @@ type Writer struct {
 	contentStruct Response
 }
 
-func NewWriter(ictx iris.Context, ctx context.Context, request *request.Request) *Writer {
+func NewWriter(ictx iris.Context, request *request.Request) *Writer {
 	var headers map[string]string
 	w := Writer{
 		SerializeTag:      "",
@@ -40,7 +39,6 @@ func NewWriter(ictx iris.Context, ctx context.Context, request *request.Request)
 		serialize:         nil,
 		errorHandler:      nil,
 		ictx:              ictx,
-		ctx:               ctx,
 		request:           request,
 		code:              0,
 		headers:           headers,
@@ -102,7 +100,13 @@ func (w *Writer) ContentType() string {
 	if ct != "" {
 		return ct
 	}
-	// ② 尝试解析 Accept 和 客户端ContentType
+	// ② 读取通过middleware统一对ictx设置的
+	ct = w.ictx.Values().GetString(airis.CtxContentType)
+	if ct != "" {
+		w.WithHeader("Content-Type", ct)
+		return ct
+	}
+	// ③ 尝试解析 Accept 和 客户端ContentType
 	serveTypes := w.serveContentTypes
 	if serveTypes == nil {
 		serveTypes = globalServeContentTypes
@@ -116,7 +120,7 @@ func (w *Writer) ContentType() string {
 			}
 		}
 	}
-	// ③ 使用注册的第一个ContentType
+	// ④ 使用注册的第一个ContentType
 	if ct == "" {
 		ct = serveTypes[0]
 	}

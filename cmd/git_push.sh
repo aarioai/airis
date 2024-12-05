@@ -2,21 +2,27 @@
 
 set -euo pipefail  # 启用严格模式，遇错即停
 
+
+
 # 定义常量
-readonly ROOT_DIR=$(pwd)"/../"
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# aarioai/airis 项目根目录
+readonly ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 readonly DEFAULT_BRANCH="main"
 readonly DEFAULT_COMMENT="NO_COMMENT"
-
 # 定义颜色输出
 readonly RED='\033[0;31m'
 readonly GREEN='\033[0;32m'
 readonly NC='\033[0m' # No Color
 
 # 初始化参数
+needCloseVPN=0
 comment="$DEFAULT_COMMENT"
 upgrade=0
 incrTag=1
 noUpdate=0
+
+
 
 # 帮助信息
 usage() {
@@ -58,12 +64,12 @@ if [ $# -gt 0 ]; then
     comment="$1"
 fi
 
+
 # 构建函数
 build() {
-    cd cmd/generator || log_error "Failed to change directory to cmd/generator"
+    cd "${ROOT_DIR}/cmd" || log_error "Failed to change directory to cmd"
     log_info "Building project..."
     go run build.go --root="$ROOT_DIR" --js="/data/Aa/proj/go/src/project/xixi/deploy/asset_src/lib_dev/aa-js/src/f_oss_filetype_readonly.js" || log_error "Build failed"
-    cd ..
 }
 
 # 更新并推送代码
@@ -88,9 +94,6 @@ pushAndUpgradeMod() {
         log_info "Updating dependencies..."
         go get -u -v ./... || log_error "Failed to update dependencies"
     fi
-
-
-
     # Git 操作
     log_info "Committing changes..."
     git add -A . || log_error "Failed to stage changes"
@@ -119,19 +122,52 @@ handle_tags() {
         git tag -d "$latestTag"
         git push origin --delete tag "$latestTag"
         
-        log_info "Creating new tag: $newTag"
         git tag "$newTag"
         git push origin --tags
         log_info "New tag created: $newTag"
     fi
 }
+# 取消VPN
+unsetVPN() {
+  if [[ $1 -eq 1 ]]; then
+      echo "VPN unsetted"
+      export http_proxy=""
+      export https_proxy=""
+      unset http_proxy
+      unset https_poxy
+  fi
+}
+# 开启VPN
+setVPN() {
+  if [ -n "${http_proxy:-}" ]; then
+    echo "Proxy ${http_proxy} ${https_proxy}"
+    return
+  fi
+  # 设置代理
+  export http_proxy=http://127.0.0.1:8118
+  export https_proxy=http://127.0.0.1:8118
+
+  # 检查代理后的网络连接
+  local http_code
+  http_code=$(curl --max-time 3 -s -w '%{http_code}\n' -o /dev/null google.com)
+  # 检查HTTP状态码，2xx和3xx都表示连接成功
+  if [[ $http_code =~ ^[23][0-9]{2}$ ]]; then
+    needCloseVPN=1
+    echo "VPN started (HTTP $http_code)"
+  else
+    unsetVPN 1
+    echo "VPN check failed (HTTP $http_code)"
+  fi
+}
 
 # 主流程
 main() {
-    build
-    pushAndUpgradeMod
-    log_info "All operations completed successfully."
-    log_info "--> Remember to use -u to upgrade all dependencies once a day"
+  setVPN
+  build
+  pushAndUpgradeMod
+  unsetVPN "$needCloseVPN"
+  log_info "All operations completed successfully."
+  log_info "--> Remember to use -u to upgrade all dependencies once a day"
 }
 
 # 执行主流程

@@ -49,13 +49,13 @@ func TestStringifyPayloadFields(t *testing.T) {
 	y0 := y{Y: &yy, Images: ims}
 	a := x{A: "LOVE", B: 100, C: 300, Y: &y0}
 	as := `{"a":"LOVE","b":"100","c":300,"m":null,"money":"0","test":"","y":{"bad":{},"img":null,"ims":[{"allowed":null,"crop_pattern":"","filetype":0,"height":0,"jsonkey":"","origin":"","path":"","provider":0,"resize_pattern":"","size":0,"width":0}],"test":"","y":10000}}`
-	s := jsons(response.StringifyBigint(a, "json"))
+	s := jsons(response.StringifyBigintFields(a, "json"))
 	if s != as {
 		t.Errorf("%s --> %s", s, as)
 	}
 	b := []x{a}
 	bs := "[" + as + "]"
-	s = jsons(response.StringifyBigint(b, "json"))
+	s = jsons(response.StringifyBigintFields(b, "json"))
 	if s != bs {
 		t.Errorf("%s --> %s", s, bs)
 	}

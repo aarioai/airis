@@ -8,12 +8,6 @@ import (
 	"runtime"
 )
 
-const (
-	CtxTraceId    = "TraceId"
-	CtxRemoteAddr = "RemoteAddr"
-	CtxRemoteUser = "RemoteUser"
-)
-
 func GetTraceId(ictx iris.Context) string {
 	traceId := ictx.GetHeader("X-Request-Id")
 	if traceId != "" {

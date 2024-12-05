@@ -1,12 +1,15 @@
 package request
 
 import (
+	"context"
+	"github.com/aarioai/airis/core/airis"
 	"github.com/kataras/iris/v12"
 	"net/http"
 )
 
 type Request struct {
 	ictx            iris.Context
+	ctx             context.Context
 	r               *http.Request
 	contentType     string
 	userAgent       string
@@ -35,4 +38,10 @@ func New(ictx iris.Context) *Request {
 		}
 	}
 	return &req
+}
+func (r *Request) Context() context.Context {
+	if r.ctx != nil {
+		return r.ctx
+	}
+	return airis.Context(r.ictx)
 }
