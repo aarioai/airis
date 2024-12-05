@@ -1,6 +1,6 @@
 module github.com/aarioai/airis
 
-go 1.23.3
+go 1.23
 
 require (
 	github.com/kataras/iris/v12 v12.2.11
