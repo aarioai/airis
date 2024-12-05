@@ -38,6 +38,7 @@ func newRawValue(name string, value any) *RawValue {
 
 // Filter 验证并过滤值
 // @param pattern  e.g. `[[:word:]]+` `\w+`
+//
 //	Filter(pattern string, required bool)
 //	Filter(required bool)
 //	Filter(pattern string)
@@ -359,7 +360,7 @@ func (r *Request) QueryWild(name string, patterns ...any) (*RawValue, *ae.Error)
 		return v, v.Filter(patterns...)
 	}
 	// 1.1. URL参数替换格式查询，可能使用的是Header（大写开头）参数名，改为小写下划线模式
-	key := strings.ToLower(strings.ReplaceAll(name, "-", "_"))
+	key := strings.ToLower(strings.ReplaceAll(strings.TrimPrefix(name, "X-"), "-", "_"))
 	if key != name {
 		v, e = r.Query(key, patterns...)
 		if e == nil && v.NotEmpty() {
