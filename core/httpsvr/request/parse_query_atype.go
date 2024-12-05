@@ -57,8 +57,8 @@ func (r *Request) QueryInt24s(p string, required, allowZero bool) ([]atype.Int24
 	values, e := r.parseInt64s(r.Query, p, required, allowZero, 24)
 	return toInt24s(values, e)
 }
-func (r *Request) QueryMoney(p string, bitSize int, ranges ...atype.Money) (atype.Money, *ae.Error) {
-	return parseMoney(r.Query, p, bitSize, ranges...)
+func (r *Request) QueryMoney(p string, ranges ...atype.Money) (atype.Money, *ae.Error) {
+	return parseMoney(r.Query, p, ranges...)
 }
 
 // QueryPaging 不可再指定offset/limit了，单一原则，通过page分页

@@ -154,8 +154,8 @@ func (r *Request) BodyLocation(p string, required ...bool) (atype.Location, *ae.
 	return loc, nil
 }
 
-func (r *Request) BodyMoney(p string, bitSize int, ranges ...atype.Money) (atype.Money, *ae.Error) {
-	return parseMoney(r.Body, p, bitSize, ranges...)
+func (r *Request) BodyMoney(p string, ranges ...atype.Money) (atype.Money, *ae.Error) {
+	return parseMoney(r.Body, p, ranges...)
 }
 
 func (r *Request) BodyProvince(p string, required ...bool) (atype.Province, *ae.Error) {

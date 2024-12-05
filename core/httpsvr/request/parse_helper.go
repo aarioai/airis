@@ -52,8 +52,8 @@ func parseDecimal(method func(string, ...any) (*RawValue, *ae.Error), p string, 
 	}
 	return n, e
 }
-func parseMoney(method func(string, ...any) (*RawValue, *ae.Error), p string, bitSize int, ranges ...atype.Money) (atype.Money, *ae.Error) {
-	x, e := parseInt64(method, p, false, bitSize)
+func parseMoney(method func(string, ...any) (*RawValue, *ae.Error), p string, ranges ...atype.Money) (atype.Money, *ae.Error) {
+	x, e := parseInt64(method, p, false, 64)
 	n := atype.Money(x)
 	rangeMin := atype.MinMoney
 	rangeMax := atype.MaxMoney
