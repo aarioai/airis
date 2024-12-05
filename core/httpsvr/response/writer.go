@@ -155,6 +155,12 @@ func (w *Writer) WithSerialize(f func(contentType string, d Response) (bytes []b
 	w.serialize = f
 	return w
 }
+func (w *Writer) Context() iris.Context {
+	return w.ictx
+}
+func (w *Writer) Request() *request.Request {
+	return w.request
+}
 func (w *Writer) StatusCode(code int) {
 	w.ictx.StatusCode(code)
 }
