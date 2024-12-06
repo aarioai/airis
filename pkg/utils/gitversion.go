@@ -1,23 +1,18 @@
 package utils
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"sync"
-	"sync/atomic"
-	"time"
 )
 
 const (
 	gitHashLength = 40
-	timeFormat    = "2006-01-02 15:04:05"
 )
 
 var (
-	startingSteps int32
-	gitHash       string
-	once          sync.Once
+	gitHash string
+	once    sync.Once
 )
 
 // GitVersion 获取Git版本哈希值
@@ -66,26 +61,4 @@ func isValidGitHash(hash []byte) bool {
 		}
 	}
 	return true
-}
-
-// TraceStartup 记录启动步骤
-func TraceStartup(msg ...string) {
-	id := atomic.AddInt32(&startingSteps, 1)
-	now := formatCurrentTime()
-
-	message := fmt.Sprintf("%s starting %d", now, id)
-	if len(msg) > 0 {
-		message += " " + msg[0]
-	}
-
-	fmt.Println(message)
-}
-
-// formatCurrentTime 格式化当前时间，包含微秒
-func formatCurrentTime() string {
-	n := time.Now()
-	return fmt.Sprintf("%s.%d",
-		n.Format(timeFormat),
-		n.UnixMicro(),
-	)
 }

@@ -147,3 +147,6 @@ func (c *Config) getRsa(name string) []byte {
 	}
 	return c.rsa[name]
 }
+func (c *Config) isOnWrite() bool {
+	return c.onWrite.Load()
+}

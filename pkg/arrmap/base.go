@@ -2,6 +2,15 @@ package arrmap
 
 import "github.com/aarioai/airis/pkg/types"
 
+// First 获取第一个参数，一般用于动态参数获取
+func First[T any](args []T) T {
+	var v T
+	if len(args) == 0 {
+		return v
+	}
+	return args[0]
+}
+
 // Merge 合并多个相同类型的 map，后面的 map 会覆盖前面的值
 // 支持的类型包括基本类型和 []byte
 func Merge[T types.BasicType](sources ...map[string]T) map[string]T {
