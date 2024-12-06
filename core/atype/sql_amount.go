@@ -1,6 +1,7 @@
 package atype
 
 import (
+	"github.com/aarioai/airis/pkg/types"
 	"strconv"
 	"strings"
 )
@@ -17,7 +18,7 @@ func ToSepPercents(elems []Decimal) SepPercents {
 		return SepPercents(strconv.FormatInt(int64(elems[0]), 10))
 	}
 	deli := ","
-	n := (len(elems) - 1) + (len(elems) * MaxInt16Len)
+	n := (len(elems) - 1) + (len(elems) * types.MaxInt16Len)
 	var b strings.Builder
 	b.Grow(n)
 	b.WriteString(strconv.FormatInt(int64(elems[0]), 10))
@@ -53,7 +54,7 @@ func ToSepMoneys(elems []Money) SepMoneys {
 		return SepMoneys(strconv.FormatInt(int64(elems[0]), 10))
 	}
 	deli := ","
-	n := (len(elems) - 1) + (len(elems) * MaxInt64Len)
+	n := (len(elems) - 1) + (len(elems) * types.MaxInt64Len)
 	var b strings.Builder
 	b.Grow(n)
 	b.WriteString(strconv.FormatInt(int64(elems[0]), 10))

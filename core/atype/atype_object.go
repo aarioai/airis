@@ -9,168 +9,182 @@ func (p *Atype) IsNil() bool {
 	if p.raw == nil {
 		return true
 	}
-	switch reflect.TypeOf(p.raw).Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Array, reflect.Chan, reflect.Slice:
-		return reflect.ValueOf(p.raw).IsNil()
+	v := reflect.ValueOf(p.raw)
+	switch v.Kind() {
+	case reflect.Ptr, reflect.UnsafePointer, 
+	reflect.Map, reflect.Slice, 
+	reflect.Array, reflect.Interface:
+		return v.IsNil()
 	}
 	return false
 }
+
 func (p *Atype) Strings() ([]string, bool) {
-	v, ok := p.raw.([]string)
-	if ok {
+	switch v := p.raw.(type) {
+	case []string:
 		return v, true
-	}
-	ar, ok := p.raw.([]any)
-	if !ok {
-		return nil, false
-	}
-	v = make([]string, len(ar))
-	for i, a := range ar {
-		if v[i], ok = a.(string); !ok {
-			if bs, ok := a.([]byte); !ok {
+
+	case []any:
+		result := make([]string, len(v))
+		for i, item := range v {
+			switch val := item.(type) {
+			case string:
+				result[i] = val
+			case []byte:
+				result[i] = string(val)
+			default:
 				return nil, false
-			} else {
-				v[i] = string(bs)
 			}
 		}
-	}
-	return v, true
-}
-func (p *Atype) Ints() ([]int, bool) {
-	v, ok := p.raw.([]int)
-	if ok {
-		return v, true
-	}
-	ar, ok := p.raw.([]any)
-	if !ok {
-		return nil, false
-	}
-	var err error
-	v = make([]int, len(ar))
-	for i, a := range ar {
-		if v[i], err = New(a).Int(); err != nil {
-			return nil, false
+		return result, true
+
+	case [][]byte:
+		result := make([]string, len(v))
+		for i, bytes := range v {
+			result[i] = string(bytes)
 		}
+		return result, true
 	}
-	return v, true
+
+	return nil, false
+}
+
+func (p *Atype) Ints() ([]int, bool) {
+	switch v := p.raw.(type) {
+	case []int:
+		return v, true
+
+	case []any:
+		result := make([]int, len(v))
+		for i, item := range v {
+			val, err := New(item).Int()
+			if err != nil {
+				return nil, false
+			}
+			result[i] = val
+		}
+		return result, true
+	}
+
+	return nil, false
 }
 func (p *Atype) Uints() ([]uint, bool) {
-	v, ok := p.raw.([]uint)
-	if ok {
+	switch v := p.raw.(type) {
+	case []uint:
 		return v, true
-	}
-	ar, ok := p.raw.([]any)
-	if !ok {
-		return nil, false
-	}
-	var err error
-	v = make([]uint, len(ar))
-	for i, a := range ar {
-		if v[i], err = New(a).Uint(); err != nil {
-			return nil, false
+
+	case []any:
+		result := make([]uint, len(v))
+		for i, item := range v {
+			val, err := New(item).Uint()
+			if err != nil {
+				return nil, false
+			}
+			result[i] = val
 		}
+		return result, true
 	}
-	return v, true
+
+	return nil, false
 }
 func (p *Atype) Int64s() ([]int64, bool) {
-	v, ok := p.raw.([]int64)
-	if ok {
+	switch v := p.raw.(type) {
+	case []int64:
 		return v, true
-	}
-	ar, ok := p.raw.([]any)
-	if !ok {
-		return nil, false
-	}
-	var err error
-	v = make([]int64, len(ar))
-	for i, a := range ar {
-		if v[i], err = New(a).Int64(); err != nil {
-			return nil, false
+
+	case []any:
+		result := make([]int64, len(v))
+		for i, item := range v {
+			val, err := New(item).Int64()
+			if err != nil {
+				return nil, false
+			}
+			result[i] = val
 		}
+		return result, true
 	}
-	return v, true
+
+	return nil, false
 }
 func (p *Atype) Uint64s() ([]uint64, bool) {
-	v, ok := p.raw.([]uint64)
-	if ok {
+	switch v := p.raw.(type) {
+	case []uint64:
 		return v, true
-	}
-	ar, ok := p.raw.([]any)
-	if !ok {
-		return nil, false
-	}
-	var err error
-	v = make([]uint64, len(ar))
-	for i, a := range ar {
-		if v[i], err = New(a).Uint64(); err != nil {
-			return nil, false
+
+	case []any:
+		result := make([]uint64, len(v))
+		for i, item := range v {
+			val, err := New(item).Uint64()
+			if err != nil {
+				return nil, false
+			}
+			result[i] = val
 		}
+		return result, true
 	}
-	return v, true
+
+	return nil, false
 }
 func (p *Atype) Float32s() ([]float32, bool) {
-	v, ok := p.raw.([]float32)
-	if ok {
+	switch v := p.raw.(type) {
+	case []float32:
 		return v, true
-	}
-	ar, ok := p.raw.([]any)
-	if !ok {
-		return nil, false
-	}
-	var err error
-	v = make([]float32, len(ar))
-	for i, a := range ar {
-		if v[i], err = New(a).Float32(); err != nil {
-			return nil, false
+
+	case []any:
+		result := make([]float32, len(v))
+		for i, item := range v {
+			val, err := New(item).Float32()
+			if err != nil {
+				return nil, false
+			}
+			result[i] = val
 		}
+		return result, true
 	}
-	return v, true
+
+	return nil, false
 }
 func (p *Atype) Float64s() ([]float64, bool) {
-	v, ok := p.raw.([]float64)
-	if ok {
+	switch v := p.raw.(type) {
+	case []float64:
 		return v, true
-	}
-	ar, ok := p.raw.([]any)
-	if !ok {
-		return nil, false
-	}
-	var err error
-	v = make([]float64, len(ar))
-	for i, a := range ar {
-		if v[i], err = New(a).Float64(); err != nil {
-			return nil, false
+
+	case []any:
+		result := make([]float64, len(v))
+		for i, item := range v {
+			val, err := New(item).Float64()
+			if err != nil {
+				return nil, false
+			}
+			result[i] = val
 		}
+		return result, true
 	}
-	return v, true
+
+	return nil, false
 }
 func (p *Atype) ArrayJson(allowNil bool) (json.RawMessage, bool) {
-	// 也可能客户端传的是 string ，也可能是对象原数
-	bytes, ok := p.raw.([]byte)
-	if ok {
-		if bytes[0] == '[' {
+	switch v := p.raw.(type) {
+	case json.RawMessage:
+		return v, true
+	case []uint8:
+		if bytes, ok := MarshalUint8s(v); ok {
 			return bytes, true
-		} else {
-			return bytes, false
 		}
+		return nil, false
+
+	case []any:
+		if bytes, err := json.Marshal(v); err == nil {
+			return bytes, true
+		}
+		return nil, false
 	}
 
-	uint8s, ok := p.raw.([]uint8)
-	if ok {
-		v, _ := MarshalUint8s(uint8s)
-		return v, true
-	}
-
-	arr, ok := p.raw.([]any)
-	if ok {
-		v, _ := json.Marshal(arr)
-
-		return v, true
-	}
 	if allowNil {
 		if p.IsNil() {
 			return nil, true
-		} else if s, _ := p.raw.(string); s == "" {
+		}
+		if s, ok := p.raw.(string); ok && s == "" {
 			return nil, true
 		}
 	}
@@ -178,26 +192,26 @@ func (p *Atype) ArrayJson(allowNil bool) (json.RawMessage, bool) {
 	return nil, false
 }
 func (p *Atype) MapJson(allowNil bool) (json.RawMessage, bool) {
-	arr, ok := p.raw.(map[string]any)
-	if ok {
-		v, _ := json.Marshal(arr)
-		return v, true
+	switch v := p.raw.(type) {
+	case map[string]any:
+		if bytes, err := json.Marshal(v); err == nil {
+			return bytes, true
+		}
+		return nil, false
+
+	case []byte:
+		if len(v) > 0 && v[0] == '{' {
+			return v, true
+		}
+		return v, false
 	}
+
 	if allowNil {
 		if p.IsNil() {
 			return nil, true
-		} else if s, _ := p.raw.(string); s == "" {
-			return nil, true
 		}
-	}
-
-	// 也可能客户端传的是 string ，也可能使对象原数
-	bytes, ok := p.raw.([]byte)
-	if ok {
-		if bytes[0] == '{' {
-			return bytes, true
-		} else {
-			return bytes, false
+		if s, ok := p.raw.(string); ok && s == "" {
+			return nil, true
 		}
 	}
 

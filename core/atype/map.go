@@ -2,7 +2,6 @@ package atype
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 )
 
@@ -16,61 +15,40 @@ func NewMap(v any) Map {
 		Value: v,
 	}
 }
-func splitInterfaces(key any) []any {
-	switch k := key.(type) {
-	case string:
-		arr := make([]string, 0)
-		arr = append(arr, strings.Split(k, ".")...)
-		n := make([]any, len(arr))
-		for i, a := range arr {
-			n[i] = a
-		}
-		return n
-	}
-	n := []any{key}
-	return n
-}
 
 // Get key from a map[string]any
-// p.Get("users.1.name") is short for p.Get("user", "1", "name")
-// @warn p.Get("user", "1", "name") is diffirent with p.Get("user", 1, "name")
-
+// p.Get("users.1.name") 等同于 p.Get("user", "1", "name")
+// @warn p.Get("user", "1", "name") 与 p.Get("user", 1, "name") 不一样
 func (m Map) Get(key any, keys ...any) (any, error) {
 	value := m.Value
-	var val map[any]any
-	var ok bool
-
-	var rvalue reflect.Value
-	keys = append([]any{key}, keys...)
-	if len(keys) == 1 {
-		keys = splitInterfaces(keys[0])
+	if value == nil {
+		return nil, fmt.Errorf("map is nil")
+	}
+	val, ok := ToMap(value)
+	if !ok {
+		return nil, fmt.Errorf("invalid map: %v", value)
+	}
+	// 处理点号分隔的路径
+	allKeys := make([]any, 0, len(keys)+1)
+	if strKey, ok := key.(string); ok && strings.Contains(strKey, ".") {
+		ks := ToAnySlice(strings.Split(strKey, "."))
+		allKeys = append(allKeys, ks...)
+	} else {
+		allKeys = append(allKeys, key)
+		allKeys = append(allKeys, keys...)
 	}
 
-	for i, k := range keys {
-		if val, ok = value.(map[any]any); !ok {
-			val = make(map[any]any)
-
-			rvalue = reflect.ValueOf(value)
-			switch rvalue.Kind() {
-			case reflect.Map:
-				for _, v := range rvalue.MapKeys() {
-					val[v.Interface()] = rvalue.MapIndex(v).Interface()
-				}
-				ok = true
-			}
+	for i, k := range allKeys {
+		value, ok = val[k]
+		if !ok {
+			return nil, fmt.Errorf("key not found: %s", strings.Join(ToStrings(allKeys), "."))
 		}
 
-		if ok {
-			if value, ok = val[k]; ok {
-				if len(keys)-1 == i {
-					return value, nil
-				}
-			}
+		// 如果是最后一个键，直接返回值
+		if i == len(allKeys)-1 {
+			return value, nil
 		}
 	}
-	s := ""
-	for _, key := range keys {
-		s += "." + String(key)
-	}
-	return nil, fmt.Errorf("map atype field `%s` not found", s[1:])
+
+	return value, nil
 }

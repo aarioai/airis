@@ -7,61 +7,95 @@ import (
 )
 
 // String convert into string
-// @warn byte is a built-in alias of uint8, String('A') returns "97"; String(Abyte('A')) returns "A"
+// @warn byte is a built-in alias of uint8, String('A') returns "97"; String(AByte('A')) returns "A"
 func String(d any) string {
 	if d == nil {
 		return ""
 	}
 	switch v := d.(type) {
-	case Abyte: // Name(Abyte('A')) returns "A"
-		return string([]byte{byte(v)})
-	case bool:
-		return strconv.FormatBool(v)
-	case []byte:
-		return string(v)
 	case string:
 		return v
+	case []byte:
+		return string(v)
+	// Name(Abyte('A')) returns "A"
+	case AByte:
+		return string([]byte{byte(v)})
 	case Date:
 		return string(v)
 	case Datetime:
 		return string(v)
-	case int8:
-		return strconv.FormatInt(int64(v), 10)
-	case int16:
-		return strconv.FormatInt(int64(v), 10)
-	case rune: // is a built-in alias of int32, @notice 'A' is a rune(65), is different with byte('A') (alias of uint8(65))
-		return strconv.FormatInt(int64(v), 10)
-	case int:
-		return strconv.FormatInt(int64(v), 10)
+	case bool:
+		return strconv.FormatBool(v)
+
+		// 整数
 	case int64:
-		return strconv.FormatInt(v, 10)
-	case byte: // is a built-in alias of uint8, Name('A') returns "97"
-		return strconv.FormatUint(uint64(v), 10)
-	case Booln:
-		return strconv.FormatUint(uint64(v), 10)
-	case uint16:
-		return strconv.FormatUint(uint64(v), 10)
-	case Uint24:
-		return strconv.FormatUint(uint64(v), 10)
-	case uint32:
-		return strconv.FormatUint(uint64(v), 10)
-	case uint:
-		return strconv.FormatUint(uint64(v), 10)
+		return fastIntToString(v)
+	case int:
+		return fastIntToString(int64(v))
+	case int32:
+		return fastIntToString(int64(v))
+	//  is a built-in alias of int32, @notice 'A' is a rune(65), is different with byte('A') (alias of uint8(65))
+	//case rune: return fastIntToString(int64(v))
+	case Int24:
+		return fastIntToString(int64(v))
+	case int16:
+		return fastIntToString(int64(v))
+	case int8:
+		return fastIntToString(int64(v))
+
+		// 无符号整数
 	case uint64:
-		return strconv.FormatUint(v, 10)
-	case float32:
-		return strconv.FormatFloat(float64(v), 'f', -1, 32)
+		return fastUintToString(v)
+	case uint:
+		return fastUintToString(uint64(v))
+	case uint32:
+		return fastUintToString(uint64(v))
+	case Uint24:
+		return fastUintToString(uint64(v))
+	case uint16:
+		return fastUintToString(uint64(v))
+	case uint8: // byte
+		return fastUintToString(uint64(v))
+	// is a built-in alias of uint8, Name('A') returns "97"
+	//case byte: return strconv.FormatUint(uint64(v), 10)
+	case Booln:
+		return fastUintToString(uint64(v))
+
+		// 浮点数
 	case float64:
-		return strconv.FormatFloat(v, 'f', -1, 64)
+		return fastFloatToString(v, 64)
+	case float32:
+		return fastFloatToString(float64(v), 32)
 	}
 	// 有些类型type vt uint  var a, b vt 这样就无法识别为 uint；所以尝试通过字符串方式转一下
 	return fmt.Sprint(d)
 }
 
 func Bytes(d any) []byte {
+	if d == nil {
+		return nil
+	}
+	switch v := d.(type) {
+	case []byte:
+		return v
+	case string:
+		return []byte(v)
+	case AByte:
+		return []byte{byte(v)}
+	}
+	// 很少会有number/bool转bytes的情况，因此，不需要过度优化
+	// 其他类型通过 String 转换
 	return []byte(String(d))
 }
 
+func Slice(d any) ([]any, error) {
+	if d != nil {
+		if v, ok := d.([]any); ok {
+			return v, nil
+		}
+	}
+	return nil, errors.New("cast type error")
+}
 func Bool(d any) (bool, error) {
 	if d == nil {
 		return false, errors.New("nil to bool")
@@ -83,15 +117,6 @@ func Bool(d any) (bool, error) {
 	}
 	// 有些类型type vt uint  var a, b vt 这样就无法识别为 uint；所以尝试通过字符串方式转一下
 	return strconv.ParseBool(String(d))
-}
-
-func Slice(d any) ([]any, error) {
-	if d != nil {
-		if v, ok := d.([]any); ok {
-			return v, nil
-		}
-	}
-	return nil, errors.New("cast type error")
 }
 
 func Int8(d any) (int8, error) {
@@ -122,7 +147,7 @@ func Int64Base(d any, bitSize int) (int64, error) {
 	}
 
 	switch v := d.(type) {
-	case Abyte:
+	case AByte:
 		return int64(v), nil
 	case bool:
 		if v {
@@ -194,7 +219,7 @@ func Uint64Base(d any, bitSize int) (uint64, error) {
 		return 0, errors.New("nil to uint64")
 	}
 	switch v := d.(type) {
-	case Abyte:
+	case AByte:
 		return uint64(v), nil
 	case bool:
 		if v {
@@ -247,7 +272,7 @@ func Float64(d any, bitSize int) (float64, error) {
 		return 0.0, errors.New("nil to float64")
 	}
 	switch v := d.(type) {
-	case Abyte:
+	case AByte:
 		return float64(v), nil
 	case bool:
 		if v {

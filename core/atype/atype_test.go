@@ -32,7 +32,7 @@ func TestAtypeGet(t *testing.T) {
 	t.Log("[\"name\"]", v, err)
 
 	if v.String() != "Aario" {
-		t.Error("[\"name\"] != Aario")
+		t.Errorf(`["name"] %s != Aario`, v.String())
 	}
 
 	v, err = d.Get(1)

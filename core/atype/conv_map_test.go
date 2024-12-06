@@ -1,8 +1,8 @@
-package conv_test
+package atype_test
 
 import (
 	"encoding/json"
-	"github.com/aarioai/airis/core/helpers/conv"
+	"github.com/aarioai/airis/core/atype"
 	"testing"
 )
 
@@ -17,7 +17,7 @@ func TestConvStrings(t *testing.T) {
 		t.Error("parse strings fail")
 	}
 
-	ss := conv.AnyStrings(b)
+	ss := atype.ToStrings(b)
 	if len(ss) == 0 {
 		t.Error("parse strings fail")
 	}
@@ -43,7 +43,7 @@ func TestConvComplexStringMap(t *testing.T) {
 	if !ok {
 		t.Error("parse complex string map fail")
 	}
-	a := conv.AnyComplexStringMap(b)
+	a := atype.ToComplexStringMap(b)
 	if len(a) == 0 {
 		t.Error("parse complex string map fail")
 	}
@@ -58,7 +58,7 @@ func TestConvStringsMap(t *testing.T) {
 	if !ok {
 		t.Error("parse complex string map fail")
 	}
-	a := conv.AnyStringsMap(b)
+	a := atype.ToStringsMap(b)
 	if len(a) == 0 {
 		t.Error("parse complex string map fail")
 	}
@@ -73,7 +73,7 @@ func TestConvComplexStringsMap(t *testing.T) {
 	if !ok {
 		t.Error("parse complex string map fail")
 	}
-	a := conv.AnyComplexStringsMap(b)
+	a := atype.ToComplexStringsMap(b)
 	if len(a) == 0 {
 		t.Error("parse complex string map fail")
 	}
@@ -88,7 +88,7 @@ func TestConvStringMaps(t *testing.T) {
 	if !ok {
 		t.Error("parse complex string map fail")
 	}
-	a := conv.AnyStringMaps(b)
+	a := atype.ToStringMaps(b)
 	if len(a) == 0 {
 		t.Error("parse complex string map fail")
 	}
@@ -109,8 +109,8 @@ func TestConvComplexMaps(t *testing.T) {
 		if !ok {
 			t.Error("parse json `b` fail " + s)
 		}
-		maps := conv.AnyComplexMaps(b)
-		if len(maps) == 0 {
+		d := atype.ToComplexMaps(b)
+		if len(d) == 0 {
 			t.Error("parse json `b` fail " + s)
 		}
 	}

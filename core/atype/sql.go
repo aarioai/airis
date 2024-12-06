@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/binary"
+	"github.com/aarioai/airis/pkg/types"
 	"io"
 	"net"
 	"strconv"
@@ -498,7 +499,7 @@ func ToSepUint8s(elems []uint8, delimiters ...string) SepUint8s {
 		return SepUint8s(strconv.FormatUint(uint64(elems[0]), 10))
 	}
 	deli := delimiter(delimiters...)
-	n := len(deli)*(len(elems)-1) + (len(elems) * MaxUint8Len)
+	n := len(deli)*(len(elems)-1) + (len(elems) * types.MaxUint8Len)
 
 	var b strings.Builder
 	b.Grow(n)
@@ -532,7 +533,7 @@ func ToSepUint16s(elems []uint16, delimiters ...string) SepUint16s {
 		return SepUint16s(strconv.FormatUint(uint64(elems[0]), 10))
 	}
 	deli := delimiter(delimiters...)
-	n := len(deli)*(len(elems)-1) + (len(elems) * MaxUint16Len)
+	n := len(deli)*(len(elems)-1) + (len(elems) * types.MaxUint16Len)
 	var b strings.Builder
 	b.Grow(n)
 	b.WriteString(strconv.FormatUint(uint64(elems[0]), 10))
@@ -565,7 +566,7 @@ func ToSepUint24s(elems []Uint24, delimiters ...string) SepUint24s {
 		return SepUint24s(strconv.FormatUint(uint64(elems[0]), 10))
 	}
 	deli := delimiter(delimiters...)
-	n := len(deli)*(len(elems)-1) + (len(elems) * MaxUint24Len)
+	n := len(deli)*(len(elems)-1) + (len(elems) * types.MaxUint24Len)
 	var b strings.Builder
 	b.Grow(n)
 	b.WriteString(strconv.FormatUint(uint64(elems[0]), 10))
@@ -599,7 +600,7 @@ func ToSepInts(elems []int, delimiters ...string) SepInts {
 		return SepInts(strconv.FormatInt(int64(elems[0]), 10))
 	}
 	deli := delimiter(delimiters...)
-	n := len(deli)*(len(elems)-1) + (len(elems) * MaxIntLen)
+	n := len(deli)*(len(elems)-1) + (len(elems) * types.MaxIntLen)
 	var b strings.Builder
 	b.Grow(n)
 	b.WriteString(strconv.FormatInt(int64(elems[0]), 10))
@@ -632,7 +633,7 @@ func ToSepUints(elems []uint, delimiters ...string) SepUints {
 		return SepUints(strconv.FormatUint(uint64(elems[0]), 10))
 	}
 	deli := delimiter(delimiters...)
-	n := len(deli)*(len(elems)-1) + (len(elems) * MaxUintLen)
+	n := len(deli)*(len(elems)-1) + (len(elems) * types.MaxUintLen)
 	var b strings.Builder
 	b.Grow(n)
 	b.WriteString(strconv.FormatUint(uint64(elems[0]), 10))
@@ -665,7 +666,7 @@ func ToSepUint64s(elems []uint64, delimiters ...string) SepUint64s {
 		return SepUint64s(strconv.FormatUint(elems[0], 10))
 	}
 	deli := delimiter(delimiters...)
-	n := len(deli)*(len(elems)-1) + (len(elems) * MaxUint64Len)
+	n := len(deli)*(len(elems)-1) + (len(elems) * types.MaxUint64Len)
 	var b strings.Builder
 	b.Grow(n)
 	b.WriteString(strconv.FormatUint(elems[0], 10))

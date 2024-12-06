@@ -5,22 +5,22 @@ import (
 	"encoding/json"
 )
 
-type NullJson struct{ sql.NullString }          // any
-type NullUint8s struct{ sql.NullString }        // uint8 json array
-type NullUint16s struct{ sql.NullString }       // uint16 json array
-type NullUint24s struct{ sql.NullString }       // Uint24 json array
-type NullUint32s struct{ sql.NullString }       // uint32 json array
-type NullInts struct{ sql.NullString }          // int json array
-type NullUints struct{ sql.NullString }         // uint json array
-type NullUint64s struct{ sql.NullString }       // uint64 json array
-type NullStrings struct{ sql.NullString }       // string json array
-type StringMap struct{ sql.NullString }         // map[string]string   // JSON 规范，key 必须为字符串
-type StringMapsMap struct{ sql.NullString }     // map[string][]map[string]string
-type StringsMap struct{ sql.NullString }        // map[string][]string
-type ComplexStringMap struct{ sql.NullString }  // map[string]map[string]string
-type ComplexStringsMap struct{ sql.NullString } // map[string][][]string
-type StringMaps struct{ sql.NullString }        // []map[string]string
-type ComplexStringMaps struct{ sql.NullString } // []map[string][]map[string]string
+type NullJson struct{ sql.NullString }              // any
+type NullUint8s struct{ sql.NullString }            // uint8 json array
+type NullUint16s struct{ sql.NullString }           // uint16 json array
+type NullUint24s struct{ sql.NullString }           // Uint24 json array
+type NullUint32s struct{ sql.NullString }           // uint32 json array
+type NullInts struct{ sql.NullString }              // int json array
+type NullUints struct{ sql.NullString }             // uint json array
+type NullUint64s struct{ sql.NullString }           // uint64 json array
+type NullStrings struct{ sql.NullString }           // string json array
+type NullStringMap struct{ sql.NullString }         // map[string]string   // JSON 规范，key 必须为字符串
+type NullStringMapsMap struct{ sql.NullString }     // map[string][]map[string]string
+type NullStringsMap struct{ sql.NullString }        // map[string][]string
+type NullComplexStringMap struct{ sql.NullString }  // map[string]map[string]string
+type NullComplexStringsMap struct{ sql.NullString } // map[string][][]string
+type NullStringMaps struct{ sql.NullString }        // []map[string]string
+type NullComplexStringMaps struct{ sql.NullString } // []map[string][]map[string]string
 
 type ComplexMaps struct{ sql.NullString } // []map[string]any
 
@@ -302,26 +302,26 @@ func (t NullStrings) Strings() []string {
 	json.Unmarshal([]byte(t.String), &v)
 	return v
 }
-func NewStringMap(s string) StringMap {
-	var x StringMap
+func NewNullStringMap(s string) NullStringMap {
+	var x NullStringMap
 	if s != "" {
 		x.Scan(s)
 	}
 	return x
 }
-func ToStringMap(v map[string]string) StringMap {
+func ToNullStringMap(v map[string]string) NullStringMap {
 	if len(v) == 0 {
-		return StringMap{}
+		return NullStringMap{}
 	}
 	s, _ := json.Marshal(v)
 	if len(s) == 0 {
-		return StringMap{}
+		return NullStringMap{}
 	}
 
-	return NewStringMap(string(s))
+	return NewNullStringMap(string(s))
 }
 
-func (t StringMap) StringMap() map[string]string {
+func (t NullStringMap) StringMap() map[string]string {
 	if !t.Valid || t.String == "" {
 		return nil
 	}
@@ -329,25 +329,25 @@ func (t StringMap) StringMap() map[string]string {
 	json.Unmarshal([]byte(t.String), &v)
 	return v
 }
-func NewComplexStringMap(s string) ComplexStringMap {
-	var x ComplexStringMap
+func NewNullComplexStringMap(s string) NullComplexStringMap {
+	var x NullComplexStringMap
 	if s != "" {
 		x.Scan(s)
 	}
 	return x
 }
-func ToComplexStringMap(v map[string]map[string]string) ComplexStringMap {
+func ToNullComplexStringMap(v map[string]map[string]string) NullComplexStringMap {
 	if len(v) == 0 {
-		return ComplexStringMap{}
+		return NullComplexStringMap{}
 	}
 	s, _ := json.Marshal(v)
 	if len(s) == 0 {
-		return ComplexStringMap{}
+		return NullComplexStringMap{}
 	}
 
-	return NewComplexStringMap(string(s))
+	return NewNullComplexStringMap(string(s))
 }
-func (t ComplexStringMap) TStringMap() map[string]map[string]string {
+func (t NullComplexStringMap) TStringMap() map[string]map[string]string {
 	if !t.Valid || t.String == "" {
 		return nil
 	}
@@ -355,26 +355,26 @@ func (t ComplexStringMap) TStringMap() map[string]map[string]string {
 	json.Unmarshal([]byte(t.String), &v)
 	return v
 }
-func NewStringMaps(s string) StringMaps {
-	var x StringMaps
+func NewNullStringMaps(s string) NullStringMaps {
+	var x NullStringMaps
 	if s != "" {
 		x.Scan(s)
 	}
 	return x
 }
-func ToStringMaps(v []map[string]string) StringMaps {
+func ToNullStringMaps(v []map[string]string) NullStringMaps {
 	if len(v) == 0 {
-		return StringMaps{}
+		return NullStringMaps{}
 	}
 	s, _ := json.Marshal(v)
 	if len(s) == 0 {
-		return StringMaps{}
+		return NullStringMaps{}
 	}
 
-	return NewStringMaps(string(s))
+	return NewNullStringMaps(string(s))
 }
 
-func (t StringMaps) StringMaps() []map[string]string {
+func (t NullStringMaps) StringMaps() []map[string]string {
 	if !t.Valid || t.String == "" {
 		return nil
 	}
@@ -382,25 +382,25 @@ func (t StringMaps) StringMaps() []map[string]string {
 	json.Unmarshal([]byte(t.String), &v)
 	return v
 }
-func NewStringMapsMap(s string) StringMapsMap {
-	var x StringMapsMap
+func NewNullStringMapsMap(s string) NullStringMapsMap {
+	var x NullStringMapsMap
 	if s != "" {
 		x.Scan(s)
 	}
 	return x
 }
-func ToStringMapsMap(v map[string][]map[string]string) StringMapsMap {
+func ToNullStringMapsMap(v map[string][]map[string]string) NullStringMapsMap {
 	if len(v) == 0 {
-		return StringMapsMap{}
+		return NullStringMapsMap{}
 	}
 	s, _ := json.Marshal(v)
 	if len(s) == 0 {
-		return StringMapsMap{}
+		return NullStringMapsMap{}
 	}
 
-	return NewStringMapsMap(string(s))
+	return NewNullStringMapsMap(string(s))
 }
-func (t StringMapsMap) StringMapsMap() map[string][]map[string]string {
+func (t NullStringMapsMap) StringMapsMap() map[string][]map[string]string {
 	if !t.Valid || t.String == "" {
 		return nil
 	}
@@ -408,26 +408,26 @@ func (t StringMapsMap) StringMapsMap() map[string][]map[string]string {
 	json.Unmarshal([]byte(t.String), &v)
 	return v
 }
-func NewStringsMap(s string) StringsMap {
-	var x StringsMap
+func NewNullStringsMap(s string) NullStringsMap {
+	var x NullStringsMap
 	if s != "" {
 		x.Scan(s)
 	}
 	return x
 }
-func ToStringsMap(v map[string][]string) StringsMap {
+func ToNullStringsMap(v map[string][]string) NullStringsMap {
 	if len(v) == 0 {
-		return StringsMap{}
+		return NullStringsMap{}
 	}
 	s, _ := json.Marshal(v)
 	if len(s) == 0 {
-		return StringsMap{}
+		return NullStringsMap{}
 	}
 
-	return NewStringsMap(string(s))
+	return NewNullStringsMap(string(s))
 }
 
-func (t StringsMap) StringsMap() map[string][]string {
+func (t NullStringsMap) StringsMap() map[string][]string {
 	if !t.Valid || t.String == "" {
 		return nil
 	}
@@ -435,26 +435,26 @@ func (t StringsMap) StringsMap() map[string][]string {
 	json.Unmarshal([]byte(t.String), &v)
 	return v
 }
-func NewComplexStringsMap(s string) ComplexStringsMap {
-	var x ComplexStringsMap
+func NewNullComplexStringsMap(s string) NullComplexStringsMap {
+	var x NullComplexStringsMap
 	if s != "" {
 		x.Scan(s)
 	}
 	return x
 }
-func ToComplexStringsMap(v map[string][][]string) ComplexStringsMap {
+func ToNullComplexStringsMap(v map[string][][]string) NullComplexStringsMap {
 	if len(v) == 0 {
-		return ComplexStringsMap{}
+		return NullComplexStringsMap{}
 	}
 	s, _ := json.Marshal(v)
 	if len(s) == 0 {
-		return ComplexStringsMap{}
+		return NullComplexStringsMap{}
 	}
 
-	return NewComplexStringsMap(string(s))
+	return NewNullComplexStringsMap(string(s))
 }
 
-func (t ComplexStringsMap) StringsMap() map[string][][]string {
+func (t NullComplexStringsMap) StringsMap() map[string][][]string {
 	if !t.Valid || t.String == "" {
 		return nil
 	}
@@ -463,26 +463,26 @@ func (t ComplexStringsMap) StringsMap() map[string][][]string {
 	return v
 }
 
-func NewComplexStringMaps(s string) ComplexStringMaps {
-	var x ComplexStringMaps
+func NewComplexStringMaps(s string) NullComplexStringMaps {
+	var x NullComplexStringMaps
 	if s != "" {
 		x.Scan(s)
 	}
 	return x
 }
-func ToComplexStringMaps(v []map[string][]map[string]string) ComplexStringMaps {
+func ToComplexStringMaps(v []map[string][]map[string]string) NullComplexStringMaps {
 	if len(v) == 0 {
-		return ComplexStringMaps{}
+		return NullComplexStringMaps{}
 	}
 	s, _ := json.Marshal(v)
 	if len(s) == 0 {
-		return ComplexStringMaps{}
+		return NullComplexStringMaps{}
 	}
 
 	return NewComplexStringMaps(string(s))
 }
 
-func (t ComplexStringMaps) StringMaps() []map[string][]map[string]string {
+func (t NullComplexStringMaps) StringMaps() []map[string][]map[string]string {
 	if !t.Valid || t.String == "" {
 		return nil
 	}
@@ -491,14 +491,14 @@ func (t ComplexStringMaps) StringMaps() []map[string][]map[string]string {
 	return v
 }
 
-func NewComplexMaps(s string) ComplexMaps {
+func NewNullComplexMaps(s string) ComplexMaps {
 	var x ComplexMaps
 	if s != "" {
 		x.Scan(s)
 	}
 	return x
 }
-func ToComplexMaps(v []map[string]any) ComplexMaps {
+func ToNullComplexMaps(v []map[string]any) ComplexMaps {
 	if len(v) == 0 {
 		return ComplexMaps{}
 	}
@@ -507,7 +507,7 @@ func ToComplexMaps(v []map[string]any) ComplexMaps {
 		return ComplexMaps{}
 	}
 
-	return NewComplexMaps(string(s))
+	return NewNullComplexMaps(string(s))
 }
 
 func (t ComplexMaps) Maps() []map[string]any {

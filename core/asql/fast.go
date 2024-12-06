@@ -1,7 +1,7 @@
 package asql
 
 import (
-	"github.com/aarioai/airis/core/atype"
+	"github.com/aarioai/airis/pkg/types"
 	"strconv"
 	"strings"
 )
@@ -16,7 +16,7 @@ func In(field string, ids map[uint64]struct{}) string {
 		}
 	}
 	var s strings.Builder
-	s.Grow(len(field) + len(" IN ()") + (1+atype.MaxUint64Len)*len(ids))
+	s.Grow(len(field) + len(" IN ()") + (1+types.MaxUint64Len)*len(ids))
 	s.WriteString(field + " IN (")
 	isFirst := true
 	for id, _ := range ids {
@@ -40,7 +40,7 @@ func InUint(field string, ids map[uint]struct{}) string {
 		}
 	}
 	var s strings.Builder
-	s.Grow(len(field) + len(" IN ()") + (1+atype.MaxUintLen)*len(ids))
+	s.Grow(len(field) + len(" IN ()") + (1+types.MaxUintLen)*len(ids))
 	s.WriteString(field + " IN (")
 	isFirst := true
 	for id, _ := range ids {

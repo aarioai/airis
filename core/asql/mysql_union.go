@@ -2,7 +2,7 @@ package asql
 
 import (
 	"fmt"
-	"github.com/aarioai/airis/core/atype"
+	"github.com/aarioai/airis/pkg/types"
 	"strconv"
 	"strings"
 )
@@ -22,7 +22,7 @@ func UnionAllQs(format string, ptbs []string, xargs func(ptb string) []any) stri
 func UnionInUints(ids []uint, f func(uint) string) ([]string, string) {
 	tables := make([]string, 0)
 	var conds strings.Builder
-	conds.Grow((atype.MaxUintLen + 1) * len(ids))
+	conds.Grow((types.MaxUintLen + 1) * len(ids))
 	for i, id := range ids {
 		if i > 0 {
 			conds.WriteByte(',')
@@ -45,7 +45,7 @@ func UnionInUints(ids []uint, f func(uint) string) ([]string, string) {
 func UnionInUint64s(ids []uint64, f func(uint64) string) ([]string, string) {
 	tables := make([]string, 0)
 	var conds strings.Builder
-	conds.Grow((atype.MaxUintLen + 1) * len(ids))
+	conds.Grow((types.MaxUintLen + 1) * len(ids))
 	for i, id := range ids {
 		if i > 0 {
 			conds.WriteByte(',')

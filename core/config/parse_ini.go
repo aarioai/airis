@@ -3,91 +3,116 @@ package config
 import (
 	"fmt"
 	"github.com/aarioai/airis/core/atype"
+	"github.com/aarioai/airis/pkg/arrmap"
 	"gopkg.in/ini.v1"
 	"strings"
 	"sync"
-	"time"
 )
 
 var (
 	cfgMtx sync.RWMutex
 )
 
-func New(path string) *Config {
-	cfg := &Config{path: path}
-	cfg.Reload()
+func New(path string, otherConfigs ...map[string]string) *Config {
+	cfg := &Config{
+		path: path,
+	}
+	if err := cfg.Reload(otherConfigs...); err != nil {
+		panic(err.Error())
+	}
 	return cfg
 }
-func (c *Config) reload() {
-	data, err := ini.Load(c.path)
-	if err != nil {
-		panic(fmt.Errorf("failed to load config file %s: %w", c.path, err))
-	}
-	// 写锁范围一定要越小越好
-	cfgMtx.Lock()
-	c.data = data
-	cfgMtx.Unlock()
+func (c *Config) isOnWrite() bool {
+	return c.onWrite.Load()
 }
 
-func (c *Config) initializeConfig() error {
-	c.Env = Env(c.GetString(CkEnv))
-	c.Mock, _ = c.Get(CkMock).Bool()
-	// 初始化时区配置
-	if err := c.initializeTimezone(); err != nil {
-		return err
+// convertIniToMap 将 ini.File 转换为扁平化的 map[string]string
+func convertIniToMap(iniFile *ini.File, target map[string]string) {
+	// 处理默认section
+	defaultSection := iniFile.Section("")
+	for _, key := range defaultSection.Keys() {
+		target[key.Name()] = key.Value()
 	}
-	return c.loadRsa()
-}
-func (c *Config) initializeTimezone() error {
-	var err error
-	c.TimezoneID, _ = time.Now().Zone()
-	c.TimeLocation = time.Local
-	c.TimeFormat = c.GetString(CkTimeFormat, "2006-02-01 15:04:05")
 
-	if tz := c.GetString(CkTimezoneID); tz != "" {
-		c.TimezoneID = tz
-		if c.TimeLocation, err = time.LoadLocation(tz); err != nil {
-			return fmt.Errorf("invalid timezone %s: %w", tz, err)
+	// 处理其他sections
+	for _, section := range iniFile.Sections() {
+		// 跳过默认section，因为已经处理过了
+		if section.Name() == "" {
+			continue
 		}
-	}
-	return nil
-}
 
-func (c *Config) Reload() {
-	c.reload()
-	if err := c.initializeConfig(); err != nil {
-		panic(fmt.Errorf("failed to initialize config: %w", err))
-	}
-}
-
-// 这里有锁，所以要批量设置
-func (c *Config) AddConfigs(otherConfigs map[string]string) {
-	cfgMtx.Lock()
-	defer cfgMtx.Unlock()
-	if c.otherConfig == nil {
-		c.otherConfig = make(map[string]string)
-	}
-	for k, v := range otherConfigs {
-		c.otherConfig[k] = v
+		// 遍历section中的所有键值对
+		for _, key := range section.Keys() {
+			// 使用 section.name.key 作为完整的键名
+			fullKey := section.Name() + "." + key.Name()
+			target[fullKey] = key.Value()
+		}
 	}
 }
 
 func (c *Config) getIni(key string) string {
-	cfgMtx.RLock()
-	defer cfgMtx.RUnlock()
+	if c.isOnWrite() {
+		cfgMtx.RLock()
+		defer cfgMtx.RUnlock()
+	}
+	if key == "" || len(c.data) == 0 {
+		return ""
+	}
 
 	keys := splitDots(key)
-	if len(keys) == 1 {
-		return c.data.Section("").Key(key).String()
+	keyName := keys[0]
+	if len(keys) > 1 {
+		keyName += "." + strings.Join(keys[1:], "_")
 	}
-	section := c.data.Section(keys[0])
-	return section.Key(strings.Join(keys[1:], "_")).String()
+
+	return c.data[keyName]
+}
+
+func (c *Config) loadIni() (map[string]string, error) {
+	iniFile, err := ini.Load(c.path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load config %s: %w", c.path, err)
+	}
+	data := make(map[string]string)
+	convertIniToMap(iniFile, data)
+	return data, nil
+}
+
+func (c *Config) Reload(otherConfigs ...map[string]string) error {
+	c.startWrite()
+	defer c.endWrite()
+
+	data, err := c.loadIni()
+	if err != nil {
+		return err
+	}
+	rsa, err := c.loadRsa()
+	if err != nil {
+		return err
+	}
+	err = c.initializeConfig()
+	if err != nil {
+		return err
+	}
+	// 写锁范围一定要越小越好
+	cfgMtx.Lock()
+	c.data = data
+	c.rsa = rsa
+	// clear(c.otherConfig)
+	c.otherConfig = arrmap.Merge(otherConfigs...)
+	cfgMtx.Unlock()
+	return nil
 }
 
 // 不要获取太细分，否则容易导致错误不容易被排查
 func (c *Config) getOtherConfig(key string) string {
-	cfgMtx.RLock()
-	defer cfgMtx.RUnlock()
+	if c.isOnWrite() {
+		cfgMtx.RLock()
+		defer cfgMtx.RUnlock()
+	}
+	if key == "" || len(c.otherConfig) == 0 {
+		return ""
+	}
 	return c.otherConfig[key]
 }
 
@@ -96,7 +121,7 @@ func (c *Config) MustGetString(key string) (string, error) {
 		return v, nil
 	}
 	// 从RSA读取
-	if rsa, _ := c.getRsa(key); len(rsa) > 0 {
+	if rsa := c.getRsa(key); len(rsa) > 0 {
 		return string(rsa), nil
 	}
 	// 从其他配置（如数据库下载来的）读取

@@ -3,10 +3,10 @@ package config
 import (
 	"fmt"
 	"github.com/aarioai/airis/pkg/utils"
-	"gopkg.in/ini.v1"
 	"log"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"time"
 )
 
@@ -39,6 +39,12 @@ func (env Env) BeforeStaging() bool { return env.IsStaging() || env.BeforeTestin
 func (env Env) AfterStaging() bool  { return env.IsStaging() || env.IsProduction() }
 func (env Env) AfterTesting() bool  { return env.IsTesting() || env.AfterStaging() }
 
+type Snapshot struct {
+	data        map[string]string
+	rsa         map[string][]byte // rsa 是配对出现的，不要使用 sync.Map， 直接对整个map加锁设置
+	otherConfig map[string]string // 不要使用 sync.Map， 直接对整个map加锁设置
+}
+
 type Config struct {
 	/*
 		https://en.wikipedia.org/wiki/Deployment_environment
@@ -51,10 +57,12 @@ type Config struct {
 	TimeFormat   string // e.g. "2006-02-01 15:04:05"
 	Mock         bool   // using mock
 
+	onWrite     atomic.Bool
 	path        string
-	data        *ini.File
+	data        map[string]string
 	rsa         map[string][]byte // rsa 是配对出现的，不要使用 sync.Map， 直接对整个map加锁设置
 	otherConfig map[string]string // 不要使用 sync.Map， 直接对整个map加锁设置
+	snapshot    atomic.Pointer[Snapshot]
 }
 
 func (c *Config) Log() {

@@ -2,43 +2,68 @@ package atype
 
 import (
 	"database/sql"
+	"sync"
 )
 
-// Abyte String('A') will returns "97". So you have to use String(Abyte('A')) to return "A"
-type Abyte byte
-
-// fastjson 命名就是 autotype
+// Atype 提供类型安全和高效的类型转换
 type Atype struct {
 	raw any
 }
 
-func New(data any) *Atype {
-	return &Atype{
-		raw: data,
+var (
+	// 对象池，减少内存分配
+	atypePool = sync.Pool{
+		New: func() interface{} {
+			return new(Atype)
+		},
 	}
+)
+
+// New 创建一个新的 Atype 实例
+// 即使不释放，也不影响。
+func New(data any) *Atype {
+	a := atypePool.Get().(*Atype)
+	a.raw = data
+	return a
 }
 
-func (p *Atype) Bool() (bool, error) {
-	return Bool(p.raw)
-}
-func (p *Atype) Bytes() []byte {
-	return Bytes(p.raw)
+// Release 释放 Atype 实例到对象池
+// 即使这个atype 不是从对象池中获取的，也会放入对象池。不影响使用。
+func (p *Atype) Release() {
+	p.raw = nil
+	atypePool.Put(p)
 }
 
+// Raw 返回原始数据
 func (p *Atype) Raw() any {
 	return p.raw
 }
+
+// Reload 重新加载数据
 func (p *Atype) Reload(v any) {
 	p.raw = v
 }
 
-// Get key from a map[string]any
+// Get 从 map[string]any 中获取嵌套值
 // p.Get("users.1.name") is short for p.Get("user", "1", "name")
 // @warn p.Get("user", "1", "name") is diffirent with p.Get("user", 1, "name")
-
 func (p *Atype) Get(keys ...any) (*Atype, error) {
 	v, err := NewMap(p.raw).Get(keys[0], keys[1:]...)
 	return New(v), err
+}
+
+// 基本类型转换方法
+func (p *Atype) String() string {
+	return String(p.raw)
+}
+func (p *Atype) Bytes() []byte {
+	return Bytes(p.raw)
+}
+func (p *Atype) Slice() ([]any, error) {
+	return Slice(p.raw)
+}
+func (p *Atype) Bool() (bool, error) {
+	return Bool(p.raw)
 }
 
 func (p *Atype) SqlNullString() sql.NullString {
@@ -70,10 +95,6 @@ func (p *Atype) DefaultBool(defaultValue bool) bool {
 	return v
 }
 
-func (p *Atype) Slice() ([]any, error) {
-	return Slice(p.raw)
-}
-
 func (p *Atype) DefaultSlice(defaultValue []any) []any {
 	v, err := p.Slice()
 	if err != nil {
@@ -82,9 +103,6 @@ func (p *Atype) DefaultSlice(defaultValue []any) []any {
 	return v
 }
 
-func (p *Atype) String() string {
-	return String(p.raw)
-}
 func (p *Atype) DefaultString(defaultValue string) string {
 	v := p.String()
 	if v == "" {

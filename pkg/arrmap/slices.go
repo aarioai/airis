@@ -1,4 +1,4 @@
-package arrays
+package arrmap
 
 import "golang.org/x/exp/slices"
 

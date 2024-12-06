@@ -2,7 +2,7 @@ package request
 
 import (
 	"github.com/aarioai/airis/core/ae"
-	"github.com/aarioai/airis/core/helpers/conv"
+	"github.com/aarioai/airis/core/atype"
 )
 
 func (r *Request) BodyAnyMap(p string, requireds ...bool) (map[string]any, *ae.Error) {
@@ -35,7 +35,7 @@ func (r *Request) BodyFloat64Map(p string, requireds ...bool) (map[string]float6
 	if e != nil {
 		return nil, e
 	}
-	maps, err := conv.AnyFloat64Map(b)
+	maps, err := atype.ToFloat64Map(b)
 	if err != nil {
 		return nil, ae.BadParam(p)
 	}
@@ -76,7 +76,7 @@ func (r *Request) BodyComplexStringMap(p string, requireds ...bool) (map[string]
 	if e != nil {
 		return nil, e
 	}
-	maps := conv.AnyComplexStringMap(b)
+	maps := atype.ToComplexStringMap(b)
 	required := len(requireds) == 0 || requireds[0]
 	if required && maps == nil {
 		return nil, ae.BadParam(p)
@@ -88,7 +88,7 @@ func (r *Request) BodyComplexStringsMap(p string, requireds ...bool) (map[string
 	if e != nil {
 		return nil, e
 	}
-	maps := conv.AnyComplexStringsMap(b)
+	maps := atype.ToComplexStringsMap(b)
 	required := len(requireds) == 0 || requireds[0]
 	if required && maps == nil {
 		return nil, ae.BadParam(p)
@@ -100,7 +100,7 @@ func (r *Request) BodyConvStringMaps(p string, requireds ...bool) ([]map[string]
 	if e != nil {
 		return nil, e
 	}
-	maps := conv.AnyStringMaps(b)
+	maps := atype.ToStringMaps(b)
 	required := len(requireds) == 0 || requireds[0]
 	if required && maps == nil {
 		return nil, ae.BadParam(p)
@@ -113,7 +113,7 @@ func (r *Request) BodyComplexMaps(p string, requireds ...bool) ([]map[string]any
 	if e != nil {
 		return nil, e
 	}
-	maps := conv.AnyComplexMaps(b)
+	maps := atype.ToComplexMaps(b)
 	required := len(requireds) == 0 || requireds[0]
 	if required && maps == nil {
 		return nil, ae.BadParam(p)
@@ -125,7 +125,7 @@ func (r *Request) BodyStringMap(p string, requireds ...bool) (map[string]string,
 	if e != nil {
 		return nil, e
 	}
-	maps := conv.AnyStringMap(b)
+	maps := atype.ToStringMap(b)
 	required := len(requireds) == 0 || requireds[0]
 	if required && maps == nil {
 		return nil, ae.BadParam(p)
@@ -137,7 +137,7 @@ func (r *Request) BodyStringsMap(p string, requireds ...bool) (map[string][]stri
 	if e != nil {
 		return nil, e
 	}
-	maps := conv.AnyStringsMap(b)
+	maps := atype.ToStringsMap(b)
 	required := len(requireds) == 0 || requireds[0]
 	if required && maps == nil {
 		return nil, ae.BadParam(p)
