@@ -109,10 +109,12 @@ func NewLogWriter(dir string, perm os.FileMode, bufSize int, symlinks ...string)
 	if err != nil {
 		return nil, err
 	}
-
-	symlink := path.Join(dir, "app.log")
-	if len(symlinks) > 0 {
-		symlink, _, err = ios.PrepareFile(symlinks[0], os.ModePerm)
+	// 这里会同时判断 symlinks[0] 是否为空字符串，兼容性更强
+	symlink := arrmap.First(symlinks)
+	if symlink == "" {
+		symlink = path.Join(dir, "app.log")
+	} else {
+		symlink, _, err = ios.PrepareFile(symlink, os.ModePerm)
 		if err != nil {
 			return nil, err
 		}
