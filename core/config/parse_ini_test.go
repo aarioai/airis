@@ -45,24 +45,24 @@ func TestParseIni(t *testing.T) {
 	testMySQLConfig(t, c, "hello", mysqlHelloOpt)
 }
 
-func testRedisConfig(t *testing.T, c *config.Config, section string, suppose redis.Options) {
+func testRedisConfig(t *testing.T, c *config.Config, section string, want redis.Options) {
 	test, err := c.RedisConfig(section)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	if test.Password != suppose.Password {
-		t.Errorf("test redis password %s not match %s", test.Password, suppose.Password)
+	if test.Password != want.Password {
+		t.Errorf("test redis password %s not match %s", test.Password, want.Password)
 	}
-	if test.DB != suppose.DB {
-		t.Errorf("test redis db %d not match %d", test.DB, suppose.DB)
+	if test.DB != want.DB {
+		t.Errorf("test redis db %d not match %d", test.DB, want.DB)
 	}
-	if test.Addr != suppose.Addr {
-		t.Errorf("test redis addr %s not match %s", test.Addr, suppose.Addr)
+	if test.Addr != want.Addr {
+		t.Errorf("test redis addr %s not match %s", test.Addr, want.Addr)
 	}
 
 }
-func testMySQLConfig(t *testing.T, c *config.Config, section string, suppose config.MysqlConfig) {
-	mysqlConfig, err := c.MysqlConfig(section)
+func testMySQLConfig(t *testing.T, c *config.Config, want string, suppose config.MysqlConfig) {
+	mysqlConfig, err := c.MysqlConfig(want)
 	if err != nil {
 		t.Fatal(err.Error())
 	}

@@ -250,7 +250,6 @@ func (lw *LogWriter) Flush() error {
 }
 
 func (lw *LogWriter) Write(p []byte) (n int, err error) {
-	fmt.Println("SHIT")
 	if lw.bufSize > 0 {
 		n, err = lw.writeBuffer(p)
 		if err == nil {
