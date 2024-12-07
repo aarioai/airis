@@ -12,12 +12,10 @@ import (
 func testLogWriterBuffer(t *testing.T, bufferSize int) {
 	dir := t.TempDir()
 	symlink := path.Join(t.TempDir(), "logwriter_symlink_test.log")
-
 	lw, err := debug.NewLogWriter(dir, 0777, bufferSize, symlink)
 	if err != nil {
 		t.Error(err)
 	}
-	defer os.Remove(symlink)
 
 	now := time.Now().Format("2006-01-02 15:04:05")
 	testData := []byte(fmt.Sprintf(now+" buffer:%d\n", bufferSize))
@@ -50,5 +48,5 @@ func TestLogWriter(t *testing.T) {
 
 // 测试缓冲输出，直接输出
 func TestLogWriterBuffer(t *testing.T) {
-	//testLogWriterBuffer(t, 2048)
+	testLogWriterBuffer(t, 2048)
 }

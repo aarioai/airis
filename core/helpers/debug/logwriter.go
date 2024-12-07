@@ -16,12 +16,14 @@ import (
 )
 
 const (
-	logRetentionDays  = 90 // 保留日志的天数
-	logFileDateFormat = "2006-01-02"
-	logSuffix         = ".bak.log"
+	defaultLogRetention           = -time.Hour * 24 * 90 // 保留日志的天数
+	defaultLogFileDateFormat      = "2006-01-02"
+	defaultLogSuffix              = ".bak.log"
+	defaultLogBufferFlushInterval = time.Second * 3
 )
 
 type LogWriter struct {
+	retention     time.Duration
 	perm          os.FileMode
 	dir           string
 	symlink       string
@@ -34,6 +36,9 @@ type LogWriter struct {
 	bufWriter     *bufio.Writer
 	lastFlush     time.Time     // 添加最后刷新时间
 	flushInterval time.Duration // 添加刷新间隔
+
+	dateFormat string
+	suffix     string
 }
 
 var (
@@ -56,16 +61,14 @@ func Console(args ...any) {
 		}
 	}
 
-	// 格式化消息
 	msg := arrmap.SprintfArgs(args...)
 	if msg == "" {
 		return
 	}
 
 	// 移除尾部换行符
-	if strings.HasSuffix(msg, "\n") {
-		msg = msg[:len(msg)-1]
-	}
+	msg = strings.TrimSuffix(msg, "\n")
+
 	// 方便运行程序时直接显示
 	fmt.Println(msg)
 	// 记录进日志，方便通过消息队列通知
@@ -74,9 +77,9 @@ func Console(args ...any) {
 
 // RedirectLog 重定向标准日志和panic输出
 func RedirectLog(dir string, perm os.FileMode, bufSize int, symlink ...string) error {
-	dir, _ = filepath.Abs(dir)
-	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
-		return fmt.Errorf("failed to create log directory: %s: %w", dir, err)
+	dir, err := ios.MkdirAll(dir, perm)
+	if err != nil {
+		return err
 	}
 	panicLog := path.Join(dir, "panic.log")
 	panicFile, err := os.OpenFile(panicLog, os.O_CREATE|os.O_APPEND|os.O_WRONLY, perm)
@@ -117,11 +120,16 @@ func NewLogWriter(dir string, perm os.FileMode, bufSize int, symlinks ...string)
 
 	onceLogWriter.Do(func() {
 		logWriter = &LogWriter{
-			perm:    perm,
-			dir:     dir,
-			symlink: symlink,
-			bufSize: bufSize,
-			done:    make(chan struct{}),
+			retention:     defaultLogRetention,
+			perm:          perm,
+			dir:           dir,
+			symlink:       symlink,
+			bufSize:       bufSize, // 这个可以决定输出方式，因此尽量实例化之初指定，不要后来重新指定
+			done:          make(chan struct{}),
+			flushInterval: defaultLogBufferFlushInterval,
+
+			dateFormat: defaultLogFileDateFormat,
+			suffix:     defaultLogSuffix,
 		}
 		logWriter.initialize()
 		logWriter.startCleanupRoutine()
@@ -133,6 +141,22 @@ func NewLogWriter(dir string, perm os.FileMode, bufSize int, symlinks ...string)
 	}
 
 	return logWriter, nil
+}
+func (lw *LogWriter) WithRetentionDays(retentionDays time.Duration) *LogWriter {
+	lw.retention = retentionDays
+	return lw
+}
+func (lw *LogWriter) WithFlushInterval(flushInterval time.Duration) *LogWriter {
+	lw.flushInterval = flushInterval
+	return lw
+}
+func (lw *LogWriter) WithDateFormat(dateFormat string) *LogWriter {
+	lw.dateFormat = dateFormat
+	return lw
+}
+func (lw *LogWriter) WithSuffix(suffix string) *LogWriter {
+	lw.suffix = suffix
+	return lw
 }
 func (lw *LogWriter) initialize() {
 	if err := lw.openFile(); err != nil {
@@ -157,7 +181,7 @@ func (lw *LogWriter) updateConfig(dir, symlink string, bufSize int) bool {
 }
 
 func (lw *LogWriter) currentPath() string {
-	return path.Join(lw.dir, time.Now().Format(logFileDateFormat)+logSuffix)
+	return path.Join(lw.dir, time.Now().Format(lw.dateFormat)+lw.suffix)
 }
 func (lw *LogWriter) write(p []byte) (n int, err error) {
 	lw.mu.Lock()
@@ -180,6 +204,7 @@ func (lw *LogWriter) writeBuffer(p []byte) (n int, err error) {
 			return 0, fmt.Errorf("log writer failed to openFile log: %v\n", err)
 		}
 	}
+	fmt.Println("222")
 	n, err = lw.bufWriter.Write(p)
 	if err != nil {
 		return n, fmt.Errorf("log writer failed to write to buffer: %v", err)
@@ -190,22 +215,42 @@ func (lw *LogWriter) writeBuffer(p []byte) (n int, err error) {
 		time.Since(lw.lastFlush) > lw.flushInterval
 
 	if shouldFlush {
-		if err = lw.Flush(); err != nil {
+		if err = lw.flushBuffer(); err != nil {
 			return n, fmt.Errorf("log writer flush failed: %w", err)
 		}
 		lw.lastFlush = time.Now()
 	}
 	return n, err
 }
-func (lw *LogWriter) Flush() error {
-	lw.mu.Lock()
-	defer lw.mu.Unlock()
+
+// 不加锁的，供内部使用
+func (lw *LogWriter) flushBuffer() error {
 	if lw.bufWriter == nil {
 		return nil
 	}
-	return lw.bufWriter.Flush()
+	if err := lw.bufWriter.Flush(); err != nil {
+		return fmt.Errorf("failed to flush buffer: %w", err)
+	}
+
+	// 同时刷新底层文件
+	if lw.file != nil {
+		if err := lw.file.Sync(); err != nil {
+			return fmt.Errorf("failed to sync file: %w", err)
+		}
+	}
+
+	return nil
 }
+
+// Flush 加锁的，仅供外部使用
+func (lw *LogWriter) Flush() error {
+	lw.mu.Lock()
+	defer lw.mu.Unlock()
+	return lw.flushBuffer()
+}
+
 func (lw *LogWriter) Write(p []byte) (n int, err error) {
+	fmt.Println("SHIT")
 	if lw.bufSize > 0 {
 		n, err = lw.writeBuffer(p)
 		if err == nil {
@@ -271,14 +316,14 @@ func (lw *LogWriter) startCleanupRoutine() {
 func (lw *LogWriter) cleanOldLogs() {
 	Console(os.Remove(lw.symlink))
 
-	cutoff := time.Now().Add(-time.Hour * 24 * time.Duration(logRetentionDays))
+	cutoff := time.Now().Add(lw.retention)
 
 	_ = filepath.Walk(lw.dir, func(path string, info os.FileInfo, err error) error {
-		if err != nil || info.IsDir() || !strings.HasSuffix(info.Name(), logSuffix) {
+		if err != nil || info.IsDir() || !strings.HasSuffix(info.Name(), lw.suffix) {
 			return nil
 		}
 
-		fileDate, err := time.Parse(logFileDateFormat, strings.TrimSuffix(info.Name(), logSuffix))
+		fileDate, err := time.Parse(lw.dateFormat, strings.TrimSuffix(info.Name(), lw.suffix))
 		if err == nil && fileDate.Before(cutoff) {
 			if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
 				Console("failed to remove old log %s: %v", path, err)
