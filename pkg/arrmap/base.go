@@ -1,6 +1,9 @@
 package arrmap
 
-import "github.com/aarioai/airis/pkg/types"
+import (
+	"fmt"
+	"github.com/aarioai/airis/pkg/types"
+)
 
 // First 获取第一个参数，一般用于动态参数获取
 func First[T any](args []T) T {
@@ -9,6 +12,32 @@ func First[T any](args []T) T {
 		return v
 	}
 	return args[0]
+}
+
+// SprintfArgs 针对可选参数，格式化字符串
+func SprintfArgs[T any](args ...T) string {
+	if len(args) == 0 {
+		return ""
+	}
+
+	format, ok := any(args[0]).(string)
+	if !ok {
+		return fmt.Sprint(args[0])
+	}
+
+	switch len(args) {
+	case 1:
+		return format
+	case 2:
+		return fmt.Sprintf(format, any(args[1]))
+	default:
+		// 将剩余参数转换为 []any 类型
+		rest := make([]any, len(args)-1)
+		for i, arg := range args[1:] {
+			rest[i] = any(arg)
+		}
+		return fmt.Sprintf(format, rest...)
+	}
 }
 
 // Merge 合并多个相同类型的 map，后面的 map 会覆盖前面的值
