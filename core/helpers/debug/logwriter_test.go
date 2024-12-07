@@ -14,7 +14,7 @@ func testLogWriterBuffer(t *testing.T, bufferSize int) {
 	symlink := path.Join(t.TempDir(), "logwriter_symlink_test.log")
 	lw, err := debug.NewLogWriter(dir, 0777, bufferSize, symlink)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err.Error())
 	}
 
 	now := time.Now().Format("2006-01-02 15:04:05")

@@ -32,16 +32,6 @@ type MysqlConfig struct {
 	Pool MysqlPoolConfig
 }
 
-func (c *Config) tryGetMysqlCfg(section string, key string) (string, error) {
-	k := section + "." + key
-	v, err := c.MustGetString(k)
-	if err == nil {
-		return v, nil
-	}
-
-	return c.MustGetString("mysql." + key)
-}
-
 // ParseTimeout connection timeout, r timeout, w timeout, heartbeat interval
 // 10s, 1000ms
 func (c *Config) ParseTimeout(t string, defaultTimeouts ...time.Duration) (conn time.Duration, read time.Duration, write time.Duration) {
@@ -70,15 +60,34 @@ func (c *Config) ParseTimeout(t string, defaultTimeouts ...time.Duration) (conn 
 
 	return
 }
-
+func (c *Config) tryGetMysqlCfg(section string, key string) (string, error) {
+	k := section + "." + key
+	v, err := c.MustGetString(k)
+	if err == nil {
+		return v, nil
+	}
+	if section != "mysql" {
+		if !strings.HasPrefix(section, "mysql_") {
+			// 尝试section加 mysql_ 开头
+			return c.tryGetMysqlCfg("mysql_"+section, key)
+		}
+		// 读取默认值，即 mysql.$key
+		return c.MustGetString("mysql." + key)
+	}
+	return "", err
+}
 func (c *Config) MysqlConfig(section string) (MysqlConfig, error) {
+	if section == "" {
+		section = "mysql"
+	}
 	host, err := c.tryGetMysqlCfg(section, "host")
 	if err != nil {
 		return MysqlConfig{}, err
 	}
 	schema, err := c.tryGetMysqlCfg(section, "schema")
 	if err != nil {
-		return MysqlConfig{}, err
+		// schema 如果不存在，那么就跟section保持一致
+		schema = section
 	}
 	user, err := c.tryGetMysqlCfg(section, "user")
 	if err != nil {
@@ -115,16 +124,32 @@ func (c *Config) MysqlConfig(section string) (MysqlConfig, error) {
 	return cf, nil
 }
 
-func (c *Config) tryGeRedisCfg(section string, key string) (*atype.Atype, error) {
+func (c *Config) tryGeRedisCfg(section string, key string) (atype.Atype, error) {
 	k := section + "." + key
 	v, err := c.MustGet(k)
 	if err == nil {
-		return v, nil
+		return *v, nil
 	}
-	return c.MustGet("redis." + key)
+	if section != "redis" {
+		if !strings.HasPrefix(section, "redis_") {
+			// 尝试section加 redis_ 开头
+			return c.tryGeRedisCfg("redis_"+section, key)
+		}
+
+		// 读取默认值，即 redis.$key
+		v, err = c.MustGet("redis." + key)
+		if err == nil {
+			return *v, nil
+		}
+	}
+	return *atype.New(""), err
 }
 
 func (c *Config) RedisConfig(section string) (*redis.Options, error) {
+	if section == "" {
+		section = "redis"
+	}
+
 	addr, err := c.tryGeRedisCfg(section, "addr")
 	if err != nil {
 		return nil, err
