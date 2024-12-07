@@ -167,7 +167,7 @@ main() {
   pushAndUpgradeMod
   unsetVPN "$needCloseVPN"
   log_info "All operations completed successfully."
-  log_info "--> Remember to use -u to upgrade all dependencies once a day"
+  log_info "--> You may use go get -u -v ./...  or -u to upgrade all dependencies maximum 1 time per day"
 }
 
 # 执行主流程

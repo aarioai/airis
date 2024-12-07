@@ -18,7 +18,7 @@ type Writer struct {
 	beforeFlush     []func(*Writer)
 	beforeSerialize []func(ictx iris.Context, contentType string, d Response) Response
 	serialize       func(contentType string, d Response) (bytes []byte, newContentType string, err error)
-	errorHandler    func(ictx iris.Context, contentType string, d Response) (int, error, bool)
+	errorHandler    func(ictx iris.Context, request *request.Request, contentType string, d Response) (int, error, bool)
 
 	ictx    iris.Context
 	request *request.Request
@@ -133,7 +133,7 @@ func (w *Writer) DeleteHeader(key string) *Writer {
 	}
 	return w
 }
-func (w *Writer) WithErrorHandler(handler func(ictx iris.Context, contentType string, d Response) (int, error, bool)) *Writer {
+func (w *Writer) WithErrorHandler(handler func(ictx iris.Context, request *request.Request, contentType string, d Response) (int, error, bool)) *Writer {
 	w.errorHandler = handler
 	return w
 }
@@ -206,18 +206,18 @@ func (w *Writer) writeDTO(d Response) (int, error) {
 	if d.Code >= ae.CodeBadRequest {
 		// 避免重复调用，不再传 *Writer，而是直接操作 ictx
 		if w.errorHandler != nil {
-			n, err, next := w.errorHandler(w.ictx, ct, d)
+			n, err, next := w.errorHandler(w.ictx, w.request, ct, d)
 			if !next {
 				return n, err
 			}
 		}
 		if globalErrorHandler != nil {
-			n, err, next := globalErrorHandler(w.ictx, ct, d)
+			n, err, next := globalErrorHandler(w.ictx, w.request, ct, d)
 			if !next {
 				return n, err
 			}
 		}
-		n, err, next := defaultErrorHandler(w.ictx, ct, d)
+		n, err, next := defaultErrorHandler(w.ictx, w.request, ct, d)
 		if !next {
 			return n, err
 		}
