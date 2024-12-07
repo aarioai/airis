@@ -117,7 +117,16 @@ func (r *Request) BodyPaths(p string, required ...bool) ([]string, *ae.Error) {
 	return paths, e
 }
 
+// BodyStringFast 快速查询字符串
+func (r *Request) BodyStringFast(p string) string {
+	// false 是必须的，表示 required=false。默认 required = true
+	v, _ := r.BodyString(p, false)
+	return v
+}
+
 func (r *Request) BodyString(p string, required ...any) (string, *ae.Error) {
+	// 不要再进行 len(params) 判断，这属于过度优化。这个函数应当优先传 params --> 不要强制，不然不利于使用
+	// 如有该需求，应优先使用 QueryFast
 	x, e := r.Body(p, required...)
 	return x.String(), e
 }

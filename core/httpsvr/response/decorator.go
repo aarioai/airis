@@ -29,11 +29,10 @@ func (w *Writer) decorateData(payload any) (any, *ae.Error) {
 // @TODO
 // ?_field=time,service,connections:[name,scheme],server_id,test:{a,b,c}
 func (w *Writer) filterFields(a any, tagname string) (any, *ae.Error) {
-	xm, _ := w.request.Query(request.ParamField, false)
-	if xm.IsEmpty() {
+	m := w.request.QueryFast(request.ParamField)
+	if m == "" {
 		return a, nil
 	}
-	m := xm.String()
 	if m[0] == '[' && m[len(m)-1] == ']' {
 		return filterArrayFields(a, tagname, strings.Split(m[1:len(m)-1], ",")...)
 	}

@@ -106,9 +106,18 @@ func (r *Request) QueryId(p string, params ...any) (sid string, id uint64, e *ae
 	id, _ = strconv.ParseUint(sid, 10, 64)
 	return
 }
+
+// QueryFast 更高效地快速查询字符串
+func (r *Request) QueryFast(p string) string {
+	// false 是必须的，表示 required=false。默认 required = true
+	v, _ := r.queryString(p, false)
+	return v
+}
+
 func (r *Request) QueryString(p string, params ...any) (string, *ae.Error) {
-	x, e := r.Query(p, params...)
-	return x.String(), e
+	// 不要再进行 len(params) 判断，这属于过度优化。这个函数应当优先传 params --> 不要强制，不然不利于使用
+	// 如有该需求，应优先使用 QueryFast
+	return r.queryString(p, params...)
 }
 func (r *Request) QueryStrings(p string, required, allowEmptyString bool) ([]string, *ae.Error) {
 	return r.parseStrings(r.Query, p, required, allowEmptyString)
