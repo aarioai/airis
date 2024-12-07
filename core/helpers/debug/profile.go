@@ -140,6 +140,7 @@ func (p *Profile) Mark(marks ...any) int32 {
 	p.writeMarks(buf, mark, n)
 
 	fmt.Print(buf.String())
+
 	return seq
 }
 
@@ -155,6 +156,8 @@ func (p *Profile) writePrefix(buf *strings.Builder, id int32) {
 
 // writeTimeInfo 写入时间信息
 func (p *Profile) writeTimeInfo(buf *strings.Builder, id int32, now time.Time, nowMicro int64) int {
+	prevStartTime := p.startTime
+	p.startTime = nowMicro
 	elapsed := nowMicro - p.lastTime
 	if id == 1 || elapsed > printProfileTimePerMicro {
 		p.lastTime = nowMicro
@@ -162,7 +165,7 @@ func (p *Profile) writeTimeInfo(buf *strings.Builder, id int32, now time.Time, n
 		buf.WriteString(now.Format(profileTimeFormat))
 		return 0
 	}
-	if delta := nowMicro - p.startTime; delta > 0 {
+	if delta := nowMicro - prevStartTime; delta > 0 {
 		fmt.Fprintf(buf, "+%dμs", delta)
 		return 1 // μ 是2个字节，需要增加1位
 	}
