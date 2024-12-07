@@ -206,7 +206,6 @@ func (lw *LogWriter) writeBuffer(p []byte) (n int, err error) {
 			return 0, fmt.Errorf("log writer failed to openFile log: %v\n", err)
 		}
 	}
-	fmt.Println("222")
 	n, err = lw.bufWriter.Write(p)
 	if err != nil {
 		return n, fmt.Errorf("log writer failed to write to buffer: %v", err)

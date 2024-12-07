@@ -9,7 +9,7 @@ import (
 var (
 	// GlobalHideServerError 全局隐藏服务器错误(code>=500)
 	// 优先级：writer.HideServerError > GlobalHideServerError
-	globalErrorHandler      func(w *Writer, contentType string, d Response) (int, error, bool)
+	globalErrorHandler      func(ictx iris.Context, contentType string, d Response) (int, error, bool)
 	globalBeforeSerialize   []func(ictx iris.Context, contentType string, d Response) Response
 	globalSerialize         func(contentType string, d Response) (bytes []byte, newContentType string, err error)
 	log                     = logger.NewDefaultLog()
@@ -17,19 +17,21 @@ var (
 	globalServeContentTypes = []string{"application/json"}
 )
 
-func defaultErrorHandler(w *Writer, contentType string, d Response) (int, error) {
+// 避免循环调用，避免传递 *Writer
+func defaultErrorHandler(ictx iris.Context, contentType string, d Response) (int, error, bool) {
 	if d.Code == ae.CodeNotModified {
-		w.StatusCode(d.Code)
-		return 0, nil
+		ictx.StatusCode(d.Code)
+		return 0, nil, false
 	}
 	if contentType == "text/html" {
 		// 返回状态码，交给route层处理
 		//w.ictx.Values().Set(ErrCodeKey, d.Code)
 		//w.ictx.Values().Set(ErrMsgKey, d.Msg)
-		w.StatusCode(d.Code)
-		return 0, nil
+		ictx.StatusCode(d.Code)
+		return 0, nil, false
 	}
-	return w.WriteMsg(d.Code, d.Msg)
+	// 丢给 next 执行
+	return 0, nil, true
 }
 
 func defaultSerialize(contentType string, d Response) ([]byte, string, error) {
@@ -48,7 +50,7 @@ func RegisterGlobalServeContentTypes(contentTypes []string) {
 	}
 	globalServeContentTypes = contentTypes
 }
-func RegisterGlobalErrorHandler(f func(w *Writer, contentType string, d Response) (int, error, bool)) {
+func RegisterGlobalErrorHandler(f func(ictx iris.Context, contentType string, d Response) (int, error, bool)) {
 	globalErrorHandler = f
 }
 func RegisterGlobalBeforeSerialize(f func(ictx iris.Context, contentType string, d Response) Response) {
