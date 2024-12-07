@@ -18,7 +18,7 @@ import (
 const (
 	defaultLogRetention           = -time.Hour * 24 * 90 // 保留日志的天数
 	defaultLogFileDateFormat      = "2006-01-02"
-	defaultLogSuffix              = ".bak.log"
+	defaultLogSuffix              = ".log"
 	defaultLogBufferFlushInterval = time.Second * 3
 )
 

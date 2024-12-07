@@ -1,7 +1,6 @@
 package arrmap_test
 
 import (
-	"fmt"
 	"github.com/aarioai/airis/pkg/arrmap"
 	"golang.org/x/exp/slices"
 	"testing"
@@ -22,6 +21,4 @@ func TestCompact(t *testing.T) {
 	if !slices.Equal(newArr, []int{1, 2, 3, 4, 5, 6, 7, 8}) {
 		t.Errorf("util.Compact() not passed")
 	}
-
-	fmt.Println(arr, newArr)
 }

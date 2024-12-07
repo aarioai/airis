@@ -20,13 +20,12 @@ func NewMap(v any) Map {
 // p.Get("users.1.name") 等同于 p.Get("user", "1", "name")
 // @warn p.Get("user", "1", "name") 与 p.Get("user", 1, "name") 不一样
 func (m Map) Get(key any, keys ...any) (any, error) {
-	value := m.Value
-	if value == nil {
+	if m.Value == nil {
 		return nil, fmt.Errorf("map is nil")
 	}
-	val, ok := ToMap(value)
+	current, ok := ToMap(m.Value)
 	if !ok {
-		return nil, fmt.Errorf("invalid map: %v", value)
+		return nil, fmt.Errorf("invalid map: %v", m.Value)
 	}
 	// 处理点号分隔的路径
 	allKeys := make([]any, 0, len(keys)+1)
@@ -38,17 +37,26 @@ func (m Map) Get(key any, keys ...any) (any, error) {
 		allKeys = append(allKeys, keys...)
 	}
 
-	for i, k := range allKeys {
-		value, ok = val[k]
-		if !ok {
-			return nil, fmt.Errorf("key not found: %s", strings.Join(ToStrings(allKeys), "."))
+	// 遍历所有键
+	for i := 0; i < len(allKeys)-1; i++ {
+		nextValue, exists := current[allKeys[i]]
+		if !exists {
+			return nil, fmt.Errorf("key not found: %s", strings.Join(ToStrings(allKeys[:i+1]), "."))
 		}
 
-		// 如果是最后一个键，直接返回值
-		if i == len(allKeys)-1 {
-			return value, nil
+		nextMap, ok := ToMap(nextValue)
+		if !ok {
+			return nil, fmt.Errorf("invalid intermediate value at key %s: %v", strings.Join(ToStrings(allKeys[:i+1]), "."), nextValue)
 		}
+		current = nextMap
 	}
 
-	return value, nil
+	// 获取最终值
+	finalKey := allKeys[len(allKeys)-1]
+	finalValue, exists := current[finalKey]
+	if !exists {
+		return nil, fmt.Errorf("key not found: %s", strings.Join(ToStrings(allKeys), "."))
+	}
+
+	return finalValue, nil
 }

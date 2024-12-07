@@ -35,7 +35,10 @@ func TestPrimitiveType(t *testing.T) {
 	type b safeInt
 	type c b
 	x := c(100)
-	t.Log(types.PrimitiveType(&x), types.PType(&x), types.PType(x))
+	if types.PType(&x) != types.PType(x) || types.PType(x) != reflect.Int32 {
+		t.Errorf("types ptype invalid: x:= c(100) %v", types.PType(&x))
+	}
+
 	type g1 struct {
 		A int64 `json:"a"`
 	}
@@ -45,8 +48,16 @@ func TestPrimitiveType(t *testing.T) {
 	gg2 := &gg
 
 	t.Log(types.PrimitiveType(&g), types.PType(&g), types.PType(g))
-	t.Log(types.PrimitiveType(&gg), types.PType(&gg), types.PType(gg))
-	t.Log(types.PrimitiveType(&gg2), f0(gg2), types.PType(&gg2), types.PType(gg2))
+
+	if types.PType(&g) != types.PType(g) || types.PType(g) != reflect.Struct {
+		t.Errorf("types invalid: g %v", types.PType(&g))
+	}
+	if types.PType(&gg) != types.PType(gg) || types.PType(gg) != reflect.Struct {
+		t.Errorf("types invalid: gg %v", types.PType(&gg))
+	}
+	if types.PType(&gg2) != types.PType(gg2) || types.PType(gg2) != reflect.Struct {
+		t.Errorf("types ptypeinvalid: gg2 %v", types.PType(&gg2))
+	}
 
 	type y struct {
 		A string `json:"a"`
@@ -72,5 +83,7 @@ func TestPrimitiveType2(t *testing.T) {
 	yy := 10000
 	y0 := y{Y: &yy}
 	a := x{A: "LOVE", B: 100, C: 300, Y: &y0}
-	t.Log(types.PType(a.Y.Img))
+	if types.PType(&a.Y.Img) != reflect.Struct {
+		t.Errorf("types ptypeinvalid: a.Y.Img %v", types.PType(&a.Y.Img))
+	}
 }
