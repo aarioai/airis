@@ -89,7 +89,7 @@ func (t *Tx) Update(ctx context.Context, query string, args ...any) (int64, *ae.
 // 批量查询
 /*
 	stmt,_ := db.Prepare("select count(*) from tb where id=?")
-	defer stmt.Close()
+	defer stmt.Shutdown()
 	for i:=0;i<1000;i++{
 		stmt.QueryRowContext(ctx, i).&Scan()
 	}

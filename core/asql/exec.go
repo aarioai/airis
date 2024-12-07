@@ -42,7 +42,7 @@ func (d *DB) Close() {
 }
 
 // 批处理 prepare 性能会更好，但需要支持 mysqli；非批处理，不要使用 prepare，会造成多余开销
-// 不要忘记 stmt.Close() 释放连接池资源
+// 不要忘记 stmt.Shutdown() 释放连接池资源
 // Prepared statements take up server resources and should be closed after use.
 func (d *DB) Prepare(ctx context.Context, query string) (*sql.Stmt, *ae.Error) {
 	if d.err != nil {
@@ -87,7 +87,7 @@ func (d *DB) Update(ctx context.Context, query string, args ...any) (int64, *ae.
 // 批量查询
 /*
 	stmt,_ := db.Prepare("select count(*) from tb where id=?")
-	defer stmt.Close()
+	defer stmt.Shutdown()
 	for i:=0;i<1000;i++{
 		stmt.QueryRowContext(ctx, i).&Scan()
 	}
@@ -97,7 +97,7 @@ func (d *DB) Update(ctx context.Context, query string, args ...any) (int64, *ae.
 //	if e != nil {
 //		return nil, e
 //	}
-//	defer stmt.Close()
+//	defer stmt.Shutdown()
 //	rows := make([]*sql.Row, len(margs))
 //	for i, args := range margs {
 //		rows[i] = stmt.QueryRowContext(ctx, args...)
