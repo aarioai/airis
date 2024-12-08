@@ -81,6 +81,23 @@ func New(path string, otherConfigs ...map[string]string) *Config {
 	return cfg
 }
 
+func (c *Config) PanicNoRSA() {
+	root := c.GetString(CkRsaRoot)
+	if root == "" {
+		panic(fmt.Sprintf("rsa root config %s is not set", CkRsaRoot))
+	}
+	if len(c.rsa) == 0 {
+		panic(fmt.Sprintf("no rsa file found in %s", root))
+	}
+}
+
+func (c *Config) PanicNotEqual(key, want string) {
+	value := c.GetString(key)
+	if value != want {
+		panic(fmt.Sprintf("config %s = %s not equal to %s", key, value, want))
+	}
+}
+
 func parseToDuration(d string) time.Duration {
 	if len(d) < 2 {
 		return 0
