@@ -69,7 +69,6 @@ var (
 	NotAcceptableE   = New(NotAcceptable)
 
 	TimeoutE               = New(RequestTimeout)
-	ConflictE              = New(Conflict)
 	GoneE                  = New(Gone)
 	RequestEntityTooLargeE = New(RequestEntityTooLarge)
 	LockedE                = New(Locked)
@@ -90,29 +89,34 @@ func BadParamE(param string) *Error {
 	return New(BadRequest, "bad param `"+param+"`")
 }
 func ProxyAuthRequiredE(msg ...any) *Error {
-	return New(ProxyAuthRequired).TryAddMsg(msg...)
+	return New(ProxyAuthRequired).AppendMsg(msg...)
+}
+func ConflictE(name string) *Error {
+	return New(Conflict).AppendMsg(name)
 }
 
 func PreconditionFailedE(msg ...any) *Error {
-	return New(PreconditionFailed).TryAddMsg(msg...)
+	return New(PreconditionFailed).AppendMsg(msg...)
 }
 
 func UnsupportedMediaE(wants ...string) *Error {
 	e := New(UnsupportedMedia)
 	if len(wants) > 0 {
-		e.TryAddMsg("want " + strings.Join(wants, " or "))
+		e.AppendMsg("want " + strings.Join(wants, " or "))
 	}
 	return e
 }
 func FailedDependencyE(msg ...any) *Error {
-	return New(FailedDependency).TryAddMsg(msg...)
+	return New(FailedDependency).AppendMsg(msg...)
 }
 func VariantAlsoNegotiatesE(format string, args ...any) *Error {
 	return New(VariantAlsoNegotiates, afmt.Sprintf(format, args...))
 }
 func LoopDetectedE(msg ...any) *Error {
-	return New(LoopDetected).TryAddMsg(msg...)
+	return New(LoopDetected).AppendMsg(msg...)
 }
+
+// CodeText 获取错误码对应的文本描述
 func CodeText(code int) string {
 	if text, ok := defaultCodeTexts[code]; ok {
 		return text

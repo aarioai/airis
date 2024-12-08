@@ -38,7 +38,7 @@ func HIncrBy(ctx context.Context, rdb *redis.Client, expires time.Duration, k st
 			var err1 error
 			reply, err1 = pipe.HIncrBy(ctx, k, field, incr).Result()
 			err2 := pipe.Expire(ctx, k, expires).Err()
-			return ae.CatchError(err1, err2)
+			return ae.FirstError(err1, err2)
 		})
 	}
 	return reply, ae.NewRedisError(err)

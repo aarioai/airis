@@ -3,7 +3,9 @@ package asql
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/aarioai/airis/core/ae"
+	"github.com/aarioai/airis/pkg/afmt"
 )
 
 type DB struct {
@@ -46,10 +48,10 @@ func (d *DB) Close() {
 // Prepared statements take up server resources and should be closed after use.
 func (d *DB) Prepare(ctx context.Context, query string) (*sql.Stmt, *ae.Error) {
 	if d.err != nil {
-		return nil, ae.NewSQLError(d.err).WithDetail(query)
+		return nil, ae.NewSQLError(d.err, query)
 	}
 	stmt, err := d.DB.PrepareContext(ctx, query)
-	return stmt, ae.NewSQLError(err).WithDetail(query)
+	return stmt, ae.NewSQLError(err, query)
 }
 
 /*
@@ -57,7 +59,7 @@ stmt close 必须要等到相关都执行完（包括  res.LastInsertId()  ,  ro
 */
 func (d *DB) Execute(ctx context.Context, query string, args ...any) (sql.Result, *ae.Error) {
 	res, err := d.DB.ExecContext(ctx, query, args...)
-	return res, ae.NewSQLError(err).WithDetail(query, args...)
+	return res, ae.NewSQLError(err, afmt.Sprintf(query, args...))
 }
 
 func (d *DB) Exec(ctx context.Context, query string, args ...any) *ae.Error {
@@ -71,7 +73,7 @@ func (d *DB) Insert(ctx context.Context, query string, args ...any) (uint, *ae.E
 	}
 	// 由于事务是先执行，后回滚或提交，所以可以先获取插入的ID，后commit()
 	id, err := res.LastInsertId()
-	return uint(id), ae.NewSQLError(err).WithDetail(query, args...)
+	return uint(id), ae.NewSQLError(err, afmt.Sprintf(query, args...))
 }
 
 func (d *DB) Update(ctx context.Context, query string, args ...any) (int64, *ae.Error) {
@@ -81,7 +83,7 @@ func (d *DB) Update(ctx context.Context, query string, args ...any) (int64, *ae.
 	}
 	// 由于事务是先执行，后回滚或提交，所以可以先获取更新结果，后commit()
 	id, err := res.RowsAffected()
-	return id, ae.NewSQLError(err).WithDetail(query, args...)
+	return id, ae.NewSQLError(err, afmt.Sprintf(query, args...))
 }
 
 // 批量查询
@@ -107,7 +109,7 @@ func (d *DB) Update(ctx context.Context, query string, args ...any) (int64, *ae.
 
 func (d *DB) QueryRow(ctx context.Context, query string, args ...any) (*sql.Row, *ae.Error) {
 	row := d.DB.QueryRowContext(ctx, query, args...)
-	return row, ae.NewSQLError(row.Err()).WithDetail(query, args...)
+	return row, ae.NewSQLError(row.Err(), afmt.Sprintf(query, args...))
 }
 
 func (d *DB) ScanArgs(ctx context.Context, query string, args []any, dest ...any) *ae.Error {
@@ -115,14 +117,14 @@ func (d *DB) ScanArgs(ctx context.Context, query string, args []any, dest ...any
 	if e != nil {
 		return e
 	}
-	return ae.NewSQLError(row.Scan(dest...)).WithDetail(query, args...)
+	return ae.NewSQLError(row.Scan(dest...), afmt.Sprintf(query, args...))
 }
 func (d *DB) ScanRow(ctx context.Context, query string, dest ...any) *ae.Error {
 	row, e := d.QueryRow(ctx, query)
 	if e != nil {
 		return e
 	}
-	return ae.NewSQLError(row.Scan(dest...)).WithDetail(query)
+	return ae.NewSQLError(row.Scan(dest...), query)
 }
 
 func (d *DB) Scan(ctx context.Context, query string, id uint64, dest ...any) *ae.Error {
@@ -130,14 +132,14 @@ func (d *DB) Scan(ctx context.Context, query string, id uint64, dest ...any) *ae
 	if e != nil {
 		return e
 	}
-	return ae.NewSQLError(row.Scan(dest...)).WithDetail(query, id)
+	return ae.NewSQLError(row.Scan(dest...), fmt.Sprintf(query, id))
 }
 func (d *DB) ScanX(ctx context.Context, query string, id string, dest ...any) *ae.Error {
 	row, e := d.QueryRow(ctx, query, id)
 	if e != nil {
 		return e
 	}
-	return ae.NewSQLError(row.Scan(dest...)).WithDetail(query, id)
+	return ae.NewSQLError(row.Scan(dest...), fmt.Sprintf(query, id))
 }
 
 // do not forget to close *sql.Rows
@@ -149,7 +151,7 @@ func (d *DB) Query(ctx context.Context, query string, args ...any) (*sql.Rows, *
 		if err == sql.ErrNoRows {
 			return nil, ae.NoRowsE
 		}
-		return nil, ae.NewSQLError(err).WithDetail(query, args...)
+		return nil, ae.NewSQLError(err, afmt.Sprintf(query, args...))
 	}
 	return rows, nil
 }

@@ -1,6 +1,7 @@
 package ae
 
 import (
+	"fmt"
 	"github.com/aarioai/airis/core/airis"
 	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/kataras/iris/v12"
@@ -33,8 +34,8 @@ func New(code int, msgs ...any) *Error {
 	return e
 }
 
-// NewMsg 使用消息创建 Error
-func NewMsg(format string, args ...any) *Error {
+// NewE 使用消息创建 Error
+func NewE(format string, args ...any) *Error {
 	return &Error{
 		Code:   InternalServerError,
 		Msg:    afmt.Sprintf(format, args...),
@@ -43,15 +44,19 @@ func NewMsg(format string, args ...any) *Error {
 }
 
 // NewError 从标准 error 创建 Error
-func NewError(err error, details ...string) *Error {
+func NewError(err error, details ...any) *Error {
 	if err == nil {
 		return nil
 	}
-	return NewMsg(err.Error()).WithCaller(2).withDetail(details...)
+	return NewE(err.Error()).WithCaller(2).WithDetail(details...)
+}
+func (e *Error) WithMsg(format string, args ...any) *Error {
+	e.Msg = fmt.Sprintf(format, args...)
+	return e
 }
 
-// TryAddMsg 尝试添加消息
-func (e *Error) TryAddMsg(msgs ...any) *Error {
+// AppendMsg 尝试添加消息
+func (e *Error) AppendMsg(msgs ...any) *Error {
 	msg := afmt.SprintfArgs(msgs...)
 	if msg != "" {
 		e.Msg += " - " + msg
@@ -64,22 +69,9 @@ func (e *Error) WithCaller(skip int) *Error {
 	e.Caller = Caller(skip + 1)
 	return e
 }
-func (e *Error) withDetail(details ...string) *Error {
-	if len(details) == 1 {
-		return e.WithDetail(details[0])
-	} else if len(details) > 1 {
-		args := make([]any, len(details)-1)
-		for i := 1; i < len(details); i++ {
-			args[i-1] = details[i]
-		}
-		return e.WithDetail(details[0], args...)
-	}
-	return e
-}
 
-// WithDetail 添加详细信息
-func (e *Error) WithDetail(format string, args ...any) *Error {
-	e.Detail = afmt.Sprintf(format, args...)
+func (e *Error) WithDetail(detail ...any) *Error {
+	e.Detail = afmt.SprintfArgs(detail)
 	return e
 }
 func (e *Error) WithTraceInfo(ctx iris.Context) *Error {
@@ -122,7 +114,7 @@ func (e *Error) IsNotFound() bool {
 }
 
 func (e *Error) IsServerError() bool {
-	return  e.Code >= 500 && e.Code <= 599
+	return e.Code >= 500 && e.Code <= 599
 }
 
 func (e *Error) IsRetryWith() bool {

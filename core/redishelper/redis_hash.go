@@ -15,7 +15,7 @@ func HSet(ctx context.Context, rdb *redis.Client, expires time.Duration, k strin
 	_, err := rdb.Pipelined(ctx, func(pipe redis.Pipeliner) error {
 		err1 := pipe.HSet(ctx, k, values...).Err()
 		err2 := pipe.Expire(ctx, k, expires).Err()
-		return ae.CatchError(err1, err2)
+		return ae.FirstError(err1, err2)
 	})
 
 	return ae.NewRedisError(err)
@@ -36,7 +36,7 @@ func HMSet(ctx context.Context, rdb *redis.Client, expires time.Duration, k stri
 	_, err := rdb.Pipelined(ctx, func(pipe redis.Pipeliner) error {
 		err1 := pipe.HMSet(ctx, k, values...).Err()
 		err2 := pipe.Expire(ctx, k, expires).Err()
-		return ae.CatchError(err1, err2)
+		return ae.FirstError(err1, err2)
 	})
 
 	return ae.NewRedisError(err)

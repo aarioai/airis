@@ -9,11 +9,20 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+const (
+	sqlBadConnMsg   = "sql bad conn: "
+	sqlSkipMsg      = "sql skip: "
+	sqlRemoveArgMsg = "sql remove argument: "
+	sqlConnDoneMsg  = "sql conn done: "
+	sqlTxDoneMsg    = "sql tx done: "
+	sqlErrorMsg     = "sql error: "
+)
+
 var (
 	duplicateKeyPattern = regexp.MustCompile(`Duplicate\s+entry\s+'([^']*)'\s+for\s+key\s+'([^']*)'`)
 )
 
-func Catch(es ...*Error) *Error {
+func First(es ...*Error) *Error {
 	for _, e := range es {
 		if e != nil {
 			return e
@@ -21,8 +30,10 @@ func Catch(es ...*Error) *Error {
 	}
 	return nil
 }
-func CatchError(es ...error) error {
-	for _, e := range es {
+
+// FirstError 支持所有继承 error 的子类
+func FirstError(errs ...error) error {
+	for _, e := range errs {
 		if e != nil {
 			return e
 		}
@@ -31,54 +42,45 @@ func CatchError(es ...error) error {
 }
 
 // NewSQLError 处理 SQL 错误
-// @TODO
-func NewSQLError(err error, details ...string) *Error {
+func NewSQLError(err error, details ...any) *Error {
 	if err == nil {
 		return nil
 	}
 	msg, pos := CallerMsg(err.Error(), 1)
 
-	switch {
-	case errors.Is(err, driver.ErrBadConn):
-		return New(InternalServerError, pos+" sql bad conn: "+msg).withDetail(details...)
-	case errors.Is(err, driver.ErrSkip):
-		// ErrSkip may be returned by some optional interfaces' methods to
-		// indicate at runtime that the fast path is unavailable and the sql
-		// package should continue as if the optional interface was not
-		// implemented. ErrSkip is only supported where explicitly
-		// documented.
-		return New(InternalServerError, pos+" sql skip: "+msg).withDetail(details...)
-	case errors.Is(err, driver.ErrRemoveArgument):
-		return New(InternalServerError, pos+" sql remove argument: "+msg).withDetail(details...)
-	case errors.Is(err, sql.ErrNoRows):
-		return NotFoundE.withDetail(details...) // 通过在 asql层，对数组转换为 ae.NoRows
-	case errors.Is(err, sql.ErrConnDone):
-		// ErrConnDone is returned by any operation that is performed on a connection
-		// that has already been returned to the connection pool.
-		return New(InternalServerError, pos+" sql conn done: "+msg).withDetail(details...)
-	case errors.Is(err, sql.ErrTxDone):
-		return New(InternalServerError, pos+" sql tx done: "+msg).withDetail(details...)
+	errorMapping := map[error]func() *Error{
+		driver.ErrBadConn:        func() *Error { return NewE(pos + sqlBadConnMsg + msg).WithDetail(details...) },
+		driver.ErrSkip:           func() *Error { return NewE(pos + sqlSkipMsg + msg).WithDetail(details...) },
+		driver.ErrRemoveArgument: func() *Error { return NewE(pos + sqlRemoveArgMsg + msg).WithDetail(details...) },
+		sql.ErrNoRows:            func() *Error { return NotFoundE.WithDetail(details...) },
+		sql.ErrConnDone:          func() *Error { return NewE(pos + sqlConnDoneMsg + msg).WithDetail(details...) },
+		sql.ErrTxDone:            func() *Error { return NewE(pos + sqlTxDoneMsg + msg).WithDetail(details...) },
 	}
 
-	dupMatches := duplicateKeyPattern.FindAllStringSubmatch(msg, -1)
-	if dupMatches != nil && len(dupMatches) > 0 && len(dupMatches[0]) == 3 {
-		// dupMatches[0][1]
-		return New(Conflict, "sql key conflict").withDetail(details...)
+	for errType, handler := range errorMapping {
+		if errors.Is(err, errType) {
+			return handler()
+		}
 	}
 
-	return New(InternalServerError, pos+" sql error: "+msg).withDetail(details...)
+	// 处理重复键错误
+	if matches := duplicateKeyPattern.FindStringSubmatch(msg); len(matches) == 3 {
+		return ConflictE("sql key").WithDetail(details...)
+	}
+
+	return NewE(pos + sqlErrorMsg + msg).WithDetail(details...)
 }
 
 // NewRedisError 处理 Redis 错误
 // @TODO
-func NewRedisError(err error, details ...string) *Error {
+func NewRedisError(err error, details ...any) *Error {
 	if err == nil {
 		return nil
 	}
 
 	if errors.Is(err, redis.Nil) {
-		return New(NotFound, "Key not found").withDetail(details...)
+		return New(NotFound, "redis key not found").WithDetail(details...)
 	}
 	msg, pos := CallerMsg(err.Error(), 1)
-	return New(InternalServerError, pos+" redis: "+msg).withDetail(details...)
+	return New(InternalServerError, pos+" redis: "+msg).WithDetail(details...)
 }
