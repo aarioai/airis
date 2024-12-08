@@ -13,7 +13,8 @@ func TestParseIni(t *testing.T) {
 		"default.time": time.Now().Format("2006-01-02 15:04:05"),
 	})
 
-	c.Dump()
+	//c.Dump()
+	//c.Log()
 
 	debug, err := c.Get("debug").Bool()
 	if err != nil || !debug {

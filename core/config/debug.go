@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/aarioai/airis/pkg/arrmap"
 	"github.com/aarioai/airis/pkg/utils"
 	"log"
@@ -10,12 +11,12 @@ import (
 
 func (c *Config) Log() {
 	info := fmt.Sprintf(`
-launch config:
- git version: %s
- env: %s
- timezone: %s
- mock: %v
- rsa: %s
+Launch Config:
+  git version: %s
+  env: %s
+  timezone: %s
+  mock: %v
+  rsa: %s
 `,
 		utils.GitVersion(),
 		c.Env,
@@ -24,9 +25,8 @@ launch config:
 		arrmap.JoinKeys(c.rsa, ", ", true),
 	)
 
-	infoWithColor := "\033[32m" + info + "\033[0m"
 	// 方便运行程序时直接显示
-	fmt.Println(infoWithColor)
+	afmt.Println(info, afmt.Green)
 	// 日志无法显示颜色
 	log.Println(info)
 }
@@ -36,32 +36,36 @@ func (c *Config) Dump() {
 	// 黄色 \033[33m
 	// 结束符 \033[0m
 	// 每行尽量保持小于80字符长度
-	fmt.Printf("\n\033[33m================================ Config Dump ================================\033[0m\n")
+
+	afmt.PrintBorder("Config Dump", afmt.Yellow, afmt.Bold)
 
 	for category, configs := range all {
+		fmt.Printf("\n")
 		switch category {
 		case "ini":
-			fmt.Printf("\n\u001B[33m [%s] %s \u001B[0m\n", category, c.path)
+			afmt.PrintYellow("[%s] %s", category, c.path)
 		case "rsa":
-			fmt.Printf("\n\033[33m [%s] %s \033[0m\n", category, c.getIni(CkRsaRoot))
+			afmt.PrintYellow("[%s] %s", category, c.getIni(CkRsaRoot))
 		default:
-			fmt.Printf("\n\033[33m [%s] \033[0m\n", category)
+			afmt.PrintYellow("[%s]", category)
 		}
+		fmt.Printf("\n")
 		for _, d := range configs {
 			v := d[1]
 			if len(v) > 70 {
 				v = strings.ReplaceAll(v[0:60], "\n", "\\n") + fmt.Sprintf("... (%dB)", len(v))
 			}
+			fmt.Print("  ")
 			if d[2] != "" {
-				// 红色 \033[31m
-				// 绿色 \033[32m
-				fmt.Printf("    \u001B[31m%s = %s \033[0m\033[32m %s \033[0m\n", d[0], v, d[2])
+				afmt.PrintRed("%s = %s", d[0], v)
+				afmt.PrintGreen(" %s\n", d[2])
 			} else {
-				fmt.Printf("    \033[32m%s\033[0m = %s\n", d[0], v)
+				afmt.PrintGreen(d[0])
+				fmt.Println(" = " + v)
 			}
 		}
 	}
-	fmt.Printf("\n\033[33m=============================== End of Config ===============================\033[0m\n")
+	afmt.PrintBorder("End of Config", afmt.Yellow, afmt.Bold)
 }
 
 func sortConfigKeys[T string | []byte](data map[string]T) [][3]string {
