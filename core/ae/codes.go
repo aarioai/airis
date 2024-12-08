@@ -1,9 +1,10 @@
 package ae
 
 import (
-	"fmt"
+	"github.com/aarioai/airis/pkg/afmt"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 // HTTP 扩展状态码
@@ -69,7 +70,6 @@ var (
 	ConflictE              = New(Conflict)
 	GoneE                  = New(Gone)
 	RequestEntityTooLargeE = New(RequestEntityTooLarge)
-	UnsupportedMediaE      = New(UnsupportedMedia)
 	LockedE                = New(Locked)
 	TooEarlyE              = New(TooEarly)
 	IllegalE               = New(Illegal)
@@ -87,13 +87,22 @@ func RetryWithE(redirect string) *Error {
 func BadParamE(param string) *Error {
 	return New(BadRequest, "bad param `"+param+"`")
 }
+func PreconditionFailedE(msg ...any) *Error {
+	return New(PreconditionFailed).TryAddMsg(msg...)
+}
 
-func VariantAlsoNegotiatesE(format string, args ...any) *Error {
-	msg := format
-	if len(args) > 0 {
-		msg = fmt.Sprintf(format, args...)
+func UnsupportedMediaE(wants ...string) *Error {
+	e := New(UnsupportedMedia)
+	if len(wants) > 0 {
+		e.TryAddMsg("want " + strings.Join(wants, " or "))
 	}
-	return New(VariantAlsoNegotiates, msg)
+	return e
+}
+func FailedDependencyE(msg ...any) *Error {
+	return New(FailedDependency).TryAddMsg(msg...)
+}
+func VariantAlsoNegotiatesE(format string, args ...any) *Error {
+	return New(VariantAlsoNegotiates, afmt.Sprintf(format, args...))
 }
 
 func CodeText(code int) string {

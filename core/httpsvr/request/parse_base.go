@@ -250,7 +250,7 @@ func (r *Request) parseBodyStream() *ae.Error {
 
 	ct, params, err := r.contentMediaType()
 	if err != nil {
-		return ae.UnsupportedMediaE
+		return ae.UnsupportedMediaE()
 	}
 	switch ct {
 	case CtJSON.String(), CtOctetStream.String(), CtForm.String():
@@ -293,7 +293,7 @@ func (r *Request) parseSimpleBody() *ae.Error {
 func (r *Request) parseFormBody(b []byte) *ae.Error {
 	values, err := url.ParseQuery(string(b))
 	if err != nil {
-		return ae.New(ae.UnsupportedMedia, "invalid form data")
+		return ae.UnsupportedMediaE("form data")
 	}
 	r.setPartialBodyData(values)
 	return nil
@@ -301,7 +301,7 @@ func (r *Request) parseFormBody(b []byte) *ae.Error {
 
 func (r *Request) parseJSONBody(b []byte) *ae.Error {
 	if err := json.Unmarshal(b, &r.partialBodyData); err != nil {
-		return ae.New(ae.UnsupportedMedia, "invalid json")
+		return ae.UnsupportedMediaE("json")
 	}
 	return nil
 }
@@ -309,12 +309,12 @@ func (r *Request) parseJSONBody(b []byte) *ae.Error {
 // parseMultipartBody 解析multipart请求体
 func (r *Request) parseMultipartBody(boundary string) *ae.Error {
 	if boundary == "" {
-		return ae.New(ae.PreconditionFailed, "missing boundary")
+		return ae.PreconditionFailedE("missing boundary")
 	}
 
 	form, err := multipart.NewReader(r.r.Body, boundary).ReadForm(maxMultiSize)
 	if err != nil {
-		return ae.New(ae.UnsupportedMedia, "body should encode in multipart form")
+		return ae.UnsupportedMediaE("multipart form")
 	}
 	r.setPartialBodyData(form.Value)
 	return nil

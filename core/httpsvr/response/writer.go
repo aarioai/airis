@@ -6,6 +6,7 @@ import (
 	"github.com/aarioai/airis/core/ae"
 	"github.com/aarioai/airis/core/airis"
 	"github.com/aarioai/airis/core/httpsvr/request"
+	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/kataras/iris/v12"
 	"net/http"
 	"slices"
@@ -304,7 +305,7 @@ func (w *Writer) WriteError(err error) (int, error) {
 func (w *Writer) WriteMsg(code int, msg string, args ...any) (int, error) {
 	return w.writeDTO(Response{
 		Code: code,
-		Msg:  fmt.Sprintf(msg, args...),
+		Msg:  afmt.Sprintf(msg, args...),
 	})
 }
 

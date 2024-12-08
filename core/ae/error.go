@@ -1,9 +1,8 @@
 package ae
 
 import (
-	"fmt"
 	"github.com/aarioai/airis/core/airis"
-	"github.com/aarioai/airis/pkg/arrmap"
+	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/kataras/iris/v12"
 	"strconv"
 	"strings"
@@ -25,7 +24,7 @@ func New(code int, msgs ...any) *Error {
 		Caller: Caller(2),
 	}
 
-	if msg := arrmap.SprintfArgs(msgs); msg != "" {
+	if msg := afmt.SprintfArgs(msgs); msg != "" {
 		e.Msg = msg
 	} else {
 		e.Msg = CodeText(code)
@@ -38,7 +37,7 @@ func New(code int, msgs ...any) *Error {
 func NewMsg(format string, args ...any) *Error {
 	return &Error{
 		Code:   InternalServerError,
-		Msg:    fmt.Sprintf(format, args...),
+		Msg:    afmt.Sprintf(format, args...),
 		Caller: Caller(2),
 	}
 }
@@ -51,18 +50,21 @@ func NewError(err error, details ...string) *Error {
 	return NewMsg(err.Error()).WithCaller(2).withDetail(details...)
 }
 
+// TryAddMsg 尝试添加消息
+func (e *Error) TryAddMsg(msgs ...any) *Error {
+	msg := afmt.SprintfArgs(msgs...)
+	if msg != "" {
+		e.Msg += " - " + msg
+	}
+	return e
+}
+
 // WithCaller 添加调用者信息
 func (e *Error) WithCaller(skip int) *Error {
-	if e == nil {
-		return nil
-	}
 	e.Caller = Caller(skip + 1)
 	return e
 }
 func (e *Error) withDetail(details ...string) *Error {
-	if e == nil {
-		return nil
-	}
 	if len(details) == 1 {
 		return e.WithDetail(details[0])
 	} else if len(details) > 1 {
@@ -77,16 +79,10 @@ func (e *Error) withDetail(details ...string) *Error {
 
 // WithDetail 添加详细信息
 func (e *Error) WithDetail(format string, args ...any) *Error {
-	if e == nil {
-		return nil
-	}
-	e.Detail = fmt.Sprintf(format, args...)
+	e.Detail = afmt.Sprintf(format, args...)
 	return e
 }
 func (e *Error) WithTraceInfo(ctx iris.Context) *Error {
-	if e == nil {
-		return nil
-	}
 	e.TraceInfo = airis.TraceInfo(ctx)
 	return e
 }
@@ -94,11 +90,9 @@ func (e *Error) WithTraceInfo(ctx iris.Context) *Error {
 // Text 输出错误信息，最好不要使用 Error，避免跟 error 一致，导致人写的时候发生失误
 // $caller {$trace_info} code:$code $msg\n$detail
 func (e *Error) Text() string {
-	if e == nil {
-		return "<nil>"
-	}
+	capacity := len(e.Caller) + len(e.TraceInfo) + len(e.Msg) + len(e.Detail) + 20
 	var s strings.Builder
-	s.Grow(32)
+	s.Grow(capacity)
 	if e.Caller != "" {
 		s.WriteString(e.Caller)
 		s.WriteByte(' ')
@@ -124,13 +118,13 @@ func (e *Error) Trace(ctx iris.Context) string {
 
 // 状态检查方法
 func (e *Error) IsNotFound() bool {
-	return e != nil && (e.Code == NotFound || e.Code == NoRowsAvailable || e.Code == Gone)
+	return e.Code == NotFound || e.Code == NoRowsAvailable || e.Code == Gone
 }
 
 func (e *Error) IsServerError() bool {
-	return e != nil && e.Code >= 500 && e.Code <= 599
+	return  e.Code >= 500 && e.Code <= 599
 }
 
 func (e *Error) IsRetryWith() bool {
-	return e != nil && e.Code == RetryWith && e.Msg != ""
+	return e.Code == RetryWith && e.Msg != ""
 }

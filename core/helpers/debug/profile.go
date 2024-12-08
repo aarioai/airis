@@ -3,7 +3,7 @@ package debug
 import (
 	"fmt"
 	"github.com/aarioai/airis/core/atype"
-	"github.com/aarioai/airis/pkg/arrmap"
+	"github.com/aarioai/airis/pkg/afmt"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -68,7 +68,7 @@ func NewProfile(labels ...string) *Profile {
 	}
 
 	return &Profile{
-		label:     arrmap.First(labels),
+		label:     afmt.First(labels),
 		startTime: now,
 		bufferPool: &sync.Pool{
 			New: func() interface{} {
@@ -131,7 +131,7 @@ func (p *Profile) Mark(marks ...any) int32 {
 		p.bufferPool.Put(buf)
 	}()
 
-	mark := arrmap.SprintfArgs(marks...)
+	mark := afmt.SprintfArgs(marks...)
 	estimatedSize := maxProfileLabelWidth + len(mark) + 10 + buf.Len() // 10 是 \n 等其他字符估计值；buf.Len 是保留以后扩展允许临时插入
 	buf.Grow(estimatedSize)
 

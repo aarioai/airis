@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/aarioai/airis/pkg/afmt"
 	"os"
 	"path"
 	"regexp"
@@ -62,10 +63,7 @@ func readJsonFile(file string) ([]byte, error) {
 
 // writeFile 写入文件内容
 func writeFile(f *os.File, format string, args ...any) {
-	if len(args) > 0 {
-		format = fmt.Sprintf(format, args...)
-	}
-	_, err := f.WriteString(format)
+	_, err := f.WriteString(afmt.Sprintf(format, args...))
 	if err != nil {
 		panic(fmt.Sprintf("write file error: %v", err))
 	}

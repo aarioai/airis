@@ -3,7 +3,7 @@ package debug
 import (
 	"bufio"
 	"fmt"
-	"github.com/aarioai/airis/pkg/arrmap"
+	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/aarioai/airis/pkg/ios"
 	"github.com/aarioai/airis/pkg/utils"
 	"log"
@@ -61,7 +61,7 @@ func Console(args ...any) {
 		}
 	}
 
-	msg := arrmap.SprintfArgs(args...)
+	msg := afmt.SprintfArgs(args...)
 	if msg == "" {
 		return
 	}
@@ -110,7 +110,7 @@ func NewLogWriter(dir string, perm os.FileMode, bufSize int, symlinks ...string)
 		return nil, err
 	}
 	// 这里会同时判断 symlinks[0] 是否为空字符串，兼容性更强
-	symlink := arrmap.First(symlinks)
+	symlink := afmt.First(symlinks)
 	if symlink == "" {
 		symlink = path.Join(dir, "app.log")
 	} else {
