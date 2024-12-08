@@ -2,6 +2,7 @@ package request
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/aarioai/airis/core/ae"
 	"github.com/aarioai/airis/core/atype"
 	"golang.org/x/text/cases"
@@ -35,77 +36,63 @@ func newRawValue(name string, value any) *RawValue {
 		name:  name,
 	}
 }
-
-// onlyRequired 参数是否只包含 required
-// 1. 不传参数等同于传了 true，即 required = true
-// 2. 只传了一个参数，且该参数为bool类型，则该参数值为required值
-func onlyRequired(patterns []any) (only bool, required bool) {
-	switch len(patterns) {
-	case 0:
-		return true, true
-	case 1:
-		if r, ok := patterns[0].(bool); ok {
-			return true, r
-		}
-	}
-	return false, false
-}
-
-// Filter 验证并过滤值
-// @param pattern  e.g. `[[:word:]]+` `\w+`
-// Filter(pattern string, required bool)
-// Filter(required bool)
-// Filter(pattern string)
-// Filter(default atype.Atype)
-func (v *RawValue) Filter(patterns ...any) *ae.Error {
+func findDefaultValue(patterns []any) any {
 	// 处理默认值
 	for _, pat := range patterns {
 		switch defaultVal := pat.(type) {
 		case *atype.Atype:
-			if v.String() == "" {
-				v.Reload(defaultVal.Raw())
-				break
-			}
+			return defaultVal.Raw()
 		case atype.Atype:
-			if v.String() == "" {
-				v.Reload(defaultVal.Raw())
-				break
-			}
+			return defaultVal.Raw()
 		}
 	}
-
-	var (
-		required = true // 默认必需
-		pattern  string
-		re       *regexp.Regexp
-	)
-
+	return nil
+}
+func parseValidationRules(patterns []any) (bool, *regexp.Regexp, error) {
+	required := true // 默认为true
+	var re *regexp.Regexp
 	// 解析验证规则
 	for _, pat := range patterns {
 		switch p := pat.(type) {
 		case string:
-			pattern = p
+			if p != "" && re == nil {
+				var err error
+				if re, err = regexp.Compile(p); err != nil {
+					return false, nil, fmt.Errorf("invalid request pattern `%s`", p)
+				}
+			}
 		case bool:
 			required = p
 		case *regexp.Regexp:
 			re = p
 		}
 	}
+	return required, re, nil
+}
 
-	if v.String() == "" {
-		if required {
-			return ae.BadParam(v.name)
+// Validate 验证并过滤值
+// @param pattern  e.g. `[[:word:]]+` `\w+`
+// Filter(pattern string, required bool)
+// Filter(required bool)
+// Filter(pattern string)
+// Filter(default atype.Atype)
+func (v *RawValue) Validate(patterns ...any) *ae.Error {
+	if v.IsEmpty() {
+		if defaultVal := findDefaultValue(patterns); defaultVal != nil {
+			v.Reload(defaultVal)
 		}
-		return nil
 	}
-	if pattern != "" && re == nil {
-		var err error
-		if re, err = regexp.Compile(pattern); err != nil {
-			return ae.NewMsg("invalid request pattern `%s`", pattern)
-		}
+	required, re, err := parseValidationRules(patterns)
+	if err != nil {
+		return ae.VariantAlsoNegotiatesE(err.Error())
 	}
+
+	if required && v.IsEmpty() {
+		return ae.BadParamE(v.name)
+	}
+
 	if re != nil && !re.MatchString(v.String()) {
-		return ae.BadParam(v.name)
+		return ae.BadParamE(v.name)
 	}
 	return nil
 }
@@ -163,19 +150,16 @@ func (r *Request) findAny(programData map[string]any, userData userDataInterface
 	if userData != nil {
 		return userData.Get(name)
 	}
-	return ""
+	return nil
 }
 func (r *Request) findStringFast(programData map[string]any, userData userDataInterface, name string) string {
 	v := r.findAny(programData, userData, name)
-	if s, ok := v.(string); ok {
-		return s
-	}
 	return atype.String(v)
 }
 func (r *Request) find(programData map[string]any, userData userDataInterface, name string, patterns ...any) (*RawValue, *ae.Error) {
 	v := r.findAny(programData, userData, name)
 	raw := newRawValue(name, v)
-	return raw, raw.Filter(patterns...)
+	return raw, raw.Validate(patterns...)
 }
 
 func (r *Request) findString(programData map[string]any, userData userDataInterface, name string, patterns ...any) (string, *ae.Error) {
@@ -183,11 +167,11 @@ func (r *Request) findString(programData map[string]any, userData userDataInterf
 	only, requiredWhenOnly := onlyRequired(patterns)
 	if only {
 		if requiredWhenOnly && v == "" {
-			return "", ae.BadParam(name)
+			return "", ae.BadParamE(name)
 		}
 		return v, nil
 	}
-	return v, newRawValue(name, v).Filter(patterns)
+	return v, newRawValue(name, v).Validate(patterns)
 }
 func (r *Request) queryString(name string, patterns ...any) (string, *ae.Error) {
 	var userData url.Values
@@ -266,7 +250,7 @@ func (r *Request) parseBodyStream() *ae.Error {
 
 	ct, params, err := r.contentMediaType()
 	if err != nil {
-		return ae.New(ae.CodeUnsupportedMedia, "invalid content media type")
+		return ae.UnsupportedMediaE
 	}
 	switch ct {
 	case CtJSON.String(), CtOctetStream.String(), CtForm.String():
@@ -279,8 +263,10 @@ func (r *Request) parseBodyStream() *ae.Error {
 
 // parseSimpleBody 解析简单请求体
 func (r *Request) parseSimpleBody() *ae.Error {
-	var reader io.Reader = r.r.Body
 	maxSize := maxInt64
+
+	var reader io.Reader = r.r.Body
+
 	if _, ok := reader.(*maxBytesReader); !ok {
 		maxSize = maxFormSize
 		reader = io.LimitReader(r.r.Body, maxSize+1)
@@ -290,36 +276,45 @@ func (r *Request) parseSimpleBody() *ae.Error {
 		return ae.NewError(err)
 	}
 	if int64(len(b)) > maxSize {
-		return ae.RequestEntityTooLarge
+		return ae.RequestEntityTooLargeE
 	}
 	switch r.ContentType() {
 	case CtForm.String():
-		values, err := url.ParseQuery(string(b))
-		if err != nil {
-			return ae.New(ae.CodeUnsupportedMedia, "invalid form data")
-		}
-		r.setPartialBodyData(values)
+		return r.parseFormBody(b)
 	default:
-		if err := json.Unmarshal(b, &r.partialBodyData); err != nil {
-			return ae.New(ae.CodeUnsupportedMedia, "invalid json")
-		}
+		return r.parseJSONBody(b)
 	}
 	// @see http.ParseMultipartForm
 	// .MultipartForm "multipart/form-data" ||  "multipart/mixed"
 	// .PostFormValue  "application/x-www-form-urlencoded" url.ParseQuery(body) + .MultipartForm
 	// .FormValue() 调用 .Form  =  url.ParseQuery(r.URL.RawQuery) + .PostFormValue
+}
+
+func (r *Request) parseFormBody(b []byte) *ae.Error {
+	values, err := url.ParseQuery(string(b))
+	if err != nil {
+		return ae.New(ae.UnsupportedMedia, "invalid form data")
+	}
+	r.setPartialBodyData(values)
+	return nil
+}
+
+func (r *Request) parseJSONBody(b []byte) *ae.Error {
+	if err := json.Unmarshal(b, &r.partialBodyData); err != nil {
+		return ae.New(ae.UnsupportedMedia, "invalid json")
+	}
 	return nil
 }
 
 // parseMultipartBody 解析multipart请求体
 func (r *Request) parseMultipartBody(boundary string) *ae.Error {
 	if boundary == "" {
-		return ae.New(ae.CodePreconditionFailed, "missing boundary")
+		return ae.New(ae.PreconditionFailed, "missing boundary")
 	}
 
 	form, err := multipart.NewReader(r.r.Body, boundary).ReadForm(maxMultiSize)
 	if err != nil {
-		return ae.New(ae.CodeUnsupportedMedia, "body should encode in multipart form")
+		return ae.New(ae.UnsupportedMedia, "body should encode in multipart form")
 	}
 	r.setPartialBodyData(form.Value)
 	return nil
@@ -338,7 +333,7 @@ func (r *Request) Body(name string, patterns ...any) (*RawValue, *ae.Error) {
 			raw.Reload(v)
 		}
 	}
-	return raw, raw.Filter(patterns...)
+	return raw, raw.Validate(patterns...)
 }
 func (r *Request) Cookie(name string) (*http.Cookie, error) {
 	return r.r.Cookie(name)
@@ -486,16 +481,16 @@ func (r *Request) QueryWild(name string, patterns ...any) (*RawValue, *ae.Error)
 	// 3. Cookie
 	if cookie, err := r.Cookie(name); err == nil {
 		v = newRawValue(cookie.Name, cookie.Value)
-		return v, v.Filter(patterns...)
+		return v, v.Validate(patterns...)
 	}
 	if key != name {
 		if cookie, err := r.Cookie(key); err == nil {
 			v = newRawValue(cookie.Name, cookie.Value)
-			return v, v.Filter(patterns...)
+			return v, v.Validate(patterns...)
 		}
 	}
 	// 返回空值
-	return v, v.Filter(patterns...)
+	return v, v.Validate(patterns...)
 }
 
 func (r *Request) QueryWildString(name string, patterns ...any) (string, *ae.Error) {
@@ -521,15 +516,15 @@ func (r *Request) QueryWildString(name string, patterns ...any) (string, *ae.Err
 
 	// 3. Cookie
 	if cookie, err := r.Cookie(name); err == nil {
-		return cookie.Value, newRawValue(cookie.Name, cookie.Value).Filter(patterns...)
+		return cookie.Value, newRawValue(cookie.Name, cookie.Value).Validate(patterns...)
 	}
 	if key != name {
 		if cookie, err := r.Cookie(key); err == nil {
-			return cookie.Value, newRawValue(cookie.Name, cookie.Value).Filter(patterns...)
+			return cookie.Value, newRawValue(cookie.Name, cookie.Value).Validate(patterns...)
 		}
 	}
 	// 返回空值
-	return v, newRawValue(name, v).Filter(patterns...)
+	return v, newRawValue(name, v).Validate(patterns...)
 }
 
 // QueryWildFast 更高效地快速查询字符串
@@ -569,4 +564,31 @@ func (r *Request) QueryWildValue(name string) *RawValue {
 		return newRawValue(name, "")
 	}
 	return v
+}
+
+// isRequired
+// 1. 不传参数等同于传了 true，即 required = true
+// 2. 其他的以第一个为准
+func isRequired(requireds []bool) bool {
+	// 1. 不传参数等同于传了 true，即 required = true
+	if len(requireds) == 0 {
+		return true
+	}
+	return requireds[0]
+}
+
+// onlyRequired 参数是否只包含 required
+// 1. 不传参数等同于传了 true，即 required = true
+// 2. 只传了一个参数，且该参数为bool类型，则该参数值为required值
+func onlyRequired(patterns []any) (only bool, required bool) {
+	// 1. 不传参数等同于传了 true，即 required = true
+	if len(patterns) == 0 {
+		return true, true
+	}
+	if len(patterns) == 1 {
+		if required, ok := patterns[0].(bool); ok {
+			return true, required
+		}
+	}
+	return false, false
 }

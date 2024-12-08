@@ -25,7 +25,7 @@ func (r *Request) BodyEnum(p string, required bool, validators []string) (string
 			return x, nil
 		}
 	}
-	return x, ae.BadParam(p)
+	return x, ae.BadParamE(p)
 }
 func (r *Request) BodyEnum8(p string, required bool, validators []uint8) (uint8, *ae.Error) {
 	x, e := r.BodyUint8(p, required)
@@ -40,7 +40,7 @@ func (r *Request) BodyEnum8(p string, required bool, validators []uint8) (uint8,
 			return x, nil
 		}
 	}
-	return x, ae.BadParam(p)
+	return x, ae.BadParamE(p)
 }
 func (r *Request) BodyEnum8i(p string, required bool, validators []int8) (int8, *ae.Error) {
 	x, e := r.BodyInt8(p, required)
@@ -55,11 +55,11 @@ func (r *Request) BodyEnum8i(p string, required bool, validators []int8) (int8, 
 			return x, nil
 		}
 	}
-	return x, ae.BadParam(p)
+	return x, ae.BadParamE(p)
 }
 
 func (r *Request) BodyInt(p string, required ...bool) (int, *ae.Error) {
-	v, e := parseInt64(r.Body, p, len(required) == 0 || required[0], 32)
+	v, e := parseInt64(r.Body, p, isRequired(required), 32)
 	return int(v), e
 }
 
@@ -68,7 +68,7 @@ func (r *Request) BodyInts(p string, required, allowZero bool) ([]int, *ae.Error
 	return toInts(values, e)
 }
 func (r *Request) BodyInt8(p string, required ...bool) (int8, *ae.Error) {
-	v, e := parseInt64(r.Body, p, len(required) == 0 || required[0], 8)
+	v, e := parseInt64(r.Body, p, isRequired(required), 8)
 	return int8(v), e
 }
 func (r *Request) BodyInt8s(p string, required, allowZero bool) ([]int8, *ae.Error) {
@@ -76,7 +76,7 @@ func (r *Request) BodyInt8s(p string, required, allowZero bool) ([]int8, *ae.Err
 	return toInt8s(values, e)
 }
 func (r *Request) BodyInt16(p string, required ...bool) (int16, *ae.Error) {
-	v, e := parseInt64(r.Body, p, len(required) == 0 || required[0], 16)
+	v, e := parseInt64(r.Body, p, isRequired(required), 16)
 	return int16(v), e
 }
 func (r *Request) BodyInt16s(p string, required, allowZero bool) ([]int16, *ae.Error) {
@@ -84,7 +84,7 @@ func (r *Request) BodyInt16s(p string, required, allowZero bool) ([]int16, *ae.E
 	return toInt16s(values, e)
 }
 func (r *Request) BodyInt32(p string, required ...bool) (int32, *ae.Error) {
-	v, e := parseInt64(r.Body, p, len(required) == 0 || required[0], 32)
+	v, e := parseInt64(r.Body, p, isRequired(required), 32)
 	return int32(v), e
 }
 func (r *Request) BodyInt32s(p string, required, allowZero bool) ([]int32, *ae.Error) {
@@ -92,17 +92,17 @@ func (r *Request) BodyInt32s(p string, required, allowZero bool) ([]int32, *ae.E
 	return toInt32s(values, e)
 }
 func (r *Request) BodyInt64(p string, required ...bool) (int64, *ae.Error) {
-	return parseInt64(r.Body, p, len(required) == 0 || required[0], 64)
+	return parseInt64(r.Body, p, isRequired(required), 64)
 }
 func (r *Request) BodyInt64s(p string, required, allowZero bool) ([]int64, *ae.Error) {
 	return r.parseInt64s(r.Body, p, required, allowZero, 64)
 }
 
 func (r *Request) BodyPath(p string, required ...bool) (string, *ae.Error) {
-	return r.BodyString(p, `^([\w-\/\.]+)$`, len(required) == 0 || required[0])
+	return r.BodyString(p, `^([\w-\/\.]+)$`, isRequired(required))
 }
 func (r *Request) BodyPaths(p string, required ...bool) ([]string, *ae.Error) {
-	xx, e := r.BodyStrings(p, len(required) == 0 || required[0], false)
+	xx, e := r.BodyStrings(p, isRequired(required), false)
 	if e != nil || len(xx) == 0 {
 		return nil, e
 	}
@@ -110,7 +110,7 @@ func (r *Request) BodyPaths(p string, required ...bool) ([]string, *ae.Error) {
 	for i, x := range xx {
 		// @TODO 平衡性能和准确性，调整到最合适的判断方法
 		if x == "" || (strings.LastIndexByte(x, '.') < 0 || strings.IndexByte(x, ' ') > -1 || strings.IndexByte(x, '?') > -1 || strings.IndexByte(x, '=') > -1) {
-			return nil, ae.BadParam(p)
+			return nil, ae.BadParamE(p)
 		}
 		paths[i] = x
 	}
@@ -135,7 +135,7 @@ func (r *Request) BodyStrings(p string, required, allowEmptyString bool) ([]stri
 	return r.parseStrings(r.Body, p, required, allowEmptyString)
 }
 func (r *Request) BodyUint(p string, required ...bool) (uint, *ae.Error) {
-	v, e := parseUint64(r.Body, p, len(required) == 0 || required[0], 32)
+	v, e := parseUint64(r.Body, p, isRequired(required), 32)
 	return uint(v), e
 }
 
@@ -144,7 +144,7 @@ func (r *Request) BodyUints(p string, required, allowZero bool) ([]uint, *ae.Err
 	return toUints(values, e)
 }
 func (r *Request) BodyUint8(p string, required ...bool) (uint8, *ae.Error) {
-	v, e := parseUint64(r.Body, p, len(required) == 0 || required[0], 8)
+	v, e := parseUint64(r.Body, p, isRequired(required), 8)
 	return uint8(v), e
 }
 func (r *Request) BodyUint8s(p string, required, allowZero bool) ([]uint8, *ae.Error) {
@@ -152,7 +152,7 @@ func (r *Request) BodyUint8s(p string, required, allowZero bool) ([]uint8, *ae.E
 	return toUint8s(values, e)
 }
 func (r *Request) BodyUint16(p string, required ...bool) (uint16, *ae.Error) {
-	v, e := parseUint64(r.Body, p, len(required) == 0 || required[0], 16)
+	v, e := parseUint64(r.Body, p, isRequired(required), 16)
 	return uint16(v), e
 }
 func (r *Request) BodyUint16s(p string, required, allowZero bool) ([]uint16, *ae.Error) {
@@ -160,7 +160,7 @@ func (r *Request) BodyUint16s(p string, required, allowZero bool) ([]uint16, *ae
 	return toUint16s(values, e)
 }
 func (r *Request) BodyUint32(p string, required ...bool) (uint32, *ae.Error) {
-	v, e := parseUint64(r.Body, p, len(required) == 0 || required[0], 32)
+	v, e := parseUint64(r.Body, p, isRequired(required), 32)
 	return uint32(v), e
 }
 
@@ -170,7 +170,7 @@ func (r *Request) BodyUint32s(p string, required, allowZero bool) ([]uint32, *ae
 }
 
 func (r *Request) BodyUint64(p string, required ...bool) (uint64, *ae.Error) {
-	return parseUint64(r.Body, p, len(required) == 0 || required[0], 64)
+	return parseUint64(r.Body, p, isRequired(required), 64)
 }
 
 func (r *Request) BodyUint64s(p string, required, allowZero bool) ([]uint64, *ae.Error) {
@@ -186,7 +186,7 @@ func (r *Request) BodyValid(p string, required bool, validator func(string) bool
 		return "", nil
 	}
 	if ok := validator(x); !ok {
-		return "", ae.BadParam(p)
+		return "", ae.BadParamE(p)
 	}
 	return x, nil
 }
@@ -199,7 +199,7 @@ func (r *Request) BodyValid8(p string, required bool, validator func(uint8) bool
 		return 0, nil
 	}
 	if ok := validator(x); !ok {
-		return 0, ae.BadParam(p)
+		return 0, ae.BadParamE(p)
 	}
 	return x, nil
 }

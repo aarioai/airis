@@ -142,12 +142,12 @@ func (d *DB) ScanX(ctx context.Context, query string, id string, dest ...any) *a
 
 // do not forget to close *sql.Rows
 // 不要忘了关闭 rows
-// 只有 QueryRow 找不到才会返回 ae.NotFound；Query 即使不存在，也是 nil
+// 只有 QueryRow 找不到才会返回 ae.NotFoundE；Query 即使不存在，也是 nil
 func (d *DB) Query(ctx context.Context, query string, args ...any) (*sql.Rows, *ae.Error) {
 	rows, err := d.DB.QueryContext(ctx, query, args...)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, ae.NoRows
+			return nil, ae.NoRowsE
 		}
 		return nil, ae.NewSQLError(err).WithDetail(query, args...)
 	}

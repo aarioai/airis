@@ -13,18 +13,18 @@ func (r *Request) BodyAnyMap(p string, requireds ...bool) (map[string]any, *ae.E
 	}
 	if x.IsNil() || x.String() == "" {
 		if required {
-			return nil, ae.BadParam(p)
+			return nil, ae.BadParamE(p)
 		}
 		return nil, nil
 	}
 	raw := x.Raw()
 	b, ok := raw.(map[string]any)
 	if !ok {
-		return nil, ae.BadParam(p)
+		return nil, ae.BadParamE(p)
 	}
 	if len(b) == 0 {
 		if required {
-			return nil, ae.BadParam(p)
+			return nil, ae.BadParamE(p)
 		}
 		return nil, nil
 	}
@@ -37,11 +37,11 @@ func (r *Request) BodyFloat64Map(p string, requireds ...bool) (map[string]float6
 	}
 	maps, err := atype.ToFloat64Map(b)
 	if err != nil {
-		return nil, ae.BadParam(p)
+		return nil, ae.BadParamE(p)
 	}
 	required := len(requireds) == 0 || requireds[0]
 	if required && maps == nil {
-		return nil, ae.BadParam(p)
+		return nil, ae.BadParamE(p)
 	}
 	return maps, nil
 }
@@ -53,18 +53,18 @@ func (r *Request) BodyAnySlice(p string, requireds ...bool) ([]any, *ae.Error) {
 	}
 	if x.IsNil() || x.String() == "" {
 		if required {
-			return nil, ae.BadParam(p)
+			return nil, ae.BadParamE(p)
 		}
 		return nil, nil
 	}
 	raw := x.Raw()
 	b, ok := raw.([]any)
 	if !ok {
-		return nil, ae.BadParam(p)
+		return nil, ae.BadParamE(p)
 	}
 	if len(b) == 0 {
 		if required {
-			return nil, ae.BadParam(p)
+			return nil, ae.BadParamE(p)
 		}
 		return nil, nil
 	}
@@ -79,7 +79,7 @@ func (r *Request) BodyComplexStringMap(p string, requireds ...bool) (map[string]
 	maps := atype.ToComplexStringMap(b)
 	required := len(requireds) == 0 || requireds[0]
 	if required && maps == nil {
-		return nil, ae.BadParam(p)
+		return nil, ae.BadParamE(p)
 	}
 	return maps, nil
 }
@@ -91,7 +91,7 @@ func (r *Request) BodyComplexStringsMap(p string, requireds ...bool) (map[string
 	maps := atype.ToComplexStringsMap(b)
 	required := len(requireds) == 0 || requireds[0]
 	if required && maps == nil {
-		return nil, ae.BadParam(p)
+		return nil, ae.BadParamE(p)
 	}
 	return maps, nil
 }
@@ -103,7 +103,7 @@ func (r *Request) BodyConvStringMaps(p string, requireds ...bool) ([]map[string]
 	maps := atype.ToStringMaps(b)
 	required := len(requireds) == 0 || requireds[0]
 	if required && maps == nil {
-		return nil, ae.BadParam(p)
+		return nil, ae.BadParamE(p)
 	}
 	return maps, nil
 }
@@ -116,7 +116,7 @@ func (r *Request) BodyComplexMaps(p string, requireds ...bool) ([]map[string]any
 	maps := atype.ToComplexMaps(b)
 	required := len(requireds) == 0 || requireds[0]
 	if required && maps == nil {
-		return nil, ae.BadParam(p)
+		return nil, ae.BadParamE(p)
 	}
 	return maps, nil
 }
@@ -128,7 +128,7 @@ func (r *Request) BodyStringMap(p string, requireds ...bool) (map[string]string,
 	maps := atype.ToStringMap(b)
 	required := len(requireds) == 0 || requireds[0]
 	if required && maps == nil {
-		return nil, ae.BadParam(p)
+		return nil, ae.BadParamE(p)
 	}
 	return maps, nil
 }
@@ -140,7 +140,7 @@ func (r *Request) BodyStringsMap(p string, requireds ...bool) (map[string][]stri
 	maps := atype.ToStringsMap(b)
 	required := len(requireds) == 0 || requireds[0]
 	if required && maps == nil {
-		return nil, ae.BadParam(p)
+		return nil, ae.BadParamE(p)
 	}
 	return maps, nil
 }

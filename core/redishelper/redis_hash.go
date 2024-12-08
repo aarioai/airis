@@ -49,11 +49,11 @@ func HScan(ctx context.Context, rdb *redis.Client, dest any, k string, fields ..
 		return ae.NewRedisError(err)
 	}
 	if len(v) != len(fields) {
-		return ae.NotFound
+		return ae.NotFoundE
 	}
 	for _, x := range v {
 		if atype.IsNil(x) {
-			return ae.NotFound
+			return ae.NotFoundE
 		}
 	}
 	e := ae.NewRedisError(c.Scan(dest))
@@ -67,7 +67,7 @@ func HGetAll(ctx context.Context, rdb *redis.Client, k string, dest any) *ae.Err
 		return ae.NewRedisError(err)
 	}
 	if len(result) == 0 {
-		return ae.NotFound
+		return ae.NotFoundE
 	}
 	e := ae.NewRedisError(c.Scan(dest))
 	return e
@@ -81,7 +81,7 @@ func HGetAllInt(ctx context.Context, rdb *redis.Client, k string, restrict bool)
 	}
 	n := len(result)
 	if n == 0 {
-		return nil, ae.NotFound
+		return nil, ae.NotFoundE
 	}
 	value := make(map[string]int, n)
 	var x int64
@@ -97,7 +97,7 @@ func HGetAllInt(ctx context.Context, rdb *redis.Client, k string, restrict bool)
 	return value, nil
 }
 
-// 只要存在一个，就不报错；全是nil，返回 ae.NotFound
+// 只要存在一个，就不报错；全是nil，返回 ae.NotFoundE
 func TryHMGet(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]any, bool, *ae.Error) {
 	v, err := rdb.HMGet(ctx, k, fields...).Result()
 	if err != nil {
@@ -105,10 +105,10 @@ func TryHMGet(ctx context.Context, rdb *redis.Client, k string, fields ...string
 	}
 	n := len(v)
 	if n != len(fields) {
-		return nil, false, ae.NotFound
+		return nil, false, ae.NotFoundE
 	}
 	ok := true
-	e := ae.NotFound
+	e := ae.NotFoundE
 	for _, x := range v {
 		if !atype.IsNil(x) {
 			e = nil // 只要存在一个不是nil，都正确
@@ -125,7 +125,7 @@ func TryHMGet(ctx context.Context, rdb *redis.Client, k string, fields ...string
 	return v, ok, e
 }
 
-// 只要存在一个，就不报错；全是nil，返回 ae.NotFound
+// 只要存在一个，就不报错；全是nil，返回 ae.NotFoundE
 func TryHMGetString(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]string, bool, *ae.Error) {
 	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
 	if e != nil {
@@ -314,11 +314,11 @@ func MustHMGet(ctx context.Context, rdb *redis.Client, k string, fields ...strin
 		return nil, ae.NewRedisError(err)
 	}
 	if len(v) != len(fields) {
-		return nil, ae.NotFound
+		return nil, ae.NotFoundE
 	}
 	for _, x := range v {
 		if atype.IsNil(x) {
-			return v, ae.NotFound
+			return v, ae.NotFoundE
 		}
 	}
 	return v, nil

@@ -3,8 +3,8 @@ package ae
 import (
 	"fmt"
 	"github.com/aarioai/airis/core/airis"
+	"github.com/aarioai/airis/pkg/arrmap"
 	"github.com/kataras/iris/v12"
-	"net/http"
 	"strconv"
 	"strings"
 )
@@ -19,27 +19,25 @@ type Error struct {
 }
 
 // New 使用错误码和消息创建 Error
-func New(code int, msg string) *Error {
-	return &Error{
+func New(code int, msgs ...any) *Error {
+	e := &Error{
 		Code:   code,
-		Msg:    msg,
 		Caller: Caller(2),
 	}
-}
 
-// NewCode 使用错误码创建 Error
-func NewCode(code int) *Error {
-	return &Error{
-		Code:   code,
-		Msg:    http.StatusText(code),
-		Caller: Caller(2),
+	if msg := arrmap.SprintfArgs(msgs); msg != "" {
+		e.Msg = msg
+	} else {
+		e.Msg = CodeText(code)
 	}
+
+	return e
 }
 
 // NewMsg 使用消息创建 Error
 func NewMsg(format string, args ...any) *Error {
 	return &Error{
-		Code:   500,
+		Code:   InternalServerError,
 		Msg:    fmt.Sprintf(format, args...),
 		Caller: Caller(2),
 	}
@@ -100,6 +98,7 @@ func (e *Error) Text() string {
 		return "<nil>"
 	}
 	var s strings.Builder
+	s.Grow(32)
 	if e.Caller != "" {
 		s.WriteString(e.Caller)
 		s.WriteByte(' ')
@@ -125,7 +124,7 @@ func (e *Error) Trace(ctx iris.Context) string {
 
 // 状态检查方法
 func (e *Error) IsNotFound() bool {
-	return e != nil && (e.Code == CodeNotFound || e.Code == CodeNoRows || e.Code == CodeGone)
+	return e != nil && (e.Code == NotFound || e.Code == NoRowsAvailable || e.Code == Gone)
 }
 
 func (e *Error) IsServerError() bool {
@@ -133,5 +132,5 @@ func (e *Error) IsServerError() bool {
 }
 
 func (e *Error) IsRetryWith() bool {
-	return e != nil && e.Code == CodeRetryWith && e.Msg != ""
+	return e != nil && e.Code == RetryWith && e.Msg != ""
 }

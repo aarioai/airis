@@ -18,17 +18,17 @@ func (r *Request) QueryCountry(p string, xargs ...bool) (aenum.Country, *ae.Erro
 	return parseCountry(r.QueryUint16, p, xargs...)
 }
 func (r *Request) QueryDate(p string, loc *time.Location, required ...bool) (atype.Date, *ae.Error) {
-	x, e := r.Query(p, `^`+aenum.DateRegExp+`$`, len(required) == 0 || required[0])
+	x, e := r.Query(p, `^`+aenum.DateRegExp+`$`, isRequired(required))
 	if e != nil {
-		return "", ae.BadParam(p)
+		return "", ae.BadParamE(p)
 	}
 	return atype.NewDate(x.String(), loc), nil
 }
 
 func (r *Request) QueryDatetime(p string, loc *time.Location, required ...bool) (atype.Datetime, *ae.Error) {
-	x, e := r.Query(p, `^`+aenum.DatetimeRegExp+`$`, len(required) == 0 || required[0])
+	x, e := r.Query(p, `^`+aenum.DatetimeRegExp+`$`, isRequired(required))
 	if e != nil {
-		return "", ae.BadParam(p)
+		return "", ae.BadParamE(p)
 	}
 	return atype.NewDatetime(x.String(), loc), nil
 }
@@ -45,12 +45,12 @@ func (r *Request) QueryDist(p string, required ...bool) (atype.Dist, *ae.Error) 
 	return distri.Dist(), nil
 }
 func (r *Request) QueryDistri(p string, required ...bool) (atype.Distri, *ae.Error) {
-	x, e := r.QueryUint24(p, len(required) == 0 || required[0])
+	x, e := r.QueryUint24(p, isRequired(required))
 	return atype.NewDistri(x), e
 }
 
 func (r *Request) QueryInt24(p string, required ...bool) (atype.Int24, *ae.Error) {
-	v, e := parseInt64(r.Query, p, len(required) == 0 || required[0], 24)
+	v, e := parseInt64(r.Query, p, isRequired(required), 24)
 	return atype.Int24(v), e
 }
 func (r *Request) QueryInt24s(p string, required, allowZero bool) ([]atype.Int24, *ae.Error) {
@@ -90,7 +90,7 @@ func (r *Request) QueryStatus(p string, xargs ...bool) (aenum.Status, *ae.Error)
 	return parseStatus(r.QueryInt8, p, xargs...)
 }
 func (r *Request) QueryUint24(p string, required ...bool) (atype.Uint24, *ae.Error) {
-	v, e := parseInt64(r.Query, p, len(required) == 0 || required[0], 24)
+	v, e := parseInt64(r.Query, p, isRequired(required), 24)
 	return atype.Uint24(v), e
 }
 func (r *Request) QueryUint24s(p string, required, allowZero bool) ([]atype.Uint24, *ae.Error) {

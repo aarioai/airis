@@ -19,7 +19,7 @@ func parseStatus(method func(string, ...bool) (int8, *ae.Error), p string, xargs
 
 	status, ok := aenum.NewStatus(sts)
 	if !ok {
-		return 0, ae.BadParam(p)
+		return 0, ae.BadParamE(p)
 	}
 	return status, nil
 }
@@ -32,7 +32,7 @@ func parseCountry(method func(string, ...bool) (uint16, *ae.Error), p string, xa
 
 	status, ok := aenum.NewCountry(sts)
 	if !ok {
-		return 0, ae.BadParam(p)
+		return 0, ae.BadParamE(p)
 	}
 	return status, nil
 }
@@ -48,7 +48,7 @@ func parseDecimal(method func(string, ...any) (*RawValue, *ae.Error), p string, 
 		rangeMax = ranges[1]
 	}
 	if n < rangeMin || n > rangeMax {
-		return 0, ae.BadParam(p)
+		return 0, ae.BadParamE(p)
 	}
 	return n, e
 }
@@ -64,7 +64,7 @@ func parseMoney(method func(string, ...any) (*RawValue, *ae.Error), p string, ra
 		rangeMax = ranges[1]
 	}
 	if n < rangeMin || n > rangeMax {
-		return 0, ae.BadParam(p)
+		return 0, ae.BadParamE(p)
 	}
 	return n, e
 }
@@ -75,7 +75,7 @@ func parseInt64(method func(string, ...any) (*RawValue, *ae.Error), p string, re
 	}
 	v, err := strconv.ParseInt(value.String(), 10, bitSize)
 	if err != nil {
-		return 0, ae.BadParam(p)
+		return 0, ae.BadParamE(p)
 	}
 	return v, nil
 }
@@ -95,7 +95,7 @@ func parseUint64(method func(string, ...any) (*RawValue, *ae.Error), p string, r
 	}
 	v, err := strconv.ParseUint(value.String(), 10, bitSize)
 	if err != nil {
-		return 0, ae.BadParam(p)
+		return 0, ae.BadParamE(p)
 	}
 	return v, nil
 }
@@ -111,7 +111,7 @@ func (r *Request) parseInt64s(method func(string, ...any) (*RawValue, *ae.Error)
 	}
 	if reflect.TypeOf(d).Kind() != reflect.Slice {
 		if required {
-			return nil, ae.BadParam(p)
+			return nil, ae.BadParamE(p)
 		}
 		return nil, nil
 	}
@@ -123,14 +123,14 @@ func (r *Request) parseInt64s(method func(string, ...any) (*RawValue, *ae.Error)
 	for i := 0; i < s.Len(); i++ {
 		n, err = atype.Int64Base(s.Index(i).Interface(), bitSize)
 		if err != nil {
-			return nil, ae.BadParam(p)
+			return nil, ae.BadParamE(p)
 		}
 		if allowZero || n > 0 {
 			v = append(v, n)
 		}
 	}
 	if len(v) == 0 && required {
-		return nil, ae.BadParam(p)
+		return nil, ae.BadParamE(p)
 	}
 	return v, nil
 }
@@ -146,7 +146,7 @@ func (r *Request) parseUint64s(method func(string, ...any) (*RawValue, *ae.Error
 	}
 	if reflect.TypeOf(d).Kind() != reflect.Slice {
 		if required {
-			return nil, ae.BadParam(p)
+			return nil, ae.BadParamE(p)
 		}
 		return nil, nil
 	}
@@ -158,14 +158,14 @@ func (r *Request) parseUint64s(method func(string, ...any) (*RawValue, *ae.Error
 	for i := 0; i < s.Len(); i++ {
 		n, err = atype.Uint64Base(s.Index(i).Interface(), bitSize)
 		if err != nil {
-			return nil, ae.BadParam(p)
+			return nil, ae.BadParamE(p)
 		}
 		if allowZero || n > 0 {
 			v = append(v, n)
 		}
 	}
 	if len(v) == 0 && required {
-		return nil, ae.BadParam(p)
+		return nil, ae.BadParamE(p)
 	}
 	return v, nil
 }
@@ -194,7 +194,7 @@ func (r *Request) parseStrings(method func(string, ...any) (*RawValue, *ae.Error
 		}
 	}
 	if len(v) == 0 && required {
-		return nil, ae.BadParam(p)
+		return nil, ae.BadParamE(p)
 	}
 	return v, nil
 }
@@ -223,7 +223,7 @@ func sepStrings(method func(string, ...any) (*RawValue, *ae.Error), p string, se
 
 	}
 	if len(b) == 0 && required {
-		return nil, ae.BadParam(p)
+		return nil, ae.BadParamE(p)
 	}
 	return b, nil
 }
@@ -240,7 +240,7 @@ func (r *Request) sepInt64s(method func(string, ...any) (*RawValue, *ae.Error), 
 	for _, a := range arr {
 		n, err = strconv.ParseInt(a, 10, bitSize)
 		if err != nil {
-			return nil, ae.BadParam(p)
+			return nil, ae.BadParamE(p)
 		}
 		if allowZero || n > 0 {
 			v = append(v, n)
@@ -259,7 +259,7 @@ func (r *Request) separatedUint64s(method func(string, ...any) (*RawValue, *ae.E
 	for _, a := range arr {
 		n, err = strconv.ParseUint(a, 10, bitSize)
 		if err != nil {
-			return nil, ae.BadParam(p)
+			return nil, ae.BadParamE(p)
 		}
 		if allowZero || n > 0 {
 			v = append(v, n)

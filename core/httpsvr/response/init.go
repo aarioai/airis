@@ -20,7 +20,7 @@ var (
 
 // 避免循环调用，避免传递 *Writer
 func defaultErrorHandler(ictx iris.Context, request *request.Request, contentType string, d Response) (int, error, bool) {
-	if d.Code == ae.CodeNotModified {
+	if d.Code == ae.NotModified {
 		ictx.StatusCode(d.Code)
 		return 0, nil, false
 	}

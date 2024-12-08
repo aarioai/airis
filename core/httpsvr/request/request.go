@@ -36,6 +36,7 @@ func New(ictx iris.Context) *Request {
 		for _, v := range ictx.Params().Store {
 			params[v.Key] = v.ValueRaw
 		}
+		req.partialQueries = params
 	}
 	return &req
 }

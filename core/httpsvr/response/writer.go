@@ -195,7 +195,7 @@ func (w *Writer) WriteRawOctetStream(bytes []byte) (int, error) {
 func (w *Writer) WriteJSONP(v any, opts ...iris.JSONP) error {
 	data, e := w.decorateData(v)
 	if e != nil {
-		w.StatusCode(ae.CodeInternalError)
+		w.StatusCode(ae.InternalServerError)
 		return errors.New("handle json data error: " + e.Text())
 	}
 	return w.ictx.JSONP(data, opts...)
@@ -203,7 +203,7 @@ func (w *Writer) WriteJSONP(v any, opts ...iris.JSONP) error {
 
 func (w *Writer) writeDTO(d Response) (int, error) {
 	ct := w.ContentType()
-	if d.Code >= ae.CodeBadRequest {
+	if d.Code >= ae.BadRequest {
 		// 避免重复调用，不再传 *Writer，而是直接操作 ictx
 		if w.errorHandler != nil {
 			n, err, next := w.errorHandler(w.ictx, w.request, ct, d)
@@ -261,7 +261,7 @@ func (w *Writer) Write(a any) (int, error) {
 		return w.WriteE(e)
 	}
 	return w.writeDTO(Response{
-		Code: ae.CodeOK,
+		Code: ae.OK,
 		Msg:  "OK",
 		Data: data,
 	})
@@ -269,7 +269,7 @@ func (w *Writer) Write(a any) (int, error) {
 
 func (w *Writer) WriteOK() (int, error) {
 	return w.writeDTO(Response{
-		Code: ae.CodeOK,
+		Code: ae.OK,
 		Msg:  "OK",
 		Data: nil,
 	})
@@ -283,7 +283,7 @@ func (w *Writer) WriteCode(code int) (int, error) {
 
 func (w *Writer) WriteE(e *ae.Error) (int, error) {
 	if e == nil {
-		return w.WriteCode(ae.CodeOK)
+		return w.WriteCode(ae.OK)
 	}
 	return w.writeDTO(Response{
 		Code: e.Code,
@@ -293,10 +293,10 @@ func (w *Writer) WriteE(e *ae.Error) (int, error) {
 
 func (w *Writer) WriteError(err error) (int, error) {
 	if err == nil {
-		return w.WriteCode(ae.CodeOK)
+		return w.WriteCode(ae.OK)
 	}
 	return w.writeDTO(Response{
-		Code: ae.CodeInternalError,
+		Code: ae.InternalServerError,
 		Msg:  err.Error(),
 	})
 }
@@ -369,7 +369,7 @@ func (w *Writer) TryWriteUintAliasId(alias string, id uint, e *ae.Error) (int, e
 func (w *Writer) WriteJointId(args ...any) (int, error) {
 	l := len(args)
 	if l < 2 || l%2 == 1 {
-		w.StatusCode(ae.CodeInternalError)
+		w.StatusCode(ae.InternalServerError)
 		return 0, fmt.Errorf("response no enough joint id args %+q", args)
 	}
 	id := make(map[string]any, l/2)
