@@ -2,8 +2,6 @@ package config
 
 import (
 	"fmt"
-	"github.com/aarioai/airis/pkg/utils"
-	"log"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -65,24 +63,17 @@ type Config struct {
 	snapshot    atomic.Pointer[Snapshot]
 }
 
-func (c *Config) Log() {
-	info := fmt.Sprintf(`
-Launch Configuration:
-Environment: %s
-Timezone: %s
-Mock Enabled: %v
-Git Version: %s
-`,
-		c.Env,
-		c.TimezoneID,
-		c.Mock,
-		utils.GitVersion(),
-	)
-
-	// 方便运行程序时直接显示
-	fmt.Println(info)
-	// 记录进日志，方便通过消息队列通知
-	log.Println(info)
+func New(path string, otherConfigs ...map[string]string) *Config {
+	cfg := &Config{
+		path:        path,
+		data:        make(map[string]string),
+		rsa:         make(map[string][]byte),
+		otherConfig: make(map[string]string),
+	}
+	if err := cfg.Reload(otherConfigs...); err != nil {
+		panic(fmt.Sprintf("failed to load config: %v", err))
+	}
+	return cfg
 }
 
 func parseToDuration(d string) time.Duration {

@@ -9,6 +9,12 @@ import (
 
 func TestParseIni(t *testing.T) {
 	c := config.New("./parse_ini_test.ini")
+	c.AddConfigs(map[string]string{
+		"default.time": time.Now().Format("2006-01-02 15:04:05"),
+	})
+
+	c.Dump()
+
 	debug, err := c.Get("debug").Bool()
 	if err != nil || !debug {
 		t.Errorf("config parse debug fail: %s", c.Get("debug").String())

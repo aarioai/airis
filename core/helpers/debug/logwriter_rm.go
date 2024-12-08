@@ -51,16 +51,16 @@ esac
 
 # Validate date format
 if ! date -d "$BEFORE_DATE" >/dev/null 2>&1; then
-    echo "Error: Invalid date format '$BEFORE_DATE'. Please use YYYY-MM-DD format"
+    echo "[error] invalid date format '$BEFORE_DATE'. Please use YYYY-MM-DD format"
     exit 1
 fi
 
 # Show operation details
-echo "Delete $FILE_NAME_FORMAT before $BEFORE_DATE in current directory"
-echo "Continue? [y/N]"
+echo "rm $FILE_NAME_FORMAT before $BEFORE_DATE"
+echo "continue? [y/N]"
 read -r confirm
 if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
-    echo "Operation cancelled"
+    echo "operation cancelled"
     exit 0
 fi
 
@@ -91,9 +91,9 @@ for file in *."$file_extension"; do
 
     if [[ "$standard_date" < "$BEFORE_DATE" ]]; then
         if rm "$file"; then
-            echo "rm -f $file"
+            echo "rm $file"
         else
-            echo "[error] rm -f $file"
+            echo "[error] rm $file"
         fi
     fi
 done`

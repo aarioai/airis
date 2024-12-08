@@ -13,37 +13,16 @@ var (
 	cfgMtx sync.RWMutex
 )
 
-func New(path string, otherConfigs ...map[string]string) *Config {
-	cfg := &Config{
-		path: path,
-		data: make(map[string]string),
-        rsa:  make(map[string][]byte),
-        otherConfig: make(map[string]string),
-	}
-	if err := cfg.Reload(otherConfigs...); err != nil {
-		panic(fmt.Sprintf("failed to load config: %v", err))
-	}
-	return cfg
-}
-
 // convertIniToMap 将 ini.File 转换为扁平化的 map[string]string
 func convertIniToMap(iniFile *ini.File, target map[string]string) {
-	// 处理默认section
-	defaultSection := iniFile.Section("")
-	for _, key := range defaultSection.Keys() {
-		target[key.Name()] = key.Value()
-	}
-
-	// 处理其他sections
 	for _, section := range iniFile.Sections() {
-		// 跳过默认section，因为已经处理过了
-		if section.Name() == "" {
-			continue
+		var prefix string
+		sectionName := section.Name()
+		if sectionName != "" && sectionName != "DEFAULT" {
+			prefix = sectionName + "."
 		}
-
-		prefix := section.Name() + "."
 		for _, key := range section.Keys() {
-			target[prefix + key.Name()] = key.Value()
+			target[prefix+key.Name()] = key.Value()
 		}
 	}
 }
@@ -102,6 +81,7 @@ func (c *Config) getIni(key string) string {
 
 	return c.data[keyName]
 }
+
 // 不要获取太细分，否则容易导致错误不容易被排查
 func (c *Config) getOtherConfig(key string) string {
 	if c.isOnWrite() {
@@ -115,16 +95,18 @@ func (c *Config) getOtherConfig(key string) string {
 }
 
 func (c *Config) MustGetString(key string) (string, error) {
-	// 从 ini 配置获取
-	if v := c.getIni(key); v != "" {
+	// 1. 优先从其他配置（如数据库下载来的）读取。能修改掉 ini 里面的模式配置
+	if v := c.getOtherConfig(key); v != "" {
 		return v, nil
 	}
-	// 从RSA读取
+
+	// 2. 从RSA读取
 	if rsa := c.getRsa(key); len(rsa) > 0 {
 		return string(rsa), nil
 	}
-	// 从其他配置（如数据库下载来的）读取
-	if v := c.getOtherConfig(key); v != "" {
+
+	// 3. 从 ini 配置获取
+	if v := c.getIni(key); v != "" {
 		return v, nil
 	}
 	return "", fmt.Errorf("required config key not found: %s", key)

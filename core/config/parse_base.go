@@ -98,7 +98,6 @@ func (c *Config) loadRsa() (map[string][]byte, error) {
 	rsaFiles := make(map[string][]byte, len(dir))
 	// 因为RSA是配对出现的，所以要整体加载
 	for _, entry := range dir {
-
 		if isNotValidFile(entry) {
 			continue
 		}
@@ -142,7 +141,7 @@ func (c *Config) getRsa(name string) []byte {
 		cfgMtx.RLock()
 		defer cfgMtx.RUnlock()
 	}
-	if name == "" || len(c.rsa) == 0 {
+	if len(c.rsa) == 0 {
 		return nil
 	}
 	return c.rsa[name]

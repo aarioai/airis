@@ -140,7 +140,7 @@ func (r *Request) Origin() string {
 }
 
 func (r *Request) findAny(programData map[string]any, userData userDataInterface, name string) any {
-	// 读取程序设置的header
+	// 1. 优先读取程序设置的数据
 	if programData != nil {
 		if v, exists := programData[name]; exists {
 			return v
@@ -178,14 +178,14 @@ func (r *Request) queryString(name string, patterns ...any) (string, *ae.Error) 
 	if r.r != nil {
 		userData = r.r.URL.Query()
 	}
-	return r.findString(r.partialQueries, userData, name, patterns...)
+	return r.findString(r.injectedQueries, userData, name, patterns...)
 }
 func (r *Request) query(name string, patterns ...any) (*RawValue, *ae.Error) {
 	var userData url.Values
 	if r.r != nil {
 		userData = r.r.URL.Query()
 	}
-	return r.find(r.partialQueries, userData, name, patterns...)
+	return r.find(r.injectedQueries, userData, name, patterns...)
 }
 
 // Headers 获取所有headers
@@ -202,7 +202,7 @@ func (r *Request) queries(programData map[string]any, userData map[string][]stri
 	}
 	// 优先级高，读取程序设置的header
 	if programData != nil {
-		for k, v := range r.partialHeaders {
+		for k, v := range r.injectedHeaders {
 			data[k] = v
 		}
 	}
@@ -221,20 +221,20 @@ func (r *Request) Queries() map[string]any {
 	if r.r != nil {
 		userData = r.r.URL.Query()
 	}
-	return r.queries(r.partialQueries, userData)
+	return r.queries(r.injectedQueries, userData)
 }
 func (r *Request) setPartialBodyData(data map[string][]string) {
 	if len(data) == 0 {
 		return
 	}
-	if r.partialBodyData == nil {
-		r.partialBodyData = make(map[string]any, len(data))
+	if r.injectedBodies == nil {
+		r.injectedBodies = make(map[string]any, len(data))
 	}
 	for k, v := range data {
 		// 只返回首个元素
 		// @see http.Request.FormValue()
 		if len(v) > 0 {
-			r.partialBodyData[k] = v[0]
+			r.injectedBodies[k] = v[0]
 		}
 	}
 }
@@ -300,7 +300,7 @@ func (r *Request) parseFormBody(b []byte) *ae.Error {
 }
 
 func (r *Request) parseJSONBody(b []byte) *ae.Error {
-	if err := json.Unmarshal(b, &r.partialBodyData); err != nil {
+	if err := json.Unmarshal(b, &r.injectedBodies); err != nil {
 		return ae.UnsupportedMediaE("json")
 	}
 	return nil
@@ -328,8 +328,8 @@ func (r *Request) Body(name string, patterns ...any) (*RawValue, *ae.Error) {
 		}
 	}
 	raw := newRawValue(name, "")
-	if r.partialBodyData != nil {
-		if v, ok := r.partialBodyData[name]; ok {
+	if r.injectedBodies != nil {
+		if v, ok := r.injectedBodies[name]; ok {
 			raw.Reload(v)
 		}
 	}
@@ -352,14 +352,14 @@ func (r *Request) headerString(name string, patterns ...any) (string, *ae.Error)
 	if r.r != nil {
 		userData = r.r.Header
 	}
-	return r.findString(r.partialHeaders, userData, name, patterns...)
+	return r.findString(r.injectedHeaders, userData, name, patterns...)
 }
 func (r *Request) header(name string, patterns ...any) (*RawValue, *ae.Error) {
 	var userData http.Header
 	if r.r != nil {
 		userData = r.r.Header
 	}
-	return r.find(r.partialHeaders, userData, name, patterns...)
+	return r.find(r.injectedHeaders, userData, name, patterns...)
 }
 
 // @warn 尽量不要通过自定义header传参，因为可能某个web server会基于安全禁止某些无法识别的header
@@ -448,7 +448,7 @@ func (r *Request) Headers() map[string]any {
 	if r.r != nil {
 		userData = r.r.Header
 	}
-	return r.queries(r.partialHeaders, userData)
+	return r.queries(r.injectedHeaders, userData)
 }
 
 // QueryWild 尝试从URL参数、HeaderValue（包括标准格式和X-前缀格式）、Cookie读取参数值
