@@ -48,8 +48,8 @@ const (
 	ServiceUnavailable    = http.StatusServiceUnavailable    // 服务不可用
 	GatewayTimeout        = http.StatusGatewayTimeout        // 网关超时
 	VariantAlsoNegotiates = http.StatusVariantAlsoNegotiates // 服务器内部配置错误
-
-	StatusException = 590 // http 状态码出错，未达到程序阶段。一般由路由层，或nginx等代理层抛出
+	LoopDetected          = http.StatusLoopDetected          // 一般用于内部业务分享，检测到死循环存在
+	StatusException       = 590                              // http 状态码出错，未达到程序阶段。一般由路由层，或nginx等代理层抛出
 )
 
 var (
@@ -104,7 +104,9 @@ func FailedDependencyE(msg ...any) *Error {
 func VariantAlsoNegotiatesE(format string, args ...any) *Error {
 	return New(VariantAlsoNegotiates, afmt.Sprintf(format, args...))
 }
-
+func LoopDetectedE(msg ...any) *Error {
+	return New(LoopDetected).TryAddMsg(msg...)
+}
 func CodeText(code int) string {
 	if text, ok := defaultCodeTexts[code]; ok {
 		return text
