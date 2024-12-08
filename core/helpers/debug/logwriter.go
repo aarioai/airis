@@ -116,6 +116,13 @@ func RedirectLog(dir string, perm os.FileMode, bufSize int, symlink ...string) e
 // NewLogWriter 单例模式创建新的日志写入器
 // @warn docker 内使用，需要注意单独添加软链接映射，如 -v /var/log/symlink.log:/var/log/symlink.log
 func NewLogWriter(dir string, perm os.FileMode, bufSize int, symlinks ...string) (*LogWriter, error) {
+	defer func() {
+		err := generateRmlogScript(dir)
+		if err != nil {
+			Console("generate rmlog script failed: %v", err)
+		}
+	}()
+
 	dir, err := ios.MkdirAll(dir, perm)
 	if err != nil {
 		return nil, err
