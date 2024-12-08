@@ -22,11 +22,11 @@ const (
 	Forbidden       = http.StatusForbidden       // 禁止访问
 	NotFound        = http.StatusNotFound        // 资源不存在
 	//MethodNotAllowed      = http.StatusMethodNotAllowed // 方法不允许
-	NotAcceptable     = http.StatusNotAcceptable // 不接受的请求
-	ProxyAuthRequired = http.StatusProxyAuthRequired
-	RequestTimeout    = http.StatusRequestTimeout // 请求超时，注意与429区别
-	Conflict          = http.StatusConflict       // 资源冲突
-	Gone              = http.StatusGone           // 资源已永久删除
+	NotAcceptable     = http.StatusNotAcceptable     // 不接受的请求
+	ProxyAuthRequired = http.StatusProxyAuthRequired // 如微信等第三方认证前置
+	RequestTimeout    = http.StatusRequestTimeout    // 请求超时，注意与429区别
+	Conflict          = http.StatusConflict          // 资源冲突
+	Gone              = http.StatusGone              // 资源已永久删除
 	//LengthRequired        = http.StatusLengthRequired        // 需要Content-Length
 	PreconditionFailed    = http.StatusPreconditionFailed    // 前置条件验证失败，注意与424区别
 	RequestEntityTooLarge = http.StatusRequestEntityTooLarge // 请求实体过大
@@ -59,13 +59,15 @@ var (
 	}
 
 	// 快捷变量，使用时候不需要指定message的，其他的一般都需要指定message供调试或反馈给客户端
+	NoContentE   = New(NoContent)
+	NotModifiedE = New(NotModified)
 
-	UnauthorizedE          = New(Unauthorized)
-	PaymentRequiredE       = New(PaymentRequired)
-	ForbiddenE             = New(Forbidden)
-	NotFoundE              = New(NotFound)
-	NotAcceptableE         = New(NotAcceptable)
-	ProxyAuthRequiredE     = New(ProxyAuthRequired)
+	UnauthorizedE    = New(Unauthorized)
+	PaymentRequiredE = New(PaymentRequired)
+	ForbiddenE       = New(Forbidden)
+	NotFoundE        = New(NotFound)
+	NotAcceptableE   = New(NotAcceptable)
+
 	TimeoutE               = New(RequestTimeout)
 	ConflictE              = New(Conflict)
 	GoneE                  = New(Gone)
@@ -87,6 +89,10 @@ func RetryWithE(redirect string) *Error {
 func BadParamE(param string) *Error {
 	return New(BadRequest, "bad param `"+param+"`")
 }
+func ProxyAuthRequiredE(msg ...any) *Error {
+	return New(ProxyAuthRequired).TryAddMsg(msg...)
+}
+
 func PreconditionFailedE(msg ...any) *Error {
 	return New(PreconditionFailed).TryAddMsg(msg...)
 }

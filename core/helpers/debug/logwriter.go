@@ -81,7 +81,18 @@ func RedirectLog(dir string, perm os.FileMode, bufSize int, symlink ...string) e
 	if err != nil {
 		return err
 	}
-	panicLog := path.Join(dir, "panic.log")
+	// 清除目录下所有空的日志文件
+	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil || info.IsDir() || !strings.HasSuffix(info.Name(), ".log") {
+			return nil
+		}
+		if info.Size() == 0 {
+			os.Remove(path)
+		}
+		return nil
+	})
+
+	panicLog := path.Join(dir, fmt.Sprintf("panic-%s.log", time.Now().Format("2006-01-02")))
 	panicFile, err := os.OpenFile(panicLog, os.O_CREATE|os.O_APPEND|os.O_WRONLY, perm)
 	if err != nil {
 		return fmt.Errorf("failed to open crash file: %w", err)
