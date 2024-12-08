@@ -84,20 +84,15 @@ func (c *Config) initializeTimezone() error {
 	}
 	return nil
 }
-func (c *Config) loadRsa() (map[string][]byte, error) {
-	root := c.GetString(CkRsaRoot)
-	if root == "" {
-		return nil, nil
-	}
-
-	dir, err := os.ReadDir(root)
+func (c *Config) loadRsa(root string) (map[string][]byte, error) {
+	entries, err := os.ReadDir(root)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read RSA directory %s: %w", root, err)
 	}
 
-	rsaFiles := make(map[string][]byte, len(dir))
+	rsaFiles := make(map[string][]byte, len(entries))
 	// 因为RSA是配对出现的，所以要整体加载
-	for _, entry := range dir {
+	for _, entry := range entries {
 		if isNotValidFile(entry) {
 			continue
 		}

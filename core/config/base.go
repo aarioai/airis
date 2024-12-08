@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -23,6 +24,10 @@ const (
 	CkTimezoneID = "timezone_id"
 	CkTimeFormat = "time_format"
 	CkMock       = "mock"
+)
+
+var (
+	cfgMtx sync.RWMutex
 )
 
 type Env string

@@ -6,11 +6,6 @@ import (
 	"github.com/aarioai/airis/pkg/arrmap"
 	"gopkg.in/ini.v1"
 	"strings"
-	"sync"
-)
-
-var (
-	cfgMtx sync.RWMutex
 )
 
 // convertIniToMap 将 ini.File 转换为扁平化的 map[string]string
@@ -47,14 +42,13 @@ func (c *Config) Reload(otherConfigs ...map[string]string) error {
 	if err != nil {
 		return err
 	}
-	rsa, err := c.loadRsa()
-	if err != nil {
-		return err
+	var rsa map[string][]byte
+	if rsaRoot, ok := data[CkRsaRoot]; ok {
+		if rsa, err = c.loadRsa(rsaRoot); err != nil {
+			return err
+		}
 	}
-	err = c.initializeConfig()
-	if err != nil {
-		return err
-	}
+
 	// 写锁范围一定要越小越好
 	cfgMtx.Lock()
 	c.data = data
@@ -62,7 +56,7 @@ func (c *Config) Reload(otherConfigs ...map[string]string) error {
 	// clear(c.otherConfig)
 	c.otherConfig = arrmap.Merge(otherConfigs...)
 	cfgMtx.Unlock()
-	return nil
+	return c.initializeConfig()
 }
 func (c *Config) getIni(key string) string {
 	if c.isOnWrite() {
