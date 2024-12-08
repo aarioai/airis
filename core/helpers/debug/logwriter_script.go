@@ -103,9 +103,6 @@ done`
 	}
 
 	scriptPath := filepath.Join(targetDir, "rmlog.sh")
-	if _, err := os.Stat(scriptPath); err == nil {
-		return nil
-	}
 	if err := os.WriteFile(scriptPath, []byte(scriptContent), 0755); err != nil {
 		return fmt.Errorf("write script failed: %w", err)
 	}
