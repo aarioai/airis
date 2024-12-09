@@ -115,7 +115,7 @@ func (p *Profile) Label() string {
 }
 
 // Mark 记录性能标记点
-func (p *Profile) Mark(marks ...any) int32 {
+func (p *Profile) Mark(msg ...any) int32 {
 	if p.IsDisabled() {
 		return p.seq.Load()
 	}
@@ -131,13 +131,13 @@ func (p *Profile) Mark(marks ...any) int32 {
 		p.bufferPool.Put(buf)
 	}()
 
-	mark := afmt.SprintfArgs(marks...)
+	mark := afmt.SprintfArgs(msg...)
 	estimatedSize := maxProfileLabelWidth + len(mark) + 10 + buf.Len() // 10 是 \n 等其他字符估计值；buf.Len 是保留以后扩展允许临时插入
 	buf.Grow(estimatedSize)
 
 	p.writePrefix(buf, seq)
 	n := p.writeTimeInfo(buf, seq, now, nowMicro)
-	p.writeMarks(buf, mark, n)
+	p.writeMsg(buf, mark, n)
 
 	fmt.Print(buf.String())
 
@@ -172,20 +172,22 @@ func (p *Profile) writeTimeInfo(buf *strings.Builder, id int32, now time.Time, n
 	return 0
 }
 
-// writeMarks 写入标记信息
-func (p *Profile) writeMarks(buf *strings.Builder, mark string, n int) {
-	if mark == "" {
+// writeMsg 写入标记信息
+func (p *Profile) writeMsg(buf *strings.Builder, msg string, n int) {
+	if msg == "" {
 		return
 	}
 	padding := maxProfileLabelWidth - buf.Len() + n
-	buf.WriteString(strings.Repeat(" ", padding))
-	buf.WriteString(mark)
+	if padding > 0 {
+		buf.WriteString(strings.Repeat(" ", padding))
+	}
+	buf.WriteString(msg)
 	buf.WriteByte('\n')
 }
 
 // Fork 创建子性能分析器
-func (p *Profile) Fork(marks ...any) *Profile {
-	id := p.Mark(marks...)
+func (p *Profile) Fork(msg ...any) *Profile {
+	id := p.Mark(msg...)
 	return &Profile{
 		label:     p.label,
 		parent:    p,
