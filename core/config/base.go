@@ -17,13 +17,13 @@ const (
 	EnvStaging     = "staging"
 )
 
-// Configuration keys
+// Reserved configuration keys
 const (
-	CkRsaRoot    = "rsa_root"
 	CkEnv        = "env"
-	CkTimezoneID = "timezone_id"
-	CkTimeFormat = "time_format"
 	CkMock       = "mock"
+	CkRSARoot    = "rsa_root"
+	CkTimeFormat = "time_format"
+	CkTimezoneID = "timezone_id"
 )
 
 var (
@@ -55,10 +55,11 @@ type Config struct {
 		development -> test -> pre-production -> production
 	*/
 	Env          Env
+	Mock         bool // using mock
+	RSARoot      string
+	TimeFormat   string // e.g. "2006-02-01 15:04:05"
 	TimezoneID   string // e.g. "Asia/Shanghai"
 	TimeLocation *time.Location
-	TimeFormat   string // e.g. "2006-02-01 15:04:05"
-	Mock         bool   // using mock
 
 	onWrite     atomic.Bool
 	path        string

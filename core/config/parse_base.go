@@ -28,7 +28,7 @@ func (c *Config) AddConfigs(otherConfigs ...map[string]string) {
 	cfgMtx.Unlock()
 }
 
-func (c *Config) AddRsaConfigs(rsaConfigs ...map[string][]byte) {
+func (c *Config) AddRSAConfigs(rsaConfigs ...map[string][]byte) {
 	c.startWrite()
 	defer c.endWrite()
 	cfgs := arrmap.MergeSlices(rsaConfigs...)
@@ -67,14 +67,16 @@ func (c *Config) endWrite() {
 func (c *Config) initializeConfig() error {
 	c.Env = Env(c.GetString(CkEnv))
 	c.Mock, _ = c.Get(CkMock).Bool()
+	c.RSARoot = c.GetString(CkRSARoot)
 	// 初始化时区配置
 	return c.initializeTimezone()
 }
 func (c *Config) initializeTimezone() error {
 	var err error
+
+	c.TimeFormat = c.GetString(CkTimeFormat, "2006-02-01 15:04:05")
 	c.TimezoneID, _ = time.Now().Zone()
 	c.TimeLocation = time.Local
-	c.TimeFormat = c.GetString(CkTimeFormat, "2006-02-01 15:04:05")
 
 	if tz := c.GetString(CkTimezoneID); tz != "" {
 		c.TimezoneID = tz
@@ -84,7 +86,7 @@ func (c *Config) initializeTimezone() error {
 	}
 	return nil
 }
-func (c *Config) loadRsa(root string) (map[string][]byte, error) {
+func (c *Config) loadRSA(root string) (map[string][]byte, error) {
 	entries, err := os.ReadDir(root)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read RSA directory %s: %w", root, err)
@@ -96,7 +98,7 @@ func (c *Config) loadRsa(root string) (map[string][]byte, error) {
 		if isNotValidFile(entry) {
 			continue
 		}
-		if err = c.loadRsaFile(root, entry, rsaFiles); err != nil {
+		if err = c.loadRSAFile(root, entry, rsaFiles); err != nil {
 			return nil, err
 		}
 	}
@@ -113,8 +115,8 @@ func isNotValidFile(entry fs.DirEntry) bool {
 	return entry.IsDir() || len(name) == 0 || name[0] == '.'
 }
 
-// loadRsaFile 加载单个RSA文件
-func (c *Config) loadRsaFile(root string, entry fs.DirEntry, rsaFiles map[string][]byte) error {
+// loadRSAFile 加载单个RSA文件
+func (c *Config) loadRSAFile(root string, entry fs.DirEntry, rsaFiles map[string][]byte) error {
 	filePath := filepath.Join(root, entry.Name())
 
 	data, err := os.ReadFile(filePath)
@@ -131,7 +133,7 @@ func (c *Config) loadRsaFile(root string, entry fs.DirEntry, rsaFiles map[string
 }
 
 // 不要获取太细分，否则容易导致错误不容易被排查
-func (c *Config) getRsa(name string) []byte {
+func (c *Config) getRSA(name string) []byte {
 	if c.isOnWrite() {
 		cfgMtx.RLock()
 		defer cfgMtx.RUnlock()

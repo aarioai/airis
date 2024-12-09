@@ -10,9 +10,9 @@ import (
 )
 
 func (c *Config) PanicIfNoRSA() {
-	root := c.GetString(CkRsaRoot)
+	root := c.GetString(CkRSARoot)
 	if root == "" {
-		panic(fmt.Sprintf("rsa root config %s is not set", CkRsaRoot))
+		panic(fmt.Sprintf("rsa root config %s is not set", CkRSARoot))
 	}
 	if len(c.rsa) == 0 {
 		panic(fmt.Sprintf("no rsa file found in %s", root))
@@ -61,7 +61,7 @@ func (c *Config) Dump() {
 		case "ini":
 			afmt.PrintYellow("[%s] %s", category, c.path)
 		case "rsa":
-			afmt.PrintYellow("[%s] %s", category, c.getIni(CkRsaRoot))
+			afmt.PrintYellow("[%s] %s", category, c.RSARoot)
 		default:
 			afmt.PrintYellow("[%s]", category)
 		}

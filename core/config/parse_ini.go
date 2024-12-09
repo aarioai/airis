@@ -43,8 +43,8 @@ func (c *Config) Reload(otherConfigs ...map[string]string) error {
 		return err
 	}
 	var rsa map[string][]byte
-	if rsaRoot, ok := data[CkRsaRoot]; ok {
-		if rsa, err = c.loadRsa(rsaRoot); err != nil {
+	if rsaRoot, ok := data[CkRSARoot]; ok {
+		if rsa, err = c.loadRSA(rsaRoot); err != nil {
 			return err
 		}
 	}
@@ -95,7 +95,7 @@ func (c *Config) MustGetString(key string) (string, error) {
 	}
 
 	// 2. 从RSA读取
-	if rsa := c.getRsa(key); len(rsa) > 0 {
+	if rsa := c.getRSA(key); len(rsa) > 0 {
 		return string(rsa), nil
 	}
 
