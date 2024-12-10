@@ -28,7 +28,7 @@ func (c *Config) AddConfigs(otherConfigs ...map[string]string) {
 	cfgMtx.Unlock()
 }
 
-func (c *Config) AddBinConfigs(rsaConfigs ...map[string][]byte) {
+func (c *Config) AddTextConfigs(rsaConfigs ...map[string][]byte) {
 	c.startWrite()
 	defer c.endWrite()
 	cfgs := arrmap.MergeSlices(rsaConfigs...)
@@ -37,12 +37,12 @@ func (c *Config) AddBinConfigs(rsaConfigs ...map[string][]byte) {
 	}
 	// 写锁范围一定要越小越好
 	cfgMtx.Lock()
-	if c.binConfig == nil {
-		c.binConfig = make(map[string][]byte)
+	if c.textConfig == nil {
+		c.textConfig = make(map[string]string)
 	}
 	for name, v := range cfgs {
 		if len(v) > 0 {
-			c.binConfig[name] = v
+			c.textConfig[name] = string(v)
 		}
 	}
 	cfgMtx.Unlock()
@@ -68,7 +68,7 @@ func (c *Config) endWrite() {
 func (c *Config) initializeConfig() error {
 	c.Env = Env(c.GetString(CkEnv))
 	c.Mock, _ = c.Get(CkMock).Bool()
-	c.FileConfigDirs = binConfigDirs(c.GetString(CkBinConfigDirs))
+	c.TextConfigDirs = textConfigDirs(c.GetString(CkTextConfigDirs))
 	// 初始化时区配置
 	return c.initializeTimezone()
 }
@@ -90,40 +90,40 @@ func (c *Config) initializeTimezone() error {
 }
 
 // 将空格隔开的配置，转换为数组
-func (c *Config) loadAllBinConfigs(value string) (map[string][]byte, error) {
-	dirs := binConfigDirs(value)
+func (c *Config) loadAllTextConfigs(value string) (map[string]string, error) {
+	dirs := textConfigDirs(value)
 	if len(dirs) == 0 {
 		return nil, nil
 	}
-	fileConfigs, err := c.loadBinConfigs(dirs[0])
+	fileConfigs, err := c.loadTextConfigs(dirs[0])
 	if len(dirs) == 1 || err != nil {
 		return fileConfigs, err
 	}
 
 	for i := 1; i < len(dirs); i++ {
 		dir := dirs[i]
-		cfg, err := c.loadBinConfigs(dir)
+		cfg, err := c.loadTextConfigs(dir)
 		if err != nil {
 			return nil, err
 		}
-		fileConfigs = arrmap.MergeSlices(fileConfigs, cfg)
+		fileConfigs = arrmap.Merge(fileConfigs, cfg)
 	}
 
 	return fileConfigs, nil
 }
-func (c *Config) loadBinConfigs(dir string) (map[string][]byte, error) {
+func (c *Config) loadTextConfigs(dir string) (map[string]string, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read bin config directory %s: %w", dir, err)
 	}
 
-	rsaFiles := make(map[string][]byte, len(entries))
+	rsaFiles := make(map[string]string, len(entries))
 	// 因为file config是配对出现的，所以要整体加载
 	for _, entry := range entries {
 		if isNotValidFile(entry) {
 			continue
 		}
-		if err = c.loadFile(dir, entry, rsaFiles); err != nil {
+		if err = c.loadTextFile(dir, entry, rsaFiles); err != nil {
 			return nil, err
 		}
 	}
@@ -133,8 +133,8 @@ func (c *Config) loadBinConfigs(dir string) (map[string][]byte, error) {
 	return nil, nil
 }
 
-// loadFile 加载单个RSA文件
-func (c *Config) loadFile(root string, entry fs.DirEntry, rsaFiles map[string][]byte) error {
+// loadTextFile 加载单个text config文件
+func (c *Config) loadTextFile(root string, entry fs.DirEntry, rsaFiles map[string]string) error {
 	filePath := filepath.Join(root, entry.Name())
 
 	data, err := os.ReadFile(filePath)
@@ -146,20 +146,20 @@ func (c *Config) loadFile(root string, entry fs.DirEntry, rsaFiles map[string][]
 		return fmt.Errorf("bin config file is empty: %s", filePath)
 	}
 
-	rsaFiles[entry.Name()] = data
+	rsaFiles[entry.Name()] = string(data)
 	return nil
 }
 
 // 不要获取太细分，否则容易导致错误不容易被排查
-func (c *Config) getBinData(name string) []byte {
+func (c *Config) getTextData(name string) string {
 	if c.isOnWrite() {
 		cfgMtx.RLock()
 		defer cfgMtx.RUnlock()
 	}
-	if len(c.binConfig) == 0 {
-		return nil
+	if len(c.textConfig) == 0 {
+		return ""
 	}
-	return c.binConfig[name]
+	return c.textConfig[name]
 }
 func (c *Config) isOnWrite() bool {
 	return c.onWrite.Load()

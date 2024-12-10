@@ -20,11 +20,11 @@ const (
 
 // Reserved configuration keys
 const (
-	CkEnv           = "env"
-	CkMock          = "mock"
-	CkBinConfigDirs = "bin_config_dirs" // 使用空格隔开
-	CkTimeFormat    = "time_format"
-	CkTimezoneID    = "timezone_id"
+	CkEnv            = "env"
+	CkMock           = "mock"
+	CkTextConfigDirs = "text_config_dirs" // 使用空格隔开
+	CkTimeFormat     = "time_format"
+	CkTimezoneID     = "timezone_id"
 )
 
 var (
@@ -45,8 +45,8 @@ func (env Env) AfterTesting() bool  { return env.IsTesting() || env.AfterStaging
 
 type Snapshot struct {
 	baseConfig  map[string]string
-	binConfig   map[string][]byte // binConfig 是配对出现的，不要使用 sync.Map， 直接对整个map加锁设置
-	otherConfig map[string]string // 不要使用 sync.Map， 直接对整个map加锁设置
+	textConfig  map[string]string
+	otherConfig map[string]string
 }
 
 type Config struct {
@@ -57,7 +57,7 @@ type Config struct {
 	*/
 	Env            Env
 	Mock           bool // using mock
-	FileConfigDirs []string
+	TextConfigDirs []string
 	TimeFormat     string // e.g. "2006-02-01 15:04:05"
 	TimezoneID     string // e.g. "Asia/Shanghai"
 	TimeLocation   *time.Location
@@ -65,7 +65,7 @@ type Config struct {
 	onWrite     atomic.Bool
 	path        string
 	baseConfig  map[string]string
-	binConfig   map[string][]byte // binConfig 是配对出现的，不要使用 sync.Map， 直接对整个map加锁设置
+	textConfig  map[string]string // 使用字符串保存，避免[]byte被业务层修改
 	otherConfig map[string]string // 不要使用 sync.Map， 直接对整个map加锁设置
 	snapshot    atomic.Pointer[Snapshot]
 }
@@ -74,7 +74,7 @@ func New(path string, otherConfigs ...map[string]string) *Config {
 	cfg := &Config{
 		path:        path,
 		baseConfig:  make(map[string]string),
-		binConfig:   make(map[string][]byte),
+		textConfig:  make(map[string]string),
 		otherConfig: make(map[string]string),
 	}
 	if err := cfg.Reload(otherConfigs...); err != nil {
@@ -119,7 +119,7 @@ func isNotValidFile(entry fs.DirEntry) bool {
 }
 
 // 转化为数组，多个目录
-func binConfigDirs(value string) []string {
+func textConfigDirs(value string) []string {
 	if value == "" {
 		return nil
 	}

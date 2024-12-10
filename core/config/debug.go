@@ -48,8 +48,8 @@ func (c *Config) Dump() {
 		switch category {
 		case "base":
 			afmt.PrintYellow("[%s] %s", category, c.path)
-		case "bin":
-			afmt.PrintYellow("[%s] %s", category, strings.Join(c.FileConfigDirs, " "))
+		case "text":
+			afmt.PrintYellow("[%s] %s", category, strings.Join(c.TextConfigDirs, " "))
 		default:
 			afmt.PrintYellow("[%s]", category)
 		}
@@ -120,15 +120,15 @@ func (c *Config) All() map[string][][3]string {
 	// 返回数组，可以保证输出key排序后的值
 	result := map[string][][3]string{
 		"other": make([][3]string, 0),
-		"bin":   make([][3]string, 0),
+		"text":  make([][3]string, 0),
 		"base":  make([][3]string, 0),
 	}
 	// 优先级: other > rsa > ini
 	result["other"] = sortConfigKeys(c.otherConfig)
-	result["bin"] = sortConfigKeys(c.binConfig)
+	result["text"] = sortConfigKeys(c.textConfig)
 	result["base"] = sortConfigKeys(c.baseConfig)
-	handleReplace(result, "bin", "other")
-	handleReplace(result, "base", "bin")
+	handleReplace(result, "text", "other")
+	handleReplace(result, "base", "text")
 	handleReplace(result, "base", "other")
 	return result
 }
