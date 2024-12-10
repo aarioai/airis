@@ -104,6 +104,7 @@ func (e *Error) Text() string {
 	}
 	return s.String()
 }
+
 func (e *Error) Trace(ctx iris.Context) string {
 	return e.WithTraceInfo(ctx).Text()
 }
