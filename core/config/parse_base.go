@@ -28,7 +28,7 @@ func (c *Config) AddConfigs(otherConfigs ...map[string]string) {
 	cfgMtx.Unlock()
 }
 
-func (c *Config) AddRSAConfigs(rsaConfigs ...map[string][]byte) {
+func (c *Config) AddBinConfigs(rsaConfigs ...map[string][]byte) {
 	c.startWrite()
 	defer c.endWrite()
 	cfgs := arrmap.MergeSlices(rsaConfigs...)
@@ -37,12 +37,12 @@ func (c *Config) AddRSAConfigs(rsaConfigs ...map[string][]byte) {
 	}
 	// 写锁范围一定要越小越好
 	cfgMtx.Lock()
-	if c.rsa == nil {
-		c.rsa = make(map[string][]byte)
+	if c.binConfig == nil {
+		c.binConfig = make(map[string][]byte)
 	}
 	for name, v := range cfgs {
 		if len(v) > 0 {
-			c.rsa[name] = v
+			c.binConfig[name] = v
 		}
 	}
 	cfgMtx.Unlock()
@@ -64,13 +64,15 @@ func (c *Config) endWrite() {
 		}
 	}
 }
+
 func (c *Config) initializeConfig() error {
 	c.Env = Env(c.GetString(CkEnv))
 	c.Mock, _ = c.Get(CkMock).Bool()
-	c.RSARoot = c.GetString(CkRSARoot)
+	c.FileConfigDirs = binConfigDirs(c.GetString(CkBinConfigDirs))
 	// 初始化时区配置
 	return c.initializeTimezone()
 }
+
 func (c *Config) initializeTimezone() error {
 	var err error
 
@@ -86,19 +88,42 @@ func (c *Config) initializeTimezone() error {
 	}
 	return nil
 }
-func (c *Config) loadRSA(root string) (map[string][]byte, error) {
-	entries, err := os.ReadDir(root)
+
+// 将空格隔开的配置，转换为数组
+func (c *Config) loadAllBinConfigs(value string) (map[string][]byte, error) {
+	dirs := binConfigDirs(value)
+	if len(dirs) == 0 {
+		return nil, nil
+	}
+	fileConfigs, err := c.loadBinConfigs(dirs[0])
+	if len(dirs) == 1 || err != nil {
+		return fileConfigs, err
+	}
+
+	for i := 1; i < len(dirs); i++ {
+		dir := dirs[i]
+		cfg, err := c.loadBinConfigs(dir)
+		if err != nil {
+			return nil, err
+		}
+		fileConfigs = arrmap.MergeSlices(fileConfigs, cfg)
+	}
+
+	return fileConfigs, nil
+}
+func (c *Config) loadBinConfigs(dir string) (map[string][]byte, error) {
+	entries, err := os.ReadDir(dir)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read RSA directory %s: %w", root, err)
+		return nil, fmt.Errorf("failed to read bin config directory %s: %w", dir, err)
 	}
 
 	rsaFiles := make(map[string][]byte, len(entries))
-	// 因为RSA是配对出现的，所以要整体加载
+	// 因为file config是配对出现的，所以要整体加载
 	for _, entry := range entries {
 		if isNotValidFile(entry) {
 			continue
 		}
-		if err = c.loadRSAFile(root, entry, rsaFiles); err != nil {
+		if err = c.loadFile(dir, entry, rsaFiles); err != nil {
 			return nil, err
 		}
 	}
@@ -108,24 +133,17 @@ func (c *Config) loadRSA(root string) (map[string][]byte, error) {
 	return nil, nil
 }
 
-// shouldSkipFile 判断是否应该跳过该文件
-// 跳过目录和隐藏文件
-func isNotValidFile(entry fs.DirEntry) bool {
-	name := entry.Name()
-	return entry.IsDir() || len(name) == 0 || name[0] == '.'
-}
-
-// loadRSAFile 加载单个RSA文件
-func (c *Config) loadRSAFile(root string, entry fs.DirEntry, rsaFiles map[string][]byte) error {
+// loadFile 加载单个RSA文件
+func (c *Config) loadFile(root string, entry fs.DirEntry, rsaFiles map[string][]byte) error {
 	filePath := filepath.Join(root, entry.Name())
 
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		return fmt.Errorf("failed to read RSA file %s: %w", filePath, err)
+		return fmt.Errorf("failed to read bin config file %s: %w", filePath, err)
 	}
 
 	if len(data) == 0 {
-		return fmt.Errorf("RSA file is empty: %s", filePath)
+		return fmt.Errorf("bin config file is empty: %s", filePath)
 	}
 
 	rsaFiles[entry.Name()] = data
@@ -133,15 +151,15 @@ func (c *Config) loadRSAFile(root string, entry fs.DirEntry, rsaFiles map[string
 }
 
 // 不要获取太细分，否则容易导致错误不容易被排查
-func (c *Config) getRSA(name string) []byte {
+func (c *Config) getBinData(name string) []byte {
 	if c.isOnWrite() {
 		cfgMtx.RLock()
 		defer cfgMtx.RUnlock()
 	}
-	if len(c.rsa) == 0 {
+	if len(c.binConfig) == 0 {
 		return nil
 	}
-	return c.rsa[name]
+	return c.binConfig[name]
 }
 func (c *Config) isOnWrite() bool {
 	return c.onWrite.Load()

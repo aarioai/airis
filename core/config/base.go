@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"io/fs"
 	"strconv"
 	"strings"
 	"sync"
@@ -19,11 +20,11 @@ const (
 
 // Reserved configuration keys
 const (
-	CkEnv        = "env"
-	CkMock       = "mock"
-	CkRSARoot    = "rsa_root"
-	CkTimeFormat = "time_format"
-	CkTimezoneID = "timezone_id"
+	CkEnv           = "env"
+	CkMock          = "mock"
+	CkBinConfigDirs = "bin_config_dirs" // 使用空格隔开
+	CkTimeFormat    = "time_format"
+	CkTimezoneID    = "timezone_id"
 )
 
 var (
@@ -43,8 +44,8 @@ func (env Env) AfterStaging() bool  { return env.IsStaging() || env.IsProduction
 func (env Env) AfterTesting() bool  { return env.IsTesting() || env.AfterStaging() }
 
 type Snapshot struct {
-	data        map[string]string
-	rsa         map[string][]byte // rsa 是配对出现的，不要使用 sync.Map， 直接对整个map加锁设置
+	baseConfig  map[string]string
+	binConfig   map[string][]byte // binConfig 是配对出现的，不要使用 sync.Map， 直接对整个map加锁设置
 	otherConfig map[string]string // 不要使用 sync.Map， 直接对整个map加锁设置
 }
 
@@ -54,17 +55,17 @@ type Config struct {
 		local -> development/trunk -> integration -> testing/test/qc/internal acceptnace -> staging/stage/model/pre-production/demo -> production/live
 		development -> test -> pre-production -> production
 	*/
-	Env          Env
-	Mock         bool // using mock
-	RSARoot      string
-	TimeFormat   string // e.g. "2006-02-01 15:04:05"
-	TimezoneID   string // e.g. "Asia/Shanghai"
-	TimeLocation *time.Location
+	Env            Env
+	Mock           bool // using mock
+	FileConfigDirs []string
+	TimeFormat     string // e.g. "2006-02-01 15:04:05"
+	TimezoneID     string // e.g. "Asia/Shanghai"
+	TimeLocation   *time.Location
 
 	onWrite     atomic.Bool
 	path        string
-	data        map[string]string
-	rsa         map[string][]byte // rsa 是配对出现的，不要使用 sync.Map， 直接对整个map加锁设置
+	baseConfig  map[string]string
+	binConfig   map[string][]byte // binConfig 是配对出现的，不要使用 sync.Map， 直接对整个map加锁设置
 	otherConfig map[string]string // 不要使用 sync.Map， 直接对整个map加锁设置
 	snapshot    atomic.Pointer[Snapshot]
 }
@@ -72,8 +73,8 @@ type Config struct {
 func New(path string, otherConfigs ...map[string]string) *Config {
 	cfg := &Config{
 		path:        path,
-		data:        make(map[string]string),
-		rsa:         make(map[string][]byte),
+		baseConfig:  make(map[string]string),
+		binConfig:   make(map[string][]byte),
 		otherConfig: make(map[string]string),
 	}
 	if err := cfg.Reload(otherConfigs...); err != nil {
@@ -108,4 +109,23 @@ func splitDots(keys ...string) []string {
 		n = append(n, strings.Split(key, ".")...)
 	}
 	return n
+}
+
+// shouldSkipFile 判断是否应该跳过该文件
+// 跳过目录和隐藏文件
+func isNotValidFile(entry fs.DirEntry) bool {
+	name := entry.Name()
+	return entry.IsDir() || len(name) == 0 || name[0] == '.'
+}
+
+// 转化为数组，多个目录
+func binConfigDirs(value string) []string {
+	if value == "" {
+		return nil
+	}
+	dirs := strings.Fields(value)
+	if len(dirs) == 0 {
+		return nil
+	}
+	return dirs
 }

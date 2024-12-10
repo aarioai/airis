@@ -9,16 +9,6 @@ import (
 	"strings"
 )
 
-func (c *Config) PanicIfNoRSA() {
-	root := c.GetString(CkRSARoot)
-	if root == "" {
-		panic(fmt.Sprintf("rsa root config %s is not set", CkRSARoot))
-	}
-	if len(c.rsa) == 0 {
-		panic(fmt.Sprintf("no rsa file found in %s", root))
-	}
-}
-
 func (c *Config) PanicIfNotEqual(key, want string) {
 	value := c.GetString(key)
 	if value != want {
@@ -32,13 +22,11 @@ Launch Config:
   env: %s
   timezone: %s
   mock: %v
-  rsa: %s
 `,
 		utils.GitVersion(),
 		c.Env,
 		c.TimezoneID,
 		c.Mock,
-		arrmap.JoinKeys(c.rsa, ", ", true),
 	)
 
 	// 方便运行程序时直接显示
@@ -58,10 +46,10 @@ func (c *Config) Dump() {
 	for category, configs := range all {
 		fmt.Printf("\n")
 		switch category {
-		case "ini":
+		case "base":
 			afmt.PrintYellow("[%s] %s", category, c.path)
-		case "rsa":
-			afmt.PrintYellow("[%s] %s", category, c.RSARoot)
+		case "bin":
+			afmt.PrintYellow("[%s] %s", category, strings.Join(c.FileConfigDirs, " "))
 		default:
 			afmt.PrintYellow("[%s]", category)
 		}
@@ -132,15 +120,15 @@ func (c *Config) All() map[string][][3]string {
 	// 返回数组，可以保证输出key排序后的值
 	result := map[string][][3]string{
 		"other": make([][3]string, 0),
-		"rsa":   make([][3]string, 0),
-		"ini":   make([][3]string, 0),
+		"bin":   make([][3]string, 0),
+		"base":  make([][3]string, 0),
 	}
 	// 优先级: other > rsa > ini
 	result["other"] = sortConfigKeys(c.otherConfig)
-	result["rsa"] = sortConfigKeys(c.rsa)
-	result["ini"] = sortConfigKeys(c.data)
-	handleReplace(result, "rsa", "other")
-	handleReplace(result, "ini", "rsa")
-	handleReplace(result, "ini", "other")
+	result["bin"] = sortConfigKeys(c.binConfig)
+	result["base"] = sortConfigKeys(c.baseConfig)
+	handleReplace(result, "bin", "other")
+	handleReplace(result, "base", "bin")
+	handleReplace(result, "base", "other")
 	return result
 }

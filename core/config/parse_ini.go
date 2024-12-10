@@ -42,28 +42,26 @@ func (c *Config) Reload(otherConfigs ...map[string]string) error {
 	if err != nil {
 		return err
 	}
-	var rsa map[string][]byte
-	if rsaRoot, ok := data[CkRSARoot]; ok {
-		if rsa, err = c.loadRSA(rsaRoot); err != nil {
-			return err
-		}
+	rsa, err := c.loadAllBinConfigs(data[CkBinConfigDirs])
+	if err != nil {
+		return err
 	}
-
 	// 写锁范围一定要越小越好
 	cfgMtx.Lock()
-	c.data = data
-	c.rsa = rsa
+	c.baseConfig = data
+	c.binConfig = rsa
 	// clear(c.otherConfig)
 	c.otherConfig = arrmap.Merge(otherConfigs...)
 	cfgMtx.Unlock()
 	return c.initializeConfig()
 }
-func (c *Config) getIni(key string) string {
+
+func (c *Config) getBase(key string) string {
 	if c.isOnWrite() {
 		cfgMtx.RLock()
 		defer cfgMtx.RUnlock()
 	}
-	if key == "" || len(c.data) == 0 {
+	if key == "" || len(c.baseConfig) == 0 {
 		return ""
 	}
 
@@ -73,7 +71,7 @@ func (c *Config) getIni(key string) string {
 		keyName += "." + strings.Join(keys[1:], "_")
 	}
 
-	return c.data[keyName]
+	return c.baseConfig[keyName]
 }
 
 // 不要获取太细分，否则容易导致错误不容易被排查
@@ -88,20 +86,35 @@ func (c *Config) getOtherConfig(key string) string {
 	return c.otherConfig[key]
 }
 
+// MustGetBytes 这个比较特殊，一般优先从
+func (c *Config) MustGetBytes(key string) ([]byte, error) {
+	// 1. 优先从 file 读取
+	if rsa := c.getBinData(key); len(rsa) > 0 {
+		return rsa, nil
+	}
+	// 2. 从其他配置读取
+	if v := c.getOtherConfig(key); v != "" {
+		return []byte(v), nil
+	}
+	// 3. 从 ini 配置获取
+	if v := c.getBase(key); v != "" {
+		return []byte(v), nil
+	}
+	return nil, fmt.Errorf("required config key not found: %s", key)
+}
+
 func (c *Config) MustGetString(key string) (string, error) {
 	// 1. 优先从其他配置（如数据库下载来的）读取。能修改掉 ini 里面的模式配置
 	if v := c.getOtherConfig(key); v != "" {
 		return v, nil
 	}
-
-	// 2. 从RSA读取
-	if rsa := c.getRSA(key); len(rsa) > 0 {
-		return string(rsa), nil
-	}
-
-	// 3. 从 ini 配置获取
-	if v := c.getIni(key); v != "" {
+	// 2. 从 ini 配置获取
+	if v := c.getBase(key); v != "" {
 		return v, nil
+	}
+	// 3. 从file读取
+	if rsa := c.getBinData(key); len(rsa) > 0 {
+		return string(rsa), nil
 	}
 	return "", fmt.Errorf("required config key not found: %s", key)
 }
