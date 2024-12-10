@@ -19,8 +19,9 @@ show_usage() {
     echo "    -h show help"
     echo "Examples:"
     echo "  $0 -d 2024-03-01            # Delete logs before 2024-03-01"
-    echo "  $0 -d day|week|month        # Delete logs before one day/week/month ago"
-    echo "  $0 -f panic-%Y-%m-%d.log  # Delete logs with format panic-YYYY-MM-DD.log"
+    echo "  $0 -d now|day|week|month  	# Delete logs before one day/week/month ago"
+    echo "  $0 -f panic-%Y-%m-%d.log  	# Delete logs with format panic-YYYY-MM-DD.log"
+    echo "  $0 -f panic-%D.log  	  	# %D = %Y-%m-%d"
     echo "  $0                          # Delete logs before one month ago"
     exit 1
 }
@@ -43,7 +44,12 @@ if [ -z "$BEFORE_DATE" ]; then
     exit 1
 fi
 
+if [ -n "$FILE_NAME_FORMAT" ]; then
+	FILE_NAME_FORMAT=${FILE_NAME_FORMAT//%D/%Y-%m-%d}
+fi
+
 case $BEFORE_DATE in
+    now) BEFORE_DATE=$(date +%Y-%m-%d) ;;
     day) BEFORE_DATE=$(date -d "1 day ago" +%Y-%m-%d) ;;
     week) BEFORE_DATE=$(date -d "1 week ago" +%Y-%m-%d) ;;
     month) BEFORE_DATE=$(date -d "1 month ago" +%Y-%m-%d) ;;

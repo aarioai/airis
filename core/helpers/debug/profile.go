@@ -25,6 +25,8 @@ type Profile struct {
 	lastTime   int64
 	disabled   bool // 停止标志
 	bufferPool *sync.Pool
+
+	styles []string
 }
 
 var defaultProfile atomic.Pointer[Profile]
@@ -75,6 +77,7 @@ func NewProfile(labels ...string) *Profile {
 				return new(strings.Builder)
 			},
 		},
+		styles: []string{afmt.Green},
 	}
 }
 
@@ -84,6 +87,10 @@ func (p *Profile) WithLabel(label string) *Profile {
 		return newProfile().WithLabel(label)
 	}
 	p.label = label
+	return p
+}
+func (p *Profile) WithStyles(styles ...string) *Profile {
+	p.styles = styles
 	return p
 }
 
@@ -181,7 +188,7 @@ func (p *Profile) writeMsg(buf *strings.Builder, msg string, n int) {
 	if padding > 0 {
 		buf.WriteString(strings.Repeat(" ", padding))
 	}
-	buf.WriteString(afmt.WithStyle(msg, afmt.BgGreen))
+	buf.WriteString(afmt.WithStyle(msg, p.styles...))
 	buf.WriteByte('\n')
 }
 

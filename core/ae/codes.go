@@ -66,7 +66,6 @@ var (
 	PaymentRequiredE = New(PaymentRequired)
 	ForbiddenE       = New(Forbidden)
 	NotFoundE        = New(NotFound)
-	NotAcceptableE   = New(NotAcceptable)
 
 	TimeoutE               = New(RequestTimeout)
 	GoneE                  = New(Gone)
@@ -87,6 +86,9 @@ func RetryWithE(redirect string) *Error {
 
 func BadParamE(param string) *Error {
 	return New(BadRequest, "bad param `"+param+"`")
+}
+func NotAcceptableE(msg ...any) *Error {
+	return New(NotAcceptable).AppendMsg(msg...)
 }
 func ProxyAuthRequiredE(msg ...any) *Error {
 	return New(ProxyAuthRequired).AppendMsg(msg...)
