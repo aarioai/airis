@@ -57,7 +57,7 @@ func (e *Error) WithMsg(format string, args ...any) *Error {
 
 // AppendMsg 尝试添加消息
 func (e *Error) AppendMsg(msgs ...any) *Error {
-	msg := afmt.SprintfArgs(msgs...)
+	msg := afmt.SprintfArgs(msgs)
 	if msg != "" {
 		e.Msg += " - " + msg
 	}

@@ -61,7 +61,7 @@ func Console(args ...any) {
 		}
 	}
 
-	msg := afmt.SprintfArgs(args...)
+	msg := afmt.SprintfArgs(args)
 	if msg == "" {
 		return
 	}

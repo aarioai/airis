@@ -21,14 +21,14 @@ func Sprintf(format string, args ...any) string {
 }
 
 // SprintfArgs 针对可选参数，格式化字符串
-func SprintfArgs[T any](args ...T) string {
+func SprintfArgs[T any](args []T) string {
 	if len(args) == 0 {
 		return ""
 	}
 
 	format, ok := any(args[0]).(string)
 	if !ok {
-		return fmt.Sprint(args[0])
+		format = fmt.Sprint(args[0])
 	}
 
 	switch len(args) {

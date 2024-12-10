@@ -138,7 +138,7 @@ func (p *Profile) Mark(msg ...any) int32 {
 		p.bufferPool.Put(buf)
 	}()
 
-	mark := afmt.SprintfArgs(msg...)
+	mark := afmt.SprintfArgs(msg)
 	estimatedSize := maxProfileLabelWidth + len(p.label) + len(mark) + 10 + buf.Len() // 10 是 \n 等其他字符估计值；buf.Len 是保留以后扩展允许临时插入
 	buf.Grow(estimatedSize)
 
