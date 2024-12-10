@@ -132,7 +132,7 @@ func (p *Profile) Mark(msg ...any) int32 {
 	}()
 
 	mark := afmt.SprintfArgs(msg...)
-	estimatedSize := maxProfileLabelWidth + len(mark) + 10 + buf.Len() // 10 是 \n 等其他字符估计值；buf.Len 是保留以后扩展允许临时插入
+	estimatedSize := maxProfileLabelWidth + len(p.label) + len(mark) + 10 + buf.Len() // 10 是 \n 等其他字符估计值；buf.Len 是保留以后扩展允许临时插入
 	buf.Grow(estimatedSize)
 
 	p.writePrefix(buf, seq)
@@ -177,11 +177,11 @@ func (p *Profile) writeMsg(buf *strings.Builder, msg string, n int) {
 	if msg == "" {
 		return
 	}
-	padding := maxProfileLabelWidth - buf.Len() + n
+	padding := maxProfileLabelWidth + len(p.label) - buf.Len() + n
 	if padding > 0 {
 		buf.WriteString(strings.Repeat(" ", padding))
 	}
-	buf.WriteString(msg)
+	buf.WriteString(afmt.WithStyle(msg, afmt.BgGreen))
 	buf.WriteByte('\n')
 }
 

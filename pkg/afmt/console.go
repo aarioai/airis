@@ -43,86 +43,90 @@ func Println(msg string, styles ...string) {
 
 // Print 命令行中，输出带颜色等样式的信息
 func Print(msg string, styles ...string) {
+	fmt.Print(WithStyle(msg, styles...))
+}
+
+func WithStyle(msg string, styles ...string) string {
 	if len(styles) > 0 {
 		for _, style := range styles {
 			msg = style + msg
 		}
 		msg += Reset
 	}
-	fmt.Print(msg)
+	return msg
 }
 
 // 前景色打印函数
 func PrintRed(format string, args ...any) {
-    Print(Sprintf(format, args...), Red)
+	Print(Sprintf(format, args...), Red)
 }
 
 func PrintGreen(format string, args ...any) {
-    Print(Sprintf(format, args...), Green)
+	Print(Sprintf(format, args...), Green)
 }
 
 func PrintYellow(format string, args ...any) {
-    Print(Sprintf(format, args...), Yellow)
+	Print(Sprintf(format, args...), Yellow)
 }
 
 func PrintBlue(format string, args ...any) {
-    Print(Sprintf(format, args...), Blue)
+	Print(Sprintf(format, args...), Blue)
 }
 
 func PrintMagenta(format string, args ...any) {
-    Print(Sprintf(format, args...), Magenta)
+	Print(Sprintf(format, args...), Magenta)
 }
 
 func PrintCyan(format string, args ...any) {
-    Print(Sprintf(format, args...), Cyan)
+	Print(Sprintf(format, args...), Cyan)
 }
 
 func PrintWhite(format string, args ...any) {
-    Print(Sprintf(format, args...), White)
+	Print(Sprintf(format, args...), White)
 }
 
 // 背景色打印函数
 func PrintBgBlack(format string, args ...any) {
-    Print(Sprintf(format, args...), BgBlack)
+	Print(Sprintf(format, args...), BgBlack)
 }
 
 func PrintBgRed(format string, args ...any) {
-    Print(Sprintf(format, args...), BgRed)
+	Print(Sprintf(format, args...), BgRed)
 }
 
 func PrintBgGreen(format string, args ...any) {
-    Print(Sprintf(format, args...), BgGreen)
+	Print(Sprintf(format, args...), BgGreen)
 }
 
 func PrintBgYellow(format string, args ...any) {
-    Print(Sprintf(format, args...), BgYellow)
+	Print(Sprintf(format, args...), BgYellow)
 }
 
 func PrintBgBlue(format string, args ...any) {
-    Print(Sprintf(format, args...), BgBlue)
+	Print(Sprintf(format, args...), BgBlue)
 }
 
 func PrintBgMagenta(format string, args ...any) {
-    Print(Sprintf(format, args...), BgMagenta)
+	Print(Sprintf(format, args...), BgMagenta)
 }
 
 func PrintBgCyan(format string, args ...any) {
-    Print(Sprintf(format, args...), BgCyan)
+	Print(Sprintf(format, args...), BgCyan)
 }
 
 func PrintBgWhite(format string, args ...any) {
-    Print(Sprintf(format, args...), BgWhite)
+	Print(Sprintf(format, args...), BgWhite)
 }
 
 // 样式打印函数
 func PrintBold(format string, args ...any) {
-    Print(Sprintf(format, args...), Bold)
+	Print(Sprintf(format, args...), Bold)
 }
 
 func PrintUnderline(format string, args ...any) {
-    Print(Sprintf(format, args...), Underline)
+	Print(Sprintf(format, args...), Underline)
 }
 
 func PrintReverse(format string, args ...any) {
-    Print(Sprintf(format, args...), Reverse)
+	Print(Sprintf(format, args...), Reverse)
 }
