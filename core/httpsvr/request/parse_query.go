@@ -12,6 +12,14 @@ func (r *Request) QueryBool(p string) (bool, *ae.Error) {
 	}
 	return x.DefaultBool(false), nil
 }
+
+func (r *Request) QueryBytes(p string) ([]byte, *ae.Error) {
+	x, e := r.Query(p, false)
+	if e != nil {
+		return nil, e
+	}
+	return x.Bytes(), nil
+}
 func (r *Request) QueryEnum(p string, required bool, validators []string) (string, *ae.Error) {
 	x, e := r.QueryString(p, required)
 	if e != nil {

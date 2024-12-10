@@ -12,6 +12,13 @@ func (r *Request) BodyBool(p string) (bool, *ae.Error) {
 	}
 	return x.DefaultBool(false), e
 }
+func (r *Request) BodyBytes(p string) ([]byte, *ae.Error) {
+	x, e := r.Body(p, false)
+	if e != nil {
+		return nil, e
+	}
+	return x.Bytes(), e
+}
 func (r *Request) BodyEnum(p string, required bool, validators []string) (string, *ae.Error) {
 	x, e := r.BodyString(p, required)
 	if e != nil {

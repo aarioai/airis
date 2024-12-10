@@ -321,13 +321,13 @@ func (r *Request) parseMultipartBody(boundary string) *ae.Error {
 }
 
 func (r *Request) Body(name string, patterns ...any) (*RawValue, *ae.Error) {
+	raw := newRawValue(name, "")
 	if !r.bodyParsed {
-		err := r.parseBodyStream()
-		if err != nil {
-			return nil, err
+		e := r.parseBodyStream()
+		if e != nil {
+			return raw, e
 		}
 	}
-	raw := newRawValue(name, "")
 	if r.injectedBodies != nil {
 		if v, ok := r.injectedBodies[name]; ok {
 			raw.Reload(v)
