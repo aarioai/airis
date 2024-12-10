@@ -86,8 +86,8 @@ func (c *Config) getOtherConfig(key string) string {
 	return c.otherConfig[key]
 }
 
-// MustGetBytes 这个比较特殊，一般优先从
-func (c *Config) MustGetBytes(key string) ([]byte, error) {
+// MustGetBin 这个比较特殊，一般优先从
+func (c *Config) MustGetBin(key string) ([]byte, error) {
 	// 1. 优先从 file 读取
 	if rsa := c.getBinData(key); len(rsa) > 0 {
 		return rsa, nil
