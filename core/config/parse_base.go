@@ -9,12 +9,13 @@ import (
 	"time"
 )
 
-func (c *Config) AddConfigs(otherConfigs ...map[string]string) {
+// Extend 扩展 other configs，后面扩展的配置会替换已存在的配置
+func (c *Config) Extend(otherConfigs ...map[string]string) error {
 	c.startWrite()
 	defer c.endWrite()
-	cfgs := arrmap.Merge(otherConfigs...)
-	if len(cfgs) == 0 {
-		return
+	cfgs, err := c.parseOtherConfig(otherConfigs...)
+	if err != nil || len(cfgs) == 0 {
+		return err
 	}
 
 	// 写锁范围一定要越小越好
@@ -26,26 +27,7 @@ func (c *Config) AddConfigs(otherConfigs ...map[string]string) {
 		c.otherConfig[k] = v
 	}
 	cfgMtx.Unlock()
-}
-
-func (c *Config) AddTextConfigs(rsaConfigs ...map[string][]byte) {
-	c.startWrite()
-	defer c.endWrite()
-	cfgs := arrmap.MergeSlices(rsaConfigs...)
-	if len(cfgs) == 0 {
-		return
-	}
-	// 写锁范围一定要越小越好
-	cfgMtx.Lock()
-	if c.textConfig == nil {
-		c.textConfig = make(map[string]string)
-	}
-	for name, v := range cfgs {
-		if len(v) > 0 {
-			c.textConfig[name] = string(v)
-		}
-	}
-	cfgMtx.Unlock()
+	return nil
 }
 
 func (c *Config) startWrite() {
@@ -99,14 +81,16 @@ func (c *Config) loadAllTextConfigs(value string) (map[string]string, error) {
 	if len(dirs) == 1 || err != nil {
 		return fileConfigs, err
 	}
-
+	if fileConfigs == nil {
+		fileConfigs = make(map[string]string)
+	}
 	for i := 1; i < len(dirs); i++ {
 		dir := dirs[i]
 		cfg, err := c.loadTextConfigs(dir)
 		if err != nil {
 			return nil, err
 		}
-		fileConfigs = arrmap.Merge(fileConfigs, cfg)
+		arrmap.Extend(fileConfigs, cfg)
 	}
 
 	return fileConfigs, nil
@@ -145,8 +129,14 @@ func (c *Config) loadTextFile(root string, entry fs.DirEntry, rsaFiles map[strin
 	if len(data) == 0 {
 		return fmt.Errorf("bin config file is empty: %s", filePath)
 	}
-
-	rsaFiles[entry.Name()] = string(data)
+	k := entry.Name()
+	v := string(data)
+	if c.valueProcessor != nil {
+		if v, err = c.valueProcessor(k, v); err != nil {
+			return err
+		}
+	}
+	rsaFiles[k] = v
 	return nil
 }
 

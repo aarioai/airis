@@ -12,10 +12,9 @@ type App struct {
 	Log    logger.LogInterface
 }
 
-func New(cfgPath string, logger logger.LogInterface) *App {
-	c := config.New(cfgPath)
+func New(config *config.Config, logger logger.LogInterface) *App {
 	return &App{
-		Config: c,
+		Config: config,
 		Log:    logger,
 	}
 }

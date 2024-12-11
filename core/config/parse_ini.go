@@ -9,17 +9,26 @@ import (
 )
 
 // convertIniToMap 将 ini.File 转换为扁平化的 map[string]string
-func convertIniToMap(iniFile *ini.File, target map[string]string) {
+func (c *Config) convertIniToMap(iniFile *ini.File, target map[string]string) error {
 	for _, section := range iniFile.Sections() {
-		var prefix string
+		prefix := ""
 		sectionName := section.Name()
 		if sectionName != "" && sectionName != "DEFAULT" {
 			prefix = sectionName + "."
 		}
 		for _, key := range section.Keys() {
-			target[prefix+key.Name()] = key.Value()
+			k := prefix + key.Name()
+			v := key.Value()
+			if c.valueProcessor != nil {
+				var err error
+				if v, err = c.valueProcessor(k, v); err != nil {
+					return err
+				}
+			}
+			target[k] = v
 		}
 	}
+	return nil
 }
 
 // loadIni 加载 ini 文件
@@ -29,12 +38,44 @@ func (c *Config) loadIni() (map[string]string, error) {
 		return nil, fmt.Errorf("failed to load config %s: %w", c.path, err)
 	}
 	data := make(map[string]string)
-	convertIniToMap(iniFile, data)
-	return data, nil
+	err = c.convertIniToMap(iniFile, data)
+	return data, err
+}
+func (c *Config) processData(data map[string]string) error {
+	if c.valueProcessor == nil {
+		return nil
+	}
+
+	for k, v := range data {
+		newV, err := c.valueProcessor(k, v)
+		if err != nil {
+			return err
+		}
+		if newV != v {
+			data[k] = newV
+		}
+	}
+	return nil
+}
+func (c *Config) parseOtherConfig(otherConfigs ...map[string]string) (map[string]string, error) {
+	cfgs := arrmap.Merge(otherConfigs...)
+	if c.valueProcessor == nil {
+		return cfgs, nil
+	}
+	for k, v := range cfgs {
+		newV, err := c.valueProcessor(k, v)
+		if err != nil {
+			return nil, err
+		}
+		if newV != v {
+			cfgs[k] = newV
+		}
+	}
+	return cfgs, nil
 }
 
-// Reload 重新加载配置
-func (c *Config) Reload(otherConfigs ...map[string]string) error {
+// Reload 重新加载base和text配置
+func (c *Config) Reload() error {
 	c.startWrite()
 	defer c.endWrite()
 
@@ -46,12 +87,11 @@ func (c *Config) Reload(otherConfigs ...map[string]string) error {
 	if err != nil {
 		return err
 	}
+
 	// 写锁范围一定要越小越好
 	cfgMtx.Lock()
 	c.baseConfig = data
 	c.textConfig = textConfigs
-	// clear(c.otherConfig)
-	c.otherConfig = arrmap.Merge(otherConfigs...)
 	cfgMtx.Unlock()
 	return c.initializeConfig()
 }

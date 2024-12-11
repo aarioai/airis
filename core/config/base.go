@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"io/fs"
 	"strconv"
 	"strings"
@@ -68,19 +67,20 @@ type Config struct {
 	textConfig  map[string]string // 使用字符串保存，避免[]byte被业务层修改
 	otherConfig map[string]string // 不要使用 sync.Map， 直接对整个map加锁设置
 	snapshot    atomic.Pointer[Snapshot]
+
+	valueProcessor func(key string, value string) (string, error)
 }
 
-func New(path string, otherConfigs ...map[string]string) *Config {
+func New(path string, valueProcessor func(key string, value string) (string, error)) (*Config, error) {
 	cfg := &Config{
-		path:        path,
-		baseConfig:  make(map[string]string),
-		textConfig:  make(map[string]string),
-		otherConfig: make(map[string]string),
+		TimeFormat:     "2006-02-01 15:04:05",
+		TimezoneID:     time.Local.String(),
+		TimeLocation:   time.Local,
+		path:           path,
+		valueProcessor: valueProcessor,
 	}
-	if err := cfg.Reload(otherConfigs...); err != nil {
-		panic(fmt.Sprintf("failed to load config: %v", err))
-	}
-	return cfg
+	err := cfg.Reload()
+	return cfg, err
 }
 
 func parseToDuration(d string) time.Duration {

@@ -8,10 +8,16 @@ import (
 )
 
 func TestParseIni(t *testing.T) {
-	c := config.New("./parse_ini_test.ini")
-	c.AddConfigs(map[string]string{
+	c, err := config.New("./parse_ini_test.ini", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = c.Extend(map[string]string{
 		"default.time": time.Now().Format("2006-01-02 15:04:05"),
 	})
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	//c.Dump()
 	//c.Log()
