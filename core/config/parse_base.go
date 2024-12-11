@@ -129,7 +129,8 @@ func (c *Config) loadTextFile(root string, entry fs.DirEntry, rsaFiles map[strin
 	if len(data) == 0 {
 		return fmt.Errorf("bin config file is empty: %s", filePath)
 	}
-	k := entry.Name()
+	// 目录名.文件名
+	k := filepath.Base(root) + "." + entry.Name()
 	v := string(data)
 	if c.valueProcessor != nil {
 		if v, err = c.valueProcessor(k, v); err != nil {
