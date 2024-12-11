@@ -59,11 +59,12 @@ func (p *Atype) String() string {
 func (p *Atype) Bytes() []byte {
 	return Bytes(p.raw)
 }
-func (p *Atype) Slice() ([]any, error) {
-	return Slice(p.raw)
-}
+
 func (p *Atype) Bool() (bool, error) {
 	return Bool(p.raw)
+}
+func (p *Atype) IsUnsigned() bool {
+	return IsUnsigned(p.raw)
 }
 
 func (p *Atype) SqlNullString() sql.NullString {
@@ -89,14 +90,6 @@ func (p *Atype) NotEmpty() bool {
 
 func (p *Atype) DefaultBool(defaultValue bool) bool {
 	v, err := p.Bool()
-	if err != nil {
-		return defaultValue
-	}
-	return v
-}
-
-func (p *Atype) DefaultSlice(defaultValue []any) []any {
-	v, err := p.Slice()
 	if err != nil {
 		return defaultValue
 	}

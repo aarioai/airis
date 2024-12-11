@@ -26,29 +26,3 @@ func getSmallNumberString(n int) string {
 	}
 	return strconv.Itoa(n)
 }
-func fastIntToString(v int64) string {
-	// 小数字使用查表法；小数字在query string 或body传参中会很常见
-	if v >= 0 && v < 100 {
-		return getSmallNumberString(int(v))
-	}
-	return strconv.FormatInt(v, 10)
-}
-
-func fastUintToString(v uint64) string {
-	// 小数字使用查表法
-	if v < 100 {
-		return getSmallNumberString(int(v))
-	}
-
-	return strconv.FormatUint(v, 10)
-}
-
-func fastFloatToString(v float64, bitSize int) string {
-	// 整数部分处理
-	if v == float64(int64(v)) {
-		return fastIntToString(int64(v))
-	}
-
-	// 使用 strconv.FormatFloat
-	return strconv.FormatFloat(v, 'f', -1, bitSize)
-}

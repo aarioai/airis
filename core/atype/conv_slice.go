@@ -1,29 +1,30 @@
 package atype
 
 import (
+	"errors"
 	"reflect"
 )
 
-// ToSlice 将任意值转换为 []any
-func ToSlice(v any) []any {
+// Slice 将任意值转换为 []any
+func Slice(v any) ([]any, error) {
 	if v == nil {
-		return nil
+		return nil, nil
 	}
 
 	if slice, ok := v.([]any); ok {
-		return slice
+		return slice, nil
 	}
 
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Slice && rv.Kind() != reflect.Array {
-		return nil
+		return nil, errors.New("cast type error")
 	}
 
 	result := make([]any, rv.Len())
 	for i := 0; i < rv.Len(); i++ {
 		result[i] = rv.Index(i).Interface()
 	}
-	return result
+	return result, nil
 }
 
 // ToAnySlice 将任意类型切片转换为 []any

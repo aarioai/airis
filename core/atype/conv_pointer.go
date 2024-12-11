@@ -1,8 +1,4 @@
-package conv
-
-import (
-	"github.com/aarioai/airis/core/atype"
-)
+package atype
 
 // Deref 是一个通用的指针解引用函数，如果指针为 nil 则返回类型的零值
 // T 必须是基本数值类型: uint64, uint32, uint, uint16, uint8, int64, int32, int, int16, int8, float64, float32, string
@@ -16,7 +12,7 @@ func Deref[T uint64 | uint32 | uint | uint16 | uint8 | int64 | int32 | int | int
 }
 
 // DerefInt24 专门处理 Int24 类型的指针解引用
-func DerefInt24(n *atype.Uint24) atype.Uint24 {
+func DerefInt24(n *Uint24) Uint24 {
 	if n == nil {
 		return 0
 	}
@@ -24,7 +20,7 @@ func DerefInt24(n *atype.Uint24) atype.Uint24 {
 }
 
 // DerefUint24 专门处理 Uint24 类型的指针解引用
-func DerefUint24(n *atype.Uint24) atype.Uint24 {
+func DerefUint24(n *Uint24) Uint24 {
 	if n == nil {
 		return 0
 	}

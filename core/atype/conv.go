@@ -29,43 +29,43 @@ func String(d any) string {
 
 		// 整数
 	case int64:
-		return fastIntToString(v)
+		return FormatInt(v)
 	case int:
-		return fastIntToString(int64(v))
+		return FormatInt(int64(v))
 	case int32:
-		return fastIntToString(int64(v))
+		return FormatInt(int64(v))
 	//  is a built-in alias of int32, @notice 'A' is a rune(65), is different with byte('A') (alias of uint8(65))
-	//case rune: return fastIntToString(int64(v))
+	//case rune: return FormatInt(int64(v))
 	case Int24:
-		return fastIntToString(int64(v))
+		return FormatInt(int64(v))
 	case int16:
-		return fastIntToString(int64(v))
+		return FormatInt(int64(v))
 	case int8:
-		return fastIntToString(int64(v))
+		return FormatInt(int64(v))
 
 		// 无符号整数
 	case uint64:
-		return fastUintToString(v)
+		return FormatUint(v)
 	case uint:
-		return fastUintToString(uint64(v))
+		return FormatUint(uint64(v))
 	case uint32:
-		return fastUintToString(uint64(v))
+		return FormatUint(uint64(v))
 	case Uint24:
-		return fastUintToString(uint64(v))
+		return FormatUint(uint64(v))
 	case uint16:
-		return fastUintToString(uint64(v))
+		return FormatUint(uint64(v))
 	case uint8: // byte
-		return fastUintToString(uint64(v))
+		return FormatUint(uint64(v))
 	// is a built-in alias of uint8, Name('A') returns "97"
 	//case byte: return strconv.FormatUint(uint64(v), 10)
 	case Booln:
-		return fastUintToString(uint64(v))
+		return FormatUint(uint64(v))
 
 		// 浮点数
 	case float64:
-		return fastFloatToString(v, 64)
+		return FormatFloat(v, 64)
 	case float32:
-		return fastFloatToString(float64(v), 32)
+		return FormatFloat(float64(v), 32)
 	}
 	// 有些类型type vt uint  var a, b vt 这样就无法识别为 uint；所以尝试通过字符串方式转一下
 	return fmt.Sprint(d)
@@ -88,17 +88,9 @@ func Bytes(d any) []byte {
 	return []byte(String(d))
 }
 
-func Slice(d any) ([]any, error) {
-	if d != nil {
-		if v, ok := d.([]any); ok {
-			return v, nil
-		}
-	}
-	return nil, errors.New("cast type error")
-}
 func Bool(d any) (bool, error) {
 	if d == nil {
-		return false, errors.New("nil to bool")
+		return false, nil
 	}
 
 	switch v := d.(type) {

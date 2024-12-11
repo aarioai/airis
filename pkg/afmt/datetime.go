@@ -9,6 +9,12 @@ import (
 	"time"
 )
 
+var (
+	ErrDurationPattern = errors.New("layout pattern must be like h`m`s or d`h`m`s")
+	ErrDurationSingle  = errors.New("the singular layout pattern does not match the plural layout pattern")
+)
+
+
 func timeDiff(a, b time.Time) (year, month, day, hour, min, sec int) {
 	if a.Location() != b.Location() {
 		b = b.In(a.Location())
@@ -213,6 +219,7 @@ func DurationInChinese(d time.Duration) string {
 	return s
 }
 
+
 // 格式化 Duration
 // time.Duration.String()  返回如：895061h51m1.00001s
 // 这里对系统功能进行扩展，支持多种语言，但是只支持到整数秒。
@@ -226,7 +233,7 @@ func DurationString(d time.Duration, layout string, singlelar ...string) (string
 
 	la := bytes.Split([]byte(layout), []byte{'`'})
 	if len(la) < 3 {
-		return "", errors.New("layout pattern must be like h`m`s or d`h`m`s")
+		return "", ErrDurationPattern
 	}
 	for _, p := range la {
 		x += len(p)
@@ -235,7 +242,7 @@ func DurationString(d time.Duration, layout string, singlelar ...string) (string
 	if g {
 		sa = bytes.Split([]byte(singlelar[0]), []byte{'`'})
 		if len(sa) != len(la) {
-			return "", errors.New("the singular layout pattern does not match the plural layout pattern")
+			return "", ErrDurationSingle
 		}
 		x = 0
 		for i, p := range la {
