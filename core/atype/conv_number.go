@@ -1,6 +1,7 @@
 package atype
 
 import (
+	"golang.org/x/exp/constraints"
 	"math"
 	"strconv"
 )
@@ -25,16 +26,18 @@ func FormatUint8(v uint8) string {
 }
 
 // FormatInt 将int64转换为字符串，小数字直接使用查表法
-func FormatInt(v int64) string {
+func FormatInt[T constraints.Signed](value T) string {
+	v := int64(value)
 	// 小数字使用查表法
 	if v >= 0 && v <= maxSmallNumber {
 		return smallNumbers[v]
 	}
-	return strconv.FormatInt(v, 10)
+	return strconv.FormatInt(int64(v), 10)
 }
 
 // FormatUint 将uint64转换为字符串，小数字直接使用查表法
-func FormatUint(v uint64) string {
+func FormatUint[T constraints.Unsigned](value T) string {
+	v := uint64(value)
 	// 小数字使用查表法
 	if v <= maxSmallNumber {
 		return smallNumbers[v]
@@ -42,13 +45,14 @@ func FormatUint(v uint64) string {
 	return strconv.FormatUint(v, 10)
 }
 
-// FormatFloat 将float64转换为字符串，整数部分使用FormatInt，小数部分使用strconv.FormatFloat
-func FormatFloat(v float64, bitSize int) string {
-	// 整数部分处理
-	if v == float64(int64(v)) {
-		return FormatInt(int64(v))
+// FormatFloat 将float转换为字符串，整数部分使用FormatInt，小数部分使用strconv.FormatFloat
+func FormatFloat[T constraints.Float](value T, bitSize int) string {
+	v := float64(value)
+	intPart := int64(v)
+	// 处理int性能更好
+	if v == float64(intPart) {
+		return FormatInt(intPart)
 	}
-	// 使用 strconv.FormatFloat
 	return strconv.FormatFloat(v, 'f', -1, bitSize)
 }
 func ParseInt(s string) int {

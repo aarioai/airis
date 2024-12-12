@@ -2,8 +2,8 @@ package config
 
 import (
 	"fmt"
-	"github.com/aarioai/airis/pkg/arrmap"
 	"io/fs"
+	"maps"
 	"os"
 	"path/filepath"
 	"time"
@@ -90,7 +90,7 @@ func (c *Config) loadAllTextConfigs(value string) (map[string]string, error) {
 		if err != nil {
 			return nil, err
 		}
-		arrmap.Extend(fileConfigs, cfg)
+		maps.Copy(fileConfigs, cfg)
 	}
 
 	return fileConfigs, nil

@@ -1,6 +1,7 @@
 package atype
 
 import (
+	"github.com/aarioai/airis/pkg/types"
 	"reflect"
 )
 
@@ -67,11 +68,11 @@ func ToComplexMaps(ai []any) []map[string]any {
 	return result
 }
 
-func ToFloat64Map(mi map[string]any) (map[string]float64, error) {
+func ToFloat64Map[T types.MapKeyType](mi map[T]any) (map[T]float64, error) {
 	if len(mi) == 0 {
 		return nil, nil
 	}
-	result := make(map[string]float64, len(mi))
+	result := make(map[T]float64, len(mi))
 	for k, v := range mi {
 		val, err := Float64(v, 64)
 		if err != nil {
@@ -82,22 +83,22 @@ func ToFloat64Map(mi map[string]any) (map[string]float64, error) {
 	return result, nil
 }
 
-func ToStringMap(mi map[string]any) map[string]string {
+func ToStringMap[T types.MapKeyType](mi map[T]any) map[T]string {
 	if len(mi) == 0 {
 		return nil
 	}
-	result := make(map[string]string, len(mi))
+	result := make(map[T]string, len(mi))
 	for k, v := range mi {
 		result[k] = String(v)
 	}
 	return result
 }
 
-func ToStringsMap(mi map[string]any) map[string][]string {
+func ToStringsMap[T types.MapKeyType](mi map[T]any) map[T][]string {
 	if len(mi) == 0 {
 		return nil
 	}
-	result := make(map[string][]string, len(mi))
+	result := make(map[T][]string, len(mi))
 	for k, v := range mi {
 		if slice, ok := v.([]any); ok {
 			result[k] = ToStrings(slice)
@@ -105,11 +106,11 @@ func ToStringsMap(mi map[string]any) map[string][]string {
 	}
 	return result
 }
-func ToComplexStringMap(mi map[string]any) map[string]map[string]string {
+func ToComplexStringMap[T types.MapKeyType](mi map[T]any) map[T]map[string]string {
 	if len(mi) == 0 {
 		return nil
 	}
-	result := make(map[string]map[string]string, len(mi))
+	result := make(map[T]map[string]string, len(mi))
 	for k, v := range mi {
 		if m, ok := v.(map[string]any); ok {
 			result[k] = ToStringMap(m)
@@ -117,11 +118,11 @@ func ToComplexStringMap(mi map[string]any) map[string]map[string]string {
 	}
 	return result
 }
-func ToComplexStringsMap(mi map[string]any) map[string][][]string {
+func ToComplexStringsMap[T types.MapKeyType](mi map[T]any) map[T][][]string {
 	if len(mi) == 0 {
 		return nil
 	}
-	result := make(map[string][][]string, len(mi))
+	result := make(map[T][][]string, len(mi))
 	for k, v := range mi {
 		if slices, ok := v.([]any); ok {
 			innerSlices := make([][]string, len(slices))

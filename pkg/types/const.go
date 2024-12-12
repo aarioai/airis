@@ -1,6 +1,9 @@
 package types
 
-import "golang.org/x/exp/constraints"
+import (
+	"cmp"
+	"golang.org/x/exp/constraints"
+)
 
 // Number 表示所有数字类型
 type Number interface {
@@ -9,7 +12,18 @@ type Number interface {
 
 // BasicType 表示所有基本类型
 type BasicType interface {
-	bool | byte | string | Number
+	bool | byte | string | rune | Number
+}
+
+// MapKeyType 允许的map key类型
+// 事实上Go map key 还支持struct，但是不建议使用
+type MapKeyType interface {
+	cmp.Ordered // rune = int32, byte = uint8
+}
+
+// StringConvertableType 可以直接使用 string(T) 转换的类型
+type StringConvertableType interface {
+	byte | rune | string // rune = int32, byte = uint8
 }
 
 // 其他的使用 math.MaxInt64

@@ -39,7 +39,7 @@ func ToAnySlice[T any](v []T) []any {
 	return args
 }
 
-func ToStrings(ai []any) []string {
+func ToStrings[T any](ai []T) []string {
 	if len(ai) == 0 {
 		return nil
 	}

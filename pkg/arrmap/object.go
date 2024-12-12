@@ -1,39 +1,43 @@
 package arrmap
 
 import (
-	"sort"
+	"github.com/aarioai/airis/pkg/types"
+	"slices"
 	"strings"
 )
 
 // JoinKeys 将map的key用sep连接起来
-func JoinKeys[T any](m map[string]T, sep string, sorts ...bool) string {
+func JoinKeys[A types.StringConvertableType](m map[A]any, sep string, sort bool) string {
 	if len(m) == 0 {
 		return ""
 	}
-	keys := Keys(m)
-	if len(sorts) > 0 && sorts[0] {
-		sort.Strings(keys)
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, string(k))
 	}
-
+	if sort {
+		slices.Sort(keys)
+	}
 	return strings.Join(keys, sep)
 }
 
 // SortedKeys 获取map的key列表，并排序
-func SortedKeys[T any](m map[string]T) []string {
-	if len(m) == 0 {
+func SortedKeys[A types.MapKeyType, T any](m map[A]T) []A {
+	keys := Keys(m)
+	if len(keys) == 0 {
 		return nil
 	}
-	keys := Keys(m)
-	sort.Strings(keys)
+	slices.Sort(keys)
 	return keys
 }
 
 // Keys 获取map的key列表
-func Keys[T any](m map[string]T) []string {
+// maps.Keys() 是一个iter.Seq[K]，通过 for  k := range maps.Keys(m) 使用
+func Keys[A types.MapKeyType, T any](m map[A]T) []A {
 	if len(m) == 0 {
 		return nil
 	}
-	keys := make([]string, 0, len(m))
+	keys := make([]A, 0, len(m))
 	for k := range m {
 		keys = append(keys, k)
 	}

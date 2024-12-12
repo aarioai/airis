@@ -72,7 +72,7 @@ func (c *Config) Dump() {
 	afmt.PrintBorder("End of Config", afmt.Yellow, afmt.Bold)
 }
 
-func sortConfigKeys[T string | []byte](data map[string]T) [][3]string {
+func sortConfigKeys[T string | []rune | []byte](data map[string]T) [][3]string {
 	result := make([][3]string, 0, len(data))
 	defaultSectionKeys := make([]string, 0)
 	sectionKeys := make([]string, 0)
