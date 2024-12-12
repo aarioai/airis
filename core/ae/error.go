@@ -16,6 +16,7 @@ type Error struct {
 	Caller    string `json:"caller"`
 	Detail    string `json:"details"`
 	TraceInfo string `json:"trace_info"`
+	locked    bool
 }
 
 // New 使用错误码和消息创建 Error
@@ -50,13 +51,27 @@ func NewError(err error, details ...any) *Error {
 	}
 	return NewE(err.Error()).WithCaller(2).WithDetail(details...)
 }
+
+// Lock 锁定后就不能再解锁了，作为常量使用
+func (e *Error) Lock() *Error {
+	e.locked = true
+	return e
+}
 func (e *Error) WithMsg(format string, args ...any) *Error {
+	if e.locked {
+		fmt.Println("it's locked!")
+		return e
+	}
 	e.Msg = fmt.Sprintf(format, args...)
 	return e
 }
 
 // AppendMsg 尝试添加消息
 func (e *Error) AppendMsg(msgs ...any) *Error {
+	if e.locked {
+		fmt.Println("it's locked!")
+		return e
+	}
 	msg := afmt.SprintfArgs(msgs)
 	if msg != "" {
 		e.Msg += " - " + msg
@@ -66,15 +81,27 @@ func (e *Error) AppendMsg(msgs ...any) *Error {
 
 // WithCaller 添加调用者信息
 func (e *Error) WithCaller(skip int) *Error {
+	if e.locked {
+		fmt.Println("it's locked!")
+		return e
+	}
 	e.Caller = Caller(skip + 1)
 	return e
 }
 
 func (e *Error) WithDetail(detail ...any) *Error {
+	if e.locked {
+		fmt.Println("it's locked!")
+		return e
+	}
 	e.Detail = afmt.SprintfArgs(detail)
 	return e
 }
 func (e *Error) WithTraceInfo(ctx iris.Context) *Error {
+	if e.locked {
+		fmt.Println("it's locked!")
+		return e
+	}
 	e.TraceInfo = airis.TraceInfo(ctx)
 	return e
 }

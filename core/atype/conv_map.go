@@ -4,7 +4,7 @@ import (
 	"reflect"
 )
 
-// ToAny 将任意值转换为 map[any]any
+// ToMap 将任意值转换为 map[any]any
 func ToMap(value any) (map[any]any, bool) {
 	switch v := value.(type) {
 	case map[any]any:
