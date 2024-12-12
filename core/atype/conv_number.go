@@ -1,12 +1,34 @@
 package atype
 
-import "strconv"
+import (
+	"math"
+	"strconv"
+)
+
+const maxSmallNumber = math.MaxUint8
+
+// 为了提高性能，可以添加常用数字的字符串缓存。小数字在query string 或body传参中会很常见
+var (
+	smallNumbers [maxSmallNumber + 1]string // 暂时保持 uint8 最高范围
+)
+
+func init() {
+	for i := 0; i < maxSmallNumber; i++ {
+		smallNumbers[i] = strconv.Itoa(i)
+	}
+}
+
+// FormatUint8 直接查表
+// 小数字在query string 或body传参中会很常见
+func FormatUint8(v uint8) string {
+	return smallNumbers[v]
+}
 
 // FormatInt 将int64转换为字符串，小数字直接使用查表法
 func FormatInt(v int64) string {
-	// 小数字使用查表法；小数字在query string 或body传参中会很常见
-	if v >= 0 && v < 100 {
-		return getSmallNumberString(int(v))
+	// 小数字使用查表法
+	if v >= 0 && v <= maxSmallNumber {
+		return smallNumbers[v]
 	}
 	return strconv.FormatInt(v, 10)
 }
@@ -14,8 +36,8 @@ func FormatInt(v int64) string {
 // FormatUint 将uint64转换为字符串，小数字直接使用查表法
 func FormatUint(v uint64) string {
 	// 小数字使用查表法
-	if v < 100 {
-		return getSmallNumberString(int(v))
+	if v <= maxSmallNumber {
+		return smallNumbers[v]
 	}
 	return strconv.FormatUint(v, 10)
 }
