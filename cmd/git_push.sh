@@ -38,12 +38,12 @@ EOF
 }
 
 # 日志函数
-log_info() {
-    echo -e "${GREEN}>>> $1${NC}"
+log() {
+    echo -e "${GREEN}$1${NC}"
 }
 
-log_error() {
-    echo -e "${RED}Error: $1${NC}" >&2
+panic() {
+    echo -e "${RED}[error] $1${NC}" >&2
     exit 1
 }
 
@@ -67,38 +67,38 @@ fi
 
 # 构建函数
 build() {
-    cd "${ROOT_DIR}/cmd" || log_error "Failed to change directory to cmd"
-    log_info "Building project..."
-    go run build.go --root="$ROOT_DIR" --js="/data/Aa/proj/go/src/project/xixi/deploy/asset_src/lib_dev/aa-js/src/f_oss_filetype_readonly.js" || log_error "Build failed"
+    cd "$ROOT_DIR/cmd" || panic "failed to cd $ROOT_DIR/cmd"
+    log "building project..."
+    go run build.go --root="$ROOT_DIR" --js="/data/Aa/proj/go/src/project/xixi/deploy/asset_src/lib_dev/aa-js/src/f_oss_filetype_readonly.js" || panic "Build failed"
 }
 
 # 更新并推送代码
 pushAndUpgradeMod() {
-    cd "$ROOT_DIR" || log_error "Failed to change directory to $ROOT_DIR"
+    cd "$ROOT_DIR" || panic "failed to cd $ROOT_DIR"
 
-    go mod tidy || log_error "Failed to tidy go.mod"
+    go mod tidy || panic "failed go mod tidy"
 
     # 运行单元测试
-    log_info "Running tests..."
-    go test ./... || log_error "Tests failed"
+    log "go test ./..."
+    go test ./... || panic "failed go test ./... failed"
 
     # 更新 go.mod
     if [ $upgrade -eq 1 ]; then
-        log_info "Upgrading go.mod..."
+        log "go mod init"
         rm -f go.mod
-        go mod init || log_error "Failed to initialize go.mod"
+        go mod init || panic "failed go mod init"
     fi
 
     # 更新依赖
     if [ $noUpdate -eq 0 ]; then
-        log_info "Updating dependencies..."
-        go get -u -v ./... || log_error "Failed to update dependencies"
+        log "updating dependencies..."
+        go get -u -v ./... || panic "failed go get -u -v ./..."
     fi
     # Git 操作
-    log_info "Committing changes..."
-    git add -A . || log_error "Failed to stage changes"
-    git commit -m "$comment" || log_error "Failed to commit changes"
-    git push origin "$DEFAULT_BRANCH" || log_error "Failed to push changes"
+    log "committing changes..."
+    git add -A . || panic "failed git add -A ."
+    git commit -m "$comment" || panic "failed git commit -m $comment"
+    git push origin "$DEFAULT_BRANCH" || panic "failed git push origin $DEFAULT_BRANCH"
 
     # 处理标签
     if [ $incrTag -eq 1 ]; then
@@ -108,7 +108,7 @@ pushAndUpgradeMod() {
 
 # 处理Git标签
 handle_tags() {
-    log_info "Managing tags..."
+    log "managing tags..."
     git fetch --tags
     latestTag=$(git describe --tags "$(git rev-list --tags --max-count=1)" 2>/dev/null || echo "")
     
@@ -118,19 +118,19 @@ handle_tags() {
         id=$((id+1))
         newTag="$tag.$id"
         
-        log_info "Removing old tag: $latestTag"
+        log "removing old tag: $latestTag"
         git tag -d "$latestTag"
         git push origin --delete tag "$latestTag"
         
         git tag "$newTag"
         git push origin --tags
-        log_info "New tag created: $newTag"
+        log "new tag created: $newTag"
     fi
 }
 # 取消VPN
 unsetVPN() {
   if [[ $1 -eq 1 ]]; then
-      echo "VPN unsetted"
+      echo "unset VPN"
       export http_proxy=""
       export https_proxy=""
       unset http_proxy
@@ -140,7 +140,7 @@ unsetVPN() {
 # 开启VPN
 setVPN() {
   if [ -n "${http_proxy:-}" ]; then
-    echo "Proxy ${http_proxy} ${https_proxy}"
+    echo "proxy ${http_proxy} ${https_proxy}"
     return
   fi
   # 设置代理
@@ -153,10 +153,10 @@ setVPN() {
   # 检查HTTP状态码，2xx和3xx都表示连接成功
   if [[ $http_code =~ ^[23][0-9]{2}$ ]]; then
     needCloseVPN=1
-    echo "VPN started (HTTP $http_code)"
+    echo "start VPN (HTTP $http_code)"
   else
     unsetVPN 1
-    echo "VPN check failed (HTTP $http_code)"
+    echo "check VPN failed (HTTP $http_code)"
   fi
 }
 
@@ -166,8 +166,8 @@ main() {
   build
   pushAndUpgradeMod
   unsetVPN "$needCloseVPN"
-  log_info "All operations completed successfully."
-  log_info "--> You may use go get -u -v ./...  or -u to upgrade all dependencies maximum 1 time per day"
+  log "success!"
+  log "use go get -u -v ./...  or -u to upgrade all dependencies maximum 1 time per day"
 }
 
 # 执行主流程
