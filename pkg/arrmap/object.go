@@ -30,6 +30,14 @@ func SortedKeys[A types.MapKeyType, T any](m map[A]T) []A {
 	slices.Sort(keys)
 	return keys
 }
+func FilterSortedKeys[A types.MapKeyType, T any](m map[A]T, filter func(key A, value T) (A, bool)) []A {
+	keys := FilterKeys(m, filter)
+	if len(keys) == 0 {
+		return nil
+	}
+	slices.Sort(keys)
+	return keys
+}
 
 // Keys 获取map的key列表
 // maps.Keys() 是一个iter.Seq[K]，通过 for  k := range maps.Keys(m) 使用
@@ -40,6 +48,21 @@ func Keys[A types.MapKeyType, T any](m map[A]T) []A {
 	keys := make([]A, 0, len(m))
 	for k := range m {
 		keys = append(keys, k)
+	}
+	return keys
+}
+
+// FilterKeysKeys 获取map的key列表
+// maps.Keys() 是一个iter.Seq[K]，通过 for  k := range maps.Keys(m) 使用
+func FilterKeys[A types.MapKeyType, T any](m map[A]T, filter func(key A, value T) (A, bool)) []A {
+	if len(m) == 0 {
+		return nil
+	}
+	keys := make([]A, 0, len(m))
+	for k := range m {
+		if newK, ok := filter(k, m[k]); ok {
+			keys = append(keys, newK)
+		}
 	}
 	return keys
 }
