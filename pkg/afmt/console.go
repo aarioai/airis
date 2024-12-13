@@ -35,7 +35,7 @@ const (
 
 // PrintBorder 命令行中，输出边界
 func PrintBorder(msg string, styles ...string) {
-	msg = PadBoth(strings.ToUpper(msg), 80, "=", false)
+	msg = PadBoth(strings.ToUpper(msg), "=", 80)
 	Print("\n"+msg+"\n", styles...)
 }
 func Println(msg string, styles ...string) {

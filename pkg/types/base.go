@@ -21,8 +21,8 @@ type MapKeyType interface {
 	cmp.Ordered // rune = int32, byte = uint8
 }
 
-// StringConvertableType 可以直接使用 string(T) 转换的类型
-type StringConvertableType interface {
+// Stringable 可以直接使用 string(T) 转换的类型。  单词 stringable 被Laravel、Apache等使用
+type Stringable interface {
 	byte | rune | string // rune = int32, byte = uint8
 }
 
