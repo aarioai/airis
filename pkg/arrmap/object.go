@@ -7,7 +7,7 @@ import (
 )
 
 // JoinKeys 将map的key用sep连接起来
-func JoinKeys[A types.Stringable](m map[A]any, sep string, sort bool) string {
+func JoinKeys[A byte | rune | string](m map[A]any, sep string, sort bool) string {
 	if len(m) == 0 {
 		return ""
 	}
