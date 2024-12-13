@@ -59,62 +59,64 @@ var (
 	}
 
 	// 快捷变量，使用时候不需要指定message的，其他的一般都需要指定message供调试或反馈给客户端
-	NoContentE   = New(NoContent)
-	NotModifiedE = New(NotModified)
+	// ErrorXXX/ErrXXX  都应被视为常量，不应修改
 
-	UnauthorizedE    = New(Unauthorized)
-	PaymentRequiredE = New(PaymentRequired)
-	ForbiddenE       = New(Forbidden)
-	NotFoundE        = New(NotFound)
+	ErrorNoContent   = New(NoContent).Lock()
+	ErrorNotModified = New(NotModified).Lock()
 
-	TimeoutE               = New(RequestTimeout)
-	GoneE                  = New(Gone)
-	RequestEntityTooLargeE = New(RequestEntityTooLarge)
-	LockedE                = New(Locked)
-	TooEarlyE              = New(TooEarly)
-	IllegalE               = New(Illegal)
-	NoRowsE                = New(NoRowsAvailable) // 自定义状态码
+	ErrorUnauthorized    = New(Unauthorized).Lock()
+	ErrorPaymentRequired = New(PaymentRequired).Lock()
+	ErrorForbidden       = New(Forbidden).Lock()
+	ErrorNotFound        = New(NotFound).Lock()
 
-	NotImplementedE     = New(NotImplemented)
-	BadGatewayE         = New(BadGateway)
-	ServiceUnavailableE = New(ServiceUnavailable)
+	ErrorTimeout               = New(RequestTimeout).Lock()
+	ErrorGone                  = New(Gone).Lock()
+	ErrorRequestEntityTooLarge = New(RequestEntityTooLarge).Lock()
+	ErrorLocked                = New(Locked).Lock()
+	ErrorTooEarly              = New(TooEarly).Lock()
+	ErrorIllegal               = New(Illegal).Lock()
+	ErrorNoRows                = New(NoRowsAvailable).Lock() // 自定义状态码
+
+	ErrorNotImplemented     = New(NotImplemented).Lock()
+	ErrorBadGateway         = New(BadGateway).Lock()
+	ErrorServiceUnavailable = New(ServiceUnavailable).Lock()
 )
 
-func RetryWithE(redirect string) *Error {
+func NewRetryWith(redirect string) *Error {
 	return New(RetryWith, redirect) // 特殊错误码，msg 用于跳转
 }
 
-func BadParamE(param string) *Error {
+func NewBadParam(param string) *Error {
 	return New(BadRequest, "bad param `"+param+"`")
 }
-func NotAcceptableE(msg ...any) *Error {
+func NewNotAcceptable(msg ...any) *Error {
 	return New(NotAcceptable).AppendMsg(msg...)
 }
-func ProxyAuthRequiredE(msg ...any) *Error {
+func NewProxyAuthRequired(msg ...any) *Error {
 	return New(ProxyAuthRequired).AppendMsg(msg...)
 }
-func ConflictE(name string) *Error {
+func NewConflict(name string) *Error {
 	return New(Conflict).AppendMsg(name)
 }
 
-func PreconditionFailedE(msg ...any) *Error {
+func NewPreconditionFailed(msg ...any) *Error {
 	return New(PreconditionFailed).AppendMsg(msg...)
 }
 
-func UnsupportedMediaE(wants ...string) *Error {
+func NewUnsupportedMedia(wants ...string) *Error {
 	e := New(UnsupportedMedia)
 	if len(wants) > 0 {
 		e.AppendMsg("want " + strings.Join(wants, " or "))
 	}
 	return e
 }
-func FailedDependencyE(msg ...any) *Error {
+func NewFailedDependency(msg ...any) *Error {
 	return New(FailedDependency).AppendMsg(msg...)
 }
-func VariantAlsoNegotiatesE(format string, args ...any) *Error {
+func NewVariantAlsoNegotiates(format string, args ...any) *Error {
 	return New(VariantAlsoNegotiates, afmt.Sprintf(format, args...))
 }
-func LoopDetectedE(msg ...any) *Error {
+func NewLoopDetected(msg ...any) *Error {
 	return New(LoopDetected).AppendMsg(msg...)
 }
 

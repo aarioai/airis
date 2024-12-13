@@ -6,12 +6,13 @@ import (
 )
 
 func TestAtype(t *testing.T) {
-	zero := atype.New("")
+	zero := atype.New()
+	defer zero.Release()
 	if zero.String() != "" {
 		t.Errorf("String() should return empty string")
 	}
 	b := 234242342342423.3
-	s := atype.New(b).String()
+	s := zero.Reload(b).String()
 	if s != "234242342342423.3" {
 		t.Errorf("float64(%f) ==> string(%s)", b, s)
 	}
@@ -32,6 +33,7 @@ func TestAtypeGet(t *testing.T) {
 	}
 
 	d := atype.New(arr)
+	defer d.Release()
 	v, err := d.Get("name")
 	if err != nil {
 		t.Error("get name failed")

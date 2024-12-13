@@ -151,7 +151,7 @@ func (t *Tx) Query(ctx context.Context, query string, args ...any) (*sql.Rows, *
 	rows, err := t.Tx.QueryContext(ctx, query, args...)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ae.NoRowsE
+			return nil, ae.ErrorNoRows
 		}
 		return nil, ae.NewSQLError(err, afmt.Sprintf(query, args...))
 	}

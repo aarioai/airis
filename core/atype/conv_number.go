@@ -55,6 +55,10 @@ func FormatFloat[T constraints.Float](value T, bitSize int) string {
 	}
 	return strconv.FormatFloat(v, 'f', -1, bitSize)
 }
+func ParseBool(s string) bool {
+	v, _ := strconv.ParseBool(s)
+	return v
+}
 func ParseInt(s string) int {
 	return parseInt[int](s, 10, 32)
 }

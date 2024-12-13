@@ -19,9 +19,11 @@ func isInArgsTag(t any) bool {
 }
 func uniqueKey(xargs []any) string {
 	var k strings.Builder
+	v := atype.New()
+	defer v.Release()
 	for _, arg := range xargs {
 		if !isInArgsTag(arg) {
-			k.WriteString(atype.New(arg).String())
+			k.WriteString(v.Reload(arg).String())
 		}
 	}
 	return k.String()

@@ -44,11 +44,11 @@ func (r *Request) BodyCoordinate(p string, required ...bool) (*atype.Coordinate,
 	}
 	lat, ok := x["lat"]
 	if !ok {
-		return nil, ae.BadParamE(p)
+		return nil, ae.NewBadParam(p)
 	}
 	lng, ok := x["lng"]
 	if !ok {
-		return nil, ae.BadParamE(p)
+		return nil, ae.NewBadParam(p)
 	}
 	height, _ := x["height"]
 	coord := atype.Coordinate{
@@ -61,17 +61,17 @@ func (r *Request) BodyCoordinate(p string, required ...bool) (*atype.Coordinate,
 func (r *Request) BodyDate(p string, loc *time.Location, required ...bool) (atype.Date, *ae.Error) {
 	x, e := r.Body(p, `^`+aenum.DateRegExp+`$`, isRequired(required))
 	if e != nil {
-		return "", ae.BadParamE(p)
+		return "", ae.NewBadParam(p)
 	}
-	return atype.NewDate(x.String(), loc), nil
+	return atype.NewDate(x.ReleaseString(), loc), nil
 }
 
 func (r *Request) BodyDatetime(p string, loc *time.Location, required ...bool) (atype.Datetime, *ae.Error) {
 	x, e := r.Body(p, `^`+aenum.DatetimeRegExp+`$`, isRequired(required))
 	if e != nil {
-		return "", ae.BadParamE(p)
+		return "", ae.NewBadParam(p)
 	}
-	return atype.NewDatetime(x.String(), loc), nil
+	return atype.NewDatetime(x.ReleaseString(), loc), nil
 }
 
 func (r *Request) BodyDecimal(p string, bitSize int, ranges ...atype.Decimal) (atype.Decimal, *ae.Error) {
@@ -90,7 +90,10 @@ func (r *Request) BodyDistri(p string, required ...bool) (atype.Distri, *ae.Erro
 }
 func (r *Request) BodyHtml(p string, required ...any) (template.HTML, *ae.Error) {
 	x, e := r.Body(p, required...)
-	return template.HTML(x.String()), e
+	if e != nil {
+		return "", ae.NewBadParam(p)
+	}
+	return template.HTML(x.ReleaseString()), nil
 }
 func (r *Request) BodyImage(p string, required ...bool) (atype.Image, *ae.Error) {
 	x, e := r.BodyPath(p, required...)
@@ -127,22 +130,22 @@ func (r *Request) BodyLocation(p string, required ...bool) (atype.Location, *ae.
 	var loc atype.Location
 	lat, ok := x["lat"]
 	if !ok {
-		e = ae.BadParamE(p)
+		e = ae.NewBadParam(p)
 		return atype.Location{}, e
 	}
 
 	if loc.Latitude, ok = lat.(float64); !ok {
-		e = ae.BadParamE(p)
+		e = ae.NewBadParam(p)
 		return atype.Location{}, e
 	}
 	lng, ok := x["lng"]
 	if !ok {
-		e = ae.BadParamE(p)
+		e = ae.NewBadParam(p)
 		return atype.Location{}, e
 	}
 
 	if loc.Longitude, ok = lng.(float64); !ok {
-		e = ae.BadParamE(p)
+		e = ae.NewBadParam(p)
 		return atype.Location{}, e
 	}
 	if ht, ok := x["height"]; ok {
@@ -175,7 +178,10 @@ func (r *Request) BodyStatus(p string, xargs ...bool) (aenum.Status, *ae.Error) 
 
 func (r *Request) BodyText(p string, required ...any) (atype.Text, *ae.Error) {
 	x, e := r.Body(p, required...)
-	return atype.NewText(x.String(), false), e
+	if e != nil {
+		return "", e
+	}
+	return atype.NewText(x.ReleaseString(), false), e
 }
 
 func (r *Request) BodyUint24(p string, required ...bool) (atype.Uint24, *ae.Error) {

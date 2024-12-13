@@ -10,6 +10,7 @@ func (r *Request) BodyBool(p string) (bool, *ae.Error) {
 	if e != nil {
 		return false, e
 	}
+	defer x.Release()
 	return x.DefaultBool(false), e
 }
 func (r *Request) BodyBytes(p string) ([]byte, *ae.Error) {
@@ -17,7 +18,7 @@ func (r *Request) BodyBytes(p string) ([]byte, *ae.Error) {
 	if e != nil {
 		return nil, e
 	}
-	return x.Bytes(), e
+	return x.ReleaseBytes(), e
 }
 func (r *Request) BodyEnum(p string, required bool, validators []string) (string, *ae.Error) {
 	x, e := r.BodyString(p, required)
@@ -32,7 +33,7 @@ func (r *Request) BodyEnum(p string, required bool, validators []string) (string
 			return x, nil
 		}
 	}
-	return x, ae.BadParamE(p)
+	return x, ae.NewBadParam(p)
 }
 func (r *Request) BodyEnum8(p string, required bool, validators []uint8) (uint8, *ae.Error) {
 	x, e := r.BodyUint8(p, required)
@@ -47,7 +48,7 @@ func (r *Request) BodyEnum8(p string, required bool, validators []uint8) (uint8,
 			return x, nil
 		}
 	}
-	return x, ae.BadParamE(p)
+	return x, ae.NewBadParam(p)
 }
 func (r *Request) BodyEnum8i(p string, required bool, validators []int8) (int8, *ae.Error) {
 	x, e := r.BodyInt8(p, required)
@@ -62,7 +63,7 @@ func (r *Request) BodyEnum8i(p string, required bool, validators []int8) (int8, 
 			return x, nil
 		}
 	}
-	return x, ae.BadParamE(p)
+	return x, ae.NewBadParam(p)
 }
 
 func (r *Request) BodyInt(p string, required ...bool) (int, *ae.Error) {
@@ -117,7 +118,7 @@ func (r *Request) BodyPaths(p string, required ...bool) ([]string, *ae.Error) {
 	for i, x := range xx {
 		// @TODO 平衡性能和准确性，调整到最合适的判断方法
 		if x == "" || (strings.LastIndexByte(x, '.') < 0 || strings.IndexByte(x, ' ') > -1 || strings.IndexByte(x, '?') > -1 || strings.IndexByte(x, '=') > -1) {
-			return nil, ae.BadParamE(p)
+			return nil, ae.NewBadParam(p)
 		}
 		paths[i] = x
 	}
@@ -135,7 +136,7 @@ func (r *Request) BodyString(p string, required ...any) (string, *ae.Error) {
 	// 不要再进行 len(params) 判断，这属于过度优化。这个函数应当优先传 params --> 不要强制，不然不利于使用
 	// 如有该需求，应优先使用 QueryFast
 	x, e := r.Body(p, required...)
-	return x.String(), e
+	return x.ReleaseString(), e
 }
 
 func (r *Request) BodyStrings(p string, required, allowEmptyString bool) ([]string, *ae.Error) {
@@ -193,7 +194,7 @@ func (r *Request) BodyValid(p string, required bool, validator func(string) bool
 		return "", nil
 	}
 	if ok := validator(x); !ok {
-		return "", ae.BadParamE(p)
+		return "", ae.NewBadParam(p)
 	}
 	return x, nil
 }
@@ -206,7 +207,7 @@ func (r *Request) BodyValid8(p string, required bool, validator func(uint8) bool
 		return 0, nil
 	}
 	if ok := validator(x); !ok {
-		return 0, ae.BadParamE(p)
+		return 0, ae.NewBadParam(p)
 	}
 	return x, nil
 }

@@ -104,8 +104,10 @@ func (t NullUint16s) Uint16s() []uint16 {
 		return nil
 	}
 	w := make([]uint16, len(v))
+	newV := New()
+	defer newV.Release()
 	for i, x := range v {
-		w[i] = New(x).DefaultUint16(0)
+		w[i] = newV.Reload(x).DefaultUint16(0)
 	}
 	return w
 }
@@ -137,8 +139,10 @@ func (t NullUint24s) Uint24s() []Uint24 {
 		return nil
 	}
 	w := make([]Uint24, len(v))
+	newV := New()
+	defer newV.Release()
 	for i, x := range v {
-		w[i] = New(x).DefaultUint24(0)
+		w[i] = newV.Reload(x).DefaultUint24(0)
 	}
 	return w
 }
@@ -170,8 +174,10 @@ func (t NullUint32s) Uint32s() []uint32 {
 		return nil
 	}
 	w := make([]uint32, len(v))
+	newV := New()
+	defer newV.Release()
 	for i, x := range v {
-		w[i] = New(x).DefaultUint32(0)
+		w[i] = newV.Reload(x).DefaultUint32(0)
 	}
 	return w
 }
@@ -203,8 +209,10 @@ func (t NullInts) Ints() []int {
 		return nil
 	}
 	w := make([]int, len(v))
+	newV := New()
+	defer newV.Release()
 	for i, x := range v {
-		w[i] = New(x).DefaultInt(0)
+		w[i] = newV.Reload(x).DefaultInt(0)
 	}
 	return w
 }
@@ -236,8 +244,10 @@ func (t NullUints) Uints() []uint {
 		return nil
 	}
 	w := make([]uint, len(v))
+	newV := New()
+	defer newV.Release()
 	for i, x := range v {
-		w[i] = New(x).DefaultUint(0)
+		w[i] = newV.Reload(x).DefaultUint(0)
 	}
 	return w
 }
@@ -271,8 +281,10 @@ func (t NullUint64s) Uint64s() []uint64 {
 		return nil
 	}
 	w := make([]uint64, len(v))
+	newV := New()
+	defer newV.Release()
 	for i, x := range v {
-		w[i] = New(x).DefaultUint64(0)
+		w[i] = newV.Reload(x).DefaultUint64(0)
 	}
 	return w
 }

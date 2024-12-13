@@ -80,7 +80,7 @@ func filterMapFields(u any, tagname string, tags ...string) (map[string]any, *ae
 func filterArrayFields(w any, tagname string, tags ...string) (ret []map[string]any, e *ae.Error) {
 	t := reflect.TypeOf(w).Kind()
 	if t != reflect.Slice && t != reflect.Array {
-		return nil, ae.BadParamE(request.ParamField)
+		return nil, ae.NewBadParam(request.ParamField)
 	}
 	v := reflect.ValueOf(w)
 	ret = make([]map[string]any, v.Len())

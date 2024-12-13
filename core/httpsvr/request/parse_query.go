@@ -10,7 +10,7 @@ func (r *Request) QueryBool(p string) (bool, *ae.Error) {
 	if e != nil {
 		return false, e
 	}
-	return x.DefaultBool(false), nil
+	return x.ReleaseDefaultBool(false), nil
 }
 
 func (r *Request) QueryBytes(p string) ([]byte, *ae.Error) {
@@ -18,7 +18,7 @@ func (r *Request) QueryBytes(p string) ([]byte, *ae.Error) {
 	if e != nil {
 		return nil, e
 	}
-	return x.Bytes(), nil
+	return x.ReleaseBytes(), nil
 }
 func (r *Request) QueryEnum(p string, required bool, validators []string) (string, *ae.Error) {
 	x, e := r.QueryString(p, required)
@@ -33,7 +33,7 @@ func (r *Request) QueryEnum(p string, required bool, validators []string) (strin
 			return x, nil
 		}
 	}
-	return x, ae.BadParamE(p)
+	return x, ae.NewBadParam(p)
 }
 func (r *Request) QueryEnum8(p string, required bool, validators []uint8) (uint8, *ae.Error) {
 	x, e := r.QueryUint8(p, required)
@@ -48,7 +48,7 @@ func (r *Request) QueryEnum8(p string, required bool, validators []uint8) (uint8
 			return x, nil
 		}
 	}
-	return x, ae.BadParamE(p)
+	return x, ae.NewBadParam(p)
 }
 func (r *Request) QueryEnum8i(p string, required bool, validators []int8) (int8, *ae.Error) {
 	x, e := r.QueryInt8(p, required)
@@ -63,7 +63,7 @@ func (r *Request) QueryEnum8i(p string, required bool, validators []int8) (int8,
 			return x, nil
 		}
 	}
-	return x, ae.BadParamE(p)
+	return x, ae.NewBadParam(p)
 }
 func (r *Request) QueryInt(p string, required ...bool) (int, *ae.Error) {
 	v, e := parseInt64(r.Query, p, isRequired(required), 32)
@@ -104,7 +104,7 @@ func (r *Request) QueryId(p string, params ...any) (sid string, id uint64, e *ae
 	}
 	for _, s := range sid {
 		if s < '0' || (s > '9' && s < 'A') || (s > 'Z' && s < '_') || (s > '_' && s < 'a') || s > 'z' {
-			e = ae.BadParamE(p)
+			e = ae.NewBadParam(p)
 			return
 		}
 		if s > '9' {
@@ -177,7 +177,7 @@ func (r *Request) QueryValid(p string, required bool, validator func(string) boo
 		return "", nil
 	}
 	if ok := validator(x); !ok {
-		return "", ae.BadParamE(p)
+		return "", ae.NewBadParam(p)
 	}
 	return x, nil
 }
@@ -190,7 +190,7 @@ func (r *Request) QueryValid8(p string, required bool, validator func(uint8) boo
 		return 0, nil
 	}
 	if ok := validator(x); !ok {
-		return 0, ae.BadParamE(p)
+		return 0, ae.NewBadParam(p)
 	}
 	return x, nil
 }

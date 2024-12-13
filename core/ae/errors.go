@@ -52,7 +52,7 @@ func NewSQLError(err error, details ...any) *Error {
 		driver.ErrBadConn:        func() *Error { return NewE(pos + sqlBadConnMsg + msg).WithDetail(details...) },
 		driver.ErrSkip:           func() *Error { return NewE(pos + sqlSkipMsg + msg).WithDetail(details...) },
 		driver.ErrRemoveArgument: func() *Error { return NewE(pos + sqlRemoveArgMsg + msg).WithDetail(details...) },
-		sql.ErrNoRows:            func() *Error { return NotFoundE.WithDetail(details...) },
+		sql.ErrNoRows:            func() *Error { return ErrorNotFound.WithDetail(details...) },
 		sql.ErrConnDone:          func() *Error { return NewE(pos + sqlConnDoneMsg + msg).WithDetail(details...) },
 		sql.ErrTxDone:            func() *Error { return NewE(pos + sqlTxDoneMsg + msg).WithDetail(details...) },
 	}
@@ -65,7 +65,7 @@ func NewSQLError(err error, details ...any) *Error {
 
 	// 处理重复键错误
 	if matches := duplicateKeyPattern.FindStringSubmatch(msg); len(matches) == 3 {
-		return ConflictE("sql key").WithDetail(details...)
+		return NewConflict("sql key").WithDetail(details...)
 	}
 
 	return NewE(pos + sqlErrorMsg + msg).WithDetail(details...)

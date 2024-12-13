@@ -20,17 +20,17 @@ func (r *Request) QueryCountry(p string, xargs ...bool) (aenum.Country, *ae.Erro
 func (r *Request) QueryDate(p string, loc *time.Location, required ...bool) (atype.Date, *ae.Error) {
 	x, e := r.Query(p, `^`+aenum.DateRegExp+`$`, isRequired(required))
 	if e != nil {
-		return "", ae.BadParamE(p)
+		return "", ae.NewBadParam(p)
 	}
-	return atype.NewDate(x.String(), loc), nil
+	return atype.NewDate(x.ReleaseString(), loc), nil
 }
 
 func (r *Request) QueryDatetime(p string, loc *time.Location, required ...bool) (atype.Datetime, *ae.Error) {
 	x, e := r.Query(p, `^`+aenum.DatetimeRegExp+`$`, isRequired(required))
 	if e != nil {
-		return "", ae.BadParamE(p)
+		return "", ae.NewBadParam(p)
 	}
-	return atype.NewDatetime(x.String(), loc), nil
+	return atype.NewDatetime(x.ReleaseString(), loc), nil
 }
 
 func (r *Request) QueryDecimal(p string, bitSize int, ranges ...atype.Decimal) (atype.Decimal, *ae.Error) {

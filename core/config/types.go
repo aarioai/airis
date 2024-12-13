@@ -105,6 +105,10 @@ func (c *Config) MysqlConfig(section string) (MysqlConfig, error) {
 	poolMaxOpenConns, _ := c.tryGetMysqlCfg(section, "pool_max_open_conns")
 	poolConnMaxLifetime, _ := c.tryGetMysqlCfg(section, "pool_conn_max_life_time")
 	poolConnMaxIdleTime, _ := c.tryGetMysqlCfg(section, "pool_conn_max_idle_time")
+
+	newV := atype.New()
+	defer newV.Release()
+
 	cf := MysqlConfig{
 		Schema:       schema,
 		User:         user,
@@ -115,20 +119,20 @@ func (c *Config) MysqlConfig(section string) (MysqlConfig, error) {
 		ReadTimeout:  rt,
 		WriteTimeout: wt,
 		Pool: MysqlPoolConfig{
-			MaxIdleConns:    atype.New(poolMaxIdleConns).DefaultInt(0),
-			MaxOpenConns:    atype.New(poolMaxOpenConns).DefaultInt(0),
-			ConnMaxLifetime: time.Duration(atype.New(poolConnMaxLifetime).DefaultInt64(0)) * time.Second,
-			ConnMaxIdleTime: time.Duration(atype.New(poolConnMaxIdleTime).DefaultInt64(0)) * time.Second,
+			MaxIdleConns:    newV.Reload(poolMaxIdleConns).DefaultInt(0),
+			MaxOpenConns:    newV.Reload(poolMaxOpenConns).DefaultInt(0),
+			ConnMaxLifetime: time.Duration(newV.Reload(poolConnMaxLifetime).DefaultInt64(0)) * time.Second,
+			ConnMaxIdleTime: time.Duration(newV.Reload(poolConnMaxIdleTime).DefaultInt64(0)) * time.Second,
 		},
 	}
 	return cf, nil
 }
 
-func (c *Config) tryGeRedisCfg(section string, key string) (atype.Atype, error) {
+func (c *Config) tryGeRedisCfg(section string, key string) (string, error) {
 	k := section + "." + key
-	v, err := c.MustGet(k)
+	v, err := c.MustGetString(k)
 	if err == nil {
-		return *v, nil
+		return v, nil
 	}
 	if section != "redis" {
 		if !strings.HasPrefix(section, "redis_") {
@@ -137,12 +141,12 @@ func (c *Config) tryGeRedisCfg(section string, key string) (atype.Atype, error) 
 		}
 
 		// 读取默认值，即 redis.$key
-		v, err = c.MustGet("redis." + key)
+		v, err = c.MustGetString("redis." + key)
 		if err == nil {
-			return *v, nil
+			return v, nil
 		}
 	}
-	return *atype.New(""), err
+	return "", err
 }
 
 func (c *Config) RedisConfig(section string) (*redis.Options, error) {
@@ -178,40 +182,43 @@ func (c *Config) RedisConfig(section string) (*redis.Options, error) {
 	disableIdentity, _ := c.tryGeRedisCfg(section, "disable_identity")
 	identitySuffix, _ := c.tryGeRedisCfg(section, "identity_suffix")
 	unstableResp3, _ := c.tryGeRedisCfg(section, "unstable_resp3")
+	newV := atype.New()
+	defer newV.Release()
+
 	opt := redis.Options{
-		Network: network.String(),
-		Addr:    addr.String(), //  127.0.0.1:6379
+		Network: network,
+		Addr:    addr, //  127.0.0.1:6379
 		// ClientName will execute the `CLIENT SETNAME ClientName` command for each conn.
-		ClientName:                 clientName.String(),
+		ClientName:                 clientName,
 		Dialer:                     nil,
 		OnConnect:                  nil,
-		Protocol:                   protocol.DefaultInt(0),
-		Username:                   username.String(),
-		Password:                   password.String(),
+		Protocol:                   atype.ParseInt(protocol),
+		Username:                   username,
+		Password:                   password,
 		CredentialsProvider:        nil,
 		CredentialsProviderContext: nil,
-		DB:                         db.DefaultInt(0),
-		MaxRetries:                 maxRetries.DefaultInt(0),
-		MinRetryBackoff:            time.Duration(minRetryBackoff.DefaultInt64(0)),
-		MaxRetryBackoff:            time.Duration(maxRetryBackoff.DefaultInt64(0)),
-		DialTimeout:                time.Duration(dialTimeout.DefaultInt64(0)),
-		ReadTimeout:                time.Duration(readTimeout.DefaultInt64(0)),
-		WriteTimeout:               time.Duration(writeTimeout.DefaultInt64(0)),
-		ContextTimeoutEnabled:      contextTimeoutEnabled.DefaultBool(false),
-		PoolFIFO:                   poolFIFO.DefaultBool(false),
-		PoolSize:                   poolSize.DefaultInt(0),
-		PoolTimeout:                time.Duration(poolTimeout.DefaultInt64(0)),
-		MinIdleConns:               minIdleConns.DefaultInt(0),
-		MaxIdleConns:               maxIdleConns.DefaultInt(0),
-		MaxActiveConns:             maxActiveConns.DefaultInt(0),
-		ConnMaxIdleTime:            time.Duration(connMaxIdleTime.DefaultInt64(0)),
-		ConnMaxLifetime:            time.Duration(connMaxLifetime.DefaultInt64(0)),
+		DB:                         atype.ParseInt(db),
+		MaxRetries:                 atype.ParseInt(maxRetries),
+		MinRetryBackoff:            time.Duration(atype.ParseInt64(minRetryBackoff)),
+		MaxRetryBackoff:            time.Duration(atype.ParseInt64(maxRetryBackoff)),
+		DialTimeout:                time.Duration(atype.ParseInt64(dialTimeout)),
+		ReadTimeout:                time.Duration(atype.ParseInt64(readTimeout)),
+		WriteTimeout:               time.Duration(atype.ParseInt64(writeTimeout)),
+		ContextTimeoutEnabled:      atype.ParseBool(contextTimeoutEnabled),
+		PoolFIFO:                   atype.ParseBool(poolFIFO),
+		PoolSize:                   atype.ParseInt(poolSize),
+		PoolTimeout:                time.Duration(atype.ParseInt64(poolTimeout)),
+		MinIdleConns:               atype.ParseInt(minIdleConns),
+		MaxIdleConns:               atype.ParseInt(maxIdleConns),
+		MaxActiveConns:             atype.ParseInt(maxActiveConns),
+		ConnMaxIdleTime:            time.Duration(atype.ParseInt64(connMaxIdleTime)),
+		ConnMaxLifetime:            time.Duration(atype.ParseInt64(connMaxLifetime)),
 		TLSConfig:                  nil,
 		Limiter:                    nil,
 		// 官方写错，会在 v10 更正过来
-		DisableIndentity: disableIdentity.DefaultBool(false),
-		IdentitySuffix:   identitySuffix.String(),
-		UnstableResp3:    unstableResp3.DefaultBool(false),
+		DisableIndentity: atype.ParseBool(disableIdentity),
+		IdentitySuffix:   identitySuffix,
+		UnstableResp3:    atype.ParseBool(unstableResp3),
 	}
 	return &opt, nil
 }

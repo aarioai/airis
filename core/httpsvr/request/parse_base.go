@@ -36,6 +36,12 @@ func newRawValue(name string, value any) *RawValue {
 		name:  name,
 	}
 }
+
+func (v *RawValue) Release() {
+	if v.Atype != nil {
+		v.Atype.Release()
+	}
+}
 func findDefaultValue(patterns []any) any {
 	// 处理默认值
 	for _, pat := range patterns {
@@ -69,6 +75,10 @@ func parseValidationRules(patterns []any) (bool, *regexp.Regexp, error) {
 	}
 	return required, re, nil
 }
+func (v *RawValue) ReleaseValidate(patterns ...any) *ae.Error {
+	defer v.Release()
+	return v.Validate(patterns...)
+}
 
 // Validate 验证并过滤值
 // @param pattern  e.g. `[[:word:]]+` `\w+`
@@ -84,15 +94,15 @@ func (v *RawValue) Validate(patterns ...any) *ae.Error {
 	}
 	required, re, err := parseValidationRules(patterns)
 	if err != nil {
-		return ae.VariantAlsoNegotiatesE(err.Error())
+		return ae.NewVariantAlsoNegotiates(err.Error())
 	}
 
 	if required && v.IsEmpty() {
-		return ae.BadParamE(v.name)
+		return ae.NewBadParam(v.name)
 	}
 
 	if re != nil && !re.MatchString(v.String()) {
-		return ae.BadParamE(v.name)
+		return ae.NewBadParam(v.name)
 	}
 	return nil
 }
@@ -159,7 +169,12 @@ func (r *Request) findStringFast(programData map[string]any, userData userDataIn
 func (r *Request) find(programData map[string]any, userData userDataInterface, name string, patterns ...any) (*RawValue, *ae.Error) {
 	v := r.findAny(programData, userData, name)
 	raw := newRawValue(name, v)
-	return raw, raw.Validate(patterns...)
+	e := raw.Validate(patterns...)
+	if e != nil {
+		raw.Release()
+		return nil, e
+	}
+	return raw, nil
 }
 
 func (r *Request) findString(programData map[string]any, userData userDataInterface, name string, patterns ...any) (string, *ae.Error) {
@@ -167,11 +182,11 @@ func (r *Request) findString(programData map[string]any, userData userDataInterf
 	only, requiredWhenOnly := onlyRequired(patterns)
 	if only {
 		if requiredWhenOnly && v == "" {
-			return "", ae.BadParamE(name)
+			return "", ae.NewBadParam(name)
 		}
 		return v, nil
 	}
-	return v, newRawValue(name, v).Validate(patterns)
+	return v, newRawValue(name, v).ReleaseValidate(patterns)
 }
 func (r *Request) queryString(name string, patterns ...any) (string, *ae.Error) {
 	var userData url.Values
@@ -250,7 +265,7 @@ func (r *Request) parseBodyStream() *ae.Error {
 
 	ct, params, err := r.contentMediaType()
 	if err != nil {
-		return ae.UnsupportedMediaE()
+		return ae.NewUnsupportedMedia()
 	}
 	switch ct {
 	case CtJSON.String(), CtOctetStream.String(), CtForm.String():
@@ -276,7 +291,7 @@ func (r *Request) parseSimpleBody() *ae.Error {
 		return ae.NewError(err)
 	}
 	if int64(len(b)) > maxSize {
-		return ae.RequestEntityTooLargeE
+		return ae.ErrorRequestEntityTooLarge
 	}
 	switch r.ContentType() {
 	case CtForm.String():
@@ -293,7 +308,7 @@ func (r *Request) parseSimpleBody() *ae.Error {
 func (r *Request) parseFormBody(b []byte) *ae.Error {
 	values, err := url.ParseQuery(string(b))
 	if err != nil {
-		return ae.UnsupportedMediaE("form data")
+		return ae.NewUnsupportedMedia("form data")
 	}
 	r.setPartialBodyData(values)
 	return nil
@@ -301,7 +316,7 @@ func (r *Request) parseFormBody(b []byte) *ae.Error {
 
 func (r *Request) parseJSONBody(b []byte) *ae.Error {
 	if err := json.Unmarshal(b, &r.injectedBodies); err != nil {
-		return ae.UnsupportedMediaE("json")
+		return ae.NewUnsupportedMedia("json")
 	}
 	return nil
 }
@@ -309,12 +324,12 @@ func (r *Request) parseJSONBody(b []byte) *ae.Error {
 // parseMultipartBody 解析multipart请求体
 func (r *Request) parseMultipartBody(boundary string) *ae.Error {
 	if boundary == "" {
-		return ae.PreconditionFailedE("missing boundary")
+		return ae.NewPreconditionFailed("missing boundary")
 	}
 
 	form, err := multipart.NewReader(r.r.Body, boundary).ReadForm(maxMultiSize)
 	if err != nil {
-		return ae.UnsupportedMediaE("multipart form")
+		return ae.NewUnsupportedMedia("multipart form")
 	}
 	r.setPartialBodyData(form.Value)
 	return nil
@@ -325,7 +340,8 @@ func (r *Request) Body(name string, patterns ...any) (*RawValue, *ae.Error) {
 	if !r.bodyParsed {
 		e := r.parseBodyStream()
 		if e != nil {
-			return raw, e
+			raw.Release()
+			return nil, e
 		}
 	}
 	if r.injectedBodies != nil {
@@ -460,35 +476,55 @@ func (r *Request) Headers() map[string]any {
 func (r *Request) QueryWild(name string, patterns ...any) (*RawValue, *ae.Error) {
 	// 1. URL参数直接查询模式
 	v, e := r.Query(name, patterns...)
-	if e == nil && v.NotEmpty() {
-		return v, nil
+	if e == nil {
+		if v.NotEmpty() {
+			// 不用释放
+			return v, nil
+		}
+		v.Release() // 需要释放
 	}
 	// 1.1. URL参数替换格式查询，可能使用的是Header（大写开头）参数名，改为小写下划线模式
 	key := strings.ToLower(strings.ReplaceAll(strings.TrimPrefix(name, "X-"), "-", "_"))
 	if key != name {
 		v, e = r.Query(key, patterns...)
-		if e == nil && v.NotEmpty() {
-			return v, nil
+		if e == nil {
+			if v.NotEmpty() {
+				// 不用释放
+				return v, nil
+			}
+			v.Release() // 需要释放
 		}
 	}
 
 	// 2. HTTP头部（包括标准格式和 X- 前缀）
 	v, e = r.Header(name, patterns...)
-	if e == nil && v.NotEmpty() {
-		return v, nil
+	if e == nil {
+		if v.NotEmpty() {
+			// 不用释放
+			return v, nil
+		}
+		v.Release() // 需要释放
 	}
 
 	// 3. Cookie
-	if cookie, err := r.Cookie(name); err == nil {
+	if cookie, err := r.Cookie(name); err == nil && cookie.Value != "" {
 		v = newRawValue(cookie.Name, cookie.Value)
-		return v, v.Validate(patterns...)
-	}
-	if key != name {
-		if cookie, err := r.Cookie(key); err == nil {
+
+	} else if key != name {
+		if cookie, err = r.Cookie(key); err == nil && cookie.Value != "" {
 			v = newRawValue(cookie.Name, cookie.Value)
-			return v, v.Validate(patterns...)
 		}
 	}
+	if v == nil {
+		v = newRawValue(name, "")
+	}
+	e = v.Validate(patterns...) // 空值也需要判断是否符合pattern，如 required=false
+	if e != nil {
+		v.Release()
+		return nil, e
+	}
+	return v, nil
+
 	// 返回空值
 	return v, v.Validate(patterns...)
 }
@@ -516,15 +552,15 @@ func (r *Request) QueryWildString(name string, patterns ...any) (string, *ae.Err
 
 	// 3. Cookie
 	if cookie, err := r.Cookie(name); err == nil {
-		return cookie.Value, newRawValue(cookie.Name, cookie.Value).Validate(patterns...)
+		return cookie.Value, newRawValue(cookie.Name, cookie.Value).ReleaseValidate(patterns...)
 	}
 	if key != name {
 		if cookie, err := r.Cookie(key); err == nil {
-			return cookie.Value, newRawValue(cookie.Name, cookie.Value).Validate(patterns...)
+			return cookie.Value, newRawValue(cookie.Name, cookie.Value).ReleaseValidate(patterns...)
 		}
 	}
 	// 返回空值
-	return v, newRawValue(name, v).Validate(patterns...)
+	return v, newRawValue(name, v).ReleaseValidate(patterns...)
 }
 
 // QueryWildFast 更高效地快速查询字符串

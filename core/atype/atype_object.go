@@ -11,9 +11,9 @@ func (p *Atype) IsNil() bool {
 	}
 	v := reflect.ValueOf(p.raw)
 	switch v.Kind() {
-	case reflect.Ptr, reflect.UnsafePointer, 
-	reflect.Map, reflect.Slice, 
-	reflect.Array, reflect.Interface:
+	case reflect.Ptr, reflect.UnsafePointer,
+		reflect.Map, reflect.Slice,
+		reflect.Array, reflect.Interface:
 		return v.IsNil()
 	}
 	return false
@@ -49,6 +49,11 @@ func (p *Atype) Strings() ([]string, bool) {
 	return nil, false
 }
 
+func (p *Atype) ReleaseStrings() ([]string, bool) {
+	defer p.Release()
+	return p.Strings()
+}
+
 func (p *Atype) Ints() ([]int, bool) {
 	switch v := p.raw.(type) {
 	case []int:
@@ -56,8 +61,11 @@ func (p *Atype) Ints() ([]int, bool) {
 
 	case []any:
 		result := make([]int, len(v))
+		newV := New()
+		defer newV.Release()
 		for i, item := range v {
-			val, err := New(item).Int()
+			newV.Reload(item)
+			val, err := newV.Int()
 			if err != nil {
 				return nil, false
 			}
@@ -67,6 +75,10 @@ func (p *Atype) Ints() ([]int, bool) {
 	}
 
 	return nil, false
+}
+func (p *Atype) ReleaseInts() ([]int, bool) {
+	defer p.Release()
+	return p.Ints()
 }
 func (p *Atype) Uints() ([]uint, bool) {
 	switch v := p.raw.(type) {
@@ -75,8 +87,10 @@ func (p *Atype) Uints() ([]uint, bool) {
 
 	case []any:
 		result := make([]uint, len(v))
+		newV := New()
+		defer newV.Release()
 		for i, item := range v {
-			val, err := New(item).Uint()
+			val, err := newV.Reload(item).Uint()
 			if err != nil {
 				return nil, false
 			}
@@ -87,6 +101,11 @@ func (p *Atype) Uints() ([]uint, bool) {
 
 	return nil, false
 }
+func (p *Atype) ReleaseUints() ([]uint, bool) {
+	defer p.Release()
+	return p.Uints()
+}
+
 func (p *Atype) Int64s() ([]int64, bool) {
 	switch v := p.raw.(type) {
 	case []int64:
@@ -94,8 +113,10 @@ func (p *Atype) Int64s() ([]int64, bool) {
 
 	case []any:
 		result := make([]int64, len(v))
+		newV := New()
+		defer newV.Release()
 		for i, item := range v {
-			val, err := New(item).Int64()
+			val, err := newV.Reload(item).Int64()
 			if err != nil {
 				return nil, false
 			}
@@ -106,6 +127,11 @@ func (p *Atype) Int64s() ([]int64, bool) {
 
 	return nil, false
 }
+func (p *Atype) ReleaseInt64s() ([]int64, bool) {
+	defer p.Release()
+	return p.Int64s()
+}
+
 func (p *Atype) Uint64s() ([]uint64, bool) {
 	switch v := p.raw.(type) {
 	case []uint64:
@@ -113,8 +139,10 @@ func (p *Atype) Uint64s() ([]uint64, bool) {
 
 	case []any:
 		result := make([]uint64, len(v))
+		newV := New()
+		defer newV.Release()
 		for i, item := range v {
-			val, err := New(item).Uint64()
+			val, err := newV.Reload(item).Uint64()
 			if err != nil {
 				return nil, false
 			}
@@ -125,6 +153,11 @@ func (p *Atype) Uint64s() ([]uint64, bool) {
 
 	return nil, false
 }
+func (p *Atype) ReleaseUint64s() ([]uint64, bool) {
+	defer p.Release()
+	return p.Uint64s()
+}
+
 func (p *Atype) Float32s() ([]float32, bool) {
 	switch v := p.raw.(type) {
 	case []float32:
@@ -132,8 +165,10 @@ func (p *Atype) Float32s() ([]float32, bool) {
 
 	case []any:
 		result := make([]float32, len(v))
+		newV := New()
+		defer newV.Release()
 		for i, item := range v {
-			val, err := New(item).Float32()
+			val, err := newV.Reload(item).Float32()
 			if err != nil {
 				return nil, false
 			}
@@ -143,6 +178,10 @@ func (p *Atype) Float32s() ([]float32, bool) {
 	}
 
 	return nil, false
+}
+func (p *Atype) ReleaseFloat32s() ([]float32, bool) {
+	defer p.Release()
+	return p.Float32s()
 }
 func (p *Atype) Float64s() ([]float64, bool) {
 	switch v := p.raw.(type) {
@@ -151,8 +190,10 @@ func (p *Atype) Float64s() ([]float64, bool) {
 
 	case []any:
 		result := make([]float64, len(v))
+		newV := New()
+		defer newV.Release()
 		for i, item := range v {
-			val, err := New(item).Float64()
+			val, err := newV.Reload(item).Float64()
 			if err != nil {
 				return nil, false
 			}
@@ -163,6 +204,11 @@ func (p *Atype) Float64s() ([]float64, bool) {
 
 	return nil, false
 }
+func (p *Atype) ReleaseFloat64s() ([]float64, bool) {
+	defer p.Release()
+	return p.Float64s()
+}
+
 func (p *Atype) ArrayJson(allowNil bool) (json.RawMessage, bool) {
 	switch v := p.raw.(type) {
 	case json.RawMessage:
@@ -191,6 +237,11 @@ func (p *Atype) ArrayJson(allowNil bool) (json.RawMessage, bool) {
 
 	return nil, false
 }
+func (p *Atype) ReleaseArrayJson(allowNil bool) (json.RawMessage, bool) {
+	defer p.Release()
+	return p.ArrayJson(allowNil)
+}
+
 func (p *Atype) MapJson(allowNil bool) (json.RawMessage, bool) {
 	switch v := p.raw.(type) {
 	case map[string]any:
@@ -216,4 +267,8 @@ func (p *Atype) MapJson(allowNil bool) (json.RawMessage, bool) {
 	}
 
 	return nil, false
+}
+func (p *Atype) ReleaseMapJson(allowNil bool) (json.RawMessage, bool) {
+	defer p.Release()
+	return p.MapJson(allowNil)
 }
