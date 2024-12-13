@@ -7,19 +7,26 @@ import (
 	"github.com/kataras/iris/v12"
 )
 
+// Body 这个没有方法，单纯结构体，不需要对象池管理
+type Body struct {
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
+	Data any    `json:"data"`
+}
+
 var (
 	// GlobalHideServerError 全局隐藏服务器错误(code>=500)
 	// 优先级：writer.HideServerError > GlobalHideServerError
-	globalErrorHandler      func(ictx iris.Context, request *request.Request, contentType string, d Response) (int, error, bool)
-	globalBeforeSerialize   []func(ictx iris.Context, contentType string, d Response) Response
-	globalSerialize         func(contentType string, d Response) (bytes []byte, newContentType string, err error)
+	globalErrorHandler      func(ictx iris.Context, request *request.Request, contentType string, d Body) (int, error, bool)
+	globalBeforeSerialize   []func(ictx iris.Context, contentType string, d Body) Body
+	globalSerialize         func(contentType string, d Body) (bytes []byte, newContentType string, err error)
 	log                     = logger.NewDefaultLog()
 	SerializeTag            = "json" // `json:"key"`
 	globalServeContentTypes = []string{"application/json"}
 )
 
 // 避免循环调用，避免传递 *Writer
-func defaultErrorHandler(ictx iris.Context, request *request.Request, contentType string, d Response) (int, error, bool) {
+func defaultErrorHandler(ictx iris.Context, request *request.Request, contentType string, d Body) (int, error, bool) {
 	if d.Code == ae.NotModified {
 		ictx.StatusCode(d.Code)
 		return 0, nil, false
@@ -35,7 +42,7 @@ func defaultErrorHandler(ictx iris.Context, request *request.Request, contentTyp
 	return 0, nil, true
 }
 
-func defaultSerialize(contentType string, d Response) ([]byte, string, error) {
+func defaultSerialize(contentType string, d Body) ([]byte, string, error) {
 	bytes, err := EncodeJson(d)
 	if err != nil {
 		return nil, "", err
@@ -51,16 +58,16 @@ func RegisterGlobalServeContentTypes(contentTypes []string) {
 	}
 	globalServeContentTypes = contentTypes
 }
-func RegisterGlobalErrorHandler(f func(ictx iris.Context, request *request.Request, contentType string, d Response) (int, error, bool)) {
+func RegisterGlobalErrorHandler(f func(ictx iris.Context, request *request.Request, contentType string, d Body) (int, error, bool)) {
 	globalErrorHandler = f
 }
-func RegisterGlobalBeforeSerialize(f func(ictx iris.Context, contentType string, d Response) Response) {
+func RegisterGlobalBeforeSerialize(f func(ictx iris.Context, contentType string, d Body) Body) {
 	if globalBeforeSerialize == nil {
-		globalBeforeSerialize = make([]func(ictx iris.Context, contentType string, d Response) Response, 0)
+		globalBeforeSerialize = make([]func(ictx iris.Context, contentType string, d Body) Body, 0)
 	}
 	globalBeforeSerialize = append(globalBeforeSerialize, f)
 }
-func RegisterGlobalSerialize(f func(contentType string, d Response) (bytes []byte, newContentType string, err error)) {
+func RegisterGlobalSerialize(f func(contentType string, d Body) (bytes []byte, newContentType string, err error)) {
 	globalSerialize = f
 }
 

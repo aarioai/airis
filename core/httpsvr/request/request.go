@@ -5,36 +5,46 @@ import (
 	"github.com/aarioai/airis/core/airis"
 	"github.com/kataras/iris/v12"
 	"net/http"
+	"sync"
 )
 
 // 每个请求独立request，因此几乎不存在并发问题，不用sync.Map
 type Request struct {
-	ictx            iris.Context
-	ctx             context.Context
-	r               *http.Request
-	contentType     string
-	userAgent       string
-	bodyParsed      bool
-	
+	ictx        iris.Context
+	ctx         context.Context
+	r           *http.Request
+	contentType string
+	userAgent   string
+	bodyParsed  bool
+
 	// 程序注入的参数，优先读取（相较于客户端传递的参数）
 	injectedHeaders map[string]any
 	injectedQueries map[string]any // 程序注入的参数，包括 path params, 以及 SetQueryData 设置的参数
 	injectedBodies  map[string]any
-
-	
 }
 
-func New(ictx iris.Context) *Request {
-	r := ictx.Request()
-	req := Request{
-		ictx:            ictx,
-		r:               r,
-		contentType:     "",
-		userAgent:       "",
-		injectedQueries: nil,
-		injectedHeaders: nil,
-		injectedBodies:  nil,
+var (
+	// 对象池，减少内存分配
+	// sync.Pool 通常不需要手动释放对象，当创建的对象，没有引用时会自动回收
+	requestPool = sync.Pool{
+		New: func() interface{} {
+			return new(Request)
+		},
 	}
+)
+
+func New(ictx iris.Context) *Request {
+	req := requestPool.Get().(*Request)
+	req.ictx = ictx
+	req.ctx = airis.Context(ictx)
+	req.r = ictx.Request()
+	req.contentType = ""
+	req.userAgent = ""
+	req.bodyParsed = false
+	req.injectedHeaders = nil
+	req.injectedQueries = nil
+	req.injectedBodies = nil
+
 	paramsLen := ictx.Params().Len()
 	if paramsLen > 0 {
 		params := make(map[string]any, paramsLen)
@@ -43,10 +53,10 @@ func New(ictx iris.Context) *Request {
 		}
 		req.injectedQueries = params
 	}
-	return &req
+	return req
 }
 
-// 注入header
+// InjectHeader 注入header
 func (r *Request) InjectHeader(name string, value any) {
 	if r.injectedHeaders == nil {
 		r.injectedHeaders = make(map[string]any)
@@ -54,7 +64,7 @@ func (r *Request) InjectHeader(name string, value any) {
 	r.injectedHeaders[name] = value
 }
 
-// 注入query
+// InjectQuery 注入query
 func (r *Request) InjectQuery(name string, value any) {
 	if r.injectedQueries == nil {
 		r.injectedQueries = make(map[string]any)
@@ -62,7 +72,7 @@ func (r *Request) InjectQuery(name string, value any) {
 	r.injectedQueries[name] = value
 }
 
-// 注入body
+// InjectBody 注入body
 func (r *Request) InjectBody(name string, value any) {
 	if r.injectedBodies == nil {
 		r.injectedBodies = make(map[string]any)
@@ -71,8 +81,11 @@ func (r *Request) InjectBody(name string, value any) {
 }
 
 func (r *Request) Context() context.Context {
-	if r.ctx != nil {
-		return r.ctx
-	}
-	return airis.Context(r.ictx)
+	return r.ctx
+}
+
+// Release 释放实例到对象池
+// 即使这个对象不是从对象池中获取的，也会放入对象池。不影响使用。
+func (r *Request) Release() {
+	requestPool.Put(r)
 }

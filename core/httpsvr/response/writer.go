@@ -10,6 +10,7 @@ import (
 	"github.com/kataras/iris/v12"
 	"net/http"
 	"slices"
+	"sync"
 )
 
 type Writer struct {
@@ -17,9 +18,9 @@ type Writer struct {
 	serveContentTypes []string
 
 	beforeFlush     []func(*Writer)
-	beforeSerialize []func(ictx iris.Context, contentType string, d Response) Response
-	serialize       func(contentType string, d Response) (bytes []byte, newContentType string, err error)
-	errorHandler    func(ictx iris.Context, request *request.Request, contentType string, d Response) (int, error, bool)
+	beforeSerialize []func(ictx iris.Context, contentType string, d Body) Body
+	serialize       func(contentType string, d Body) (bytes []byte, newContentType string, err error)
+	errorHandler    func(ictx iris.Context, request *request.Request, contentType string, d Body) (int, error, bool)
 
 	ictx    iris.Context
 	request *request.Request
@@ -27,8 +28,18 @@ type Writer struct {
 	code          int
 	headers       map[string]string // 每个请求独立 Writer，不需要异步操作
 	content       []byte
-	contentStruct Response
+	contentStruct Body
 }
+
+var (
+	// 对象池，减少内存分配
+	// sync.Pool 通常不需要手动释放对象，当创建的对象，没有引用时会自动回收
+	writerPool = sync.Pool{
+		New: func() interface{} {
+			return new(Writer)
+		},
+	}
+)
 
 func NewWriter(ictx iris.Context, request *request.Request) *Writer {
 	var headers map[string]string
@@ -44,7 +55,7 @@ func NewWriter(ictx iris.Context, request *request.Request) *Writer {
 		code:              0,
 		headers:           headers,
 		content:           nil,
-		contentStruct:     Response{},
+		contentStruct:     Body{},
 	}
 	return &w
 }
@@ -134,7 +145,7 @@ func (w *Writer) DeleteHeader(key string) *Writer {
 	}
 	return w
 }
-func (w *Writer) WithErrorHandler(handler func(ictx iris.Context, request *request.Request, contentType string, d Response) (int, error, bool)) *Writer {
+func (w *Writer) WithErrorHandler(handler func(ictx iris.Context, request *request.Request, contentType string, d Body) (int, error, bool)) *Writer {
 	w.errorHandler = handler
 	return w
 }
@@ -145,14 +156,14 @@ func (w *Writer) WithBeforeFlush(fn func(*Writer)) *Writer {
 	w.beforeFlush = append(w.beforeFlush, fn)
 	return w
 }
-func (w *Writer) WithBeforeSerialize(beforeSerialize func(ictx iris.Context, contentType string, d Response) Response) *Writer {
+func (w *Writer) WithBeforeSerialize(beforeSerialize func(ictx iris.Context, contentType string, d Body) Body) *Writer {
 	if w.beforeSerialize == nil {
-		w.beforeSerialize = make([]func(ictx iris.Context, contentType string, d Response) Response, 0)
+		w.beforeSerialize = make([]func(ictx iris.Context, contentType string, d Body) Body, 0)
 	}
 	w.beforeSerialize = append(w.beforeSerialize, beforeSerialize)
 	return w
 }
-func (w *Writer) WithSerialize(f func(contentType string, d Response) (bytes []byte, newContentType string, err error)) *Writer {
+func (w *Writer) WithSerialize(f func(contentType string, d Body) (bytes []byte, newContentType string, err error)) *Writer {
 	w.serialize = f
 	return w
 }
@@ -202,7 +213,7 @@ func (w *Writer) WriteJSONP(v any, opts ...iris.JSONP) error {
 	return w.ictx.JSONP(data, opts...)
 }
 
-func (w *Writer) writeDTO(d Response) (int, error) {
+func (w *Writer) writeDTO(d Body) (int, error) {
 	ct := w.ContentType()
 	if d.Code >= ae.BadRequest {
 		// 避免重复调用，不再传 *Writer，而是直接操作 ictx
@@ -261,7 +272,7 @@ func (w *Writer) Write(a any) (int, error) {
 	if e != nil {
 		return w.WriteE(e)
 	}
-	return w.writeDTO(Response{
+	return w.writeDTO(Body{
 		Code: ae.OK,
 		Msg:  "OK",
 		Data: data,
@@ -269,14 +280,14 @@ func (w *Writer) Write(a any) (int, error) {
 }
 
 func (w *Writer) WriteOK() (int, error) {
-	return w.writeDTO(Response{
+	return w.writeDTO(Body{
 		Code: ae.OK,
 		Msg:  "OK",
 		Data: nil,
 	})
 }
 func (w *Writer) WriteCode(code int) (int, error) {
-	return w.writeDTO(Response{
+	return w.writeDTO(Body{
 		Code: code,
 		Msg:  http.StatusText(code),
 	})
@@ -286,7 +297,7 @@ func (w *Writer) WriteE(e *ae.Error) (int, error) {
 	if e == nil {
 		return w.WriteCode(ae.OK)
 	}
-	return w.writeDTO(Response{
+	return w.writeDTO(Body{
 		Code: e.Code,
 		Msg:  e.Msg,
 	})
@@ -296,14 +307,14 @@ func (w *Writer) WriteError(err error) (int, error) {
 	if err == nil {
 		return w.WriteCode(ae.OK)
 	}
-	return w.writeDTO(Response{
+	return w.writeDTO(Body{
 		Code: ae.InternalServerError,
 		Msg:  err.Error(),
 	})
 }
 
 func (w *Writer) WriteMsg(code int, msg string, args ...any) (int, error) {
-	return w.writeDTO(Response{
+	return w.writeDTO(Body{
 		Code: code,
 		Msg:  afmt.Sprintf(msg, args...),
 	})
@@ -385,4 +396,10 @@ func (w *Writer) TryWrite(a any, e *ae.Error) (int, error) {
 		return w.WriteE(e)
 	}
 	return w.Write(a)
+}
+
+// Release 释放实例到对象池
+// 即使这个对象不是从对象池中获取的，也会放入对象池。不影响使用。
+func (w *Writer) Release() {
+	writerPool.Put(w)
 }

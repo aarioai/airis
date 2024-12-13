@@ -12,6 +12,7 @@ type Atype struct {
 
 var (
 	// 对象池，减少内存分配
+	// sync.Pool 通常不需要手动释放对象，当创建的对象，没有引用时会自动回收
 	atypePool = sync.Pool{
 		New: func() interface{} {
 			return new(Atype)
@@ -33,7 +34,7 @@ func New(data ...any) *Atype {
 	return a
 }
 
-// Release 释放 Atype 实例到对象池
+// Release 释放实例到对象池
 // 即使这个atype 不是从对象池中获取的，也会放入对象池。不影响使用。
 func (p *Atype) Release() {
 	p.raw = nil
@@ -170,7 +171,7 @@ func (p *Atype) Int16() (int16, error) {
 func (p *Atype) ReleaseInt16() (int16, error) {
 	defer p.Release()
 	return p.Int16()
-}	
+}
 func (p *Atype) DefaultInt16(defaultValue int16) int16 {
 	v, err := p.Int16()
 	if err != nil {
@@ -273,7 +274,7 @@ func (p *Atype) DefaultUint16(defaultValue uint16) uint16 {
 		return defaultValue
 	}
 	return v
-}	
+}
 func (p *Atype) ReleaseDefaultUint16(defaultValue uint16) uint16 {
 	defer p.Release()
 	return p.DefaultUint16(defaultValue)
