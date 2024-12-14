@@ -148,3 +148,17 @@ func TestPadBlock(t *testing.T) {
 		t.Error("PadBlock " + afmt.ErrmsgSideEffect(base))
 	}
 }
+func TestTrim(t *testing.T) {
+	src := []rune("~~~~^_^我LOVE你^_^~~~~~")
+	want := "^_^我LOVE你^_^"
+	got := afmt.Trim(src, '~')
+	if want != string(got) {
+		t.Errorf("TrimLeft wrong: got %s (len:%d)", string(got), len(got))
+	}
+
+	srcBytes := []byte(string(src))
+	gotBytes := afmt.Trim(srcBytes, '~')
+	if want != string(gotBytes) {
+		t.Errorf("TrimLeft wrong: got %s (len:%d)", string(got), len(got))
+	}
+}

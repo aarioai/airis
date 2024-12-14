@@ -136,3 +136,45 @@ func PadBlock(base []byte, pad byte, blockSize int, separator ...byte) []byte {
 	result.WriteByte(sep)
 	return result.Bytes()
 }
+
+// TrimRight 截断右侧所有cut字符。若想cut字符串，应该使用 strings/bytes.Trim/TrimFunc等
+// 这里是对 byte = 0 情况的扩展（DES加密对齐使用byte(0))
+//
+// @note slice 入参安全
+// @warn 出参可能会产生副作用，即有些情况会返回入参slice部分
+func TrimRight[T byte | rune](s []T, cut T) []T {
+	// var zero byte 不能使用 len(zero) 会报错，需要转为 len(string(zero)) = 1；或者直接判断是否为0
+	var length int
+	if cut == 0 {
+		length = 1
+	} else {
+		length = len(s) // []rune length 是 rune 个数，而不是字节数
+	}
+	i := length - 1
+	for ; i > -1; i-- {
+		if s[i] != cut {
+			break
+		}
+	}
+	return s[:i+1]
+}
+
+func TrimLeft[T byte | rune](s []T, cut T) []T {
+	// var zero byte 不能使用 len(zero)
+	var length int
+	if cut == 0 {
+		length = 1
+	} else {
+		length = len(s)
+	}
+	i := 0
+	for ; i < length; i++ {
+		if s[i] != cut {
+			break
+		}
+	}
+	return s[i:]
+}
+func Trim[T byte | rune](s []T, cut T) []T {
+	return TrimLeft(TrimRight(s, cut), cut)
+}
