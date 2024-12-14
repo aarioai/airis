@@ -1,9 +1,33 @@
 package afmt
 
 import (
-	"github.com/aarioai/airis/pkg/types"
 	"strings"
+
+	"github.com/aarioai/airis/pkg/types"
 )
+
+// Resize 将[]byte/[]rune slice 填充到指定长度，超过长度需要截断
+func Resize[T byte | rune](s []T, pad T, length int, padHead bool) []T {
+	paddingLength := length - len(s)
+	if length < 0 || paddingLength == 0 {
+		return s
+	}
+	if paddingLength > 0 {
+		padding := make([]T, paddingLength)
+		for i := 0; i < paddingLength; i++ {
+			padding[i] = pad
+		}
+		if len(s) == 0 {
+			return padding
+		}
+		if padHead {
+			s = append(padding, s...)
+		} else {
+			s = append(s, padding...)
+		}
+	}
+	return s[:length]
+}
 
 // PadBoth 在字符串两端添加填充字符，使其达到指定长度。返回的长度大于等于 length，除非 padString 为空
 // 如果 padString 太长，无法适应 length，则会从末尾被截断。这个跟 JS padStart/padEnd 一致
