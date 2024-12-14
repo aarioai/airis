@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/aarioai/airis/core/atype"
 	"github.com/aarioai/airis/pkg/afmt"
-	"math/rand/v2"
 	"strings"
 	"testing"
 )
@@ -123,31 +122,6 @@ func TestPaRight(t *testing.T) {
 	}
 }
 
-func TestPadBlock(t *testing.T) {
-	base := make([]byte, 0)
-	n := rand.IntN(256)
-	for i := 0; i < n; i++ {
-		char := rand.IntN('Z'-'A') + 'A'
-		base = append(base, byte(char))
-	}
-	baseClone := bytes.Clone(base)
-	got := afmt.PadBlock(base, '=', 8)
-	if len(got)%8 != 0 {
-		t.Errorf("PadBlock wrong: %s (len:%d), want %d", got, len(got), len(base))
-	}
-	if !bytes.Equal(baseClone, base) {
-		t.Error("PadBlock " + afmt.ErrmsgSideEffect(base))
-	}
-
-	// 测试分隔符
-	got = afmt.PadBlock(base, '@', 8, '\n')
-	if len(got)%9 != 0 {
-		t.Errorf("PadBlock wrong: %s (len:%d), want %d", got, len(got), len(base))
-	}
-	if !bytes.Equal(baseClone, base) {
-		t.Error("PadBlock " + afmt.ErrmsgSideEffect(base))
-	}
-}
 func TestTrim(t *testing.T) {
 	src := []rune("~~~~^_^我LOVE你^_^~~~~~")
 	want := "^_^我LOVE你^_^"

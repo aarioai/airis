@@ -303,7 +303,7 @@ func (w *Writer) WriteE(e *ae.Error) (int, error) {
 	})
 }
 
-func (w *Writer) WriteError(err error) (int, error) {
+func (w *Writer) WriteErr(err error) (int, error) {
 	if err == nil {
 		return w.WriteCode(ae.OK)
 	}
@@ -313,7 +313,7 @@ func (w *Writer) WriteError(err error) (int, error) {
 	})
 }
 
-func (w *Writer) WriteMsg(code int, msg string, args ...any) (int, error) {
+func (w *Writer) WriteError(code int, msg string, args ...any) (int, error) {
 	return w.writeDTO(Body{
 		Code: code,
 		Msg:  afmt.Sprintf(msg, args...),

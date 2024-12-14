@@ -1,7 +1,6 @@
 package afmt
 
 import (
-	"bytes"
 	"github.com/aarioai/airis/pkg/types"
 	"strings"
 )
@@ -103,38 +102,6 @@ func PadRight[T1, T2 types.Stringable](base T1, pad T2, length int, trimEdge ...
 	}
 
 	return s + padding
-}
-
-// PadBlock 按照 blockSize 对齐，不足部分填充。被广泛使用与 base64/DES 等编码
-// 一般用于需要加密或编码的文本填充，因此返回bytes
-//
-// @note slice 入参安全
-// @warn 出参可能会产生副作用，即有些情况会返回base原数组
-func PadBlock(base []byte, pad byte, blockSize int, separator ...byte) []byte {
-
-	paddingLength := blockSize - len(base)%blockSize
-	if paddingLength == 0 && len(separator) == 0 {
-		return base
-	}
-	padding := bytes.Repeat([]byte{pad}, paddingLength)
-	if len(separator) == 0 {
-		return append(base, padding...)
-	}
-	// pad 和 sep 都可以是 byte(0)
-	sep := separator[0]
-	// 每个block尾部插入分隔符
-	bn := len(base) / blockSize
-	blockNum := bn + 1
-	var result bytes.Buffer
-	result.Grow(len(base) + blockNum + len(padding))
-	for i := 0; i < bn; i++ {
-		result.Write(base[i*blockSize : (i+1)*blockSize])
-		result.WriteByte(sep)
-	}
-	result.Write(base[bn*blockSize:])
-	result.Write(padding)
-	result.WriteByte(sep)
-	return result.Bytes()
 }
 
 // TrimRight 截断右侧所有cut字符。若想cut字符串，应该使用 strings/bytes.Trim/TrimFunc等
