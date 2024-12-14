@@ -111,16 +111,17 @@ func PadRight[T1, T2 types.Stringable](base T1, pad T2, length int, trimEdge ...
 // @note slice 入参安全
 // @warn 出参可能会产生副作用，即有些情况会返回base原数组
 func PadBlock(base []byte, pad byte, blockSize int, separator ...byte) []byte {
-	sep := First(separator)
+
 	paddingLength := blockSize - len(base)%blockSize
-	if paddingLength == 0 && sep == 0 {
+	if paddingLength == 0 && len(separator) == 0 {
 		return base
 	}
 	padding := bytes.Repeat([]byte{pad}, paddingLength)
-	if sep == 0 {
+	if len(separator) == 0 {
 		return append(base, padding...)
 	}
-
+	// pad 和 sep 都可以是 byte(0)
+	sep := separator[0]
 	// 每个block尾部插入分隔符
 	bn := len(base) / blockSize
 	blockNum := bn + 1
