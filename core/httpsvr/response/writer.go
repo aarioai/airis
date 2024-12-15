@@ -406,3 +406,10 @@ func (w *Writer) Release() error {
 	writerPool.Put(w)
 	return nil
 }
+
+func (w *Writer) ReleaseWith(r *request.Request) error {
+	if r != nil {
+		r.Release()
+	}
+	return w.Release()
+}
