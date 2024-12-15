@@ -5,7 +5,7 @@ go 1.23
 require (
 	github.com/kataras/iris/v12 v12.2.11
 	github.com/redis/go-redis/v9 v9.7.0
-	golang.org/x/exp v0.0.0-20241210194714-1829a127f884
+	golang.org/x/exp v0.0.0-20241215155358-4a5509556b9e
 	golang.org/x/sys v0.28.0
 	golang.org/x/text v0.21.0
 	gopkg.in/ini.v1 v1.67.0
@@ -29,14 +29,14 @@ require (
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/iris-contrib/schema v0.0.6 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
-	github.com/kataras/blocks v0.0.9 // indirect
+	github.com/kataras/blocks v0.0.11 // indirect
 	github.com/kataras/golog v0.1.12 // indirect
 	github.com/kataras/pio v0.0.13 // indirect
 	github.com/kataras/sitemap v0.0.6 // indirect
 	github.com/kataras/tunnel v0.0.4 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/mailgun/raymond/v2 v2.0.48 // indirect
-	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/mailru/easyjson v0.9.0 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.27 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect

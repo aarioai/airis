@@ -22,16 +22,6 @@ var (
 	duplicateKeyPattern = regexp.MustCompile(`Duplicate\s+entry\s+'([^']*)'\s+for\s+key\s+'([^']*)'`)
 )
 
-func First(es ...*Error) *Error {
-	for _, e := range es {
-		if e != nil {
-			return e
-		}
-	}
-	return nil
-}
-
-// FirstError 支持所有继承 error 的子类
 func FirstError(errs ...error) error {
 	for _, e := range errs {
 		if e != nil {

@@ -5,6 +5,7 @@ import (
 	"github.com/aarioai/airis/core/ae"
 	"github.com/aarioai/airis/core/config"
 	"github.com/aarioai/airis/core/logger"
+	"github.com/aarioai/airis/pkg/afmt"
 )
 
 type App struct {
@@ -21,7 +22,7 @@ func New(config *config.Config, logger logger.LogInterface) *App {
 
 // Check 检查错误
 func (app *App) Check(ctx context.Context, es ...*ae.Error) bool {
-	e := ae.Check(es...)
+	e := afmt.First(es)
 	if e == nil {
 		return true
 	}
@@ -33,7 +34,7 @@ func (app *App) Check(ctx context.Context, es ...*ae.Error) bool {
 
 // CheckError 检查标准错误
 func (app *App) CheckErrors(ctx context.Context, errs ...error) bool {
-	err := ae.CheckErrors(errs...)
+	err := afmt.First(errs)
 	if err != nil {
 		app.Log.Error(ctx, err.Error())
 		return false

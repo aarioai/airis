@@ -8,7 +8,8 @@ import (
 	"sync"
 )
 
-// 每个请求独立request，因此几乎不存在并发问题，不用sync.Map
+// Request 每个请求独立request，因此几乎不存在并发问题，不用sync.Map
+// @extend type T interface{Release()error}
 type Request struct {
 	ictx        iris.Context
 	ctx         context.Context
@@ -86,6 +87,7 @@ func (r *Request) Context() context.Context {
 
 // Release 释放实例到对象池
 // 即使这个对象不是从对象池中获取的，也会放入对象池。不影响使用。
-func (r *Request) Release() {
+func (r *Request) Release() error {
 	requestPool.Put(r)
+	return nil
 }

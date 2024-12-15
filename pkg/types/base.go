@@ -22,8 +22,9 @@ type MapKeyType interface {
 }
 
 // Stringable 可以直接使用 string(T) 转换的类型。  单词 stringable 被Laravel、Apache等使用
+// ~ 表示底层类型，如 atype.Uint24 底层类型是 uint32
 type Stringable interface {
-	[]byte | []rune | byte | rune | string // rune = int32, byte = uint8
+	~[]byte | ~[]rune | ~byte | ~rune | ~string // rune = int32, byte = uint8
 }
 
 // 其他的使用 math.MaxInt64

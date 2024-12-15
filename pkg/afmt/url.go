@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// @TODO
 func Url(baseUrl string, params map[string]string) template.URL {
 	if params == nil {
 		return template.URL(strings.TrimSuffix(baseUrl, "?"))

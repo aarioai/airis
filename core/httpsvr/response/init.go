@@ -49,8 +49,6 @@ func defaultSerialize(contentType string, d Body) ([]byte, string, error) {
 	}
 	return bytes, contentType, nil
 }
-func init() {
-}
 
 func RegisterGlobalServeContentTypes(contentTypes []string) {
 	if len(contentTypes) == 0 {

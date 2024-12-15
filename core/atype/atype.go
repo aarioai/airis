@@ -6,6 +6,7 @@ import (
 )
 
 // Atype 提供类型安全和高效的类型转换
+// @extend type T interface{Release()error}
 type Atype struct {
 	raw any
 }
@@ -36,9 +37,10 @@ func New(data ...any) *Atype {
 
 // Release 释放实例到对象池
 // 即使这个atype 不是从对象池中获取的，也会放入对象池。不影响使用。
-func (p *Atype) Release() {
+func (p *Atype) Release() error {
 	p.raw = nil
 	atypePool.Put(p)
+	return nil
 }
 
 // Raw 返回原始数据

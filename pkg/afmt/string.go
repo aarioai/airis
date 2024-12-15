@@ -7,14 +7,14 @@ import (
 )
 
 // Resize 将[]byte/[]rune slice 填充到指定长度，超过长度需要截断
-func Resize[T byte | rune](s []T, pad T, length int, padHead bool) []T {
-	paddingLength := length - len(s)
-	if length < 0 || paddingLength == 0 {
+func Resize[T ~byte | ~rune](s []T, pad T, length int, padHead bool) []T {
+	paddingLen := length - len(s)
+	if length < 0 || paddingLen == 0 {
 		return s
 	}
-	if paddingLength > 0 {
-		padding := make([]T, paddingLength)
-		for i := 0; i < paddingLength; i++ {
+	if paddingLen > 0 {
+		padding := make([]T, paddingLen)
+		for i := 0; i < paddingLen; i++ {
 			padding[i] = pad
 		}
 		if len(s) == 0 {
@@ -29,8 +29,8 @@ func Resize[T byte | rune](s []T, pad T, length int, padHead bool) []T {
 	return s[:length]
 }
 
-// PadBoth 在字符串两端添加填充字符，使其达到指定长度。返回的长度大于等于 length，除非 padString 为空
-// 如果 padString 太长，无法适应 length，则会从末尾被截断。这个跟 JS padStart/padEnd 一致
+// PadBoth 在字符串两端添加填充字符，使其达到指定长度。返回的长度大于等于 length，除非 padStr 为空
+// 如果 padStr 太长，无法适应 length，则会从末尾被截断。这个跟 JS padStart/padEnd 一致
 // 通常使用于短字符填充，因此直接返回字符串
 //
 // @param trimEdge 从两边截取多余填充，如 ~_~||~_~|AARIO|~_~||~_~；否则就是从中间截取 如 |~_~||~_~AARIO~_~||~_~|
@@ -38,28 +38,28 @@ func Resize[T byte | rune](s []T, pad T, length int, padHead bool) []T {
 // @note slice 入参安全
 func PadBoth[T1, T2 types.Stringable](base T1, pad T2, length int, trimEdge ...bool) string {
 	s := string(base)
-	padString := string(pad)
-	paddingLength := length - len(s)
+	padStr := string(pad)
+	paddingLen := length - len(s)
 
 	// 如果不需要填充，直接返回原字符串
-	if paddingLength <= 0 || padString == "" {
+	if paddingLen <= 0 || padStr == "" {
 		return s
 	}
 
 	// 计算两侧需要的填充长度
-	leftPadLen := paddingLength / 2
-	rightPadLen := paddingLength - leftPadLen
+	leftPadLen := paddingLen / 2
+	rightPadLen := paddingLen - leftPadLen
 
 	// 生成填充字符串
 	leftRepeatCount := leftPadLen
 	rightRepeatCount := rightPadLen
-	psLen := len(padString)
+	psLen := len(padStr)
 	if psLen > 1 {
 		leftRepeatCount = (leftPadLen / psLen) + 1
 		rightRepeatCount = (rightPadLen / psLen) + 1
 	}
-	leftPadding := strings.Repeat(padString, leftRepeatCount)
-	rightPadding := strings.Repeat(padString, rightRepeatCount)
+	leftPadding := strings.Repeat(padStr, leftRepeatCount)
+	rightPadding := strings.Repeat(padStr, rightRepeatCount)
 
 	// 从两边截取多余填充，如 ~_~||~_~|AARIO|~_~||~_~
 	if First(trimEdge) {
@@ -83,20 +83,20 @@ func PadBoth[T1, T2 types.Stringable](base T1, pad T2, length int, trimEdge ...b
 // @note slice 入参安全
 func PadLeft[T1, T2 types.Stringable](base T1, pad T2, length int, trimEdge ...bool) string {
 	s := string(base)
-	padString := string(pad)
-	paddingLength := length - len(s)
-	if paddingLength <= 0 || padString == "" {
+	padStr := string(pad)
+	paddingLen := length - len(s)
+	if paddingLen <= 0 || padStr == "" {
 		return s
 	}
-	repeatCount := paddingLength
-	if len(padString) > 1 {
-		repeatCount = (paddingLength / len(padString)) + 1
+	repeatCount := paddingLen
+	if len(padStr) > 1 {
+		repeatCount = (paddingLen / len(padStr)) + 1
 	}
-	padding := strings.Repeat(padString, repeatCount)
+	padding := strings.Repeat(padStr, repeatCount)
 	if First(trimEdge) {
-		padding = padding[len(padding)-paddingLength:]
+		padding = padding[len(padding)-paddingLen:]
 	} else {
-		padding = padding[:paddingLength]
+		padding = padding[:paddingLen]
 	}
 	return padding + s
 }
@@ -109,20 +109,20 @@ func PadLeft[T1, T2 types.Stringable](base T1, pad T2, length int, trimEdge ...b
 // @note slice 入参安全
 func PadRight[T1, T2 types.Stringable](base T1, pad T2, length int, trimEdge ...bool) string {
 	s := string(base)
-	padString := string(pad)
-	paddingLength := length - len(s)
-	if paddingLength <= 0 || padString == "" {
+	padStr := string(pad)
+	paddingLen := length - len(s)
+	if paddingLen <= 0 || padStr == "" {
 		return s
 	}
-	repeatCount := paddingLength
-	if len(padString) > 1 {
-		repeatCount = (paddingLength / len(padString)) + 1
+	repeatCount := paddingLen
+	if len(padStr) > 1 {
+		repeatCount = (paddingLen / len(padStr)) + 1
 	}
-	padding := strings.Repeat(padString, repeatCount)
+	padding := strings.Repeat(padStr, repeatCount)
 	if First(trimEdge) {
-		padding = padding[:paddingLength]
+		padding = padding[:paddingLen]
 	} else {
-		padding = padding[len(padding)-paddingLength:]
+		padding = padding[len(padding)-paddingLen:]
 	}
 
 	return s + padding
@@ -133,7 +133,7 @@ func PadRight[T1, T2 types.Stringable](base T1, pad T2, length int, trimEdge ...
 //
 // @note slice 入参安全
 // @warn 出参可能会产生副作用，即有些情况会返回入参slice部分
-func TrimRight[T byte | rune](s []T, cut T) []T {
+func TrimRight[T ~byte | ~rune](s []T, cut T) []T {
 	// var zero byte 不能使用 len(zero) 会报错，需要转为 len(string(zero)) = 1；或者直接判断是否为0
 	var length int
 	if cut == 0 {
@@ -150,7 +150,7 @@ func TrimRight[T byte | rune](s []T, cut T) []T {
 	return s[:i+1]
 }
 
-func TrimLeft[T byte | rune](s []T, cut T) []T {
+func TrimLeft[T ~byte | ~rune](s []T, cut T) []T {
 	// var zero byte 不能使用 len(zero)
 	var length int
 	if cut == 0 {
@@ -166,6 +166,6 @@ func TrimLeft[T byte | rune](s []T, cut T) []T {
 	}
 	return s[i:]
 }
-func Trim[T byte | rune](s []T, cut T) []T {
+func Trim[T ~byte | ~rune](s []T, cut T) []T {
 	return TrimLeft(TrimRight(s, cut), cut)
 }

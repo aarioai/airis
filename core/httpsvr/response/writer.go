@@ -13,6 +13,8 @@ import (
 	"sync"
 )
 
+// Writer
+// @extend type T interface{Release()error}
 type Writer struct {
 	SerializeTag      string
 	serveContentTypes []string
@@ -400,6 +402,7 @@ func (w *Writer) TryWrite(a any, e *ae.Error) (int, error) {
 
 // Release 释放实例到对象池
 // 即使这个对象不是从对象池中获取的，也会放入对象池。不影响使用。
-func (w *Writer) Release() {
+func (w *Writer) Release() error {
 	writerPool.Put(w)
+	return nil
 }

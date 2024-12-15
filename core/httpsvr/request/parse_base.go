@@ -25,6 +25,9 @@ const (
 type userDataInterface interface {
 	Get(key string) string
 }
+
+// RawValue
+// @extend type T interface{Release()error}
 type RawValue struct {
 	*atype.Atype
 	name string
@@ -37,10 +40,11 @@ func newRawValue(name string, value any) *RawValue {
 	}
 }
 
-func (v *RawValue) Release() {
+func (v *RawValue) Release() error {
 	if v.Atype != nil {
-		v.Atype.Release()
+		return v.Atype.Release()
 	}
+	return nil
 }
 func findDefaultValue(patterns []any) any {
 	// 处理默认值
