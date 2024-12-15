@@ -10,7 +10,7 @@ import (
 func generateRmlogScript(targetDir string) error {
 	// 这里一般仅使用一次，不用移到常驻常量，浪费内存
 	const scriptContent = `#!/bin/bash
-
+set -euo pipefail
 # Show usage instructions
 show_usage() {
     echo "Usage: $0"
@@ -22,11 +22,11 @@ show_usage() {
     echo "  $0 -d now|day|week|month  	# Delete logs before one day/week/month ago"
     echo "  $0 -f panic-%Y-%m-%d.log  	# Delete logs with format panic-YYYY-MM-DD.log"
     echo "  $0 -f panic-%D.log  	  	# %D = %Y-%m-%d"
-    echo "  $0                          # Delete logs before one month ago"
+    echo "  $0 -d all                   # Delete all logs, includes panic"
     exit 1
 }
 
-# Default values
+all=0
 BEFORE_DATE=""
 FILE_NAME_FORMAT="%Y-%m-%d.log"
 # Parse command line arguments
@@ -49,6 +49,7 @@ if [ -n "$FILE_NAME_FORMAT" ]; then
 fi
 
 case $BEFORE_DATE in
+	all) all=1; BEFORE_DATE=$(date +%Y-%m-%d) ;;
     now) BEFORE_DATE=$(date +%Y-%m-%d) ;;
     day) BEFORE_DATE=$(date -d "1 day ago" +%Y-%m-%d) ;;
     week) BEFORE_DATE=$(date -d "1 week ago" +%Y-%m-%d) ;;
@@ -61,48 +62,58 @@ if ! date -d "$BEFORE_DATE" >/dev/null 2>&1; then
     exit 1
 fi
 
-# Show operation details
-echo "rm $FILE_NAME_FORMAT before $BEFORE_DATE"
-echo "continue? [y/N]"
-read -r confirm
-if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
-    echo "operation cancelled"
-    exit 0
+removeLog(){
+ 	local -r format="$1"
+	local -r before="$2"
+	echo "rm $format before $before"
+	echo "continue? [y/N]"
+	read -r confirm
+	if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+		echo "operation cancelled"
+		exit 0
+	fi
+	
+	file_extension="${format##*.}"
+	date_pattern="${format%.*}"
+	
+	# Convert date pattern to regex pattern
+	regex_pattern=$(echo "$date_pattern" | sed -e 's/%Y/[0-9]\{4\}/g' \
+											 -e 's/%m/[0-9]\{2\}/g' \
+											 -e 's/%d/[0-9]\{2\}/g')
+	
+	# Find and delete log files before specified date
+	for file in *."$file_extension"; do
+		[[ -f "$file" ]] || continue
+	
+		filename_no_ext="${file%.*}"
+	
+		if ! [[ "$filename_no_ext" =~ ^${regex_pattern}$ ]]; then
+			continue
+		fi
+	
+		parsed_date=$(date -d "$(echo "$filename_no_ext" | sed -E \
+			-e "s/.*([0-9]{4})-([0-9]{2})-([0-9]{2}).*/\1-\2-\3/")" "+%Y-%m-%d" 2>/dev/null)
+		
+		if [ $? -ne 0 ]; then
+			continue
+		fi
+	
+		if [[ "$standard_date" < "$before" ]]; then
+			if rm "$file"; then
+				echo "rm $file"
+			else
+				echo "[error] rm $file"
+			fi
+		fi
+	done
+}
+
+removeLog "$FILE_NAME_FORMAT" "$BEFORE_DATE"
+if [ $all -eq 1 ]; then
+	removeLog "panic-$FILE_NAME_FORMAT" "$BEFORE_DATE"
 fi
 
-file_extension="${FILE_NAME_FORMAT##*.}"
-date_pattern="${FILE_NAME_FORMAT%.*}"
-
-# Convert date pattern to regex pattern
-regex_pattern=$(echo "$date_pattern" | sed -e 's/%Y/[0-9]\{4\}/g' \
-                                         -e 's/%m/[0-9]\{2\}/g' \
-                                         -e 's/%d/[0-9]\{2\}/g')
-
-# Find and delete log files before specified date
-for file in *."$file_extension"; do
-    [[ -f "$file" ]] || continue
-
-    filename_no_ext="${file%.*}"
-
-    if ! [[ "$filename_no_ext" =~ ^${regex_pattern}$ ]]; then
-        continue
-    fi
-
-    parsed_date=$(date -d "$(echo "$filename_no_ext" | sed -E \
-        -e "s/.*([0-9]{4})-([0-9]{2})-([0-9]{2}).*/\1-\2-\3/")" "+%Y-%m-%d" 2>/dev/null)
-    
-    if [ $? -ne 0 ]; then
-        continue
-    fi
-
-    if [[ "$standard_date" < "$BEFORE_DATE" ]]; then
-        if rm "$file"; then
-            echo "rm $file"
-        else
-            echo "[error] rm $file"
-        fi
-    fi
-done`
+`
 
 	if err := os.MkdirAll(targetDir, 0755); err != nil {
 		return fmt.Errorf("create target dir failed: %w", err)
