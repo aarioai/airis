@@ -98,7 +98,7 @@ removeLog(){
 			continue
 		fi
 	
-		if [[ "$standard_date" < "$before" ]]; then
+		if [[ "$parsed_date" < "$before" ]] || [[ "$parsed_date" == "$before" ]]; then
 			if rm "$file"; then
 				echo "rm $file"
 			else

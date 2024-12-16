@@ -3,7 +3,6 @@ package response
 import (
 	"github.com/aarioai/airis/core/ae"
 	"github.com/aarioai/airis/core/httpsvr/request"
-	"github.com/aarioai/airis/core/logger"
 	"github.com/kataras/iris/v12"
 )
 
@@ -20,7 +19,6 @@ var (
 	globalErrorHandler      func(ictx iris.Context, request *request.Request, contentType string, d Body) (int, error, bool)
 	globalBeforeSerialize   []func(ictx iris.Context, contentType string, d Body) Body
 	globalSerialize         func(contentType string, d Body) (bytes []byte, newContentType string, err error)
-	log                     = logger.NewDefaultLog()
 	SerializeTag            = "json" // `json:"key"`
 	globalServeContentTypes = []string{"application/json"}
 )
@@ -67,8 +65,4 @@ func RegisterGlobalBeforeSerialize(f func(ictx iris.Context, contentType string,
 }
 func RegisterGlobalSerialize(f func(contentType string, d Body) (bytes []byte, newContentType string, err error)) {
 	globalSerialize = f
-}
-
-func RegisterLogger(logger logger.LogInterface) {
-	log = logger
 }
