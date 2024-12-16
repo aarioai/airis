@@ -500,14 +500,17 @@ func (r *Request) QueryWild(name string, patterns ...any) (*RawValue, *ae.Error)
 		return v, nil
 	}
 	utils.Release(v)
+	guessName := name
 	// 1.1. URL参数替换格式查询，可能使用的是Header（大写开头）参数名，改为小写下划线模式
-	key := strings.ToLower(strings.ReplaceAll(strings.TrimPrefix(name, "X-"), "-", "_"))
-	if key != name {
-		v, e = r.Query(key, patterns...)
-		if e == nil && v.NotEmpty() {
-			return v, nil
+	if strings.HasPrefix(name, "X-") {
+		guessName = strings.ToLower(strings.ReplaceAll(strings.TrimPrefix(name, "X-"), "-", "_"))
+		if guessName != name {
+			v, e = r.Query(guessName, patterns...)
+			if e == nil && v.NotEmpty() {
+				return v, nil
+			}
+			utils.Release(v)
 		}
-		utils.Release(v)
 	}
 
 	// 2. HTTP头部（包括标准格式和 X- 前缀）
@@ -520,8 +523,8 @@ func (r *Request) QueryWild(name string, patterns ...any) (*RawValue, *ae.Error)
 	// 3. Cookie
 	if cookie, err := r.Cookie(name); err == nil && cookie.Value != "" {
 		v = newRawValue(cookie.Name, cookie.Value)
-	} else if key != name {
-		if cookie, err = r.Cookie(key); err == nil && cookie.Value != "" {
+	} else if guessName != name {
+		if cookie, err = r.Cookie(guessName); err == nil && cookie.Value != "" {
 			v = newRawValue(cookie.Name, cookie.Value)
 		}
 	}
@@ -543,14 +546,16 @@ func (r *Request) QueryWildString(name string, patterns ...any) (string, *ae.Err
 		return v, nil
 	}
 	// 1.1. URL参数替换格式查询，可能使用的是Header（大写开头）参数名，改为小写下划线模式
-	key := strings.ToLower(strings.ReplaceAll(strings.TrimPrefix(name, "X-"), "-", "_"))
-	if key != name {
-		v, e = r.QueryString(key, patterns...)
-		if e == nil && v != "" {
-			return v, nil
+	guessName := name
+	if strings.HasPrefix(name, "X-") {
+		guessName = strings.ToLower(strings.ReplaceAll(strings.TrimPrefix(name, "X-"), "-", "_"))
+		if guessName != name {
+			v, e = r.QueryString(guessName, patterns...)
+			if e == nil && v != "" {
+				return v, nil
+			}
 		}
 	}
-
 	// 2. HTTP头部（包括标准格式和 X- 前缀）
 	v, e = r.HeaderWideString(name, patterns...)
 	if e == nil && v != "" {
@@ -561,8 +566,8 @@ func (r *Request) QueryWildString(name string, patterns ...any) (string, *ae.Err
 	if cookie, err := r.Cookie(name); err == nil {
 		return cookie.Value, newRawValue(cookie.Name, cookie.Value).ReleaseValidate(patterns...)
 	}
-	if key != name {
-		if cookie, err := r.Cookie(key); err == nil {
+	if guessName != name {
+		if cookie, err := r.Cookie(guessName); err == nil {
 			return cookie.Value, newRawValue(cookie.Name, cookie.Value).ReleaseValidate(patterns...)
 		}
 	}
@@ -577,15 +582,18 @@ func (r *Request) QueryWildFast(name string) string {
 		return v
 	}
 	// 1.1. URL参数替换格式查询，可能使用的是Header（大写开头）参数名，改为小写下划线模式
-	key := strings.ToLower(strings.ReplaceAll(strings.TrimPrefix(name, "X-"), "-", "_"))
-	if key != name {
-		if v := r.QueryFast(key); v != "" {
-			return v
+	guessName := name
+	if strings.HasPrefix(name, "X-") {
+		guessName = strings.ToLower(strings.ReplaceAll(strings.TrimPrefix(name, "X-"), "-", "_"))
+		if guessName != name {
+			if v := r.QueryFast(guessName); v != "" {
+				return v
+			}
 		}
 	}
 
 	// 2. HTTP头部（包括标准格式和 X- 前缀）
-	if v := r.HeaderFast(name); v != "" {
+	if v := r.HeaderWildFast(name); v != "" {
 		return v
 	}
 
@@ -593,8 +601,8 @@ func (r *Request) QueryWildFast(name string) string {
 	if cookie, err := r.Cookie(name); err == nil {
 		return cookie.Value
 	}
-	if key != name {
-		if cookie, err := r.Cookie(key); err == nil {
+	if guessName != name {
+		if cookie, err := r.Cookie(guessName); err == nil {
 			return cookie.Value
 		}
 	}
