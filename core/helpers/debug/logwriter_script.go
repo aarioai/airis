@@ -17,6 +17,7 @@ show_usage() {
     echo "    -d delete logs before date (YYYY-MM-DD)"
     echo "    -f log file format, default: %Y-%m-%d.log"
     echo "    -h show help"
+	echo "    -y no confirm"
     echo "Examples:"
     echo "  $0 -d 2024-03-01            # Delete logs before 2024-03-01"
     echo "  $0 -d now|day|week|month  	# Delete logs before one day/week/month ago"
@@ -27,6 +28,7 @@ show_usage() {
 }
 
 all=0
+CONFIRM=1
 BEFORE_DATE=""
 FILE_NAME_FORMAT="%Y-%m-%d.log"
 # Parse command line arguments
@@ -35,6 +37,7 @@ while getopts "d:f:h" opt; do
         d) BEFORE_DATE="$OPTARG" ;;
         f) FILE_NAME_FORMAT="$OPTARG" ;;
         h) show_usage ;;
+		y) CONFIRM=0 ;;
         ?) show_usage ;;
     esac
 done
@@ -66,11 +69,14 @@ removeLog(){
  	local -r format="$1"
 	local -r before="$2"
 	echo "rm $format before $before"
-	echo "continue? [y/N]"
-	read -r confirm
-	if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
-		echo "operation cancelled"
-		exit 0
+
+	if [[ "$CONFIRM" != "0" ]]
+		echo "continue? [y/N]"
+		read -r confirm
+		if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+			echo "operation cancelled"
+			exit 0
+		fi
 	fi
 	
 	file_extension="${format##*.}"

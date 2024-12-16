@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/aarioai/airis/core/ae"
 	"github.com/aarioai/airis/core/atype"
+	"github.com/aarioai/airis/pkg/utils"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"io"
@@ -75,6 +76,10 @@ func parseValidationRules(patterns []any) (bool, *regexp.Regexp, error) {
 			required = p
 		case *regexp.Regexp:
 			re = p
+		case *atype.Atype:
+		case atype.Atype:
+		default:
+			return false, nil, fmt.Errorf("invalid request pattern `%s`", p)
 		}
 	}
 	return required, re, nil
@@ -91,6 +96,7 @@ func (v *RawValue) ReleaseValidate(patterns ...any) *ae.Error {
 // Filter(pattern string)
 // Filter(default atype.Atype)
 func (v *RawValue) Validate(patterns ...any) *ae.Error {
+
 	if v.IsEmpty() {
 		if defaultVal := findDefaultValue(patterns); defaultVal != nil {
 			v.Reload(defaultVal)
@@ -120,20 +126,6 @@ func (r *Request) contentMediaType() (mediatype string, params map[string]string
 		ct = CtOctetStream.String()
 	}
 	return mime.ParseMediaType(ct)
-}
-
-// ContentType
-// Request是每个请求独立内存，基本不存在并发情况，没有加锁的必要性
-func (r *Request) ContentType() string {
-	if r.contentType != "" {
-		return r.contentType
-	}
-	r.contentType, _, _ = r.contentMediaType()
-	return r.contentType
-}
-
-func (r *Request) Method() string {
-	return r.ictx.Method()
 }
 
 // Origin e.g. https://luexu.com  80口省略端口，非80口，带上 :$port
@@ -339,6 +331,31 @@ func (r *Request) parseMultipartBody(boundary string) *ae.Error {
 	return nil
 }
 
+func (r *Request) Accept() string {
+	return r.HeaderFast("Accept")
+}
+
+// ContentType
+// Request是每个请求独立内存，基本不存在并发情况，没有加锁的必要性
+func (r *Request) ContentType() string {
+	if r.contentType != "" {
+		return r.contentType
+	}
+	r.contentType, _, _ = r.contentMediaType()
+	return r.contentType
+}
+
+func (r *Request) Method() string {
+	return r.ictx.Method()
+}
+func (r *Request) UserAgent() string {
+	ua := r.userAgent
+	if ua == "" {
+		ua = r.HeaderFast("User-Agent")
+		r.userAgent = ua
+	}
+	return ua
+}
 func (r *Request) Body(name string, patterns ...any) (*RawValue, *ae.Error) {
 	raw := newRawValue(name, "")
 	if !r.bodyParsed {
@@ -409,24 +426,35 @@ func (r *Request) HeaderValue(name string) *RawValue {
 //  3. X-前缀格式  如 X-Csrf-Token, X-Request-Vuid, X-From, X-Inviter
 //
 // @warn 尽量不要通过自定义header传参，因为可能某个web server会基于安全禁止某些无法识别的header
-func (r *Request) HeaderWild(name string) *RawValue {
+func (r *Request) HeaderWild(name string, patterns ...any) (*RawValue, *ae.Error) {
 	// 1. 原始格式
-	value := r.HeaderValue(name)
-	if value.NotEmpty() {
-		return value
+	value, e := r.Header(name, patterns...)
+	if e == nil && value.NotEmpty() {
+		return value, nil
 	}
+	value.Release()
 
 	// 	2. 标准格式
 	key := cases.Title(language.English).String(strings.ReplaceAll(name, "_", "-"))
 	if key != name {
-		value = r.HeaderValue(key)
-		if value.NotEmpty() {
-			return value
+		value, e = r.Header(key, patterns...)
+		if e == nil && value.NotEmpty() {
+			return value, nil
 		}
+		value.Release()
 	}
-
+	if strings.HasPrefix(key, "X-") {
+		return nil, validateEmpty(name, patterns...)
+	}
 	// 3. X-前缀格式
-	return r.HeaderValue("X-" + key)
+	return r.Header("X-"+key, patterns...)
+}
+func (r *Request) HeaderWideString(name string, patterns ...any) (string, *ae.Error) {
+	header, e := r.HeaderWild(name, patterns...)
+	if e != nil {
+		return "", e
+	}
+	return header.ReleaseString(), nil
 }
 
 // HeaderWildFast 对 HeaderWild 的性能优化、类型简化
@@ -449,18 +477,6 @@ func (r *Request) HeaderWildFast(name string) string {
 	return r.HeaderFast("X-" + key)
 }
 
-func (r *Request) UserAgent() string {
-	ua := r.userAgent
-	if ua == "" {
-		ua = r.HeaderFast("User-Agent")
-		r.userAgent = ua
-	}
-	return ua
-}
-func (r *Request) Accept() string {
-	return r.HeaderFast("Accept")
-}
-
 // Headers 获取所有headers
 // 这个读取少，直接每次独立解析即可
 func (r *Request) Headers() map[string]any {
@@ -480,40 +496,30 @@ func (r *Request) Headers() map[string]any {
 func (r *Request) QueryWild(name string, patterns ...any) (*RawValue, *ae.Error) {
 	// 1. URL参数直接查询模式
 	v, e := r.Query(name, patterns...)
-	if e == nil {
-		if v.NotEmpty() {
-			// 不用释放
-			return v, nil
-		}
-		v.Release() // 需要释放
+	if e == nil && v.NotEmpty() {
+		return v, nil
 	}
+	utils.Release(v)
 	// 1.1. URL参数替换格式查询，可能使用的是Header（大写开头）参数名，改为小写下划线模式
 	key := strings.ToLower(strings.ReplaceAll(strings.TrimPrefix(name, "X-"), "-", "_"))
 	if key != name {
 		v, e = r.Query(key, patterns...)
-		if e == nil {
-			if v.NotEmpty() {
-				// 不用释放
-				return v, nil
-			}
-			v.Release() // 需要释放
+		if e == nil && v.NotEmpty() {
+			return v, nil
 		}
+		utils.Release(v)
 	}
 
 	// 2. HTTP头部（包括标准格式和 X- 前缀）
-	v, e = r.Header(name, patterns...)
-	if e == nil {
-		if v.NotEmpty() {
-			// 不用释放
-			return v, nil
-		}
-		v.Release() // 需要释放
+	v, e = r.HeaderWild(name, patterns...)
+	if e == nil && v.NotEmpty() {
+		return v, nil
 	}
+	utils.Release(v)
 
 	// 3. Cookie
 	if cookie, err := r.Cookie(name); err == nil && cookie.Value != "" {
 		v = newRawValue(cookie.Name, cookie.Value)
-
 	} else if key != name {
 		if cookie, err = r.Cookie(key); err == nil && cookie.Value != "" {
 			v = newRawValue(cookie.Name, cookie.Value)
@@ -528,9 +534,6 @@ func (r *Request) QueryWild(name string, patterns ...any) (*RawValue, *ae.Error)
 		return nil, e
 	}
 	return v, nil
-
-	// 返回空值
-	return v, v.Validate(patterns...)
 }
 
 func (r *Request) QueryWildString(name string, patterns ...any) (string, *ae.Error) {
@@ -549,7 +552,7 @@ func (r *Request) QueryWildString(name string, patterns ...any) (string, *ae.Err
 	}
 
 	// 2. HTTP头部（包括标准格式和 X- 前缀）
-	v, e = r.HeaderString(name, patterns...)
+	v, e = r.HeaderWideString(name, patterns...)
 	if e == nil && v != "" {
 		return v, nil
 	}
@@ -631,4 +634,7 @@ func onlyRequired(patterns []any) (only bool, required bool) {
 		}
 	}
 	return false, false
+}
+func validateEmpty(name string, patterns ...any) *ae.Error {
+	return newRawValue(name, "").ReleaseValidate(patterns...)
 }
