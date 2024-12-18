@@ -3,10 +3,11 @@ package atype
 import (
 	"database/sql"
 	"fmt"
+	"github.com/aarioai/airis/pkg/types"
+	"golang.org/x/exp/constraints"
 	"log"
 	"reflect"
 	"sort"
-	"strconv"
 	"strings"
 )
 
@@ -164,25 +165,36 @@ func JoinNamesByElements(u any, ty JoinType, sep string, eles ...string) string 
 	return JoinTagsByElements(u, ty, sep, "name", eles...)
 }
 
-func JoinUint64(ids []uint64, sep byte) string {
+func JoinInt[T constraints.Signed](ids []T, sep string) string {
 	var s strings.Builder
-	s.Grow(21 * len(ids)) // maxlen of uint64  is 20, extra 1 for delimiter
+	s.Grow(types.MaxInt64Len*len(ids) + ((len(ids) - 1) * len(sep)))
 	for i, id := range ids {
 		if i > 0 {
-			s.WriteByte(sep)
+			s.WriteString(sep)
 		}
-		s.WriteString(strconv.FormatUint(id, 10))
+		s.WriteString(FormatInt(id))
 	}
 	return s.String()
 }
-func JoinUint(ids []uint, sep byte) string {
+func JoinUint[T constraints.Unsigned](ids []T, sep string) string {
 	var s strings.Builder
-	s.Grow(11 * len(ids)) // maxlen of uint  is 10, extra 1 for delimiter
+	s.Grow(types.MaxUint64Len*len(ids) + ((len(ids) - 1) * len(sep)))
 	for i, id := range ids {
 		if i > 0 {
-			s.WriteByte(sep)
+			s.WriteString(sep)
 		}
-		s.WriteString(strconv.FormatUint(uint64(id), 10))
+		s.WriteString(FormatUint(id))
+	}
+	return s.String()
+}
+func JoinFloat[T constraints.Float](ids []T, sep string) string {
+	var s strings.Builder
+	s.Grow(types.MaxUint64Len*len(ids) + ((len(ids) - 1) * len(sep)))
+	for i, id := range ids {
+		if i > 0 {
+			s.WriteString(sep)
+		}
+		s.WriteString(FormatFloat(id, 64))
 	}
 	return s.String()
 }

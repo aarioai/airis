@@ -5,7 +5,7 @@ go 1.23
 require (
 	github.com/kataras/iris/v12 v12.2.11
 	github.com/redis/go-redis/v9 v9.7.0
-	golang.org/x/exp v0.0.0-20241215155358-4a5509556b9e
+	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67
 	golang.org/x/sys v0.28.0
 	golang.org/x/text v0.21.0
 	gopkg.in/ini.v1 v1.67.0
