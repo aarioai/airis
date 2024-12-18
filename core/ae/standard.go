@@ -31,16 +31,10 @@ var (
 	ErrorDeprecated    = NewError(ErrDeprecated).WithCaller(2).Lock()
 )
 
-func ErrInvalid(name string, value ...any) error {
-	if len(value) > 0 {
-		return fmt.Errorf("invalid input %s: %v", name, value[0])
-	}
-	return errors.New("invalid input " + name)
+func ErrInvalid(value any) error {
+	return fmt.Errorf("invalid input: %v", value)
 }
 
-func ErrorInvalid(name string, value ...any) *Error {
-	if len(value) > 0 {
-		return NewE(fmt.Sprintf("invalid input %s: %v", name, value[0]))
-	}
-	return NewE("invalid input " + name)
+func ErrorInvalid(value any) *Error {
+	return NewE(fmt.Sprintf("invalid input: %v", value))
 }
