@@ -2,7 +2,6 @@ package atype
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"strconv"
 
@@ -61,7 +60,6 @@ func ConvertBase(s string, fromBase, toBase int) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Println(v, FormatUint(v), "++++")
 	if toBase == 10 {
 		return FormatUint(v), nil
 	}

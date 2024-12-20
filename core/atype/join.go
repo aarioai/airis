@@ -166,6 +166,9 @@ func JoinNamesByElements(u any, ty JoinType, sep string, eles ...string) string 
 }
 
 func JoinInt[T constraints.Signed](ids []T, sep string) string {
+	if len(ids) == 0 {
+		return ""
+	}
 	var s strings.Builder
 	s.Grow(types.MaxInt64Len*len(ids) + ((len(ids) - 1) * len(sep)))
 	for i, id := range ids {
@@ -177,6 +180,9 @@ func JoinInt[T constraints.Signed](ids []T, sep string) string {
 	return s.String()
 }
 func JoinUint[T constraints.Unsigned](ids []T, sep string) string {
+	if len(ids) == 0 {
+		return ""
+	}
 	var s strings.Builder
 	s.Grow(types.MaxUint64Len*len(ids) + ((len(ids) - 1) * len(sep)))
 	for i, id := range ids {
@@ -188,6 +194,9 @@ func JoinUint[T constraints.Unsigned](ids []T, sep string) string {
 	return s.String()
 }
 func JoinFloat[T constraints.Float](ids []T, sep string) string {
+	if len(ids) == 0 {
+		return ""
+	}
 	var s strings.Builder
 	s.Grow(types.MaxUint64Len*len(ids) + ((len(ids) - 1) * len(sep)))
 	for i, id := range ids {
