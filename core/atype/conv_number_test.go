@@ -8,6 +8,136 @@ import (
 	"testing"
 )
 
+func TestFormatBase64Uint(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    uint64
+		expected string
+	}{
+		{
+			name:     "zero",
+			input:    0,
+			expected: "0",
+		},
+		{
+			name:     "single digit",
+			input:    5,
+			expected: "5",
+		},
+		{
+			name:     "two digits",
+			input:    63,
+			expected: atype.Base64Digits[len(atype.Base64Digits)-1:],
+		},
+		{
+			name:     "large number",
+			input:    1234567890,
+			expected: "19Bwbi",
+		},
+		{
+			name:     "max uint64",
+			input:    math.MaxUint64,
+			expected: "f~~~~~~~~~~",
+		},
+		{
+			name:     "power of 64",
+			input:    64,
+			expected: "10",
+		},
+		{
+			name:     "complex number",
+			input:    987654321,
+			expected: "WTCyN",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := atype.FormatBase64Uint(tt.input)
+			if result != tt.expected {
+				t.Errorf("FormatBase64Uint(%d) = %s, want %s",
+					tt.input, result, tt.expected)
+			}
+
+			got, err := atype.ParseBase64Uint(result)
+			if err != nil {
+				t.Errorf("ParseBase64Uint(%s) failed: %s", result, err)
+			}
+			if got != tt.input {
+				t.Errorf("ParseBase64Uint(%s) = %d, want %d", result, got, tt.input)
+			}
+		})
+	}
+}
+func TestFormatBase64Int(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    int64
+		expected string
+	}{
+		{
+			name:     "zero",
+			input:    0,
+			expected: "0",
+		},
+		{
+			name:     "single digit",
+			input:    -9,
+			expected: "-9",
+		},
+		{
+			name:     "two digits",
+			input:    -63,
+			expected: "-" + atype.Base64Digits[len(atype.Base64Digits)-1:],
+		},
+		{
+			name:     "large number",
+			input:    -1234567890,
+			expected: "-19Bwbi",
+		},
+		{
+			name:     "min int64",
+			input:    math.MinInt64,
+			expected: "-80000000000",
+		},
+		{
+			name:     "max int64",
+			input:    math.MaxInt64,
+			expected: "7~~~~~~~~~~",
+		},
+		{
+			name:     "power of 64",
+			input:    64,
+			expected: "10",
+		},
+		{
+			name:     "power of -64",
+			input:    -64,
+			expected: "-10",
+		},
+		{
+			name:     "complex number",
+			input:    987654321,
+			expected: "WTCyN",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := atype.FormatBase64Int(tt.input)
+			if result != tt.expected {
+				t.Errorf("FormatBase64Int(%d) = %s, want %s",
+					tt.input, result, tt.expected)
+			}
+
+			got, err := atype.ParseBase64Int(result)
+			if err != nil {
+				t.Errorf("ParseBase64Int(%s) failed: %s", result, err)
+			}
+			if got != tt.input {
+				t.Errorf("ParseBase64Int(%s) = %d, want %d", result, got, tt.input)
+			}
+		})
+	}
+}
 func TestParseInt(t *testing.T) {
 	// 测试小数字
 	for i := 0; i < math.MaxUint8; i++ {
