@@ -13,20 +13,20 @@ import (
 // 标准以：+/  ； URL 模式以 -_   ；  这里要贴合数字，尽量不要用数学符号，因此选用 _ ~
 const Base64Digits = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_~"
 
-const nSmalls = math.MaxUint8 + 1 //
+const NSmalls = math.MaxUint8 + 1 // small number less than this
 
 // 为了提高性能，可以添加常用数字的字符串缓存。小数字在query string 或body传参中会很常见
 // 虽然 strconv.ParseInt 里面是用数字字符串段方式逐步截取的。不过没有对常用小数缓存优化。这里对常用小数字用查表法
 var (
-	smallNumbers    [nSmalls]string // 暂时保持 uint8 最高范围
+	smallNumbers    [NSmalls]string // 暂时保持 uint8 最高范围
 	smallNumberKeys = make(map[string]int, len(smallNumbers))
 
-	smallBase64Numbers    [nSmalls]string
+	smallBase64Numbers    [NSmalls]string
 	smallBase64NumberKeys = make(map[string]int, len(smallBase64Numbers))
 )
 
 func init() {
-	for i := 0; i < nSmalls; i++ {
+	for i := 0; i < NSmalls; i++ {
 		s := strconv.Itoa(i)
 		smallNumbers[i] = s
 		smallNumberKeys[s] = i
@@ -112,7 +112,7 @@ func FormatBase64Int[T constraints.Signed](u T) string {
 }
 func FormatBase64Uint[T constraints.Unsigned](v T) string {
 	u := uint64(v) // 必须要转换，否则无法比较
-	if u < nSmalls {
+	if u < NSmalls {
 		return smallBase64Numbers[int(u)]
 	}
 	return formatBase64Uint(u)
@@ -228,7 +228,7 @@ func FormatInt[T constraints.Signed](value T) string {
 func FormatUint[T constraints.Unsigned](value T) string {
 	v := uint64(value)
 	// 小数字使用查表法
-	if v < nSmalls {
+	if v < NSmalls {
 		return smallNumbers[v]
 	}
 	return strconv.FormatUint(v, 10)
