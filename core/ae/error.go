@@ -52,14 +52,18 @@ func NewError(err error, details ...any) *Error {
 	return NewE(err.Error()).WithCaller(2).WithDetail(details...)
 }
 
-// Lock 锁定后就不能再解锁了，作为常量使用
+// Lock 锁定后不可再修改或复用，一般作为常量使用
 func (e *Error) Lock() *Error {
 	e.locked = true
 	return e
 }
+func (e *Error) Unlock() *Error {
+	e.locked = false
+	return e
+}
 func (e *Error) WithMsg(format string, args ...any) *Error {
 	if e.locked {
-		fmt.Println("it's locked!")
+		panic("unable change locked error")
 		return e
 	}
 	e.Msg = fmt.Sprintf(format, args...)
@@ -69,7 +73,7 @@ func (e *Error) WithMsg(format string, args ...any) *Error {
 // AppendMsg 尝试添加消息
 func (e *Error) AppendMsg(msgs ...any) *Error {
 	if e.locked {
-		fmt.Println("it's locked!")
+		panic("unable change locked error")
 		return e
 	}
 	msg := afmt.SprintfArgs(msgs)
@@ -82,7 +86,7 @@ func (e *Error) AppendMsg(msgs ...any) *Error {
 // WithCaller 添加调用者信息
 func (e *Error) WithCaller(skip int) *Error {
 	if e.locked {
-		fmt.Println("it's locked!")
+		panic("unable change locked error")
 		return e
 	}
 	e.Caller = Caller(skip + 1)
@@ -91,7 +95,7 @@ func (e *Error) WithCaller(skip int) *Error {
 
 func (e *Error) WithDetail(detail ...any) *Error {
 	if e.locked {
-		fmt.Println("it's locked!")
+		panic("unable change locked error")
 		return e
 	}
 	e.Detail = afmt.SprintfArgs(detail)
@@ -99,7 +103,7 @@ func (e *Error) WithDetail(detail ...any) *Error {
 }
 func (e *Error) WithTraceInfo(ctx iris.Context) *Error {
 	if e.locked {
-		fmt.Println("it's locked!")
+		panic("unable change locked error")
 		return e
 	}
 	e.TraceInfo = airis.TraceInfo(ctx)
