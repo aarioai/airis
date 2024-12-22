@@ -4,44 +4,7 @@ import (
 	"github.com/aarioai/airis/core/atype"
 	"testing"
 )
-
-func TestNotEmpty(t *testing.T) {
-	if atype.NotEmpty(false) != false {
-		t.Errorf("atype.NotEmpty(false) == %s", atype.String(atype.NotEmpty(false)))
-	}
-	if atype.NotEmpty(true) != true {
-		t.Errorf("atype.NotEmpty(true) == %s", atype.String(atype.NotEmpty(true)))
-	}
-	if atype.NotEmpty(byte(0)) != false {
-		t.Errorf("atype.NotEmpty(byte(0)) == %s", atype.String(atype.NotEmpty(byte(0))))
-	}
-
-	if atype.NotEmpty(byte('0')) != true {
-		t.Errorf("atype.NotEmpty(byte('0')) == %s", atype.String(atype.NotEmpty(byte('0'))))
-	}
-	if atype.NotEmpty(rune(0)) != false {
-		t.Errorf("atype.NotEmpty(rune(0)) == %s", atype.String(atype.NotEmpty(rune(0))))
-	}
-	if atype.NotEmpty("") != false {
-		t.Errorf("atype.NotEmpty(\"\") == %s", atype.String(atype.NotEmpty("")))
-	}
-	if atype.NotEmpty([]byte{}) != false {
-		t.Errorf("atype.NotEmpty([]byte{}) == %s", atype.String(atype.NotEmpty([]byte{})))
-	}
-	if atype.NotEmpty([]byte{'0'}) != true {
-		t.Errorf("atype.NotEmpty([]byte{'0'}) == %s", atype.String(atype.NotEmpty([]byte{'0'})))
-	}
-
-	if atype.NotEmpty(-1) != true {
-		t.Errorf("atype.NotEmpty(-1) == %s", atype.String(atype.NotEmpty(-1)))
-	}
-	if atype.NotEmpty(0) != false {
-		t.Errorf("atype.NotEmpty(0) == %s", atype.String(atype.NotEmpty(0)))
-	}
-	if atype.NotEmpty(1) != true {
-		t.Errorf("atype.NotEmpty(1) == %s", atype.String(atype.NotEmpty(1)))
-	}
-}
+ 
 func TestString(t *testing.T) {
 	if atype.String(false) != "false" {
 		t.Errorf("bool(false) ==> string(%s)", atype.String(false))

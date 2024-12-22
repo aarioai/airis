@@ -3,6 +3,7 @@ package types
 import (
 	"cmp"
 	"golang.org/x/exp/constraints"
+	"reflect"
 )
 
 // Number 表示所有数字类型
@@ -12,7 +13,7 @@ type Number interface {
 
 // BasicType 表示所有基本类型
 type BasicType interface {
-	bool | byte | string | rune | Number
+	~bool | ~byte | ~rune | ~string | Number
 }
 
 // MapKeyType 允许的map key类型
@@ -42,3 +43,53 @@ const MaxIntLen = 11    // -2147483648 ~ 2147483647
 const MaxUintLen = 10   // 0 ~ 4294967295
 const MaxInt64Len = 20  // -9223372036854775808 ~ 9223372036854775807
 const MaxUint64Len = 20 // 0 ~ 18446744073709551615
+
+/*
+在Go语言中，一个any类型的变量包含了2个指针，一个指针指向值的在编译时确定的类型，另外一个指针指向实际的值。
+*/
+func IsNil(x any) bool {
+	// @warn 断言和反射性能不是特别好，如果不得已再使用，控制使用有助于提升程序性能。
+	return x == nil || (reflect.ValueOf(x).Kind() == reflect.Ptr && reflect.ValueOf(x).IsNil())
+}
+
+func IsEmpty(v any) bool {
+	if IsNil(v) {
+		return true
+	}
+	switch reflect.TypeOf(v).Kind() {
+	case reflect.Invalid:
+		return true
+	case reflect.Bool:
+		return !v.(bool)
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return reflect.ValueOf(v).Int() == 0
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return reflect.ValueOf(v).Uint() == 0
+	case reflect.Uintptr:
+		return reflect.ValueOf(v).Uint() == 0
+	case reflect.Float32, reflect.Float64:
+		return reflect.ValueOf(v).Float() == 0
+	case reflect.Complex64, reflect.Complex128:
+		return reflect.ValueOf(v).Complex() == 0
+	case reflect.Array:
+		return reflect.ValueOf(v).Len() == 0
+	//case reflect.Chan:
+	//case reflect.Func:
+	//case reflect.Interface:
+	case reflect.Map:
+		return reflect.ValueOf(v).Len() == 0
+	//case reflect.Pointer:
+	case reflect.Slice:
+		return reflect.ValueOf(v).Len() == 0
+	case reflect.String:
+		return reflect.ValueOf(v).Len() == 0
+	//case reflect.Struct:
+	//case reflect.UnsafePointer:
+	//return reflect.ValueOf(v).IsNil()
+	default:
+		return false
+	}
+}
+func NotEmpty(v any) bool {
+	return !IsEmpty(v)
+}

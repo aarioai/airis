@@ -3,8 +3,8 @@ package afmt
 import (
 	"bytes"
 	"errors"
+	"github.com/aarioai/airis/pkg/types"
 	"math"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -204,7 +204,7 @@ func TimeDiff(layout string, d1 time.Time, d2 time.Time, noCarry bool) string {
 		if *q == 0 {
 			ignore = true
 		} else {
-			out.WriteString(strconv.Itoa(*q))
+			out.WriteString(types.Itoa(*q))
 		}
 		i += 2
 		start = true

@@ -2,6 +2,7 @@ package atype
 
 import (
 	"database/sql"
+	"github.com/aarioai/airis/pkg/types"
 	"sync"
 )
 
@@ -84,9 +85,6 @@ func (p *Atype) ReleaseBool() (bool, error) {
 	defer p.Release()
 	return Bool(p.raw)
 }
-func (p *Atype) IsUnsigned() bool {
-	return IsUnsigned(p.raw)
-}
 
 func (p *Atype) NullString() sql.NullString {
 	return sql.NullString{String: p.String(), Valid: p.NotEmpty()}
@@ -112,10 +110,12 @@ func (p *Atype) ReleaseNullFloat64() sql.NullFloat64 {
 	return p.SqlFloat64()
 }
 func (p *Atype) IsEmpty() bool {
-	return IsEmpty(p.raw)
+	return types.IsEmpty(p.raw)
 }
+
+// @warn NotEmpty(byte(0)) == false,  NotEmpty(byte('0')) == true
 func (p *Atype) NotEmpty() bool {
-	return NotEmpty(p.raw)
+	return types.NotEmpty(p.raw)
 }
 
 func (p *Atype) DefaultBool(defaultValue bool) bool {

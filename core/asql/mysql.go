@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/aarioai/airis/core/ae"
 	"github.com/aarioai/airis/core/atype"
-	"strconv"
+	"github.com/aarioai/airis/pkg/types"
 	"strings"
 )
 
@@ -53,7 +53,7 @@ func qsInUnion(ctx context.Context, db *DB, unionAll bool, format string, ids []
 			if i > 0 {
 				s.WriteByte(',')
 			}
-			s.WriteString(strconv.FormatUint(id, 10))
+			s.WriteString(types.FormatUint(id))
 		}
 		for i, a := range arg {
 			if isInArgsTag(a) {

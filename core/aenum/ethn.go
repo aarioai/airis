@@ -1,6 +1,8 @@
 package aenum
 
-import "strconv"
+import (
+	"github.com/aarioai/airis/pkg/types"
+)
 
 type Ethn uint8 // 全世界大概2000个民族；1-99 为中国的民族
 // type Ethnicity uint16 // 全世界民族
@@ -140,7 +142,7 @@ func ToEthn(s string) (Ethn, bool) {
 }
 
 func (s Ethn) Uint8() uint8    { return uint8(s) }
-func (s Ethn) String() string  { return strconv.Itoa(int(s)) }
+func (s Ethn) String() string  { return types.FormatUint8(s.Uint8()) }
 func (s Ethn) Is(x uint8) bool { return s.Uint8() == x }
 func (s Ethn) In(a ...Ethn) bool {
 	for _, sts := range a {

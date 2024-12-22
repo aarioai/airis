@@ -175,7 +175,7 @@ func JoinInt[T constraints.Signed](ids []T, sep string) string {
 		if i > 0 {
 			s.WriteString(sep)
 		}
-		s.WriteString(FormatInt(id))
+		s.WriteString(types.FormatInt(id))
 	}
 	return s.String()
 }
@@ -189,7 +189,7 @@ func JoinUint[T constraints.Unsigned](ids []T, sep string) string {
 		if i > 0 {
 			s.WriteString(sep)
 		}
-		s.WriteString(FormatUint(id))
+		s.WriteString(types.FormatUint(id))
 	}
 	return s.String()
 }
@@ -203,7 +203,7 @@ func JoinFloat[T constraints.Float](ids []T, sep string) string {
 		if i > 0 {
 			s.WriteString(sep)
 		}
-		s.WriteString(FormatFloat(id, 64))
+		s.WriteString(types.FormatFloat(id))
 	}
 	return s.String()
 }

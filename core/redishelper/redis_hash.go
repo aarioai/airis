@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/aarioai/airis/core/ae"
 	"github.com/aarioai/airis/core/atype"
-	"strconv"
+	"github.com/aarioai/airis/pkg/types"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -52,7 +52,7 @@ func HScan(ctx context.Context, rdb *redis.Client, dest any, k string, fields ..
 		return ae.ErrorNotFound
 	}
 	for _, x := range v {
-		if atype.IsNil(x) {
+		if types.IsNil(x) {
 			return ae.ErrorNotFound
 		}
 	}
@@ -86,7 +86,7 @@ func HGetAllInt(ctx context.Context, rdb *redis.Client, k string, restrict bool)
 	value := make(map[string]int, n)
 	var x int64
 	for k, v := range result {
-		if x, err = strconv.ParseInt(v, 10, 32); err != nil {
+		if x, err = types.ParseInt64(v); err != nil {
 			if restrict {
 				return nil, ae.NewRedisError(fmt.Errorf(`HGetAllInt: invalid int string %s`, v))
 			}
@@ -110,7 +110,7 @@ func TryHMGet(ctx context.Context, rdb *redis.Client, k string, fields ...string
 	ok := true
 	e := ae.ErrorNotFound
 	for _, x := range v {
-		if !atype.IsNil(x) {
+		if !types.IsNil(x) {
 			e = nil // 只要存在一个不是nil，都正确
 			if !ok {
 				break
@@ -135,7 +135,7 @@ func TryHMGetString(ctx context.Context, rdb *redis.Client, k string, fields ...
 	newV := atype.New()
 	defer newV.Release()
 	for i, x := range iv {
-		if atype.IsNil(x) {
+		if types.IsNil(x) {
 			v[i] = ""
 		} else {
 			v[i] = newV.Reload(x).String()
@@ -152,7 +152,7 @@ func TryHMGetUint64(ctx context.Context, rdb *redis.Client, k string, fields []s
 	newV := atype.New()
 	defer newV.Release()
 	for i, x := range iv {
-		if atype.IsNil(x) {
+		if types.IsNil(x) {
 			v[i] = defaultValue
 		} else {
 			v[i] = newV.Reload(x).DefaultUint64(0)
@@ -169,7 +169,7 @@ func TryHMGetUint(ctx context.Context, rdb *redis.Client, k string, fields []str
 	newV := atype.New()
 	defer newV.Release()
 	for i, x := range iv {
-		if atype.IsNil(x) {
+		if types.IsNil(x) {
 			v[i] = defaultValue
 		} else {
 			v[i] = newV.Reload(x).DefaultUint(0)
@@ -186,7 +186,7 @@ func TryHMGetUint32(ctx context.Context, rdb *redis.Client, k string, fields []s
 	newV := atype.New()
 	defer newV.Release()
 	for i, x := range iv {
-		if atype.IsNil(x) {
+		if types.IsNil(x) {
 			v[i] = defaultValue
 		} else {
 			v[i] = newV.Reload(x).DefaultUint32(0)
@@ -203,7 +203,7 @@ func TryHMGetUint24(ctx context.Context, rdb *redis.Client, k string, fields []s
 	newV := atype.New()
 	defer newV.Release()
 	for i, x := range iv {
-		if atype.IsNil(x) {
+		if types.IsNil(x) {
 			v[i] = defaultValue
 		} else {
 			v[i] = newV.Reload(x).DefaultUint24(0)
@@ -220,7 +220,7 @@ func TryHMGetUint16(ctx context.Context, rdb *redis.Client, k string, fields []s
 	newV := atype.New()
 	defer newV.Release()
 	for i, x := range iv {
-		if atype.IsNil(x) {
+		if types.IsNil(x) {
 			v[i] = defaultValue
 		} else {
 			v[i] = newV.Reload(x).DefaultUint16(0)
@@ -237,7 +237,7 @@ func TryHMGetUint8(ctx context.Context, rdb *redis.Client, k string, fields []st
 	newV := atype.New()
 	defer newV.Release()
 	for i, x := range iv {
-		if atype.IsNil(x) {
+		if types.IsNil(x) {
 			v[i] = defaultValue
 		} else {
 			v[i] = newV.Reload(x).DefaultUint8(0)
@@ -254,7 +254,7 @@ func TryHMGetInt64(ctx context.Context, rdb *redis.Client, k string, fields []st
 	newV := atype.New()
 	defer newV.Release()
 	for i, x := range iv {
-		if atype.IsNil(x) {
+		if types.IsNil(x) {
 			v[i] = defaultValue
 		} else {
 			v[i] = newV.Reload(x).DefaultInt64(0)
@@ -271,7 +271,7 @@ func TryHMGetInt(ctx context.Context, rdb *redis.Client, k string, fields []stri
 	newV := atype.New()
 	defer newV.Release()
 	for i, x := range iv {
-		if atype.IsNil(x) {
+		if types.IsNil(x) {
 			v[i] = defaultValue
 		} else {
 			v[i] = newV.Reload(x).DefaultInt(0)
@@ -288,7 +288,7 @@ func TryHMGetInt32(ctx context.Context, rdb *redis.Client, k string, fields []st
 	newV := atype.New()
 	defer newV.Release()
 	for i, x := range iv {
-		if atype.IsNil(x) {
+		if types.IsNil(x) {
 			v[i] = defaultValue
 		} else {
 			v[i] = newV.Reload(x).DefaultInt32(0)
@@ -305,7 +305,7 @@ func TryHMGetInt16(ctx context.Context, rdb *redis.Client, k string, fields []st
 	newV := atype.New()
 	defer newV.Release()
 	for i, x := range iv {
-		if atype.IsNil(x) {
+		if types.IsNil(x) {
 			v[i] = defaultValue
 		} else {
 			v[i] = newV.Reload(x).DefaultInt16(0)
@@ -322,7 +322,7 @@ func TryHMGetInt8(ctx context.Context, rdb *redis.Client, k string, fields []str
 	newV := atype.New()
 	defer newV.Release()
 	for i, x := range iv {
-		if atype.IsNil(x) {
+		if types.IsNil(x) {
 			v[i] = defaultValue
 		} else {
 			v[i] = newV.Reload(x).DefaultInt8(0)
@@ -341,7 +341,7 @@ func MustHMGet(ctx context.Context, rdb *redis.Client, k string, fields ...strin
 		return nil, ae.ErrorNotFound
 	}
 	for _, x := range v {
-		if atype.IsNil(x) {
+		if types.IsNil(x) {
 			return v, ae.ErrorNotFound
 		}
 	}

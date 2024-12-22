@@ -1,7 +1,7 @@
 package asql
 
 import (
-	"strconv"
+	"github.com/aarioai/airis/pkg/types"
 	"strings"
 )
 
@@ -80,10 +80,10 @@ func SafeIncr(field string, n int, max string) string {
 	s := field + "=CASE"
 	var ns string
 	if n > 0 {
-		ns = field + "+" + strconv.FormatUint(uint64(n), 10)
+		ns = field + "+" + types.FormatInt(n)
 		s += " WHEN " + ns + ">=" + max + " THEN " + max
 	} else {
-		ns = field + "-" + strconv.FormatUint(uint64(-n), 10)
+		ns = field + "-" + types.FormatUint(uint64(-n))
 		s += " WHEN " + ns + "<=0 THEN 0"
 	}
 	s += " ELSE " + ns + " END"
@@ -95,7 +95,7 @@ func SafeUintString(n int) string {
 	if n <= 0 {
 		return "0"
 	}
-	return strconv.FormatUint(uint64(n), 10)
+	return types.FormatInt(n)
 }
 
 func SafeIncrUint8(field string, n int) string {

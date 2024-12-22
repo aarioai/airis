@@ -3,6 +3,7 @@ package atype
 import (
 	"errors"
 	"fmt"
+	"github.com/aarioai/airis/pkg/types"
 	"strconv"
 )
 
@@ -29,43 +30,43 @@ func String(d any) string {
 
 		// 整数
 	case int64:
-		return FormatInt(v)
+		return types.FormatInt(v)
 	case int:
-		return FormatInt(int64(v))
+		return types.FormatInt(int64(v))
 	case int32:
-		return FormatInt(int64(v))
+		return types.FormatInt(int64(v))
 	//  is a built-in alias of int32, @notice 'A' is a rune(65), is different with byte('A') (alias of uint8(65))
-	//case rune: return FormatInt(int64(v))
+	//case rune: return types.FormatInt(int64(v))
 	case Int24:
-		return FormatInt(int64(v))
+		return types.FormatInt(int64(v))
 	case int16:
-		return FormatInt(int64(v))
+		return types.FormatInt(int64(v))
 	case int8:
-		return FormatInt(int64(v))
+		return types.FormatInt(int64(v))
 
 		// 无符号整数
 	case uint64:
-		return FormatUint(v)
+		return types.FormatUint(v)
 	case uint:
-		return FormatUint(uint64(v))
+		return types.FormatUint(uint64(v))
 	case uint32:
-		return FormatUint(uint64(v))
+		return types.FormatUint(uint64(v))
 	case Uint24:
-		return FormatUint(uint64(v))
+		return types.FormatUint(uint64(v))
 	case uint16:
-		return FormatUint(uint64(v))
+		return types.FormatUint(uint64(v))
 	case uint8: // byte
-		return FormatUint(uint64(v))
+		return types.FormatUint(uint64(v))
 	// is a built-in alias of uint8, Name('A') returns "97"
-	//case byte: return strconv.FormatUint(uint64(v), 10)
+	//case byte: return types.FormatUint(uint64(v))
 	case Booln:
-		return FormatUint(uint64(v))
+		return types.FormatUint(uint64(v))
 
 		// 浮点数
 	case float64:
-		return FormatFloat(v, 64)
+		return types.FormatFloat(v, 64)
 	case float32:
-		return FormatFloat(float64(v), 32)
+		return types.FormatFloat(float64(v), 32)
 	}
 	// 有些类型type vt uint  var a, b vt 这样就无法识别为 uint；所以尝试通过字符串方式转一下
 	return fmt.Sprint(d)
@@ -147,7 +148,7 @@ func Int64Base(d any, bitSize int) (int64, error) {
 		}
 		return 0, nil
 	case string:
-		return strconv.ParseInt(v, 10, bitSize)
+		return types.ParseInt64(v, bitSize)
 	case int8:
 		return int64(v), nil
 	case int16:
@@ -178,7 +179,7 @@ func Int64Base(d any, bitSize int) (int64, error) {
 		return int64(v), nil
 	}
 	// 有些类型type vt uint  var a, b vt 这样就无法识别为 uint；所以尝试通过字符串方式转一下
-	return strconv.ParseInt(String(d), 10, bitSize)
+	return types.ParseInt64(String(d), bitSize)
 }
 
 func Uint8(d any) (uint8, error) {
@@ -219,7 +220,7 @@ func Uint64Base(d any, bitSize int) (uint64, error) {
 		}
 		return 0, nil
 	case string:
-		return strconv.ParseUint(v, 10, bitSize)
+		return types.ParseUint64(v, bitSize)
 	case int8:
 		return uint64(v), nil
 	case int16:
@@ -250,7 +251,7 @@ func Uint64Base(d any, bitSize int) (uint64, error) {
 		return uint64(v), nil
 	}
 	// 有些类型type vt uint  var a, b vt 这样就无法识别为 uint；所以尝试通过字符串方式转一下
-	return strconv.ParseUint(String(d), 10, bitSize)
+	return types.ParseUint64(String(d), bitSize)
 }
 func Float32(d any) (float32, error) {
 	f, err := Float64(d, 32)

@@ -1,7 +1,7 @@
 package aenum
 
 import (
-	"strconv"
+	"github.com/aarioai/airis/pkg/types"
 	"strings"
 )
 
@@ -39,7 +39,7 @@ func ToSex(s string) Sex {
 	return NilSex
 }
 func (x Sex) Uint8() uint8   { return uint8(x) }
-func (x Sex) String() string { return strconv.FormatUint(uint64(x), 10) }
+func (x Sex) String() string { return types.FormatUint8(x.Uint8()) }
 func (x Sex) Is(x2 Sex) bool { return x == x2 }
 func (x Sex) In(args ...Sex) bool {
 	for _, a := range args {

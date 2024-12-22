@@ -1,8 +1,8 @@
 package atype
 
 import (
+	"github.com/aarioai/airis/pkg/types"
 	"regexp"
-	"strconv"
 )
 
 type VideoPattern struct {
@@ -27,7 +27,7 @@ func ToImagePattern(tag string) ImagePattern {
 	matches := reg.FindAllStringSubmatch(tag, -1)
 	var p ImagePattern
 	for _, match := range matches {
-		v, _ := strconv.Atoi(match[2])
+		v, _ := types.Atoi(match[2])
 		/**
 		 * w width, h height, q quanlity, v max width, g max height
 		 *    	img.width <= v ,   img.width = w  两者区别

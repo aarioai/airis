@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/aarioai/airis/core/atype"
+	"github.com/aarioai/airis/pkg/types"
 	"github.com/redis/go-redis/v9"
 	"strings"
 	"time"
@@ -192,33 +193,33 @@ func (c *Config) RedisConfig(section string) (*redis.Options, error) {
 		ClientName:                 clientName,
 		Dialer:                     nil,
 		OnConnect:                  nil,
-		Protocol:                   atype.ToInt(protocol),
+		Protocol:                   types.ToInt(protocol),
 		Username:                   username,
 		Password:                   password,
 		CredentialsProvider:        nil,
 		CredentialsProviderContext: nil,
-		DB:                         atype.ToInt(db),
-		MaxRetries:                 atype.ToInt(maxRetries),
-		MinRetryBackoff:            time.Duration(atype.ToInt64(minRetryBackoff)),
-		MaxRetryBackoff:            time.Duration(atype.ToInt64(maxRetryBackoff)),
-		DialTimeout:                time.Duration(atype.ToInt64(dialTimeout)),
-		ReadTimeout:                time.Duration(atype.ToInt64(readTimeout)),
-		WriteTimeout:               time.Duration(atype.ToInt64(writeTimeout)),
-		ContextTimeoutEnabled:      atype.ToBool(contextTimeoutEnabled),
-		PoolFIFO:                   atype.ToBool(poolFIFO),
-		PoolSize:                   atype.ToInt(poolSize),
-		PoolTimeout:                time.Duration(atype.ToInt64(poolTimeout)),
-		MinIdleConns:               atype.ToInt(minIdleConns),
-		MaxIdleConns:               atype.ToInt(maxIdleConns),
-		MaxActiveConns:             atype.ToInt(maxActiveConns),
-		ConnMaxIdleTime:            time.Duration(atype.ToInt64(connMaxIdleTime)),
-		ConnMaxLifetime:            time.Duration(atype.ToInt64(connMaxLifetime)),
+		DB:                         types.ToInt(db),
+		MaxRetries:                 types.ToInt(maxRetries),
+		MinRetryBackoff:            time.Duration(types.ToInt64(minRetryBackoff)),
+		MaxRetryBackoff:            time.Duration(types.ToInt64(maxRetryBackoff)),
+		DialTimeout:                time.Duration(types.ToInt64(dialTimeout)),
+		ReadTimeout:                time.Duration(types.ToInt64(readTimeout)),
+		WriteTimeout:               time.Duration(types.ToInt64(writeTimeout)),
+		ContextTimeoutEnabled:      types.ToBool(contextTimeoutEnabled),
+		PoolFIFO:                   types.ToBool(poolFIFO),
+		PoolSize:                   types.ToInt(poolSize),
+		PoolTimeout:                time.Duration(types.ToInt64(poolTimeout)),
+		MinIdleConns:               types.ToInt(minIdleConns),
+		MaxIdleConns:               types.ToInt(maxIdleConns),
+		MaxActiveConns:             types.ToInt(maxActiveConns),
+		ConnMaxIdleTime:            time.Duration(types.ToInt64(connMaxIdleTime)),
+		ConnMaxLifetime:            time.Duration(types.ToInt64(connMaxLifetime)),
 		TLSConfig:                  nil,
 		Limiter:                    nil,
 		// 官方写错，会在 v10 更正过来
-		DisableIndentity: atype.ToBool(disableIdentity),
+		DisableIndentity: types.ToBool(disableIdentity),
 		IdentitySuffix:   identitySuffix,
-		UnstableResp3:    atype.ToBool(unstableResp3),
+		UnstableResp3:    types.ToBool(unstableResp3),
 	}
 	return &opt, nil
 }

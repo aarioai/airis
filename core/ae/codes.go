@@ -2,8 +2,8 @@ package ae
 
 import (
 	"github.com/aarioai/airis/pkg/afmt"
+	"github.com/aarioai/airis/pkg/types"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -127,7 +127,7 @@ func CodeText(code int) string {
 	}
 	text := http.StatusText(code)
 	if text == "" {
-		return strconv.Itoa(code)
+		return types.Itoa(code)
 	}
 	return text
 }

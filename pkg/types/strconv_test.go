@@ -1,7 +1,7 @@
-package atype_test
+package types_test
 
 import (
-	"github.com/aarioai/airis/core/atype"
+	"github.com/aarioai/airis/pkg/types"
 	"math"
 	"math/rand/v2"
 	"strconv"
@@ -27,7 +27,7 @@ func TestFormatBase64Uint(t *testing.T) {
 		{
 			name:     "two digits",
 			input:    63,
-			expected: atype.Base64Digits[len(atype.Base64Digits)-1:],
+			expected: types.Base64Digits[len(types.Base64Digits)-1:],
 		},
 		{
 			name:     "large number",
@@ -52,13 +52,13 @@ func TestFormatBase64Uint(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := atype.FormatBase64Uint(tt.input)
+			result := types.FormatBase64Uint(tt.input)
 			if result != tt.expected {
 				t.Errorf("FormatBase64Uint(%d) = %s, want %s",
 					tt.input, result, tt.expected)
 			}
 
-			got, err := atype.ParseBase64Uint(result)
+			got, err := types.ParseBase64Uint(result)
 			if err != nil {
 				t.Errorf("ParseBase64Uint(%s) failed: %s", result, err)
 			}
@@ -87,7 +87,7 @@ func TestFormatBase64Int(t *testing.T) {
 		{
 			name:     "two digits",
 			input:    -63,
-			expected: "-" + atype.Base64Digits[len(atype.Base64Digits)-1:],
+			expected: "-" + types.Base64Digits[len(types.Base64Digits)-1:],
 		},
 		{
 			name:     "large number",
@@ -122,13 +122,13 @@ func TestFormatBase64Int(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := atype.FormatBase64Int(tt.input)
+			result := types.FormatBase64Int(tt.input)
 			if result != tt.expected {
 				t.Errorf("FormatBase64Int(%d) = %s, want %s",
 					tt.input, result, tt.expected)
 			}
 
-			got, err := atype.ParseBase64Int(result)
+			got, err := types.ParseBase64Int(result)
 			if err != nil {
 				t.Errorf("ParseBase64Int(%s) failed: %s", result, err)
 			}
@@ -141,8 +141,8 @@ func TestFormatBase64Int(t *testing.T) {
 func TestParseInt(t *testing.T) {
 	// 测试小数字
 	for i := 0; i < math.MaxUint8; i++ {
-		s := atype.FormatInt(i)
-		got, err := atype.ParseInt(s)
+		s := types.FormatInt(i)
+		got, err := types.ParseInt(s)
 		if err != nil {
 			t.Errorf("FormatInt(%d) failed: %s", i, err.Error())
 			continue
@@ -159,11 +159,11 @@ func TestParseInt(t *testing.T) {
 			n = -n
 		}
 		want := strconv.FormatInt(n, 10)
-		s := atype.FormatInt(n)
+		s := types.FormatInt(n)
 		if s != want {
 			t.Errorf("FormatInt(%d) => %s, want %s", n, s, want)
 		}
-		got, err := atype.ParseInt64(s)
+		got, err := types.ParseInt64(s)
 		if err != nil {
 			t.Errorf("ParseInt64(%d) => %v, want nil", n, err)
 			continue
@@ -176,11 +176,11 @@ func TestParseInt(t *testing.T) {
 	for i := 0; i < 1000; i++ {
 		n := rand.Uint64N(math.MaxInt64)
 		want := strconv.FormatUint(n, 10)
-		s := atype.FormatUint(n)
+		s := types.FormatUint(n)
 		if s != want {
 			t.Errorf("FormatUint(%d) => %s, want %s", n, s, want)
 		}
-		got, err := atype.ParseUint64(s)
+		got, err := types.ParseUint64(s)
 		if err != nil {
 			t.Errorf("ParseUint64(%d) => %v, want nil", n, err)
 			continue
@@ -224,7 +224,7 @@ func TestConvertBase(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := atype.ConvertBase(tt.input, tt.fromBase, tt.toBase)
+			got, err := types.ConvertBase(tt.input, tt.fromBase, tt.toBase)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ConvertBase(%s, %d, %d) error = %v, wantErr %v", tt.input, tt.fromBase, tt.toBase, err, tt.wantErr)
 				return

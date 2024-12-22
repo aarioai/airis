@@ -2,7 +2,6 @@ package asql
 
 import (
 	"github.com/aarioai/airis/pkg/types"
-	"strconv"
 	"strings"
 )
 
@@ -12,7 +11,7 @@ func In(field string, ids map[uint64]struct{}) string {
 	}
 	if len(ids) == 1 {
 		for id, _ := range ids {
-			return field + "=" + strconv.FormatUint(id, 10)
+			return field + "=" + types.FormatUint(id)
 		}
 	}
 	var s strings.Builder
@@ -25,7 +24,7 @@ func In(field string, ids map[uint64]struct{}) string {
 		} else {
 			s.WriteByte(',')
 		}
-		s.WriteString(strconv.FormatUint(id, 10))
+		s.WriteString(types.FormatUint(id))
 	}
 	s.WriteByte(')')
 	return s.String()
@@ -36,7 +35,7 @@ func InUint(field string, ids map[uint]struct{}) string {
 	}
 	if len(ids) == 1 {
 		for id, _ := range ids {
-			return field + "=" + strconv.FormatUint(uint64(id), 10)
+			return field + "=" + types.FormatUint(id)
 		}
 	}
 	var s strings.Builder
@@ -49,7 +48,7 @@ func InUint(field string, ids map[uint]struct{}) string {
 		} else {
 			s.WriteByte(',')
 		}
-		s.WriteString(strconv.FormatUint(uint64(id), 10))
+		s.WriteString(types.FormatUint(id))
 	}
 	s.WriteByte(')')
 	return s.String()

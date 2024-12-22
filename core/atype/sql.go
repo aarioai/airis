@@ -7,7 +7,6 @@ import (
 	"github.com/aarioai/airis/pkg/types"
 	"io"
 	"net"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -284,7 +283,7 @@ func (b BitPosition) Uint16() uint16 { return uint16(b) }
 func (b Bitwise) SetStmt(fieldName string) string {
 	if b.BitValue {
 		bv := 1 << b.BitPos
-		bs := strconv.FormatUint(uint64(bv), 10)
+		bs := types.FormatInt(bv)
 		return fieldName + "=" + fieldName + "|" + bs
 	}
 	return b.unsetStmt(fieldName)
@@ -293,7 +292,7 @@ func (b Bitwise) SetStmt(fieldName string) string {
 func (b Bitwise) unsetStmt(fieldName string) string {
 	max := (1 << b.MaxBits) - 1
 	bv := max - (1 << b.BitPos)
-	bs := strconv.FormatUint(uint64(bv), 10)
+	bs := types.FormatInt(bv)
 	return fieldName + "=" + fieldName + "&" + bs
 }
 
@@ -345,7 +344,7 @@ func (d Ymd) Uint() uint {
 	return uint(d)
 }
 func (d Ymd) Date() Date {
-	s := strconv.FormatUint(uint64(d), 10)
+	s := types.FormatUint(d)
 	if len(s) != 8 {
 		return MinDate
 	}
@@ -393,7 +392,7 @@ func (d Date) OrNow() Date {
 
 func (d Date) Ymd() Ymd {
 	s := strings.ReplaceAll(d.String(), "-", "")
-	n, _ := strconv.ParseUint(s, 10, 32)
+	n, _ := types.ParseUint(s)
 	return Ymd(n)
 }
 func (d Date) Int64(loc *time.Location) int64 {
@@ -496,17 +495,17 @@ func ToSepUint8s(elems []uint8, delimiters ...string) SepUint8s {
 	case 0:
 		return ""
 	case 1:
-		return SepUint8s(strconv.FormatUint(uint64(elems[0]), 10))
+		return SepUint8s(types.FormatUint(elems[0]))
 	}
 	deli := delimiter(delimiters...)
 	n := len(deli)*(len(elems)-1) + (len(elems) * types.MaxUint8Len)
 
 	var b strings.Builder
 	b.Grow(n)
-	b.WriteString(strconv.FormatUint(uint64(elems[0]), 10))
+	b.WriteString(types.FormatUint(elems[0]))
 	for _, s := range elems[1:] {
 		b.WriteString(deli)
-		b.WriteString(strconv.FormatUint(uint64(s), 10))
+		b.WriteString(types.FormatUint(s))
 	}
 
 	return SepUint8s(b.String())
@@ -518,8 +517,7 @@ func (t SepUint8s) Uint8s(delimiters ...string) []uint8 {
 	arr := strings.Split(string(t), delimiter(delimiters...))
 	v := make([]uint8, len(arr))
 	for i, a := range arr {
-		b, _ := strconv.ParseUint(a, 10, 8)
-		v[i] = uint8(b)
+		v[i] = types.ToUint8(a)
 	}
 	return v
 }
@@ -530,16 +528,16 @@ func ToSepUint16s(elems []uint16, delimiters ...string) SepUint16s {
 	case 0:
 		return ""
 	case 1:
-		return SepUint16s(strconv.FormatUint(uint64(elems[0]), 10))
+		return SepUint16s(types.FormatUint(elems[0]))
 	}
 	deli := delimiter(delimiters...)
 	n := len(deli)*(len(elems)-1) + (len(elems) * types.MaxUint16Len)
 	var b strings.Builder
 	b.Grow(n)
-	b.WriteString(strconv.FormatUint(uint64(elems[0]), 10))
+	b.WriteString(types.FormatUint(elems[0]))
 	for _, s := range elems[1:] {
 		b.WriteString(deli)
-		b.WriteString(strconv.FormatUint(uint64(s), 10))
+		b.WriteString(types.FormatUint(s))
 	}
 
 	return SepUint16s(b.String())
@@ -551,8 +549,7 @@ func (t SepUint16s) Uint16s(delimiters ...string) []uint16 {
 	arr := strings.Split(string(t), delimiter(delimiters...))
 	v := make([]uint16, len(arr))
 	for i, a := range arr {
-		b, _ := strconv.ParseUint(a, 10, 16)
-		v[i] = uint16(b)
+		v[i] = types.ToUint16(a)
 	}
 	return v
 }
@@ -563,16 +560,16 @@ func ToSepUint24s(elems []Uint24, delimiters ...string) SepUint24s {
 	case 0:
 		return ""
 	case 1:
-		return SepUint24s(strconv.FormatUint(uint64(elems[0]), 10))
+		return SepUint24s(types.FormatUint(elems[0]))
 	}
 	deli := delimiter(delimiters...)
 	n := len(deli)*(len(elems)-1) + (len(elems) * types.MaxUint24Len)
 	var b strings.Builder
 	b.Grow(n)
-	b.WriteString(strconv.FormatUint(uint64(elems[0]), 10))
+	b.WriteString(types.FormatUint(elems[0]))
 	for _, s := range elems[1:] {
 		b.WriteString(deli)
-		b.WriteString(strconv.FormatUint(uint64(s), 10))
+		b.WriteString(types.FormatUint(s))
 	}
 
 	return SepUint24s(b.String())
@@ -585,8 +582,7 @@ func (t SepUint24s) Uint32s(delimiters ...string) []Uint24 {
 	arr := strings.Split(string(t), delimiter(delimiters...))
 	v := make([]Uint24, len(arr))
 	for i, a := range arr {
-		b, _ := strconv.ParseUint(a, 10, 24)
-		v[i] = Uint24(b)
+		v[i] = ToUint24(a)
 	}
 	return v
 }
@@ -597,16 +593,16 @@ func ToSepInts(elems []int, delimiters ...string) SepInts {
 	case 0:
 		return ""
 	case 1:
-		return SepInts(strconv.FormatInt(int64(elems[0]), 10))
+		return SepInts(types.FormatInt(elems[0]))
 	}
 	deli := delimiter(delimiters...)
 	n := len(deli)*(len(elems)-1) + (len(elems) * types.MaxIntLen)
 	var b strings.Builder
 	b.Grow(n)
-	b.WriteString(strconv.FormatInt(int64(elems[0]), 10))
+	b.WriteString(types.FormatInt(elems[0]))
 	for _, s := range elems[1:] {
 		b.WriteString(deli)
-		b.WriteString(strconv.FormatInt(int64(s), 10))
+		b.WriteString(types.FormatInt(s))
 	}
 
 	return SepInts(b.String())
@@ -618,7 +614,7 @@ func (t SepInts) Ints(delimiters ...string) []int {
 	arr := strings.Split(string(t), delimiter(delimiters...))
 	v := make([]int, len(arr))
 	for i, a := range arr {
-		b, _ := strconv.ParseInt(a, 10, 64)
+		b, _ := types.ParseInt(a)
 		v[i] = int(b)
 	}
 	return v
@@ -630,16 +626,16 @@ func ToSepUints(elems []uint, delimiters ...string) SepUints {
 	case 0:
 		return ""
 	case 1:
-		return SepUints(strconv.FormatUint(uint64(elems[0]), 10))
+		return SepUints(types.FormatUint(elems[0]))
 	}
 	deli := delimiter(delimiters...)
 	n := len(deli)*(len(elems)-1) + (len(elems) * types.MaxUintLen)
 	var b strings.Builder
 	b.Grow(n)
-	b.WriteString(strconv.FormatUint(uint64(elems[0]), 10))
+	b.WriteString(types.FormatUint(elems[0]))
 	for _, s := range elems[1:] {
 		b.WriteString(deli)
-		b.WriteString(strconv.FormatUint(uint64(s), 10))
+		b.WriteString(types.FormatUint(s))
 	}
 
 	return SepUints(b.String())
@@ -651,8 +647,8 @@ func (t SepUints) Uints(delimiters ...string) []uint {
 	arr := strings.Split(string(t), delimiter(delimiters...))
 	v := make([]uint, len(arr))
 	for i, a := range arr {
-		x, _ := strconv.ParseUint(a, 10, 32)
-		v[i] = uint(x)
+		x, _ := types.ParseUint(a)
+		v[i] = x
 	}
 	return v
 }
@@ -663,16 +659,16 @@ func ToSepUint64s(elems []uint64, delimiters ...string) SepUint64s {
 	case 0:
 		return ""
 	case 1:
-		return SepUint64s(strconv.FormatUint(elems[0], 10))
+		return SepUint64s(types.FormatUint(elems[0]))
 	}
 	deli := delimiter(delimiters...)
 	n := len(deli)*(len(elems)-1) + (len(elems) * types.MaxUint64Len)
 	var b strings.Builder
 	b.Grow(n)
-	b.WriteString(strconv.FormatUint(elems[0], 10))
+	b.WriteString(types.FormatUint(elems[0]))
 	for _, s := range elems[1:] {
 		b.WriteString(deli)
-		b.WriteString(strconv.FormatUint(s, 10))
+		b.WriteString(types.FormatUint(s))
 	}
 
 	return SepUint64s(b.String())
@@ -684,7 +680,7 @@ func (t SepUint64s) Uint64s(delimiters ...string) []uint64 {
 	arr := strings.Split(string(t), delimiter(delimiters...))
 	v := make([]uint64, len(arr))
 	for i, a := range arr {
-		v[i], _ = strconv.ParseUint(a, 10, 64)
+		v[i], _ = types.ParseUint64(a)
 	}
 	return v
 }

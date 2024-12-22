@@ -2,8 +2,8 @@ package redishelper
 
 import (
 	"context"
+	"github.com/aarioai/airis/pkg/types"
 	"log"
-	"strconv"
 	"time"
 
 	"github.com/aarioai/airis/core/ae"
@@ -20,7 +20,7 @@ func Uint64s(vs []string, err error) ([]uint64, *ae.Error) {
 	}
 	ids := make([]uint64, len(vs))
 	for i, v := range vs {
-		ids[i], err = strconv.ParseUint(v, 10, 64)
+		ids[i], err = types.ParseUint64(v)
 		if err != nil {
 			log.Printf("redis uint64s %s is not uint64\n", v)
 		}
@@ -72,7 +72,7 @@ func HMIncr(ctx context.Context, rdb *redis.Client, expires time.Duration, k str
 func HMIncrIds(ctx context.Context, rdb *redis.Client, expires time.Duration, k string, ids []uint64) ([]int64, *ae.Error) {
 	fields := make([]string, len(ids))
 	for i, id := range ids {
-		fields[i] = strconv.FormatUint(id, 10)
+		fields[i] = types.FormatUint(id)
 	}
 	return HMIncr(ctx, rdb, expires, k, fields)
 }

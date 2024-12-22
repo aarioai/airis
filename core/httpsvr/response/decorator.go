@@ -3,8 +3,8 @@ package response
 import (
 	"github.com/aarioai/airis/core/ae"
 	"github.com/aarioai/airis/core/httpsvr/request"
+	"github.com/aarioai/airis/pkg/types"
 	"reflect"
-	"strconv"
 	"strings"
 )
 
@@ -231,9 +231,9 @@ func StringifyBigintFields(payload any, tagname string) (any, *ae.Error) {
 	case reflect.Map:
 		return stringifyMap(t, v, tagname)
 	case reflect.Int64: // 也有可能是 int64 变体，所以不能用 x.(int64) 转换，应该用强制类型转换
-		return strconv.FormatInt(v.Int(), 10), nil
+		return types.FormatInt(v.Int()), nil
 	case reflect.Uint64:
-		return strconv.FormatUint(v.Uint(), 10), nil
+		return types.FormatUint(v.Uint()), nil
 	}
 	return payload, nil
 }

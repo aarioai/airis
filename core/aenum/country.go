@@ -1,8 +1,6 @@
 package aenum
 
-import (
-	"strconv"
-)
+import "github.com/aarioai/airis/pkg/types"
 
 type Continent uint8
 type Country uint16
@@ -18,9 +16,9 @@ const (
 )
 
 const (
-	Canada        Country = 50001
+	Canada        Country = 50001 // 国际区号跟美国一样 +1
 	America       Country = 1
-	Kazakhstan    Country = 997 // 2021年，哈萨克斯坦国际区号变更为 997
+	Kazakhstan    Country = 997 // 2021年，哈萨克斯坦国际区号变更为 997。再次之前，跟俄罗斯一样都是7
 	Russia        Country = 7
 	Egypt         Country = 20
 	SouthAfrica   Country = 27
@@ -237,7 +235,7 @@ func NewCountry(id uint16) (Country, bool) {
 }
 func (c Country) Uint16() uint16 { return uint16(c) }
 func (c Country) String() string {
-	return strconv.Itoa(int(c))
+	return types.FormatUint(c.Uint16())
 }
 func (c Country) Is(x uint16) bool {
 	return c.Uint16() == x
@@ -249,21 +247,4 @@ func (c Country) In(args ...Country) bool {
 		}
 	}
 	return false
-}
-
-func (c Country) CallingCode() string {
-	switch c {
-	case Canada:
-		return "001"
-	case NetherlandsAntilles:
-		return "00599"
-	case WesternSahara:
-		return "00212"
-	}
-	return "00" + strconv.FormatUint(uint64(c), 10)
-}
-
-// 转化成拨打模式
-func ToFullTel(c Country, tel string) string {
-	return c.CallingCode() + " " + tel
 }

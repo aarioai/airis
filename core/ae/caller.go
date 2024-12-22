@@ -1,8 +1,8 @@
 package ae
 
 import (
+	"github.com/aarioai/airis/pkg/types"
 	"runtime"
-	"strconv"
 	"strings"
 )
 
@@ -64,7 +64,7 @@ func Caller(skip int) string {
 	builder.WriteString("[")
 	builder.WriteString(filePath)
 	builder.WriteString(":")
-	builder.WriteString(strconv.Itoa(line))
+	builder.WriteString(types.FormatInt(line))
 	if funcName != "" {
 		builder.WriteString(" ")
 		builder.WriteString(funcName)

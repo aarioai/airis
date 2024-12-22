@@ -1,8 +1,8 @@
 package aenum
 
 import (
+	"github.com/aarioai/airis/pkg/types"
 	"reflect"
-	"strconv"
 )
 
 // 新建一个基础接口,统一枚举类型的方法
@@ -18,7 +18,7 @@ type BaseEnum struct {
 }
 
 func (e BaseEnum) String() string {
-	return strconv.FormatUint(e.value, 10)
+	return types.FormatUint(e.value)
 }
 
 func (e BaseEnum) In(enums []any) bool {

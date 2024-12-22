@@ -3,7 +3,6 @@ package asql
 import (
 	"fmt"
 	"github.com/aarioai/airis/pkg/types"
-	"strconv"
 	"strings"
 )
 
@@ -27,7 +26,7 @@ func UnionInUints(ids []uint, f func(uint) string) ([]string, string) {
 		if i > 0 {
 			conds.WriteByte(',')
 		}
-		conds.WriteString(strconv.FormatUint(uint64(id), 10))
+		conds.WriteString(types.FormatUint(id))
 
 		table := f(id)
 		var exists bool
@@ -50,7 +49,7 @@ func UnionInUint64s(ids []uint64, f func(uint64) string) ([]string, string) {
 		if i > 0 {
 			conds.WriteByte(',')
 		}
-		conds.WriteString(strconv.FormatUint(id, 10))
+		conds.WriteString(types.FormatUint(id))
 
 		table := f(id)
 		var exists bool

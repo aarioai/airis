@@ -3,10 +3,10 @@ package afmt_test
 import (
 	"bytes"
 	"fmt"
+	"github.com/aarioai/airis/pkg/types"
 	"strings"
 	"testing"
 
-	"github.com/aarioai/airis/core/atype"
 	"github.com/aarioai/airis/pkg/afmt"
 )
 
@@ -155,7 +155,7 @@ func testPadBoth(t *testing.T, title []byte, pad string, length int, startFromEn
 			leftLen++
 		}
 		ipad := strings.Trim(pad, " ")
-		patternRight := "%-" + ipad + atype.FormatInt(length) + "s"
+		patternRight := "%-" + ipad + types.FormatInt(length) + "s"
 		leftPadded := fmt.Sprintf("%"+ipad+"*s", leftLen, s) // e.g. fmt.Sprintf("%0*s", 10,2)
 		testS := fmt.Sprintf(patternRight, leftPadded)       // e.g. fmt.Sprintf("-010s", 2)
 		if testS != s {

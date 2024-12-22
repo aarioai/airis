@@ -4,9 +4,9 @@ import (
 	"github.com/aarioai/airis/core/ae"
 	"github.com/aarioai/airis/core/aenum"
 	"github.com/aarioai/airis/core/atype"
+	"github.com/aarioai/airis/pkg/types"
 	"reflect"
 	"regexp"
-	"strconv"
 	"strings"
 )
 
@@ -73,7 +73,7 @@ func parseInt64(method func(string, ...any) (*RawValue, *ae.Error), p string, re
 	if e != nil {
 		return 0, e
 	}
-	v, err := strconv.ParseInt(value.String(), 10, bitSize)
+	v, err := types.ParseInt64(value.String(), bitSize)
 	if err != nil {
 		return 0, ae.NewBadParam(p)
 	}
@@ -93,7 +93,7 @@ func parseUint64(method func(string, ...any) (*RawValue, *ae.Error), p string, r
 	if e != nil {
 		return 0, e
 	}
-	v, err := strconv.ParseUint(value.String(), 10, bitSize)
+	v, err := types.ParseUint64(value.String())
 	if err != nil {
 		return 0, ae.NewBadParam(p)
 	}
@@ -239,7 +239,7 @@ func (r *Request) sepInt64s(method func(string, ...any) (*RawValue, *ae.Error), 
 	var err error
 	var n int64
 	for _, a := range arr {
-		n, err = strconv.ParseInt(a, 10, bitSize)
+		n, err = types.ParseInt64(a, bitSize)
 		if err != nil {
 			return nil, ae.NewBadParam(p)
 		}
@@ -258,7 +258,7 @@ func (r *Request) separatedUint64s(method func(string, ...any) (*RawValue, *ae.E
 	var err error
 	var n uint64
 	for _, a := range arr {
-		n, err = strconv.ParseUint(a, 10, bitSize)
+		n, err = types.ParseUint64(a, bitSize)
 		if err != nil {
 			return nil, ae.NewBadParam(p)
 		}

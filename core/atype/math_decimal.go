@@ -1,8 +1,8 @@
 package atype
 
 import (
+	"github.com/aarioai/airis/pkg/types"
 	"math"
-	"strconv"
 	"strings"
 )
 
@@ -89,7 +89,7 @@ func (p Decimal) Sign() string {
 
 // 精度
 func (p Decimal) Precision() int {
-	n := len(strconv.FormatInt(p.Int64(), 10))
+	n := len(types.FormatInt(p))
 	if p < 0 {
 		n--
 	}
@@ -113,7 +113,7 @@ func (p Decimal) Mantissa(withSign bool) float64 {
 // FormatWhole 格式化整数部分
 // 类型：  1,000,000 这种
 func (p Decimal) FormatWhole(style *DecimalFormat) string {
-	s := strconv.FormatInt(p.Whole(), 10)
+	s := types.FormatInt(p.Whole())
 	if style == nil {
 		return s
 	}
@@ -138,7 +138,7 @@ func (p Decimal) FormatMantissa(style *DecimalFormat) string {
 	style = NewDecimalFormat(style)
 	scale := int(style.Scale)
 
-	s := strconv.FormatInt(p.Int64(), 10)
+	s := types.FormatInt(p)
 	g := len(s) - int(MoneyScale)
 	if g > 0 {
 		s = s[g:] // 取小数部分
@@ -166,8 +166,8 @@ func (p Decimal) FormatMantissa(style *DecimalFormat) string {
 				}
 			}
 			if !repeat9 {
-				x, _ := strconv.ParseUint("1"+s, 10, 16)
-				s = strconv.FormatUint(x+1, 10)
+				x, _ := types.ParseUint16("1" + s)
+				s = types.FormatUint(x + 1)
 			}
 		}
 		// s 发生变化
@@ -197,8 +197,8 @@ func (p Decimal) Fmt() string {
 func (p Decimal) Percent() float64 { return float64(p) / 100.0 }
 
 func (p Decimal) FormatPercent() string {
-	return strconv.FormatFloat(p.Percent(), 'f', -1, 32)
+	return types.FormatFloat(p.Percent(), 32)
 }
 func (p Decimal) FormatPercentAbs() string {
-	return strconv.FormatFloat(math.Abs(p.Percent()), 'f', -1, 32)
+	return types.FormatFloat(math.Abs(p.Percent()), 32)
 }

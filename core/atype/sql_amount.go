@@ -2,7 +2,6 @@ package atype
 
 import (
 	"github.com/aarioai/airis/pkg/types"
-	"strconv"
 	"strings"
 )
 
@@ -15,16 +14,16 @@ func ToSepPercents(elems []Decimal) SepPercents {
 	case 0:
 		return ""
 	case 1:
-		return SepPercents(strconv.FormatInt(int64(elems[0]), 10))
+		return SepPercents(types.FormatInt(elems[0]))
 	}
 	deli := ","
 	n := (len(elems) - 1) + (len(elems) * types.MaxInt16Len)
 	var b strings.Builder
 	b.Grow(n)
-	b.WriteString(strconv.FormatInt(int64(elems[0]), 10))
+	b.WriteString(types.FormatInt(elems[0]))
 	for _, s := range elems[1:] {
 		b.WriteString(deli)
-		b.WriteString(strconv.FormatInt(int64(s), 10))
+		b.WriteString(types.FormatInt(s))
 	}
 
 	return SepPercents(b.String())
@@ -37,7 +36,7 @@ func (t SepPercents) Percents() []Decimal {
 	arr := strings.Split(string(t), ",")
 	v := make([]Decimal, len(arr))
 	for i, a := range arr {
-		p, err := strconv.ParseInt(a, 10, 32)
+		p, err := types.ParseInt(a)
 		if err == nil {
 			v[i] = Decimal(p)
 		}
@@ -51,16 +50,16 @@ func ToSepMoneys(elems []Money) SepMoneys {
 	case 0:
 		return ""
 	case 1:
-		return SepMoneys(strconv.FormatInt(int64(elems[0]), 10))
+		return SepMoneys(types.FormatInt(elems[0]))
 	}
 	deli := ","
 	n := (len(elems) - 1) + (len(elems) * types.MaxInt64Len)
 	var b strings.Builder
 	b.Grow(n)
-	b.WriteString(strconv.FormatInt(int64(elems[0]), 10))
+	b.WriteString(types.FormatInt(elems[0]))
 	for _, s := range elems[1:] {
 		b.WriteString(deli)
-		b.WriteString(strconv.FormatInt(int64(s), 10))
+		b.WriteString(types.FormatInt(s))
 	}
 
 	return SepMoneys(b.String())
@@ -72,7 +71,7 @@ func (t SepMoneys) Moneys() []Money {
 	arr := strings.Split(string(t), ",")
 	v := make([]Money, len(arr))
 	for i, a := range arr {
-		p, err := strconv.ParseInt(a, 10, 64)
+		p, err := types.ParseInt(a)
 		if err == nil {
 			v[i] = Money(p)
 		}

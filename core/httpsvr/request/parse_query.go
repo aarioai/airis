@@ -2,7 +2,7 @@ package request
 
 import (
 	"github.com/aarioai/airis/core/ae"
-	"strconv"
+	"github.com/aarioai/airis/pkg/types"
 )
 
 func (r *Request) QueryBool(p string) (bool, *ae.Error) {
@@ -111,7 +111,7 @@ func (r *Request) QueryId(p string, params ...any) (sid string, id uint64, e *ae
 			return
 		}
 	}
-	id, _ = strconv.ParseUint(sid, 10, 64)
+	id = types.ToUint64(sid)
 	return
 }
 

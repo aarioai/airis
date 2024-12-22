@@ -3,8 +3,8 @@ package atype
 import "C"
 import (
 	"fmt"
+	"github.com/aarioai/airis/pkg/types"
 	"math"
-	"strconv"
 	"strings"
 )
 
@@ -98,7 +98,7 @@ func (a Money) Sign() string {
 
 // 精度
 func (a Money) Precision() int {
-	n := len(strconv.FormatInt(a.Int64(), 10))
+	n := len(types.FormatInt(a.Int64()))
 	if a < 0 {
 		n--
 	}
@@ -123,7 +123,7 @@ func (a Money) Mantissa(withSign bool) float64 {
 
 // 类型：  1,000,000 这种
 func (a Money) FormatWhole(style *DecimalFormat) string {
-	s := strconv.FormatInt(a.Whole(), 10)
+	s := types.FormatInt(a.Whole())
 	if style == nil {
 		return s
 	}
@@ -135,7 +135,7 @@ func (a Money) FormatMantissa(style *DecimalFormat) string {
 	style = NewDecimalFormat(style)
 	scale := int(style.Scale)
 
-	s := strconv.FormatInt(a.Int64(), 10)
+	s := types.FormatInt(a.Int64())
 	g := len(s) - int(MoneyScale)
 	if g > 0 {
 		s = s[g:] // 取小数部分
@@ -161,8 +161,8 @@ func (a Money) FormatMantissa(style *DecimalFormat) string {
 				}
 			}
 			if !repeat9 {
-				x, _ := strconv.ParseUint("1"+s, 10, 16)
-				s = strconv.FormatUint(x+1, 10)
+				x, _ := types.ParseUint16("1" + s)
+				s = types.FormatUint(x + 1)
 			}
 		}
 		// s 发生变化

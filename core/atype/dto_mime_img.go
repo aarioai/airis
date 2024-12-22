@@ -2,7 +2,7 @@ package atype
 
 import (
 	"github.com/aarioai/airis/core/aenum"
-	"strconv"
+	"github.com/aarioai/airis/pkg/types"
 	"strings"
 )
 
@@ -76,8 +76,8 @@ func (s ImgSrc) Crop(width, height int) string {
 		}
 	}
 
-	sw := strconv.FormatUint(uint64(width), 10)
-	sh := strconv.FormatUint(uint64(height), 10)
+	sw := types.FormatInt(width)
+	sh := types.FormatInt(height)
 	u := s.CropPattern
 	u = strings.ReplaceAll(u, "${WIDTH}", sw)
 	u = strings.ReplaceAll(u, "${HEIGHT}", sh)
@@ -126,6 +126,6 @@ func (s ImgSrc) Resize(maxWidth int) string {
 			}
 		}
 	}
-	sw := strconv.FormatUint(uint64(maxWidth), 10)
+	sw := types.FormatInt(maxWidth)
 	return strings.ReplaceAll(s.ResizePattern, "${MAXWIDTH}", sw)
 }

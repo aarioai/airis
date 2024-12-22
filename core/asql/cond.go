@@ -2,7 +2,7 @@ package asql
 
 import (
 	"github.com/aarioai/airis/core/atype"
-	"strconv"
+	"github.com/aarioai/airis/pkg/types"
 	"strings"
 )
 
@@ -82,8 +82,8 @@ func (c *Cond) LimitN() uint {
 
 func (c *Cond) LimitStmt() string {
 	limit := c.LimitN()
-	a := strconv.FormatUint(uint64(c.offset), 10)
-	b := strconv.FormatUint(uint64(limit), 10)
+	a := types.FormatUint(c.offset)
+	b := types.FormatUint(limit)
 	return "LIMIT " + a + "," + b
 }
 

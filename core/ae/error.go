@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/aarioai/airis/core/airis"
 	"github.com/aarioai/airis/pkg/afmt"
+	"github.com/aarioai/airis/pkg/types"
 	"github.com/kataras/iris/v12"
-	"strconv"
 	"strings"
 )
 
@@ -122,7 +122,7 @@ func (e *Error) Text() string {
 		s.WriteString("} ")
 	}
 	s.WriteString("code:")
-	s.WriteString(strconv.Itoa(e.Code))
+	s.WriteString(types.FormatInt(e.Code))
 	s.WriteByte(' ')
 	s.WriteString(e.Msg)
 	if e.Detail != "" {

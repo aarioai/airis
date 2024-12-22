@@ -1,7 +1,7 @@
 package aenum
 
 import (
-	"strconv"
+	"github.com/aarioai/airis/pkg/types"
 )
 
 type Status int8 // status 字段禁止默认为0，防止意外情况
@@ -33,8 +33,8 @@ const (
 )
 
 var (
-	deletedStr      = strconv.Itoa(int(Deleted))
-	pendingLimit    = strconv.Itoa(int(Pending - 1))
+	deletedStr      = types.Itoa(Deleted)
+	pendingLimit    = types.Itoa(Pending - 1)
 	MeReadableRange = [2]Status{Failed, SysTakeover} // 会显示在我列表的区间
 )
 
@@ -45,7 +45,7 @@ func NewStatus(sts int8) (Status, bool) {
 	return s, ok
 }
 func (s Status) Int8() int8     { return int8(s) }
-func (s Status) String() string { return strconv.Itoa(int(s)) }
+func (s Status) String() string { return types.Itoa(s) }
 func (s Status) Is(x int8) bool { return s.Int8() == x }
 func (s Status) In(a ...Status) bool {
 	for _, sts := range a {

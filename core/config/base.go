@@ -1,8 +1,8 @@
 package config
 
 import (
+	"github.com/aarioai/airis/pkg/types"
 	"io/fs"
-	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -89,14 +89,14 @@ func parseToDuration(d string) time.Duration {
 	}
 	var t int
 	if d[len(d)-2:] == "ms" {
-		t, _ = strconv.Atoi(d[0 : len(d)-2])
+		t, _ = types.Atoi(d[0 : len(d)-2])
 		return time.Duration(t) * time.Millisecond
 	}
 
 	if d[len(d)-1:] == "s" {
-		t, _ = strconv.Atoi(d[0 : len(d)-1])
+		t, _ = types.Atoi(d[0 : len(d)-1])
 	} else {
-		t, _ = strconv.Atoi(d)
+		t, _ = types.Atoi(d)
 	}
 	return time.Duration(t) * time.Second
 }
