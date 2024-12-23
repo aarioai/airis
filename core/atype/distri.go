@@ -1,6 +1,9 @@
 package atype
 
-import "github.com/aarioai/airis/pkg/types"
+import (
+	"errors"
+	"github.com/aarioai/airis/pkg/types"
+)
 
 // type Html template.HTML   HTML 直接使用 template.HTML
 type Province uint8 // 2 位省份地址码
@@ -32,6 +35,13 @@ func NewDistri(d Uint24) Distri {
 	}
 	return Distri(d)
 }
+func ParseDistri(s string) (Distri, error) {
+	n, err := ParseUint24(s)
+	if err != nil {
+		return 0, err
+	}
+	return NewDistri(n), nil
+}
 func ToDistri(d uint32) Distri {
 	return NewDistri(Uint24(d))
 }
@@ -52,6 +62,18 @@ func (d Distri) Dist() Dist {
 }
 func (d Distri) AddrId() AddrId {
 	return NewAddrId(uint64(d) * 1000000)
+}
+
+func ParseDist(s string) (Dist, error) {
+	n, err := types.ParseUint16(s)
+	if err != nil {
+		return 0, err
+	}
+	dist := Dist(n)
+	if dist == 0 {
+		return 0, errors.New("invalid distri string")
+	}
+	return dist, nil
 }
 
 // 某个地区是否在另外一个地区内部
@@ -84,6 +106,13 @@ func (d Distri) IsSAR() bool          { return d.In(SARs) }
 func (d Distri) IsProvLevel() bool    { return d%10000 == 0 }
 func (d Distri) IsProvince() bool     { return d.IsProvLevel() && !d.In(Municipalities) }
 
+func ParseProvince(s string) (Province, error) {
+	n, err := types.ParseUint8(s)
+	if err != nil {
+		return 0, err
+	}
+	return Province(n), nil
+}
 func (p Province) Distri() Distri {
 	return Distri(uint32(p) * 10000)
 }
@@ -97,6 +126,13 @@ func (d Dist) String() string {
 	return types.FormatUint(d)
 }
 
+func ParseAddrId(s string) (AddrId, error) {
+	n, err := types.ParseUint64(s)
+	if err != nil {
+		return 0, err
+	}
+	return AddrId(n), nil
+}
 func NewAddrId(a uint64) AddrId {
 	return AddrId(a)
 }

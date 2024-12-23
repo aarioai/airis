@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/binary"
+	"github.com/aarioai/airis/core/ae"
 	"github.com/aarioai/airis/pkg/types"
 	"io"
 	"net"
@@ -62,7 +63,7 @@ type Int24 int32
 type Uint24 uint32
 type Year uint16      // uint16 date: yyyy
 type YearMonth Uint24 // uint24 date: yyyymm  不要用 Date，主要是不需要显示dd。
-type Ymd uint         // yyyymmdd
+type YMD uint         // YYYYMMDD
 type Date string      // yyyy-mm-dd
 type Datetime string  // yyyy-mm-dd hh:ii:ss
 type UnixTime int64   // int 形式 datetime，可与 datetime, date 互转
@@ -328,7 +329,7 @@ func (n Int24) String() string     { return types.FormatInt(n) }
 func (n Uint24) String() string    { return types.FormatUint(n) }
 func (y Year) String() string      { return types.FormatUint(y) }
 func (y YearMonth) String() string { return types.FormatUint(y) }
-func (y Ymd) String() string       { return types.FormatUint(y) }
+func (y YMD) String() string       { return types.FormatUint(y) }
 
 // years/months 可为负数
 func (y YearMonth) Add(years int, months int, loc *time.Location) YearMonth {
@@ -345,10 +346,20 @@ func (y YearMonth) Time(loc *time.Location) time.Time {
 	year, month := y.Date()
 	return time.Date(year, month, 0, 00, 00, 00, 0, loc)
 }
-func (y Ymd) Uint() uint {
+
+func ParseYMD(year, month, day string) (YMD, error) {
+	y, err1 := types.ParseUint16(year)
+	m, err2 := types.ParseUint8(month)
+	d, err3 := types.ParseUint8(day)
+	if err := ae.FirstErr(err1, err2, err3); err != nil {
+		return 0, err
+	}
+	return YMD(uint(y)*10000 + uint(m)*100 + uint(d)), nil
+}
+func (y YMD) Uint() uint {
 	return uint(y)
 }
-func (y Ymd) Date() Date {
+func (y YMD) Date() Date {
 	s := types.FormatUint(y)
 	if len(s) != 8 {
 		return MinDate
@@ -395,10 +406,10 @@ func (d Date) OrNow() Date {
 	return d
 }
 
-func (d Date) Ymd() Ymd {
+func (d Date) Ymd() YMD {
 	s := strings.ReplaceAll(d.String(), "-", "")
 	n, _ := types.ParseUint(s)
-	return Ymd(n)
+	return YMD(n)
 }
 func (d Date) Int64(loc *time.Location) int64 {
 	tm, err := time.ParseInLocation("2006-01-02", string(d), loc)

@@ -22,18 +22,6 @@ type Audios struct{ NullStrings }
 // HTML 一律采用 template.HTML
 type Text string // Text 65535 bytes
 
-// 仅保留文件名，去掉目录
-func trimDir(p string) string {
-	if p == "" {
-		return ""
-	}
-	i := strings.LastIndexByte(p, '/')
-	if i == len(p) {
-		return ""
-	}
-	return p[i+1:]
-}
-
 func (p File) String() string                                        { return string(p) }
 func (p File) Src(filler func(string) *FileSrc) *FileSrc             { return filler(p.String()) }
 func (p Document) String() string                                    { return string(p) }

@@ -229,6 +229,13 @@ const (
 	Uzbekistan         Country = 998
 )
 
+func ParseCountry(s string) (Country, error) {
+	n, err := types.ParseUint16(s)
+	if err != nil {
+		return 0, err
+	}
+	return Country(n), nil
+}
 func NewCountry(id uint16) (Country, bool) {
 	c := Country(id)
 	return c, true
