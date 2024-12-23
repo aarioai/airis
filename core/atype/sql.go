@@ -325,6 +325,22 @@ func ToYearMonth(year int, month time.Month) YearMonth {
 	ym := year*100 + int(month)
 	return YearMonth(ym)
 }
+
+func ParseYear(year string) (Year, error) {
+	y, err := types.ParseUint16(year)
+	if err != nil {
+		return 0, err
+	}
+	return Year(y), nil
+}
+func ParseYearMonth(year, month string) (YearMonth, error) {
+	y, err1 := types.ParseUint16(year)
+	m, err2 := types.ParseUint8(month)
+	if err := ae.FirstErr(err1, err2); err != nil {
+		return 0, err
+	}
+	return YearMonth(uint32(y)*100 + uint32(m)), nil
+}
 func (n Int24) String() string     { return types.FormatInt(n) }
 func (n Uint24) String() string    { return types.FormatUint(n) }
 func (y Year) String() string      { return types.FormatUint(y) }
