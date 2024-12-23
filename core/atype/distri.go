@@ -1,5 +1,7 @@
 package atype
 
+import "github.com/aarioai/airis/pkg/types"
+
 // type Html template.HTML   HTML 直接使用 template.HTML
 type Province uint8 // 2 位省份地址码
 type Dist uint16    // 4 位地址简码
@@ -38,6 +40,9 @@ func (d Distri) Uint24() Uint24 {
 }
 func (d Distri) Uint32() uint32 {
 	return uint32(d)
+}
+func (d Distri) String() string {
+	return types.FormatUint(d)
 }
 func (d Distri) Province() Province {
 	return Province(d / 10000)
@@ -82,8 +87,14 @@ func (d Distri) IsProvince() bool     { return d.IsProvLevel() && !d.In(Municipa
 func (p Province) Distri() Distri {
 	return Distri(uint32(p) * 10000)
 }
-func (p Dist) Distri() Distri {
-	return Distri(uint32(p) * 100)
+func (p Province) String() string {
+	return types.FormatUint(p)
+}
+func (d Dist) Distri() Distri {
+	return Distri(uint32(d) * 100)
+}
+func (d Dist) String() string {
+	return types.FormatUint(d)
 }
 
 func NewAddrId(a uint64) AddrId {
@@ -91,4 +102,7 @@ func NewAddrId(a uint64) AddrId {
 }
 func (a AddrId) Uint64() uint64 {
 	return uint64(a)
+}
+func (a AddrId) String() string {
+	return types.FormatUint(a)
 }

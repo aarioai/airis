@@ -50,7 +50,8 @@ func DecimalUnitsX(n float64) Decimal { return Decimal(math.Round(n * decimalUni
 // 如果是整数，直接  100 * Percent 即可
 func HundredPercent(n float64) Decimal { return Decimal(math.Round(n * 100.0)) }
 
-func (p Decimal) Int64() int64 { return int64(p) }
+func (p Decimal) Int64() int64   { return int64(p) }
+func (p Decimal) String() string { return types.FormatInt(p) }
 
 func (p Decimal) MulN(n int64) Decimal {
 	return p * Decimal(n)

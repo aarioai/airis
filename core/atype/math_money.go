@@ -43,7 +43,8 @@ func MoneyUnitsX(n float64) Money { return Money(math.Round(n * moneyUnitsFloat6
 func YuanX(n float64) Money       { return MoneyUnitsX(n) }
 func DollarX(n float64) Money     { return MoneyUnitsX(n) }
 
-func (a Money) Int64() int64 { return int64(a) }
+func (a Money) Int64() int64   { return int64(a) }
+func (a Money) String() string { return types.FormatInt(a) }
 
 // 计算总价
 func (a Money) MulN(n uint) Money { return a * Money(n) }

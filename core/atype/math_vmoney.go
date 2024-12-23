@@ -1,6 +1,9 @@
 package atype
 
-import "math"
+import (
+	"github.com/aarioai/airis/pkg/types"
+	"math"
+)
 
 // virtual money
 type VMoney Money // 1 coin = 1 money    如 chatgpt 等消耗，单次消耗低于0.1分，因此需要更大的 coin比例
@@ -18,7 +21,8 @@ const (
 
 func VmoneyUnitsX(n float64) VMoney { return VMoney(math.Round(n * vmoneyUnitsFloat64)) }
 
-func (c VMoney) Int64() int64 { return int64(c) }
+func (c VMoney) Int64() int64   { return int64(c) }
+func (c VMoney) String() string { return types.FormatInt(c) }
 
 // 实数形式
 func (c VMoney) Real() float64 { return float64(c) / vmoneyUnitsFloat64 }

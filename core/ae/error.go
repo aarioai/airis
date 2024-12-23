@@ -6,6 +6,7 @@ import (
 	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/aarioai/airis/pkg/types"
 	"github.com/kataras/iris/v12"
+	"log"
 	"strings"
 )
 
@@ -72,11 +73,12 @@ func (e *Error) WithMsg(format string, args ...any) *Error {
 
 // AppendMsg 尝试添加消息
 func (e *Error) AppendMsg(msgs ...any) *Error {
+	msg := afmt.SprintfArgs(msgs)
 	if e.locked {
-		panic("unable change locked error")
+		log.Printf("[error] failed to append message %s to a locked error\n", msg)
 		return e
 	}
-	msg := afmt.SprintfArgs(msgs)
+
 	if msg != "" {
 		e.Msg += " - " + msg
 	}
@@ -86,7 +88,7 @@ func (e *Error) AppendMsg(msgs ...any) *Error {
 // WithCaller 添加调用者信息
 func (e *Error) WithCaller(skip int) *Error {
 	if e.locked {
-		panic("unable change locked error")
+		log.Printf("[error] failed to change caller(%d) to a locked error\n", skip)
 		return e
 	}
 	e.Caller = Caller(skip + 1)
@@ -94,16 +96,17 @@ func (e *Error) WithCaller(skip int) *Error {
 }
 
 func (e *Error) WithDetail(detail ...any) *Error {
+	s := afmt.SprintfArgs(detail)
 	if e.locked {
-		panic("unable change locked error")
+		log.Printf("[error] failed to change detail %s to a locked error\n", s)
 		return e
 	}
-	e.Detail = afmt.SprintfArgs(detail)
+	e.Detail = s
 	return e
 }
 func (e *Error) WithTraceInfo(ctx iris.Context) *Error {
 	if e.locked {
-		panic("unable change locked error")
+		log.Println("[error] failed to change trace info to a locked error")
 		return e
 	}
 	e.TraceInfo = airis.TraceInfo(ctx)

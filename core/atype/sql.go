@@ -42,8 +42,8 @@ type Position struct{ sql.NullString } // []byte // postion, coordinate or point
 type Ip struct{ sql.NullString } //  VARBINARY(16) | BINARY(16) 固定16位长度 net.IP               // IP Address
 
 // https://en.wikipedia.org/wiki/Bit_numbering
-type BitPos uint8       // bit position (in big endian)
-type BitPosition uint16 // bit position (in big endian)
+type BitPos uint8       // bit-position (in big endian)
+type BitPosition uint16 // bit-position (in big endian)
 type Bitwise struct {
 	BitName  string // 该位名称
 	BitPos   BitPos // big endian 下，位所在位置
@@ -324,27 +324,32 @@ func ToYearMonth(year int, month time.Month) YearMonth {
 	ym := year*100 + int(month)
 	return YearMonth(ym)
 }
+func (n Int24) String() string     { return types.FormatInt(n) }
+func (n Uint24) String() string    { return types.FormatUint(n) }
+func (y Year) String() string      { return types.FormatUint(y) }
+func (y YearMonth) String() string { return types.FormatUint(y) }
+func (y Ymd) String() string       { return types.FormatUint(y) }
 
 // years/months 可为负数
-func (ym YearMonth) Add(years int, months int, loc *time.Location) YearMonth {
-	tm := ym.Time(loc).AddDate(years, months, 0)
+func (y YearMonth) Add(years int, months int, loc *time.Location) YearMonth {
+	tm := y.Time(loc).AddDate(years, months, 0)
 	return ToYearMonth(tm.Year(), tm.Month())
 }
-func (ym YearMonth) Uin32() uint32 { return uint32(ym) }
-func (ym YearMonth) Date() (int, time.Month) {
-	year := int(ym) / 100
-	month := time.Month(ym % 100)
+func (y YearMonth) Uin32() uint32 { return uint32(y) }
+func (y YearMonth) Date() (int, time.Month) {
+	year := int(y) / 100
+	month := time.Month(y % 100)
 	return year, month
 }
-func (ym YearMonth) Time(loc *time.Location) time.Time {
-	y, m := ym.Date()
-	return time.Date(y, m, 0, 00, 00, 00, 0, loc)
+func (y YearMonth) Time(loc *time.Location) time.Time {
+	year, month := y.Date()
+	return time.Date(year, month, 0, 00, 00, 00, 0, loc)
 }
-func (d Ymd) Uint() uint {
-	return uint(d)
+func (y Ymd) Uint() uint {
+	return uint(y)
 }
-func (d Ymd) Date() Date {
-	s := types.FormatUint(d)
+func (y Ymd) Date() Date {
+	s := types.FormatUint(y)
 	if len(s) != 8 {
 		return MinDate
 	}
