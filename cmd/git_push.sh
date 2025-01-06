@@ -1,6 +1,5 @@
 #!/bin/bash
-
-set -euo pipefail  # 启用严格模式，遇错即停
+set -eu pipefail
 
 
 
@@ -8,21 +7,42 @@ set -euo pipefail  # 启用严格模式，遇错即停
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # aarioai/airis 项目根目录
 readonly ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-readonly DEFAULT_BRANCH="main"
-readonly DEFAULT_COMMENT="NO_COMMENT"
-# 定义颜色输出
-readonly RED='\033[0;31m'
-readonly GREEN='\033[0;32m'
-readonly NC='\033[0m' # No Color
 
 # 初始化参数
+declare comment
 needCloseVPN=0
-comment="$DEFAULT_COMMENT"
 upgrade=0
 incrTag=1
 noUpdate=0
 
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;32m'
+readonly YELLOW='\033[1;33m'
+readonly NC='\033[0m' # No Color
 
+_log() {
+    local level=$1
+    local color=$2
+    local message=$3
+    echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${color}${level:+[$level] }${message}${NC}"
+}
+# 日志函数
+log() {
+    _log "" "" "$1"
+}
+
+info(){
+    _log "info" "${GREEN}" "$1"
+}
+
+warn(){
+    _log "warn" "${YELLOW}" "$1" >&2
+}
+
+panic() {
+    _log "error" "${RED}" "$1" >&2
+    exit 1
+}
 
 # 帮助信息
 usage() {
@@ -34,16 +54,6 @@ Options:
     -i          Skip go mod update
     -h          Show this help message
 EOF
-    exit 1
-}
-
-# 日志函数
-log() {
-    echo -e "${GREEN}$1${NC}"
-}
-
-panic() {
-    echo -e "${RED}[error] $1${NC}" >&2
     exit 1
 }
 
@@ -95,10 +105,22 @@ pushAndUpgradeMod() {
         go get -u -v ./... || panic "failed go get -u -v ./..."
     fi
     # Git 操作
+
+    # 检查是否有变更需要提交
+    if [ -z "$(git status --porcelain)" ]; then
+        echo "No changes to commit"
+        exit 0
+    fi
+
+    # 检查是否有变更需要提交
+    if [ -z "$(git status --porcelain)" ]; then
+        echo "No changes to commit"
+        exit 0
+    fi
     log "committing changes..."
     git add -A . || panic "failed git add -A ."
     git commit -m "$comment" || panic "failed git commit -m $comment"
-    git push origin "$DEFAULT_BRANCH" || panic "failed git push origin $DEFAULT_BRANCH"
+    git push origin main || panic "failed git push origin main"
 
     # 处理标签
     if [ $incrTag -eq 1 ]; then
@@ -170,5 +192,4 @@ main() {
   log "use go get -u -v ./...  or -u to upgrade all dependencies maximum 1 time per day"
 }
 
-# 执行主流程
 main

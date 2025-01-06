@@ -10,7 +10,7 @@ import (
 func generateRmlogScript(targetDir string) error {
 	// 这里一般仅使用一次，不用移到常驻常量，浪费内存
 	const scriptContent = `#!/bin/bash
-set -euo pipefail
+set -eu pipefail
 # Show usage instructions
 show_usage() {
     echo "Usage: $0"
