@@ -40,10 +40,12 @@ func (env Env) IsTesting() bool         { return env == EnvTesting }
 func (env Env) IsStaging() bool         { return env == EnvStaging }
 func (env Env) IsProduction() bool      { return env == EnvProduction }
 func (env Env) BeforeDevelopment() bool { return env.IsLocal() || env.IsDevelopment() }
-func (env Env) BeforeTesting() bool     { return env.IsTesting() || env.IsDevelopment() }
-func (env Env) BeforeStaging() bool     { return env.IsStaging() || env.BeforeTesting() }
-func (env Env) AfterStaging() bool      { return env.IsStaging() || env.IsProduction() }
-func (env Env) AfterTesting() bool      { return env.IsTesting() || env.AfterStaging() }
+func (env Env) BeforeTesting() bool {
+	return env.IsTesting() || env.BeforeDevelopment()
+}
+func (env Env) BeforeStaging() bool { return env.IsStaging() || env.BeforeTesting() }
+func (env Env) AfterStaging() bool  { return env.IsStaging() || env.IsProduction() }
+func (env Env) AfterTesting() bool  { return env.IsTesting() || env.AfterStaging() }
 
 type Snapshot struct {
 	baseConfig  map[string]string
