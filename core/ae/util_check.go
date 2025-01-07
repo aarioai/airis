@@ -15,7 +15,7 @@ func FirstErr(errs ...error) error {
 
 func Panic(format string, args ...any) {
 	now := time.Now().Format("2006-01-02 15:04:05")
-	msg := now + " " + fmt.Sprintf(format, args...)
+	msg := now + " [panic] " + fmt.Sprintf(format, args...)
 	fmt.Println(msg) // convenient for docker/local debugging
 	panic(msg)
 }
