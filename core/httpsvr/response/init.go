@@ -50,7 +50,7 @@ func defaultSerialize(contentType string, d Body) ([]byte, string, error) {
 
 func RegisterGlobalServeContentTypes(contentTypes []string) {
 	if len(contentTypes) == 0 {
-		panic("must register at least one content type")
+		ae.Panic("must register at least one content type")
 	}
 	globalServeContentTypes = contentTypes
 }

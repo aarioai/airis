@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/aarioai/airis/core/ae"
 	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/aarioai/airis/pkg/arrmap"
 	"github.com/aarioai/airis/pkg/utils"
@@ -12,7 +13,7 @@ import (
 func (c *Config) PanicIfNotEqual(key, want string) {
 	value := c.GetString(key)
 	if value != want {
-		panic(fmt.Sprintf("config %s = %s not equal to %s", key, value, want))
+		ae.Panic("config %s = %s not equal to %s", key, value, want)
 	}
 }
 func (c *Config) Log() {

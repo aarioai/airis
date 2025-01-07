@@ -3,6 +3,7 @@ package atype
 import (
 	"database/sql"
 	"fmt"
+	"github.com/aarioai/airis/core/ae"
 	"github.com/aarioai/airis/pkg/types"
 	"golang.org/x/exp/constraints"
 	"log"
@@ -148,7 +149,7 @@ func JoinByTags(u any, ty JoinType, sep string, tagname string, tags ...string) 
 			}
 		}
 		if !found {
-			panic(fmt.Sprintf(`not found %s:"%s"`, tagname, tag))
+			ae.Panic(fmt.Sprintf(`not found %s:"%s"`, tagname, tag))
 		}
 	}
 	if len(ret) > len(sep) {

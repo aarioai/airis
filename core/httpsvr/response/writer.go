@@ -89,7 +89,7 @@ func (w *Writer) WithHeaders(headers map[string]string) *Writer {
 }
 func (w *Writer) WithServeContentTypes(contentTypes []string) *Writer {
 	if len(contentTypes) == 0 {
-		panic("must register at least one content type")
+		ae.Panic("must register at least one content type")
 	}
 	w.serveContentTypes = contentTypes
 	return w

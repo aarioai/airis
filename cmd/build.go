@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/aarioai/airis/core/ae"
 	"github.com/aarioai/airis/pkg/afmt"
 	"os"
 	"path"
@@ -65,7 +66,7 @@ func readJsonFile(file string) ([]byte, error) {
 func writeFile(f *os.File, format string, args ...any) {
 	_, err := f.WriteString(afmt.Sprintf(format, args...))
 	if err != nil {
-		panic(fmt.Sprintf("write file error: %v", err))
+		ae.Panic("write file error: %v", err)
 	}
 }
 func appendMimes(mimes []string, mime ...string) []string {

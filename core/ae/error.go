@@ -64,7 +64,7 @@ func (e *Error) Unlock() *Error {
 }
 func (e *Error) WithMsg(format string, args ...any) *Error {
 	if e.locked {
-		panic("unable change locked error")
+		Panic("unable change locked error")
 		return e
 	}
 	e.Msg = fmt.Sprintf(format, args...)
