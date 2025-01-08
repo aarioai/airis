@@ -35,7 +35,7 @@ type MysqlConfig struct {
 
 // ParseTimeouts parses connection, read, write timeout
 // 10s, 1000ms
-func (c *Config) ParseTimeouts(t string, defaultTimeouts ...time.Duration) (conn time.Duration, read time.Duration, write time.Duration) {
+func ParseTimeouts(t string, defaultTimeouts ...time.Duration) (conn time.Duration, read time.Duration, write time.Duration) {
 	for i, t := range defaultTimeouts {
 		switch i {
 		case 0:
@@ -107,7 +107,7 @@ func (c *Config) MysqlConfig(section string) (MysqlConfig, error) {
 
 	tls, _ := c.tryGetMysqlCfg(section, "tls")
 	timeout, _ := c.tryGetMysqlCfg(section, "timeout")
-	ct, rt, wt := c.ParseTimeouts(timeout)
+	ct, rt, wt := ParseTimeouts(timeout)
 	poolMaxIdleConns, _ := c.tryGetMysqlCfg(section, "pool_max_idle_conns")
 	poolMaxOpenConns, _ := c.tryGetMysqlCfg(section, "pool_max_open_conns")
 	poolConnMaxLifetime, _ := c.tryGetMysqlCfg(section, "pool_conn_max_life_time")
@@ -157,6 +157,7 @@ func (c *Config) tryGeRedisCfg(section string, key string) (string, error) {
 }
 
 func (c *Config) RedisConfig(section string) (*redis.Options, error) {
+	var connTimeout, readTimeout, writeTimeout time.Duration
 	if section == "" {
 		section = "redis"
 	}
@@ -174,9 +175,10 @@ func (c *Config) RedisConfig(section string) (*redis.Options, error) {
 	maxRetries, _ := c.tryGeRedisCfg(section, "max_retries")
 	minRetryBackoff, _ := c.tryGeRedisCfg(section, "min_retry_backoff")
 	maxRetryBackoff, _ := c.tryGeRedisCfg(section, "max_retry_backoff")
-	dialTimeout, _ := c.tryGeRedisCfg(section, "dial_timeout")
-	readTimeout, _ := c.tryGeRedisCfg(section, "read_timeout")
-	writeTimeout, _ := c.tryGeRedisCfg(section, "write_timeout")
+	if timeout, err := c.tryGeRedisCfg(section, "max_retry_backoff"); err == nil {
+		connTimeout, readTimeout, writeTimeout = ParseTimeouts(timeout)
+	}
+
 	contextTimeoutEnabled, _ := c.tryGeRedisCfg(section, "context_timeout_enabled")
 	poolFIFO, _ := c.tryGeRedisCfg(section, "pool_fifo")
 	poolSize, _ := c.tryGeRedisCfg(section, "pool_size")
@@ -208,9 +210,9 @@ func (c *Config) RedisConfig(section string) (*redis.Options, error) {
 		MaxRetries:                 types.ToInt(maxRetries),
 		MinRetryBackoff:            types.ParseDuration(minRetryBackoff),
 		MaxRetryBackoff:            types.ParseDuration(maxRetryBackoff),
-		DialTimeout:                types.ParseDuration(dialTimeout),
-		ReadTimeout:                types.ParseDuration(readTimeout),
-		WriteTimeout:               types.ParseDuration(writeTimeout),
+		DialTimeout:                connTimeout,
+		ReadTimeout:                readTimeout,
+		WriteTimeout:               writeTimeout,
 		ContextTimeoutEnabled:      types.ToBool(contextTimeoutEnabled),
 		PoolFIFO:                   types.ToBool(poolFIFO),
 		PoolSize:                   types.ToInt(poolSize),
