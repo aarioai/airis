@@ -1,19 +1,19 @@
-package logger
+package alog
 
 import "context"
 
 type ErrorLevel uint8
 
 const (
-	AllError ErrorLevel = iota
-	Debug
-	Info
-	Notice
-	Warn
+	ErrAll ErrorLevel = iota
+	DEBUG
+	INFO
+	NOTICE
+	WARN
 	Err
-	Crit
-	Alert
-	Emerg
+	CRIT
+	ALERT
+	EMERG
 )
 
 const (
@@ -22,21 +22,21 @@ const (
 
 func (lvl ErrorLevel) Name() string {
 	switch lvl {
-	case Debug:
+	case DEBUG:
 		return "debug"
-	case Info:
+	case INFO:
 		return "info"
-	case Notice:
+	case NOTICE:
 		return "notice"
-	case Warn:
+	case WARN:
 		return "warn"
 	case Err:
 		return "err"
-	case Crit:
+	case CRIT:
 		return "crit"
-	case Alert:
+	case ALERT:
 		return "alert"
-	case Emerg:
+	case EMERG:
 		return "emerg"
 	}
 	return ""
@@ -51,10 +51,10 @@ type LogInterface interface {
 	// AuthDebug 包含详细的开发情报的信息，通常只在调试一个程序时使用
 	Debug(ctx context.Context, msg string, args ...any)
 
-	// Info 情报信息，正常的系统消息，比如骚扰报告，带宽数据等，不需要处理。
+	// INFO 情报信息，正常的系统消息，比如骚扰报告，带宽数据等，不需要处理。
 	Info(ctx context.Context, msg string, args ...any)
 
-	// Notice 不是错误情况，也不需要立即处理。
+	// NOTICE 不是错误情况，也不需要立即处理。
 	Notice(ctx context.Context, msg string, args ...any)
 
 	// Warn 警告信息，不是错误，比如系统磁盘使用了85%等。
@@ -63,13 +63,13 @@ type LogInterface interface {
 	// Error 错误，不是非常紧急，在一定时间内修复即可。
 	Error(ctx context.Context, msg string, args ...any)
 
-	// Crit 重要情况，如硬盘错误，备用连接丢失
+	// CRIT 重要情况，如硬盘错误，备用连接丢失
 	Crit(ctx context.Context, msg string, args ...any)
 
-	// Alert 应该被立即改正的问题，如系统数据库被破坏，ISP连接丢失。
+	// ALERT 应该被立即改正的问题，如系统数据库被破坏，ISP连接丢失。
 	Alert(ctx context.Context, msg string, args ...any)
 
-	// Emerg 紧急情况，需要立即通知技术人员。
+	// EMERG 紧急情况，需要立即通知技术人员。
 	Emerg(ctx context.Context, msg string, args ...any)
 
 	Println(ctx context.Context, msg ...any)

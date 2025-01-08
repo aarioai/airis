@@ -1,4 +1,4 @@
-package config
+package aconfig
 
 import (
 	"github.com/aarioai/airis/core/atype"
@@ -33,9 +33,9 @@ type MysqlConfig struct {
 	Pool MysqlPoolConfig
 }
 
-// ParseTimeout connection timeout, r timeout, w timeout, heartbeat interval
+// ParseTimeouts parses connection, read, write timeout
 // 10s, 1000ms
-func (c *Config) ParseTimeout(t string, defaultTimeouts ...time.Duration) (conn time.Duration, read time.Duration, write time.Duration) {
+func (c *Config) ParseTimeouts(t string, defaultTimeouts ...time.Duration) (conn time.Duration, read time.Duration, write time.Duration) {
 	for i, t := range defaultTimeouts {
 		switch i {
 		case 0:
@@ -51,11 +51,17 @@ func (c *Config) ParseTimeout(t string, defaultTimeouts ...time.Duration) (conn 
 	for i, t := range ts {
 		switch i {
 		case 0:
-			conn = parseToDuration(t)
+			if conn2, err := time.ParseDuration(t); err == nil && conn2 > 0 {
+				conn = conn2
+			}
 		case 1:
-			read = parseToDuration(t)
+			if read2, err := time.ParseDuration(t); err == nil && read2 > 0 {
+				read = read2
+			}
 		case 2:
-			write = parseToDuration(t)
+			if write2, err := time.ParseDuration(t); err == nil && write2 > 0 {
+				write = write2
+			}
 		}
 	}
 
@@ -101,7 +107,7 @@ func (c *Config) MysqlConfig(section string) (MysqlConfig, error) {
 
 	tls, _ := c.tryGetMysqlCfg(section, "tls")
 	timeout, _ := c.tryGetMysqlCfg(section, "timeout")
-	ct, rt, wt := c.ParseTimeout(timeout)
+	ct, rt, wt := c.ParseTimeouts(timeout)
 	poolMaxIdleConns, _ := c.tryGetMysqlCfg(section, "pool_max_idle_conns")
 	poolMaxOpenConns, _ := c.tryGetMysqlCfg(section, "pool_max_open_conns")
 	poolConnMaxLifetime, _ := c.tryGetMysqlCfg(section, "pool_conn_max_life_time")
@@ -122,8 +128,8 @@ func (c *Config) MysqlConfig(section string) (MysqlConfig, error) {
 		Pool: MysqlPoolConfig{
 			MaxIdleConns:    newV.Reload(poolMaxIdleConns).DefaultInt(0),
 			MaxOpenConns:    newV.Reload(poolMaxOpenConns).DefaultInt(0),
-			ConnMaxLifetime: time.Duration(newV.Reload(poolConnMaxLifetime).DefaultInt64(0)) * time.Second,
-			ConnMaxIdleTime: time.Duration(newV.Reload(poolConnMaxIdleTime).DefaultInt64(0)) * time.Second,
+			ConnMaxLifetime: types.ParseDuration(poolConnMaxLifetime),
+			ConnMaxIdleTime: types.ParseDuration(poolConnMaxIdleTime),
 		},
 	}
 	return cf, nil
@@ -200,20 +206,20 @@ func (c *Config) RedisConfig(section string) (*redis.Options, error) {
 		CredentialsProviderContext: nil,
 		DB:                         types.ToInt(db),
 		MaxRetries:                 types.ToInt(maxRetries),
-		MinRetryBackoff:            time.Duration(types.ToInt64(minRetryBackoff)),
-		MaxRetryBackoff:            time.Duration(types.ToInt64(maxRetryBackoff)),
-		DialTimeout:                time.Duration(types.ToInt64(dialTimeout)),
-		ReadTimeout:                time.Duration(types.ToInt64(readTimeout)),
-		WriteTimeout:               time.Duration(types.ToInt64(writeTimeout)),
+		MinRetryBackoff:            types.ParseDuration(minRetryBackoff),
+		MaxRetryBackoff:            types.ParseDuration(maxRetryBackoff),
+		DialTimeout:                types.ParseDuration(dialTimeout),
+		ReadTimeout:                types.ParseDuration(readTimeout),
+		WriteTimeout:               types.ParseDuration(writeTimeout),
 		ContextTimeoutEnabled:      types.ToBool(contextTimeoutEnabled),
 		PoolFIFO:                   types.ToBool(poolFIFO),
 		PoolSize:                   types.ToInt(poolSize),
-		PoolTimeout:                time.Duration(types.ToInt64(poolTimeout)),
+		PoolTimeout:                types.ParseDuration(poolTimeout),
 		MinIdleConns:               types.ToInt(minIdleConns),
 		MaxIdleConns:               types.ToInt(maxIdleConns),
 		MaxActiveConns:             types.ToInt(maxActiveConns),
-		ConnMaxIdleTime:            time.Duration(types.ToInt64(connMaxIdleTime)),
-		ConnMaxLifetime:            time.Duration(types.ToInt64(connMaxLifetime)),
+		ConnMaxIdleTime:            types.ParseDuration(connMaxIdleTime),
+		ConnMaxLifetime:            types.ParseDuration(connMaxLifetime),
 		TLSConfig:                  nil,
 		Limiter:                    nil,
 		// 官方写错，会在 v10 更正过来

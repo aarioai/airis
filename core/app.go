@@ -2,18 +2,18 @@ package core
 
 import (
 	"context"
+	"github.com/aarioai/airis/core/aconfig"
 	"github.com/aarioai/airis/core/ae"
-	"github.com/aarioai/airis/core/config"
-	"github.com/aarioai/airis/core/logger"
+	"github.com/aarioai/airis/core/alog"
 	"github.com/aarioai/airis/pkg/afmt"
 )
 
 type App struct {
-	Config *config.Config
-	Log    logger.LogInterface
+	Config *aconfig.Config
+	Log    alog.LogInterface
 }
 
-func New(config *config.Config, logger logger.LogInterface) *App {
+func New(config *aconfig.Config, logger alog.LogInterface) *App {
 	return &App{
 		Config: config,
 		Log:    logger,

@@ -5,8 +5,8 @@ import (
 	"strings"
 )
 
+// font colors
 const (
-	// 前景色
 	Black   = "\033[30m"
 	Red     = "\033[31m"
 	Green   = "\033[32m"
@@ -15,8 +15,10 @@ const (
 	Magenta = "\033[35m"
 	Cyan    = "\033[36m"
 	White   = "\033[37m"
+)
 
-	// 背景色
+// background colors
+const (
 	BgBlack   = "\033[40m"
 	BgRed     = "\033[41m"
 	BgGreen   = "\033[42m"
@@ -25,12 +27,14 @@ const (
 	BgMagenta = "\033[45m"
 	BgCyan    = "\033[46m"
 	BgWhite   = "\033[47m"
+)
 
-	// 格式
+// styles
+const (
 	Bold      = "\033[1m"
 	Underline = "\033[4m"
 	Reverse   = "\033[7m"
-	Reset     = "\033[0m" // 重置
+	Reset     = "\033[0m"
 )
 
 // PrintBorder 命令行中，输出边界

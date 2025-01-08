@@ -1,14 +1,14 @@
-package config_test
+package aconfig_test
 
 import (
-	"github.com/aarioai/airis/core/config"
+	"github.com/aarioai/airis/core/aconfig"
 	"github.com/redis/go-redis/v9"
 	"testing"
 	"time"
 )
 
 func TestParseIni(t *testing.T) {
-	c, err := config.New("./parse_ini_test.ini", nil)
+	c, err := aconfig.New("./parse_ini_test.ini", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -36,14 +36,14 @@ func TestParseIni(t *testing.T) {
 		DB:       2,
 		Addr:     "luexu.com",
 	}
-	mysqlTestOpt := config.MysqlConfig{
+	mysqlTestOpt := aconfig.MysqlConfig{
 		Schema:       "test",
 		Host:         "luexu.com",
 		User:         "Aario",
 		Password:     "Luexu.com",
 		WriteTimeout: time.Second * 5,
 	}
-	mysqlHelloOpt := config.MysqlConfig{
+	mysqlHelloOpt := aconfig.MysqlConfig{
 		Schema:       "helloworld",
 		Host:         "luexu.com",
 		User:         "Aario",
@@ -58,7 +58,7 @@ func TestParseIni(t *testing.T) {
 	testMySQLConfig(t, c, "hello", mysqlHelloOpt)
 }
 
-func testRedisConfig(t *testing.T, c *config.Config, section string, want redis.Options) {
+func testRedisConfig(t *testing.T, c *aconfig.Config, section string, want redis.Options) {
 	test, err := c.RedisConfig(section)
 	if err != nil {
 		t.Fatal(err.Error())
@@ -74,7 +74,7 @@ func testRedisConfig(t *testing.T, c *config.Config, section string, want redis.
 	}
 
 }
-func testMySQLConfig(t *testing.T, c *config.Config, want string, suppose config.MysqlConfig) {
+func testMySQLConfig(t *testing.T, c *aconfig.Config, want string, suppose aconfig.MysqlConfig) {
 	mysqlConfig, err := c.MysqlConfig(want)
 	if err != nil {
 		t.Fatal(err.Error())

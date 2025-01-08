@@ -1,7 +1,6 @@
-package config
+package aconfig
 
 import (
-	"github.com/aarioai/airis/pkg/types"
 	"io/fs"
 	"strings"
 	"sync"
@@ -86,24 +85,6 @@ func New(path string, valueProcessor func(key string, value string) (string, err
 	}
 	err := cfg.Reload()
 	return cfg, err
-}
-
-func parseToDuration(d string) time.Duration {
-	if len(d) < 2 {
-		return 0
-	}
-	var t int
-	if d[len(d)-2:] == "ms" {
-		t, _ = types.Atoi(d[0 : len(d)-2])
-		return time.Duration(t) * time.Millisecond
-	}
-
-	if d[len(d)-1:] == "s" {
-		t, _ = types.Atoi(d[0 : len(d)-1])
-	} else {
-		t, _ = types.Atoi(d)
-	}
-	return time.Duration(t) * time.Second
 }
 
 // splitDots splits dot-separated strings into parts

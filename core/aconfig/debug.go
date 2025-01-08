@@ -1,12 +1,12 @@
-package config
+package aconfig
 
 import (
 	"fmt"
 	"github.com/aarioai/airis/core/ae"
+	"github.com/aarioai/airis/core/alog"
 	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/aarioai/airis/pkg/arrmap"
 	"github.com/aarioai/airis/pkg/utils"
-	"log"
 	"strings"
 )
 
@@ -29,11 +29,7 @@ Launch Config:
 		c.TimezoneID,
 		c.Mock,
 	)
-
-	// 方便运行程序时直接显示
-	afmt.Println(info, afmt.Green)
-	// 日志无法显示颜色
-	log.Println(info)
+	alog.Println(info, afmt.Green)
 }
 
 func (c *Config) Dump() {

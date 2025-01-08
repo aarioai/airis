@@ -1,4 +1,4 @@
-package logger
+package alog
 
 import (
 	"context"
@@ -31,7 +31,7 @@ func xlogHeader(ctx context.Context, caller string, level ErrorLevel) string {
 	b.Grow(15 + len(traceInfo))
 	b.WriteString(caller)
 	b.WriteString(traceInfo)
-	if level != AllError {
+	if level != ErrAll {
 		b.WriteString(" [" + level.Name() + "] ")
 	}
 	return b.String()
@@ -39,7 +39,7 @@ func xlogHeader(ctx context.Context, caller string, level ErrorLevel) string {
 
 func xprintf(ctx context.Context, level ErrorLevel, msg string, args ...any) {
 	errlevel := errorlevel(ctx)
-	if errlevel != AllError && errlevel&level == 0 {
+	if errlevel != ErrAll && errlevel&level == 0 {
 		return
 	}
 	_, caller := ae.CallerMsg(msg, 1)
@@ -66,24 +66,24 @@ func (l *xlog) New(prefix string, f func(context.Context, string, ...any), suffi
 
 func (l *xlog) Assert(ctx context.Context, condition bool, msg string, args ...any) {
 	if condition {
-		xprintf(ctx, Debug, msg, args...)
+		xprintf(ctx, DEBUG, msg, args...)
 	}
 }
 
 func (l *xlog) Debug(ctx context.Context, msg string, args ...any) {
-	xprintf(ctx, Debug, msg, args...)
+	xprintf(ctx, DEBUG, msg, args...)
 }
 
 func (l *xlog) Info(ctx context.Context, msg string, args ...any) {
-	xprintf(ctx, Info, msg, args...)
+	xprintf(ctx, INFO, msg, args...)
 }
 
 func (l *xlog) Notice(ctx context.Context, msg string, args ...any) {
-	xprintf(ctx, Notice, msg, args...)
+	xprintf(ctx, NOTICE, msg, args...)
 }
 
 func (l *xlog) Warn(ctx context.Context, msg string, args ...any) {
-	xprintf(ctx, Warn, msg, args...)
+	xprintf(ctx, WARN, msg, args...)
 }
 
 func (l *xlog) Error(ctx context.Context, msg string, args ...any) {
@@ -91,19 +91,19 @@ func (l *xlog) Error(ctx context.Context, msg string, args ...any) {
 }
 
 func (l *xlog) Crit(ctx context.Context, msg string, args ...any) {
-	xprintf(ctx, Crit, msg, args...)
+	xprintf(ctx, CRIT, msg, args...)
 }
 
 func (l *xlog) Alert(ctx context.Context, msg string, args ...any) {
-	xprintf(ctx, Alert, msg, args...)
+	xprintf(ctx, ALERT, msg, args...)
 }
 
 func (l *xlog) Emerg(ctx context.Context, msg string, args ...any) {
-	xprintf(ctx, Emerg, msg, args...)
+	xprintf(ctx, EMERG, msg, args...)
 }
 
 func (l *xlog) Println(ctx context.Context, msg ...any) {
-	log.Println(xlogHeader(ctx, ae.Caller(1), AllError), fmt.Sprint(msg...))
+	log.Println(xlogHeader(ctx, ae.Caller(1), ErrAll), fmt.Sprint(msg...))
 }
 
 func (l *xlog) Trace(ctx context.Context) {
