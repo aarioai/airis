@@ -43,14 +43,14 @@ func Key(n uint8, final uint8, prev bool, f func(uint8) string) string {
 }
 
 func hourIdx(interval uint8) (uint8, uint8) {
-	max := uint8(24) // 一天24小时，因数：1，2，3，4，6，8，12，24
-	if interval > (max/2) || interval == 0 {
+	hourMax := uint8(24) // 一天24小时，因数：1，2，3，4，6，8，12，24
+	if interval > (hourMax/2) || interval == 0 {
 		return 1, 1
 	}
-	if interval > max {
-		interval = max
+	if interval > hourMax {
+		interval = hourMax
 	}
-	final := max / interval
+	final := hourMax / interval
 	n := uint8(time.Now().Hour()) % final
 	return n, final
 }
@@ -66,14 +66,14 @@ func HourlyKeys(interval uint8, ignoreCurrent bool, f func(uint8) string) []stri
 }
 
 func dayIdx(interval uint8) (uint8, uint8) {
-	max := uint8(30) // 30 因数：1 2 3 5 6 10 15 30  因数越多，能够拆分的可能性越多，所以选择每个月30天
-	if interval > (max/2) || interval == 0 {
+	dayMax := uint8(30) // 30 因数：1 2 3 5 6 10 15 30  因数越多，能够拆分的可能性越多，所以选择每个月30天
+	if interval > (dayMax/2) || interval == 0 {
 		return 1, 1
 	}
-	if interval > max {
-		interval = max
+	if interval > dayMax {
+		interval = dayMax
 	}
-	final := max / interval
+	final := dayMax / interval
 	n := uint8(time.Now().Day()) % final
 	return n, final
 }

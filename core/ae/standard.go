@@ -22,6 +22,8 @@ var (
 	ErrInputTooShort    = errors.New("input is too short")
 	ErrInputTooBig      = errors.New("input is too big")
 	ErrInputTooSmall    = errors.New("input is too small")
+
+	ErrNotFound = errors.New("not found")
 )
 
 // *Error

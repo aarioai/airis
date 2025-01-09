@@ -2,93 +2,133 @@ package redishelper
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/aarioai/airis/core/ae"
 	"github.com/aarioai/airis/core/atype"
 	"github.com/aarioai/airis/pkg/types"
+	"golang.org/x/exp/constraints"
+	"reflect"
 	"time"
 
 	"github.com/redis/go-redis/v9"
 )
 
-func HSet(ctx context.Context, rdb *redis.Client, expires time.Duration, k string, values ...any) *ae.Error {
-	_, err := rdb.Pipelined(ctx, func(pipe redis.Pipeliner) error {
-		err1 := pipe.HSet(ctx, k, values...).Err()
-		err2 := pipe.Expire(ctx, k, expires).Err()
+var (
+	ErrNoResult            = ae.ErrNotFound
+	ErrUnexpectedNilResult = errors.New("unexpected nil result")
+)
+
+// HSet
+//
+//   - HSet("key1", "value1", "key2", "value2")
+//
+//   - HSet([]string{"key1", "value1", "key2", "value2"})
+//
+//   - HSet(map[string]interface{}{"key1": "value1", "key2": "value2"})
+//     Playing struct With "redis" tag.
+//     type MyHash struct { Key1 string `redis:"key1"`; Key2 int `redis:"key2"` }
+//
+//   - HSet("myhash", MyHash{"value1", "value2"}) Warn: redis-server >= 4.0
+//
+// HMSet deprecated after redis 3
+func HSet(ctx context.Context, rdb *redis.Client, expires time.Duration, key string, data ...any) error {
+	if len(data) == 0 {
+		return ae.ErrInvalidInput
+	}
+	dst := data
+	if len(data) == 1 {
+		arg := data[0]
+		switch arg := arg.(type) {
+		case []string:
+			for _, s := range arg {
+				dst = append(dst, s)
+			}
+		case []interface{}:
+			dst = append(dst, arg...)
+		case map[string]interface{}:
+			for k, v := range arg {
+				dst = append(dst, k, v)
+			}
+		case map[string]string:
+			for k, v := range arg {
+				dst = append(dst, k, v)
+			}
+		default:
+			// scan struct field
+			v := reflect.ValueOf(arg)
+			if v.Type().Kind() == reflect.Ptr {
+				if v.IsNil() {
+					return ae.ErrInvalidInput
+				}
+				v = v.Elem()
+			}
+
+			if v.Type().Kind() == reflect.Struct {
+				dst = appendStructField(dst, v)
+			}
+			return ae.ErrInvalidInput
+		}
+	}
+	ttl, err := rdb.TTL(ctx, key).Result()
+	if err == nil && ttl > 0 {
+		return rdb.HSet(ctx, key, dst...).Err()
+	}
+
+	_, err = rdb.Pipelined(ctx, func(pipe redis.Pipeliner) error {
+		err1 := pipe.HSet(ctx, key, dst...).Err()
+		err2 := pipe.Expire(ctx, key, expires).Err()
 		return ae.FirstErr(err1, err2)
 	})
 
-	return ae.NewRedisError(err)
+	return err
 }
 
-func HMSet(ctx context.Context, rdb *redis.Client, expires time.Duration, k string, values ...any) *ae.Error {
-	keys := make(map[string]struct{}, len(values)/2)
-	for i := 0; i < len(values); i += 2 {
-		f := fmt.Sprintf("%v", values[i])
-		if f == "" {
-			return ae.NewRedisError(fmt.Errorf("hmset %s empty field name", k))
-		}
-		if _, ok := keys[f]; ok {
-			return ae.NewRedisError(fmt.Errorf("hmset %s conflict %s", k, f))
-		}
-		keys[f] = struct{}{}
-	}
-	_, err := rdb.Pipelined(ctx, func(pipe redis.Pipeliner) error {
-		err1 := pipe.HMSet(ctx, k, values...).Err()
-		err2 := pipe.Expire(ctx, k, expires).Err()
-		return ae.FirstError(err1, err2)
-	})
-
-	return ae.NewRedisError(err)
-}
-
-func HScan(ctx context.Context, rdb *redis.Client, dest any, k string, fields ...string) *ae.Error {
+func HScan(ctx context.Context, rdb *redis.Client, k string, dest any, fields ...string) error {
 	c := rdb.HMGet(ctx, k, fields...)
 	v, err := c.Result()
 	if err != nil {
-		return ae.NewRedisError(err)
+		return err
 	}
 	if len(v) != len(fields) {
-		return ae.ErrorNotFound
+		return errors.New("fields mismatch")
 	}
 	for _, x := range v {
 		if types.IsNil(x) {
-			return ae.ErrorNotFound
+			return ErrUnexpectedNilResult
 		}
 	}
-	e := ae.NewRedisError(c.Scan(dest))
-	return e
+	return c.Scan(dest)
 }
 
-func HGetAll(ctx context.Context, rdb *redis.Client, k string, dest any) *ae.Error {
+func HGetAll(ctx context.Context, rdb *redis.Client, k string, dest any) error {
 	c := rdb.HGetAll(ctx, k)
 	result, err := c.Result()
 	if err != nil {
-		return ae.NewRedisError(err)
+		return err
 	}
 	if len(result) == 0 {
-		return ae.ErrorNotFound
+		return ErrNoResult
 	}
-	e := ae.NewRedisError(c.Scan(dest))
-	return e
+	return c.Scan(dest)
 }
 
-func HGetAllInt(ctx context.Context, rdb *redis.Client, k string, restrict bool) (map[string]int, *ae.Error) {
+func HGetAllInt(ctx context.Context, rdb *redis.Client, k string, restrict bool) (map[string]int, error) {
 	c := rdb.HGetAll(ctx, k)
 	result, err := c.Result()
 	if err != nil {
-		return nil, ae.NewRedisError(err)
+		return nil, err
 	}
 	n := len(result)
 	if n == 0 {
-		return nil, ae.ErrorNotFound
+		return nil, ErrNoResult
 	}
 	value := make(map[string]int, n)
 	var x int64
 	for k, v := range result {
 		if x, err = types.ParseInt64(v); err != nil {
 			if restrict {
-				return nil, ae.NewRedisError(fmt.Errorf(`HGetAllInt: invalid int string %s`, v))
+				return nil, fmt.Errorf(`invalid int string %s`, v)
 			}
 			continue
 		}
@@ -98,396 +138,129 @@ func HGetAllInt(ctx context.Context, rdb *redis.Client, k string, restrict bool)
 }
 
 // 只要存在一个，就不报错；全是nil，返回 ae.ErrorNotFound
-func TryHMGet(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]any, bool, *ae.Error) {
+func TryHMGet(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]any, bool, error) {
 	v, err := rdb.HMGet(ctx, k, fields...).Result()
 	if err != nil {
-		return nil, false, ae.NewRedisError(err)
+		return nil, false, err
 	}
 	n := len(v)
 	if n != len(fields) {
-		return nil, false, ae.ErrorNotFound
+		return nil, false, ErrNoResult
 	}
 	ok := true
-	e := ae.ErrorNotFound
+	err = ErrNoResult
 	for _, x := range v {
 		if !types.IsNil(x) {
-			e = nil // 只要存在一个不是nil，都正确
+			err = nil // 只要存在一个不是nil，都正确
 			if !ok {
 				break
 			}
 		} else {
 			ok = false
-			if e == nil {
+			if err == nil {
 				break
 			}
 		}
 	}
-	return v, ok, e
+	return v, ok, err
 }
 
 // 只要存在一个，就不报错；全是nil，返回 ae.ErrorNotFound
-func TryHMGetString(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]string, bool, *ae.Error) {
-	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
-	if e != nil {
-		return nil, ok, e
+func TryHMGetString(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]string, bool, error) {
+	iv, ok, err := TryHMGet(ctx, rdb, k, fields...)
+	if err != nil {
+		return nil, ok, err
 	}
 	v := make([]string, len(fields))
-	newV := atype.New()
-	defer newV.Release()
 	for i, x := range iv {
 		if types.IsNil(x) {
 			v[i] = ""
 		} else {
-			v[i] = newV.Reload(x).String()
+			v[i] = atype.String(x)
 		}
 	}
 	return v, ok, nil
 }
-func TryHMGetUint64(ctx context.Context, rdb *redis.Client, k string, fields []string, defaultValue uint64) ([]uint64, bool, *ae.Error) {
-	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
-	if e != nil {
-		return nil, ok, e
+func TryHMGetN[T constraints.Integer](ctx context.Context, rdb *redis.Client, k string, fields []string, defaultValue T, panicOnNil bool) ([]T, bool, error) {
+	iv, ok, err := TryHMGet(ctx, rdb, k, fields...)
+	if err != nil {
+		return nil, ok, err
 	}
-	v := make([]uint64, len(fields))
-	newV := atype.New()
-	defer newV.Release()
-	for i, x := range iv {
-		if types.IsNil(x) {
-			v[i] = defaultValue
+
+	result := make([]T, 0, len(fields))
+	for _, v := range iv {
+		if types.IsNil(v) {
+			if panicOnNil {
+				return nil, ok, ErrUnexpectedNilResult
+			}
+			result = append(result, defaultValue)
 		} else {
-			v[i] = newV.Reload(x).DefaultUint64(0)
+			switch x := v.(type) {
+			case uint8:
+				result = append(result, T(x))
+			case uint16:
+				result = append(result, T(x))
+			case uint32:
+				result = append(result, T(x))
+			case uint64:
+				result = append(result, T(x))
+			case int64:
+				result = append(result, T(x))
+			case int32:
+				result = append(result, T(x))
+			case int:
+				result = append(result, T(x))
+			case int16:
+				result = append(result, T(x))
+			case int8:
+				result = append(result, T(x))
+			case float64:
+				result = append(result, T(x))
+			case float32:
+				result = append(result, T(x))
+			case string:
+				if x == "" {
+					if panicOnNil {
+						return nil, ok, ErrUnexpectedNilResult
+					}
+					result = append(result, defaultValue)
+				} else {
+					isSigned := x[0] == '-'
+					if isSigned {
+						var y int64
+						if y, err = types.ParseInt64(x, 10); err != nil {
+							return nil, ok, fmt.Errorf("invalid number value:%s", x)
+						}
+						result = append(result, T(y))
+					} else {
+						var y uint64
+						if y, err = types.ParseUint64(x, 10); err != nil {
+							return nil, ok, fmt.Errorf("invalid number value:%s", x)
+						}
+						result = append(result, T(y))
+					}
+				}
+			default:
+				return nil, ok, fmt.Errorf("invalid number value:%v", x)
+			}
 		}
 	}
-	return v, ok, nil
-}
-func TryHMGetUint(ctx context.Context, rdb *redis.Client, k string, fields []string, defaultValue uint) ([]uint, bool, *ae.Error) {
-	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
-	if e != nil {
-		return nil, ok, e
-	}
-	v := make([]uint, len(fields))
-	newV := atype.New()
-	defer newV.Release()
-	for i, x := range iv {
-		if types.IsNil(x) {
-			v[i] = defaultValue
-		} else {
-			v[i] = newV.Reload(x).DefaultUint(0)
-		}
-	}
-	return v, ok, nil
-}
-func TryHMGetUint32(ctx context.Context, rdb *redis.Client, k string, fields []string, defaultValue uint32) ([]uint32, bool, *ae.Error) {
-	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
-	if e != nil {
-		return nil, ok, e
-	}
-	v := make([]uint32, len(fields))
-	newV := atype.New()
-	defer newV.Release()
-	for i, x := range iv {
-		if types.IsNil(x) {
-			v[i] = defaultValue
-		} else {
-			v[i] = newV.Reload(x).DefaultUint32(0)
-		}
-	}
-	return v, ok, nil
-}
-func TryHMGetUint24(ctx context.Context, rdb *redis.Client, k string, fields []string, defaultValue atype.Uint24) ([]atype.Uint24, bool, *ae.Error) {
-	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
-	if e != nil {
-		return nil, ok, e
-	}
-	v := make([]atype.Uint24, len(fields))
-	newV := atype.New()
-	defer newV.Release()
-	for i, x := range iv {
-		if types.IsNil(x) {
-			v[i] = defaultValue
-		} else {
-			v[i] = newV.Reload(x).DefaultUint24(0)
-		}
-	}
-	return v, ok, nil
-}
-func TryHMGetUint16(ctx context.Context, rdb *redis.Client, k string, fields []string, defaultValue uint16) ([]uint16, bool, *ae.Error) {
-	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
-	if e != nil {
-		return nil, ok, e
-	}
-	v := make([]uint16, len(fields))
-	newV := atype.New()
-	defer newV.Release()
-	for i, x := range iv {
-		if types.IsNil(x) {
-			v[i] = defaultValue
-		} else {
-			v[i] = newV.Reload(x).DefaultUint16(0)
-		}
-	}
-	return v, ok, nil
-}
-func TryHMGetUint8(ctx context.Context, rdb *redis.Client, k string, fields []string, defaultValue uint8) ([]uint8, bool, *ae.Error) {
-	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
-	if e != nil {
-		return nil, ok, e
-	}
-	v := make([]uint8, len(fields))
-	newV := atype.New()
-	defer newV.Release()
-	for i, x := range iv {
-		if types.IsNil(x) {
-			v[i] = defaultValue
-		} else {
-			v[i] = newV.Reload(x).DefaultUint8(0)
-		}
-	}
-	return v, ok, nil
-}
-func TryHMGetInt64(ctx context.Context, rdb *redis.Client, k string, fields []string, defaultValue int64) ([]int64, bool, *ae.Error) {
-	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
-	if e != nil {
-		return nil, false, e
-	}
-	v := make([]int64, len(fields))
-	newV := atype.New()
-	defer newV.Release()
-	for i, x := range iv {
-		if types.IsNil(x) {
-			v[i] = defaultValue
-		} else {
-			v[i] = newV.Reload(x).DefaultInt64(0)
-		}
-	}
-	return v, ok, nil
-}
-func TryHMGetInt(ctx context.Context, rdb *redis.Client, k string, fields []string, defaultValue int) ([]int, bool, *ae.Error) {
-	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
-	if e != nil {
-		return nil, false, e
-	}
-	v := make([]int, len(fields))
-	newV := atype.New()
-	defer newV.Release()
-	for i, x := range iv {
-		if types.IsNil(x) {
-			v[i] = defaultValue
-		} else {
-			v[i] = newV.Reload(x).DefaultInt(0)
-		}
-	}
-	return v, ok, nil
-}
-func TryHMGetInt32(ctx context.Context, rdb *redis.Client, k string, fields []string, defaultValue int32) ([]int32, bool, *ae.Error) {
-	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
-	if e != nil {
-		return nil, false, e
-	}
-	v := make([]int32, len(fields))
-	newV := atype.New()
-	defer newV.Release()
-	for i, x := range iv {
-		if types.IsNil(x) {
-			v[i] = defaultValue
-		} else {
-			v[i] = newV.Reload(x).DefaultInt32(0)
-		}
-	}
-	return v, ok, nil
-}
-func TryHMGetInt16(ctx context.Context, rdb *redis.Client, k string, fields []string, defaultValue int16) ([]int16, bool, *ae.Error) {
-	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
-	if e != nil {
-		return nil, false, e
-	}
-	v := make([]int16, len(fields))
-	newV := atype.New()
-	defer newV.Release()
-	for i, x := range iv {
-		if types.IsNil(x) {
-			v[i] = defaultValue
-		} else {
-			v[i] = newV.Reload(x).DefaultInt16(0)
-		}
-	}
-	return v, ok, nil
-}
-func TryHMGetInt8(ctx context.Context, rdb *redis.Client, k string, fields []string, defaultValue int8) ([]int8, bool, *ae.Error) {
-	iv, ok, e := TryHMGet(ctx, rdb, k, fields...)
-	if e != nil {
-		return nil, false, e
-	}
-	v := make([]int8, len(fields))
-	newV := atype.New()
-	defer newV.Release()
-	for i, x := range iv {
-		if types.IsNil(x) {
-			v[i] = defaultValue
-		} else {
-			v[i] = newV.Reload(x).DefaultInt8(0)
-		}
-	}
-	return v, ok, nil
+	return result, ok, nil
 }
 
 // 不能有一个是nil
-func MustHMGet(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]any, *ae.Error) {
+func MustHMGet(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]any, error) {
 	v, err := rdb.HMGet(ctx, k, fields...).Result()
 	if err != nil {
-		return nil, ae.NewRedisError(err)
+		return nil, err
 	}
 	if len(v) != len(fields) {
-		return nil, ae.ErrorNotFound
+		return nil, ErrNoResult
 	}
 	for _, x := range v {
 		if types.IsNil(x) {
-			return v, ae.ErrorNotFound
+			return v, ErrUnexpectedNilResult
 		}
-	}
-	return v, nil
-}
-func MustHMGetUint64(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]uint64, *ae.Error) {
-	iv, e := MustHMGet(ctx, rdb, k, fields...)
-	if e != nil {
-		return nil, e
-	}
-	v := make([]uint64, len(fields))
-	newV := atype.New()
-	defer newV.Release()
-	for i, a := range iv {
-		v[i] = newV.Reload(a).DefaultUint64(0)
-	}
-	return v, nil
-}
-func MustHMGetUint(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]uint, *ae.Error) {
-	iv, e := MustHMGet(ctx, rdb, k, fields...)
-	if e != nil {
-		return nil, e
-	}
-	v := make([]uint, len(fields))
-	newV := atype.New()
-	defer newV.Release()
-	for i, a := range iv {
-		v[i] = newV.Reload(a).DefaultUint(0)
-	}
-	return v, nil
-}
-func MustHMGetUint32(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]uint32, *ae.Error) {
-	iv, e := MustHMGet(ctx, rdb, k, fields...)
-	if e != nil {
-		return nil, e
-	}
-	v := make([]uint32, len(fields))
-	newV := atype.New()
-	defer newV.Release()
-	for i, a := range iv {
-		v[i] = newV.Reload(a).DefaultUint32(0)
-	}
-	return v, nil
-}
-func MustHMGetUint24(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]atype.Uint24, *ae.Error) {
-	iv, e := MustHMGet(ctx, rdb, k, fields...)
-	if e != nil {
-		return nil, e
-	}
-	v := make([]atype.Uint24, len(fields))
-	newV := atype.New()
-	defer newV.Release()
-	for i, a := range iv {
-		v[i] = newV.Reload(a).DefaultUint24(0)
-	}
-	return v, nil
-}
-func MustHMGetUint16(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]uint16, *ae.Error) {
-	iv, e := MustHMGet(ctx, rdb, k, fields...)
-	if e != nil {
-		return nil, e
-	}
-	v := make([]uint16, len(fields))
-	newV := atype.New()
-	defer newV.Release()
-	for i, a := range iv {
-		v[i] = newV.Reload(a).DefaultUint16(0)
-	}
-	return v, nil
-}
-func MustHMGetUint8(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]uint8, *ae.Error) {
-	iv, e := MustHMGet(ctx, rdb, k, fields...)
-	if e != nil {
-		return nil, e
-	}
-	v := make([]uint8, len(fields))
-	newV := atype.New()
-	defer newV.Release()
-	for i, a := range iv {
-		v[i] = newV.Reload(a).DefaultUint8(0)
-	}
-	return v, nil
-}
-func MustHMGetInt64(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]int64, *ae.Error) {
-	iv, e := MustHMGet(ctx, rdb, k, fields...)
-	if e != nil {
-		return nil, e
-	}
-	v := make([]int64, len(fields))
-	newV := atype.New()
-	defer newV.Release()
-	for i, a := range iv {
-		v[i] = newV.Reload(a).DefaultInt64(0)
-	}
-	return v, nil
-}
-func MustHMGetInt(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]int, *ae.Error) {
-	iv, e := MustHMGet(ctx, rdb, k, fields...)
-	if e != nil {
-		return nil, e
-	}
-	v := make([]int, len(fields))
-	newV := atype.New()
-	defer newV.Release()
-	for i, a := range iv {
-		v[i] = newV.Reload(a).DefaultInt(0)
-	}
-	return v, nil
-}
-func MustHMGetInt32(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]int32, *ae.Error) {
-	iv, e := MustHMGet(ctx, rdb, k, fields...)
-	if e != nil {
-		return nil, e
-	}
-	v := make([]int32, len(fields))
-	newV := atype.New()
-	defer newV.Release()
-	for i, a := range iv {
-		v[i] = newV.Reload(a).DefaultInt32(0)
-	}
-	return v, nil
-}
-func MustHMGetInt16(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]int16, *ae.Error) {
-	iv, e := MustHMGet(ctx, rdb, k, fields...)
-	if e != nil {
-		return nil, e
-	}
-	v := make([]int16, len(fields))
-	newV := atype.New()
-	defer newV.Release()
-	for i, a := range iv {
-		v[i] = newV.Reload(a).DefaultInt16(0)
-	}
-	return v, nil
-}
-
-func MustHMGetInt8(ctx context.Context, rdb *redis.Client, k string, fields ...string) ([]int8, *ae.Error) {
-	iv, e := MustHMGet(ctx, rdb, k, fields...)
-	if e != nil {
-		return nil, e
-	}
-	v := make([]int8, len(fields))
-	newV := atype.New()
-	defer newV.Release()
-	for i, a := range iv {
-		v[i] = newV.Reload(a).DefaultInt8(0)
 	}
 	return v, nil
 }
