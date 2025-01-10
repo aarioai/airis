@@ -40,24 +40,6 @@ const (
     Gzip        FileType = 7004
     Json        FileType = 10000
 )
-var AudioTypes = map[FileType][]string{
-    Aiff        : {".aiff", "audio/aiff", ".aif", ".aifc", "audio/x-aiff"},
-    Audio3gpp   : {".3gp", "audio/3gpp"},
-    Audio3gpp2  : {".3g2", "audio/3gpp2"},
-    AudioWav    : {".webm", "audio/webm"},
-    AudioWebm   : {".wav", "audio/wav"},
-    Mp3         : {".mp3", "audio/mpeg", "audio/mp3"},
-}
-var VideoTypes = map[FileType][]string{
-    Avi         : {".avi", "video/x-msvideo"},
-    Mov         : {".mov", "video/quicktime"},
-    Mp4         : {".mp4", "video/mp4"},
-    Mpeg        : {".mpeg", "video/mpeg"},
-    Video3gp    : {".3gp", "video/3gpp"},
-    Video3gp2   : {".3g2", "video/3gpp2"},
-    Wav         : {".wav", "video/x-wav"},
-    Webm        : {".webm", "video/webm"},
-}
 var DocumentTypes = map[FileType][]string{
     Doc         : {".doc", "application/msword"},
     Docx        : {".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
@@ -88,28 +70,46 @@ var ImageTypes = map[FileType][]string{
     Svg         : {".svg", "image/svg+xml"},
     Webp        : {".webp", "image/webp"},
 }
+var AudioTypes = map[FileType][]string{
+    Aiff        : {".aiff", "audio/aiff", ".aif", ".aifc", "audio/x-aiff"},
+    Audio3gpp   : {".3gp", "audio/3gpp"},
+    Audio3gpp2  : {".3g2", "audio/3gpp2"},
+    AudioWav    : {".webm", "audio/webm"},
+    AudioWebm   : {".wav", "audio/wav"},
+    Mp3         : {".mp3", "audio/mpeg", "audio/mp3"},
+}
+var VideoTypes = map[FileType][]string{
+    Avi         : {".avi", "video/x-msvideo"},
+    Mov         : {".mov", "video/quicktime"},
+    Mp4         : {".mp4", "video/mp4"},
+    Mpeg        : {".mpeg", "video/mpeg"},
+    Video3gp    : {".3gp", "video/3gpp"},
+    Video3gp2   : {".3g2", "video/3gpp2"},
+    Wav         : {".wav", "video/x-wav"},
+    Webm        : {".webm", "video/webm"},
+}
+func NewVideoType(mime string) (FileType, bool) {return ParseFileType(mime, VideoTypes)}
 func NewDocumentType(mime string) (FileType, bool) {return ParseFileType(mime, DocumentTypes)}
 func NewCompressedType(mime string) (FileType, bool) {return ParseFileType(mime, CompressedTypes)}
 func NewDataType(mime string) (FileType, bool) {return ParseFileType(mime, DataTypes)}
 func NewImageType(mime string) (FileType, bool) {return ParseFileType(mime, ImageTypes)}
 func NewAudioType(mime string) (FileType, bool) {return ParseFileType(mime, AudioTypes)}
-func NewVideoType(mime string) (FileType, bool) {return ParseFileType(mime, VideoTypes)}
 func (t FileType) ContentType() string {
+    if d, ok := VideoTypes[t]; ok {return d[1]}
+    if d, ok := DocumentTypes[t]; ok {return d[1]}
     if d, ok := CompressedTypes[t]; ok {return d[1]}
     if d, ok := DataTypes[t]; ok {return d[1]}
     if d, ok := ImageTypes[t]; ok {return d[1]}
     if d, ok := AudioTypes[t]; ok {return d[1]}
-    if d, ok := VideoTypes[t]; ok {return d[1]}
-    if d, ok := DocumentTypes[t]; ok {return d[1]}
     return ""
 }
 func (t FileType) Ext() string {
+    if d, ok := CompressedTypes[t]; ok {return d[0]}
     if d, ok := DataTypes[t]; ok {return d[0]}
     if d, ok := ImageTypes[t]; ok {return d[0]}
     if d, ok := AudioTypes[t]; ok {return d[0]}
     if d, ok := VideoTypes[t]; ok {return d[0]}
     if d, ok := DocumentTypes[t]; ok {return d[0]}
-    if d, ok := CompressedTypes[t]; ok {return d[0]}
     return ""
 }
 func (t FileType) Name() string {return strings.TrimPrefix(t.Ext(), ".")}

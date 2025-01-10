@@ -33,11 +33,10 @@ func Driver(schema string, db *sql.DB, err error) *DB {
 }
 
 func (d *DB) Close() {
-	if d.close {
+	if d.close && d.DB != nil {
 		/*
 			https://pkg.go.dev/database/sql#Open
 			The returned DB is safe for concurrent use by multiple goroutines and maintains its own pool of idle connections. Thus, the Open function should be called just once. It is rarely necessary to close a DB.
-			Go MySQL 自带连接池，不不建议关闭 DB。
 		*/
 		d.DB.Close()
 	}
