@@ -22,6 +22,9 @@ const (
 )
 
 func (d *DB) Begin(ctx context.Context, opts *sql.TxOptions) (*Tx, *ae.Error) {
+	if d.err != nil {
+		return nil, ae.NewSQLError(d.err)
+	}
 	tx, err := d.DB.BeginTx(ctx, opts)
 	if err != nil {
 		return nil, ae.NewSQLError(err)
