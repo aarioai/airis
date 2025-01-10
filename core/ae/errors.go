@@ -42,7 +42,7 @@ func NewSQLError(err error, details ...any) *Error {
 		driver.ErrBadConn:        func() *Error { return NewE(pos + sqlBadConnMsg + msg).WithDetail(details...) },
 		driver.ErrSkip:           func() *Error { return NewE(pos + sqlSkipMsg + msg).WithDetail(details...) },
 		driver.ErrRemoveArgument: func() *Error { return NewE(pos + sqlRemoveArgMsg + msg).WithDetail(details...) },
-		sql.ErrNoRows:            func() *Error { return ErrorNotFound.WithDetail(details...) },
+		sql.ErrNoRows:            func() *Error { return New(NotFound).WithDetail(details...) },
 		sql.ErrConnDone:          func() *Error { return NewE(pos + sqlConnDoneMsg + msg).WithDetail(details...) },
 		sql.ErrTxDone:            func() *Error { return NewE(pos + sqlTxDoneMsg + msg).WithDetail(details...) },
 	}

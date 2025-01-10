@@ -98,7 +98,7 @@ func (e *Error) WithCaller(skip int) *Error {
 func (e *Error) WithDetail(detail ...any) *Error {
 	s := afmt.SprintfArgs(detail)
 	if e.locked {
-		log.Printf("[error] failed to change detail %s to a locked error\n", s)
+		log.Printf("[error] failed to change locked Error with detail: %s\n", s)
 		return e
 	}
 	e.Detail = s
