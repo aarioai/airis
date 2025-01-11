@@ -182,10 +182,6 @@ func (lw *LogWriter) initialize() {
 	if err := lw.openFile(); err != nil {
 		Console("initialize log file: %v", err)
 	}
-
-	if lw.bufSize > 0 {
-		Console("initialize log writer with buffer size %dB", lw.bufSize)
-	}
 }
 
 func (lw *LogWriter) updateConfig(dir, symlink string, bufSize int) bool {

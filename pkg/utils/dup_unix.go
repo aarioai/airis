@@ -18,12 +18,6 @@ func Dup2(oldfd uintptr, newfd int) error {
 		return nil
 	}
 
-	// 在较新的 Linux 系统上，优先使用 dup3
-	err := syscall.Dup3(int(oldfd), newfd, 0)
-	if err == nil {
-		return nil
-	}
-
 	// 如果 dup3 不可用或失败，回退到 dup2
 	return syscall.Dup2(int(oldfd), newfd)
 }
