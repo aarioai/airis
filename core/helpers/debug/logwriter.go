@@ -295,9 +295,17 @@ func (lw *LogWriter) openFile() error {
 		return fmt.Errorf("failed to open new log file: %w", err)
 	}
 
-	// 对于虚拟机共享文件夹，可能创建软链会失败，这无影响
 	_ = os.Remove(lw.symlink)
-	Console(os.Symlink(newLogFile, lw.symlink))
+	symdir := filepath.Dir(lw.symlink)
+	if filepath.Dir(newLogFile) == symdir {
+		// 使用相对路径，对于容器挂载路径方式更友好
+		if err = os.Chdir(symdir); err == nil {
+			_ = os.Symlink(filepath.Base(newLogFile), filepath.Base(lw.symlink))
+		}
+	} else {
+		// 对于虚拟机共享文件夹，可能创建软链会失败，这无影响
+		_ = os.Symlink(newLogFile, lw.symlink)
+	}
 
 	lw.logName = newLogFile
 	lw.file = f // 不要关闭 f
