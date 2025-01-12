@@ -10,7 +10,8 @@ import (
 func generateRmlogScript(targetDir string) error {
 	// 这里一般仅使用一次，不用移到常驻常量，浪费内存
 	const scriptContent = `#!/bin/bash
-set -eu pipefail
+set -eux
+
 # Show usage instructions
 show_usage() {
     echo "Usage: $0"
@@ -31,14 +32,13 @@ all=0
 CONFIRM=1
 BEFORE_DATE=""
 FILE_NAME_FORMAT="%Y-%m-%d.log"
-# Parse command line arguments
-while getopts "d:f:h" opt; do
-    case $opt in
+
+while getopts "d:f:hy" opt; do
+    case "$opt" in
         d) BEFORE_DATE="$OPTARG" ;;
         f) FILE_NAME_FORMAT="$OPTARG" ;;
         h) show_usage ;;
 		y) CONFIRM=0 ;;
-        ?) show_usage ;;
     esac
 done
 

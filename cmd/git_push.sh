@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu pipefail
+set -eux
 
 
 
@@ -182,7 +182,7 @@ setVPN() {
   fi
 }
 
-# 主流程
+
 main() {
   setVPN
   build
