@@ -15,10 +15,10 @@ set -euo pipefail
 # Show usage instructions
 show_usage() {
     echo "Usage: $0"
-    echo "    -d delete logs before date (YYYY-MM-DD)"
-    echo "    -f log file format, default: %Y-%m-%d.log"
-    echo "    -h show help"
-	echo "    -y no confirm"
+    echo "  -d delete logs before date (YYYY-MM-DD)"
+    echo "  -f log file format, default: %Y-%m-%d.log"
+    echo "  -h show help"
+	echo "  -y no confirm"
     echo "Examples:"
     echo "  $0 -d 2024-03-01            # Delete logs before 2024-03-01"
     echo "  $0 -d now|day|week|month  	# Delete logs before one day/week/month ago"

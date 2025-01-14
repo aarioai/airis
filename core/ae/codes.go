@@ -86,8 +86,12 @@ func NewRetryWith(redirect string) *Error {
 	return New(RetryWith, redirect) // 特殊错误码，msg 用于跳转
 }
 
-func NewBadParam(param string) *Error {
-	return New(BadRequest, "bad param `"+param+"`")
+func NewBadParam(param string, tips ...string) *Error {
+	msg := "bad param `" + param + "`"
+	if len(tips) > 0 {
+		msg += ": " + strings.Join(tips, " ")
+	}
+	return New(BadRequest, msg)
 }
 func NewNotAcceptable(msg ...any) *Error {
 	return New(NotAcceptable).AppendMsg(msg...)

@@ -143,7 +143,6 @@ func (e *Error) Trace(ctx iris.Context) string {
 	return e.WithTraceInfo(ctx).Text()
 }
 
-// 状态检查方法
 func (e *Error) IsNotFound() bool {
 	return e.Code == NotFound || e.Code == NoRowsAvailable || e.Code == Gone
 }
