@@ -21,7 +21,7 @@ func TestDecimal(t *testing.T) {
 	for i := 0; i < n; i++ {
 		a := math.Floor(rand.Float64()*10000*10000) / 10000 // 保留4位小数
 		b := math.Floor(rand.Float64()*n*10000) / 10000     // 保留4位小数
-		c := a * b
+		c := math.Round(a*b*10000) / 10000
 		x := atype.DecimalUnitsX(a).MulRound(atype.DecimalUnitsX(b))
 		if x != atype.DecimalUnitsX(c) {
 			t.Errorf("%f*%f=%f   %d", a, 10000.0, a*10000.0, int(a*10000.0))
