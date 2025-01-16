@@ -29,6 +29,9 @@ func FirstError(errs ...error) error {
 	}
 	return nil
 }
+func IsNotFound(err error) bool {
+	return errors.Is(err, sql.ErrNoRows) || errors.Is(err, redis.Nil) || errors.Is(err, ErrNotFound)
+}
 
 // NewSQLError 处理 SQL 错误
 func NewSQLError(err error, details ...any) *Error {

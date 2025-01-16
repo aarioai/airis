@@ -35,7 +35,7 @@ func (app *App) Check(ctx context.Context, es ...*ae.Error) bool {
 // CheckError 检查标准错误
 func (app *App) CheckErrors(ctx context.Context, errs ...error) bool {
 	err := afmt.First(errs)
-	if err != nil {
+	if err != nil && !ae.IsNotFound(err) {
 		app.Log.Error(ctx, err.Error())
 		return false
 	}
