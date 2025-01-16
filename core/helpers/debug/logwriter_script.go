@@ -70,10 +70,9 @@ removeLog(){
 	local -r before="$2"
 	echo "rm $format before $before"
 
-	if [[ "$CONFIRM" != "0" ]]
-		echo "continue? [y/N]"
-		read -r confirm
-		if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+	if [[ "$CONFIRM" != "0" ]]; then
+		read -r -p "continue? [y/N]"
+		if [[ ! "$REPLY" =~ ^[Yy]$ ]]; then
 			echo "operation cancelled"
 			exit 0
 		fi
@@ -113,12 +112,13 @@ removeLog(){
 		fi
 	done
 }
-
-removeLog "$FILE_NAME_FORMAT" "$BEFORE_DATE"
-if [ $all -eq 1 ]; then
-	removeLog "panic-$FILE_NAME_FORMAT" "$BEFORE_DATE"
-fi
-
+main(){
+	removeLog "$FILE_NAME_FORMAT" "$BEFORE_DATE"
+	if [ $all -eq 1 ]; then
+		removeLog "panic-$FILE_NAME_FORMAT" "$BEFORE_DATE"
+	fi
+}
+main "$@"
 `
 
 	if err := os.MkdirAll(targetDir, 0755); err != nil {
