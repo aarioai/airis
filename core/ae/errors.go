@@ -4,9 +4,8 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"errors"
-	"regexp"
-
 	"github.com/redis/go-redis/v9"
+	"regexp"
 )
 
 const (

@@ -15,7 +15,6 @@ import (
 )
 
 var (
-	ErrNoResult            = ae.ErrNotFound
 	ErrUnexpectedNilResult = errors.New("unexpected nil result")
 )
 
@@ -108,7 +107,7 @@ func HGetAll(ctx context.Context, rdb *redis.Client, k string, dest any) error {
 		return err
 	}
 	if len(result) == 0 {
-		return ErrNoResult
+		return redis.Nil
 	}
 	return c.Scan(dest)
 }
@@ -121,7 +120,7 @@ func HGetAllInt(ctx context.Context, rdb *redis.Client, k string, restrict bool)
 	}
 	n := len(result)
 	if n == 0 {
-		return nil, ErrNoResult
+		return nil, redis.Nil
 	}
 	value := make(map[string]int, n)
 	var x int64
@@ -145,10 +144,10 @@ func TryHMGet(ctx context.Context, rdb *redis.Client, k string, fields ...string
 	}
 	n := len(v)
 	if n != len(fields) {
-		return nil, false, ErrNoResult
+		return nil, false, redis.Nil
 	}
 	ok := true
-	err = ErrNoResult
+	err = redis.Nil
 	for _, x := range v {
 		if !types.IsNil(x) {
 			err = nil // 只要存在一个不是nil，都正确
@@ -255,7 +254,7 @@ func MustHMGet(ctx context.Context, rdb *redis.Client, k string, fields ...strin
 		return nil, err
 	}
 	if len(v) != len(fields) {
-		return nil, ErrNoResult
+		return nil, redis.Nil
 	}
 	for _, x := range v {
 		if types.IsNil(x) {
