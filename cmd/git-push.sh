@@ -2,10 +2,8 @@
 set -euo pipefail
 
 
-
-# 定义常量
 readonly CUR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# aarioai/airis 项目根目录
+# aarioai/airis 
 readonly ROOT_DIR="$(cd "${CUR}/.." && pwd)"
 readonly MOD_UPDATE_FILE="${ROOT_DIR}/.modupdate"
 
@@ -25,7 +23,7 @@ _log() {
     local message=$3
     echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${color}${level:+[$level] }${message}${NC}"
 }
-# 日志函数
+
 log() {
     _log "" "" "$1"
 }
@@ -75,23 +73,24 @@ fi
 # 构建函数
 build() {
     cd "$ROOT_DIR/cmd" || panic "failed to cd $ROOT_DIR/cmd"
-    log "building project..."
+    info "building project..."
     go run build.go --root="$ROOT_DIR" --js="/data/Aa/proj/go/src/project/xixi/deploy/asset_src/lib_dev/aa-js/src/f_oss_filetype_readonly.js" || panic "Build failed"
 }
 
 handleUpdateMod(){
     local today=$(date +%Y-%m-%d)
-    if [ ! -f "${MOD_UPDATE_FILE}" ]; then
-        return 0
+    local latest_update=''
+    if [ -s "${MOD_UPDATE_FILE}" ]; then
+        latest_update=$(cat "${MOD_UPDATE_FILE}")
     fi
-    local latest_update=$(cat "${MOD_UPDATE_FILE}")
-    if [ -z "$lastest_update" ] || [[ "$today" = "$latest_update" ]]; then
+
+    if [[ "$today" = "$latest_update" ]]; then
         return 0
     fi
 
     info "go test -u -v ./..."
     go get -u -v ./...
-    print "$today" > "${MOD_UPDATE_FILE}"
+    printf '%s' "$today" > "${MOD_UPDATE_FILE}"
 }
 
 # 更新并推送代码
@@ -103,7 +102,7 @@ pushAndUpgradeMod() {
     go mod tidy || panic "failed go mod tidy"
 
     # 运行单元测试
-    log "go test ./..."
+    info "go test ./..."
     go test ./... || panic "failed go test ./... failed"
 
 
@@ -121,7 +120,7 @@ pushAndUpgradeMod() {
         echo "No changes to commit"
         exit 0
     fi
-    log "committing changes..."
+    info "committing changes..."
     git add -A . || panic "failed git add -A ."
     git commit -m "$comment" || panic "failed git commit -m $comment"
     git push origin main || panic "failed git push origin main"
@@ -134,7 +133,7 @@ pushAndUpgradeMod() {
 
 # 处理Git标签
 handle_tags() {
-    log "managing tags..."
+    info "managing tags..."
     git fetch --tags
     latestTag=$(git describe --tags "$(git rev-list --tags --max-count=1)" 2>/dev/null || echo "")
     
@@ -144,13 +143,13 @@ handle_tags() {
         id=$((id+1))
         newTag="$tag.$id"
         
-        log "removing old tag: $latestTag"
+        info "removing old tag: $latestTag"
         git tag -d "$latestTag"
         git push origin --delete tag "$latestTag"
         
         git tag "$newTag"
         git push origin --tags
-        log "new tag created: $newTag"
+        info "new tag created: $newTag"
     fi
 }
 # 取消VPN
@@ -166,7 +165,7 @@ unsetVPN() {
 # 开启VPN
 setVPN() {
   if [ -n "${http_proxy:-}" ]; then
-    echo "proxy ${http_proxy} ${https_proxy}"
+    info "proxy ${http_proxy} ${https_proxy}"
     return
   fi
   # 设置代理
@@ -192,8 +191,7 @@ main() {
   build
   pushAndUpgradeMod
   unsetVPN "$needCloseVPN"
-  log "success!"
-  log "use go get -u -v ./...  or -u to upgrade all dependencies maximum 1 time per day"
+  info "success!"
 }
 
 main
