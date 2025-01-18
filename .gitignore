@@ -22,3 +22,5 @@ go.sum
 
 
 build/*.js
+
+.modupdate

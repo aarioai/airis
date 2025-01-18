@@ -4,16 +4,15 @@ set -euo pipefail
 
 
 # 定义常量
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly CUR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # aarioai/airis 项目根目录
-readonly ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+readonly ROOT_DIR="$(cd "${CUR}/.." && pwd)"
+readonly MOD_UPDATE_FILE="${ROOT_DIR}/.modupdate"
 
 # 初始化参数
 declare comment
 needCloseVPN=0
-upgrade=0
 incrTag=1
-noUpdate=0
 
 readonly RED='\033[0;31m'
 readonly GREEN='\033[0;32m'
@@ -60,9 +59,7 @@ EOF
 # 参数解析
 while getopts "utih" opt; do
     case "$opt" in
-        u) upgrade=1 ;;
         t) incrTag=0 ;;
-        i) noUpdate=1 ;;
         h) usage ;;
         *) usage ;;
     esac
@@ -82,9 +79,26 @@ build() {
     go run build.go --root="$ROOT_DIR" --js="/data/Aa/proj/go/src/project/xixi/deploy/asset_src/lib_dev/aa-js/src/f_oss_filetype_readonly.js" || panic "Build failed"
 }
 
+handleUpdateMod(){
+    local today=$(date +%Y-%m-%d)
+    if [ ! -f "${MOD_UPDATE_FILE}" ]; then
+        return 0
+    fi
+    local latest_update=$(cat "${MOD_UPDATE_FILE}")
+    if [ -z "$lastest_update" ] || [[ "$today" = "$latest_update" ]]; then
+        return 0
+    fi
+
+    info "go test -u -v ./..."
+    go get -u -v ./...
+    print "$today" > "${MOD_UPDATE_FILE}"
+}
+
 # 更新并推送代码
 pushAndUpgradeMod() {
     cd "$ROOT_DIR" || panic "failed to cd $ROOT_DIR"
+
+    handleUpdateMod
 
     go mod tidy || panic "failed go mod tidy"
 
@@ -92,18 +106,8 @@ pushAndUpgradeMod() {
     log "go test ./..."
     go test ./... || panic "failed go test ./... failed"
 
-    # 更新 go.mod
-    if [ $upgrade -eq 1 ]; then
-        log "go mod init"
-        rm -f go.mod
-        go mod init || panic "failed go mod init"
-    fi
 
-    # 更新依赖
-    if [ $noUpdate -eq 0 ]; then
-        log "updating dependencies..."
-        go get -u -v ./... || panic "failed go get -u -v ./..."
-    fi
+
     # Git 操作
 
     # 检查是否有变更需要提交
