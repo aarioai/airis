@@ -1,6 +1,7 @@
 package ae
 
 import (
+	"fmt"
 	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/aarioai/airis/pkg/types"
 	"net/http"
@@ -39,7 +40,8 @@ const (
 	Illegal          = http.StatusUnavailableForLegalReasons // 该请求因政策法律原因不可用。
 	// 自定义状态码
 	NoRowsAvailable = 490 // 【自定义错误码】无数据记录
-	RetryWith       = 491 // 【自定义错误码】需要重试
+	RetryWith       = 491 // 【自定义错误码】需要重试，msg 是 redirect
+	ConflictWith    = 492 // 【自定义错误码】数据冲突，msg 是冲突的有效信息
 
 	// 5xx 服务器错误
 	InternalServerError   = http.StatusInternalServerError   // 服务器内部错误
@@ -84,6 +86,9 @@ var (
 
 func NewRetryWith(redirect string) *Error {
 	return New(RetryWith, redirect) // 特殊错误码，msg 用于跳转
+}
+func NewConflictWith(format string, args ...any) *Error {
+	return New(ConflictWith, fmt.Sprintf(format, args...))
 }
 
 func NewBadParam(param string, tips ...string) *Error {

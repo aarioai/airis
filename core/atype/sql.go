@@ -57,7 +57,7 @@ type Bitwiser struct {
 	BitValue bool        // 该位的值
 	MaxBits  uint8
 }
-
+type Bin string // binary string
 type Booln uint8
 type Int24 int32
 type Uint24 uint32
@@ -291,10 +291,13 @@ func (b Bitwise) SetStmt(fieldName string) string {
 }
 
 func (b Bitwise) unsetStmt(fieldName string) string {
-	max := (1 << b.MaxBits) - 1
-	bv := max - (1 << b.BitPos)
+	maxBits := (1 << b.MaxBits) - 1
+	bv := maxBits - (1 << b.BitPos)
 	bs := types.FormatInt(bv)
 	return fieldName + "=" + fieldName + "&" + bs
+}
+func (b Bin) StmtValue() string {
+	return "b'" + string(b) + "'"
 }
 
 func ToBooln(b bool) Booln {

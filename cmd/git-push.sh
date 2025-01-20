@@ -3,11 +3,10 @@ set -euo pipefail
 
 
 readonly CUR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# aarioai/airis 
+# aarioai/airis
 readonly ROOT_DIR="$(cd "${CUR}/.." && pwd)"
 readonly MOD_UPDATE_FILE="${ROOT_DIR}/.modupdate"
 
-# 初始化参数
 declare comment
 needCloseVPN=0
 incrTag=1
@@ -41,7 +40,6 @@ panic() {
     exit 1
 }
 
-# 帮助信息
 usage() {
     cat << EOF
 Usage: $0 [options] [commit message]
@@ -54,7 +52,6 @@ EOF
     exit 1
 }
 
-# 参数解析
 while getopts "utih" opt; do
     case "$opt" in
         t) incrTag=0 ;;
@@ -64,13 +61,11 @@ while getopts "utih" opt; do
 done
 shift $((OPTIND-1))
 
-# 获取提交信息
 if [ $# -gt 0 ]; then
     comment="$1"
 fi
 
 
-# 构建函数
 build() {
     cd "$ROOT_DIR/cmd" || panic "failed to cd $ROOT_DIR/cmd"
     info "building project..."
@@ -93,7 +88,6 @@ handleUpdateMod(){
     printf '%s' "$today" > "${MOD_UPDATE_FILE}"
 }
 
-# 更新并推送代码
 pushAndUpgradeMod() {
     cd "$ROOT_DIR" || panic "failed to cd $ROOT_DIR"
 
@@ -101,21 +95,15 @@ pushAndUpgradeMod() {
 
     go mod tidy || panic "failed go mod tidy"
 
-    # 运行单元测试
     info "go test ./..."
     go test ./... || panic "failed go test ./... failed"
 
-
-
-    # Git 操作
-
-    # 检查是否有变更需要提交
     if [ -z "$(git status --porcelain)" ]; then
         echo "No changes to commit"
         exit 0
     fi
 
-    # 检查是否有变更需要提交
+    # check there are changes or not
     if [ -z "$(git status --porcelain)" ]; then
         echo "No changes to commit"
         exit 0
@@ -125,13 +113,11 @@ pushAndUpgradeMod() {
     git commit -m "$comment" || panic "failed git commit -m $comment"
     git push origin main || panic "failed git push origin main"
 
-    # 处理标签
     if [ $incrTag -eq 1 ]; then
         handle_tags
     fi
 }
 
-# 处理Git标签
 handle_tags() {
     info "managing tags..."
     git fetch --tags
@@ -152,7 +138,8 @@ handle_tags() {
         info "new tag created: $newTag"
     fi
 }
-# 取消VPN
+
+
 unsetVPN() {
   if [[ $1 -eq 1 ]]; then
       echo "unset VPN"
@@ -162,20 +149,18 @@ unsetVPN() {
       unset https_poxy
   fi
 }
-# 开启VPN
+
 setVPN() {
   if [ -n "${http_proxy:-}" ]; then
     info "proxy ${http_proxy} ${https_proxy}"
     return
   fi
-  # 设置代理
+
   export http_proxy=http://127.0.0.1:8118
   export https_proxy=http://127.0.0.1:8118
 
-  # 检查代理后的网络连接
   local http_code
   http_code=$(curl --max-time 3 -s -w '%{http_code}\n' -o /dev/null google.com)
-  # 检查HTTP状态码，2xx和3xx都表示连接成功
   if [[ $http_code =~ ^[23][0-9]{2}$ ]]; then
     needCloseVPN=1
     echo "start VPN (HTTP $http_code)"
