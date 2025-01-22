@@ -6,38 +6,58 @@ type ErrorLevel uint8
 
 const (
 	ErrAll ErrorLevel = iota
-	DEBUG
-	INFO
-	NOTICE
-	WARN
-	Err
-	CRIT
-	ALERT
-	EMERG
+	Debug
+	Info
+	Notice
+	Warn
+	Error
+	Fatal
+	Alert
+	Emerg
 )
 
 const (
 	ErrorLevelKey = "aa_error_level"
 )
 
+var (
+	levelToName = map[ErrorLevel]string{
+		ErrAll: "all",
+		Debug:  "debug",
+		Info:   "info",
+		Notice: "notice",
+		Warn:   "warn",
+		Error:  "error",
+		Fatal:  "fatal",
+		Alert:  "alert",
+		Emerg:  "emerg",
+	}
+	nameToLevel = map[string]ErrorLevel{
+		"":          ErrAll,
+		"all":       ErrAll,
+		"debug":     Debug,
+		"info":      Info,
+		"notice":    Notice,
+		"warn":      Warn,
+		"warning":   Warn,
+		"error":     Error,
+		"fatal":     Fatal,
+		"critical":  Fatal,
+		"alert":     Alert,
+		"emerg":     Emerg,
+		"emergency": Emerg,
+	}
+)
+
+func NameToLevel(name string) ErrorLevel {
+	if level, ok := nameToLevel[name]; ok {
+		return level
+	}
+	return ErrAll
+}
 func (lvl ErrorLevel) Name() string {
-	switch lvl {
-	case DEBUG:
-		return "debug"
-	case INFO:
-		return "info"
-	case NOTICE:
-		return "notice"
-	case WARN:
-		return "warn"
-	case Err:
-		return "err"
-	case CRIT:
-		return "crit"
-	case ALERT:
-		return "alert"
-	case EMERG:
-		return "emerg"
+	if name, ok := levelToName[lvl]; ok {
+		return name
 	}
 	return ""
 }
@@ -51,10 +71,10 @@ type LogInterface interface {
 	// AuthDebug 包含详细的开发情报的信息，通常只在调试一个程序时使用
 	Debug(ctx context.Context, msg string, args ...any)
 
-	// INFO 情报信息，正常的系统消息，比如骚扰报告，带宽数据等，不需要处理。
+	// Info 情报信息，正常的系统消息，比如骚扰报告，带宽数据等，不需要处理。
 	Info(ctx context.Context, msg string, args ...any)
 
-	// NOTICE 不是错误情况，也不需要立即处理。
+	// Notice 不是错误情况，也不需要立即处理。
 	Notice(ctx context.Context, msg string, args ...any)
 
 	// Warn 警告信息，不是错误，比如系统磁盘使用了85%等。
@@ -63,13 +83,13 @@ type LogInterface interface {
 	// Error 错误，不是非常紧急，在一定时间内修复即可。
 	Error(ctx context.Context, msg string, args ...any)
 
-	// CRIT 重要情况，如硬盘错误，备用连接丢失
-	Crit(ctx context.Context, msg string, args ...any)
+	// Fatal 重要情况，如硬盘错误，备用连接丢失
+	Fatal(ctx context.Context, msg string, args ...any)
 
-	// ALERT 应该被立即改正的问题，如系统数据库被破坏，ISP连接丢失。
+	// Alert 应该被立即改正的问题，如系统数据库被破坏，ISP连接丢失。
 	Alert(ctx context.Context, msg string, args ...any)
 
-	// EMERG 紧急情况，需要立即通知技术人员。
+	// Emerg 紧急情况，需要立即通知技术人员。
 	Emerg(ctx context.Context, msg string, args ...any)
 
 	Println(ctx context.Context, msg ...any)

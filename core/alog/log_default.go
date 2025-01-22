@@ -66,40 +66,40 @@ func (l *xlog) New(prefix string, f func(context.Context, string, ...any), suffi
 
 func (l *xlog) Assert(ctx context.Context, condition bool, msg string, args ...any) {
 	if condition {
-		xprintf(ctx, DEBUG, msg, args...)
+		xprintf(ctx, Debug, msg, args...)
 	}
 }
 
 func (l *xlog) Debug(ctx context.Context, msg string, args ...any) {
-	xprintf(ctx, DEBUG, msg, args...)
+	xprintf(ctx, Debug, msg, args...)
 }
 
 func (l *xlog) Info(ctx context.Context, msg string, args ...any) {
-	xprintf(ctx, INFO, msg, args...)
+	xprintf(ctx, Info, msg, args...)
 }
 
 func (l *xlog) Notice(ctx context.Context, msg string, args ...any) {
-	xprintf(ctx, NOTICE, msg, args...)
+	xprintf(ctx, Notice, msg, args...)
 }
 
 func (l *xlog) Warn(ctx context.Context, msg string, args ...any) {
-	xprintf(ctx, WARN, msg, args...)
+	xprintf(ctx, Warn, msg, args...)
 }
 
 func (l *xlog) Error(ctx context.Context, msg string, args ...any) {
-	xprintf(ctx, Err, msg, args...)
+	xprintf(ctx, Error, msg, args...)
 }
 
-func (l *xlog) Crit(ctx context.Context, msg string, args ...any) {
-	xprintf(ctx, CRIT, msg, args...)
+func (l *xlog) Fatal(ctx context.Context, msg string, args ...any) {
+	xprintf(ctx, Fatal, msg, args...)
 }
 
 func (l *xlog) Alert(ctx context.Context, msg string, args ...any) {
-	xprintf(ctx, ALERT, msg, args...)
+	xprintf(ctx, Alert, msg, args...)
 }
 
 func (l *xlog) Emerg(ctx context.Context, msg string, args ...any) {
-	xprintf(ctx, EMERG, msg, args...)
+	xprintf(ctx, Emerg, msg, args...)
 }
 
 func (l *xlog) Println(ctx context.Context, msg ...any) {
