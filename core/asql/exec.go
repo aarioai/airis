@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/aarioai/airis/core/ae"
+	"github.com/aarioai/airis/core/alog"
 	"github.com/aarioai/airis/pkg/afmt"
 )
 
@@ -39,7 +40,7 @@ func (d *DB) Close() {
 			https://pkg.go.dev/database/sql#Open
 			The returned DB is safe for concurrent use by multiple goroutines and maintains its own pool of idle connections. Thus, the Open function should be called just once. It is rarely necessary to close a DB.
 		*/
-		d.DB.Close()
+		alog.PrintError(d.DB.Close())
 	}
 }
 
@@ -51,7 +52,13 @@ func (d *DB) Prepare(ctx context.Context, query string) (*sql.Stmt, *ae.Error) {
 		return nil, ae.NewSQLError(d.err)
 	}
 	stmt, err := d.DB.PrepareContext(ctx, query)
-	return stmt, ae.NewSQLError(err, query)
+	if err != nil {
+		if stmt != nil {
+			alog.PrintError(stmt.Close())
+		}
+		return nil, ae.NewSQLError(err, query)
+	}
+	return stmt, nil
 }
 
 /*
@@ -178,6 +185,9 @@ func (d *DB) Query(ctx context.Context, query string, args ...any) (*sql.Rows, *
 	}
 	rows, err := d.DB.QueryContext(ctx, query, args...)
 	if err != nil {
+		if rows != nil {
+			alog.PrintError(rows.Close())
+		}
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ae.ErrorNoRows
 		}

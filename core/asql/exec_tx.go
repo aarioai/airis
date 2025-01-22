@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/aarioai/airis/core/ae"
+	"github.com/aarioai/airis/core/alog"
 	"github.com/aarioai/airis/pkg/afmt"
 	"log"
 )
@@ -47,18 +48,24 @@ func (t *Tx) Commit() *ae.Error {
 func (t *Tx) Recover() func() {
 	return func() {
 		if p := recover(); p != nil {
-			t.Tx.Rollback()
+			alog.PrintError(t.Tx.Rollback())
 		}
 		if t.result == 0 {
 			log.Println("[waring] tx not commit")
-			t.Tx.Commit()
+			alog.PrintError(t.Tx.Commit())
 		}
 	}
 }
 
 func (t *Tx) Prepare(ctx context.Context, query string) (*sql.Stmt, *ae.Error) {
 	stmt, err := t.Tx.PrepareContext(ctx, query)
-	return stmt, ae.NewSQLError(err, query)
+	if err != nil {
+		if stmt != nil {
+			alog.PrintError(stmt.Close())
+		}
+		return nil, ae.NewSQLError(err, query)
+	}
+	return stmt, nil
 }
 
 func (t *Tx) Execute(ctx context.Context, query string, args ...any) (sql.Result, *ae.Error) {
@@ -153,6 +160,9 @@ func (t *Tx) ScanX(ctx context.Context, query string, id string, dest ...any) *a
 func (t *Tx) Query(ctx context.Context, query string, args ...any) (*sql.Rows, *ae.Error) {
 	rows, err := t.Tx.QueryContext(ctx, query, args...)
 	if err != nil {
+		if rows != nil {
+			alog.PrintError(rows.Close())
+		}
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ae.ErrorNoRows
 		}

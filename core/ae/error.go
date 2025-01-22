@@ -154,3 +154,10 @@ func (e *Error) IsServerError() bool {
 func (e *Error) IsRetryWith() bool {
 	return e.Code == RetryWith && e.Msg != ""
 }
+
+func (e *Error) ExceptNotFound() *Error {
+	if e == nil || e.IsNotFound() {
+		return nil
+	}
+	return e
+}
