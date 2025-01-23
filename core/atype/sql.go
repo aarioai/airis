@@ -418,9 +418,9 @@ func (d Date) OrMax() Date {
 	}
 	return d
 }
-func (d Date) OrNow() Date {
+func (d Date) OrNow(loc *time.Location) Date {
 	if !d.Valid() {
-		return ToDate(time.Now())
+		return Date(time.Now().In(loc).Format("2006-01-02"))
 	}
 	return d
 }
@@ -479,9 +479,9 @@ func (d Datetime) OrMax() Datetime {
 	}
 	return d
 }
-func (d Datetime) OrNow() Datetime {
+func (d Datetime) OrNow(loc *time.Location) Datetime {
 	if !d.Valid() {
-		return ToDatetime(time.Now())
+		return Now(loc)
 	}
 	return d
 }
