@@ -122,31 +122,31 @@ func (r *Request) BodyInt24s(p string, required, allowZero bool) ([]atype.Int24,
 	return toInt24s(values, e)
 }
 
-func (r *Request) BodyLocation(p string, required ...bool) (atype.Location, *ae.Error) {
+func (r *Request) BodyLocation(p string, required ...bool) (*atype.Location, *ae.Error) {
 	x, e := r.BodyAnyMap(p, required...)
 	if e != nil || x == nil {
-		return atype.Location{}, e
+		return nil, e
 	}
 	var loc atype.Location
 	lat, ok := x["lat"]
 	if !ok {
 		e = ae.NewBadParam(p)
-		return atype.Location{}, e
+		return nil, e
 	}
 
 	if loc.Latitude, ok = lat.(float64); !ok {
 		e = ae.NewBadParam(p)
-		return atype.Location{}, e
+		return nil, e
 	}
 	lng, ok := x["lng"]
 	if !ok {
 		e = ae.NewBadParam(p)
-		return atype.Location{}, e
+		return nil, e
 	}
 
 	if loc.Longitude, ok = lng.(float64); !ok {
 		e = ae.NewBadParam(p)
-		return atype.Location{}, e
+		return nil, e
 	}
 	if ht, ok := x["height"]; ok {
 		loc.Height, _ = ht.(float64)
@@ -154,7 +154,7 @@ func (r *Request) BodyLocation(p string, required ...bool) (atype.Location, *ae.
 	loc.Valid = true
 	loc.Name = atype.String(x["name"])
 	loc.Address = atype.String(x["address"])
-	return loc, nil
+	return &loc, nil
 }
 
 func (r *Request) BodyMoney(p string, ranges ...atype.Money) (atype.Money, *ae.Error) {
