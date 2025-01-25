@@ -20,10 +20,6 @@ const (
 	Emerg
 )
 
-const (
-	ErrorLevelKey = "aa_error_level"
-)
-
 var (
 	levelToName = map[ErrorLevel]string{
 		ErrAll: "",
@@ -71,8 +67,6 @@ type LogInterface interface {
 	// 添加前缀、后缀到输出
 	New(prefix string, f func(context.Context, string, ...any), suffix ...string) func(context.Context, string, ...any)
 
-	E(ctx context.Context, e *ae.Error, msg ...any)
-
 	// AuthDebug 包含详细的开发情报的信息，通常只在调试一个程序时使用
 	Debug(ctx context.Context, msg string, args ...any)
 
@@ -88,6 +82,8 @@ type LogInterface interface {
 	// Error 错误，不是非常紧急，在一定时间内修复即可。
 	Error(ctx context.Context, msg string, args ...any)
 
+	E(ctx context.Context, e *ae.Error, msg ...any)
+
 	// Fatal 重要情况，如硬盘错误，备用连接丢失
 	Fatal(ctx context.Context, msg string, args ...any)
 
@@ -97,13 +93,8 @@ type LogInterface interface {
 	// Emerg 紧急情况，需要立即通知技术人员。
 	Emerg(ctx context.Context, msg string, args ...any)
 
-	Println(ctx context.Context, msg ...any)
+	Print(ctx context.Context, msg string, args ...any)
 
 	// Trace 跟踪请求链路，或性能监控
 	Trace(ctx context.Context)
-}
-
-func errorlevel(ctx context.Context) ErrorLevel {
-	level, _ := ctx.Value(ErrorLevelKey).(ErrorLevel)
-	return level
 }

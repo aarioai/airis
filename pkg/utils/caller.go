@@ -14,8 +14,7 @@ func Caller(skip int) string {
 	if !ok {
 		return ""
 	}
-
-	// 处理文件路径
+	
 	parts := strings.Split(file, "/")
 	fileLen := len(parts)
 	var filePath string
@@ -24,6 +23,9 @@ func Caller(skip int) string {
 	case 1:
 		filePath = parts[0]
 	default:
+		if parts[fileLen-2] == "alog" {
+			return Caller(skip + 1)
+		}
 		filePath = strings.Join(parts[fileLen-2:], "/")
 	}
 

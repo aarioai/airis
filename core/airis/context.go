@@ -8,19 +8,17 @@ import (
 	"strings"
 )
 
-func GetTraceId(ictx iris.Context) string {
-	traceId := ictx.GetHeader("X-Request-Id")
-	if traceId != "" {
-		return traceId
-	}
-	return "NO_TRACE_ID"
-}
-
 // Context
 // 后面可以使用 ictx.Request().Context() 直接访问
 func Context(ictx iris.Context) context.Context {
-	traceId := GetTraceId(ictx)
-	remoteAddr := ictx.RemoteAddr()
+	// Nginx proxy_set_header X-Request-Id $request_id;
+	traceId := ictx.GetHeader("X-Request-Id")
+	// Nginx proxy_set_header X-Remote-Addr $remote_addr;
+	remoteAddr := ictx.GetHeader("X-Remote-Addr")
+	if remoteAddr == "" {
+		remoteAddr = ictx.RemoteAddr()
+	}
+
 	user := ictx.Values().GetString(CtxRemoteUser)
 	ctx := context.WithValue(ictx.Request().Context(), CtxTraceId, traceId)
 	ctx = context.WithValue(ctx, CtxRemoteAddr, remoteAddr)
