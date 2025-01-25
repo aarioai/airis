@@ -41,9 +41,7 @@ var (
 		"warn":     Warn,
 		"warning":  Warn,
 		"error":    Error,
-		"ERROR":    Error,
 		"fatal":    Fatal,
-		"FATAL":    Fatal,
 		"critical": Fatal,
 		"alert":    Alert,
 		"emerg":    Emerg,
@@ -51,16 +49,10 @@ var (
 )
 
 func NameToLevel(name string) ErrorLevel {
-	if level, ok := nameToLevel[strings.ToLower(name)]; ok {
-		return level
-	}
-	return ErrAll
+	return nameToLevel[strings.ToLower(name)] // 人为错误，直接panic即可
 }
 func (lvl ErrorLevel) Name() string {
-	if name, ok := levelToName[lvl]; ok {
-		return name
-	}
-	return ""
+	return levelToName[lvl]
 }
 
 type LogInterface interface {
