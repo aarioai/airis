@@ -5,6 +5,7 @@ import (
 	"github.com/aarioai/airis/core/airis"
 	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/aarioai/airis/pkg/types"
+	"github.com/aarioai/airis/pkg/utils"
 	"github.com/kataras/iris/v12"
 	"log"
 	"strings"
@@ -24,7 +25,7 @@ type Error struct {
 func New(code int, msgs ...any) *Error {
 	e := &Error{
 		Code:   code,
-		Caller: Caller(2),
+		Caller: utils.Caller(1),
 	}
 
 	if msg := afmt.SprintfArgs(msgs); msg != "" {
@@ -41,7 +42,7 @@ func NewE(format string, args ...any) *Error {
 	return &Error{
 		Code:   InternalServerError,
 		Msg:    afmt.Sprintf(format, args...),
-		Caller: Caller(2),
+		Caller: utils.Caller(1),
 	}
 }
 
@@ -50,7 +51,7 @@ func NewError(err error, details ...any) *Error {
 	if err == nil {
 		return nil
 	}
-	return NewE(err.Error()).WithCaller(2).WithDetail(details...)
+	return NewE(err.Error()).WithCaller(1).WithDetail(details...)
 }
 
 // Lock 锁定后不可再修改或复用，一般作为常量使用
@@ -91,7 +92,7 @@ func (e *Error) WithCaller(skip int) *Error {
 		log.Printf("[error] failed to change caller(%d) to a locked error\n", skip)
 		return e
 	}
-	e.Caller = Caller(skip + 1)
+	e.Caller = utils.Caller(skip)
 	return e
 }
 
@@ -116,18 +117,10 @@ func (e *Error) WithTraceInfo(ctx iris.Context) *Error {
 // Text 输出错误信息，最好不要使用 Error，避免跟 error 一致，导致人写的时候发生失误
 // $caller {$trace_info} code:$code $msg\n$detail
 func (e *Error) Text() string {
-	capacity := len(e.Caller) + len(e.TraceInfo) + len(e.Msg) + len(e.Detail) + 20
+	capacity := len(e.TraceInfo) + len(e.Msg) + len(e.Detail) + 10
 	var s strings.Builder
 	s.Grow(capacity)
-	if e.Caller != "" {
-		s.WriteString(e.Caller)
-		s.WriteByte(' ')
-	}
-	if e.TraceInfo != "" {
-		s.WriteByte('{')
-		s.WriteString(e.TraceInfo)
-		s.WriteString("} ")
-	}
+	s.WriteString(e.TraceInfo)
 	s.WriteString("code:")
 	s.WriteString(types.FormatInt(e.Code))
 	s.WriteByte(' ')

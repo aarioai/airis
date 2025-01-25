@@ -3,6 +3,7 @@ package ae
 import (
 	"fmt"
 	"github.com/aarioai/airis/pkg/afmt"
+	"github.com/aarioai/airis/pkg/utils"
 	"time"
 )
 
@@ -15,7 +16,7 @@ func FirstErr(errs ...error) error {
 
 func PanicWithCaller(callerSkip int, format string, args ...any) {
 	now := time.Now().Format("2006-01-02 15:04:05")
-	msg := now + " [panic] " + Caller(callerSkip) + " " + fmt.Sprintf(format, args...)
+	msg := now + " [panic] " + utils.Caller(callerSkip) + " " + fmt.Sprintf(format, args...)
 	fmt.Println(msg) // convenient for docker/local debugging
 	panic(msg)
 }

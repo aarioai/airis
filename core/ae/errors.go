@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"errors"
+	"github.com/aarioai/airis/pkg/utils"
 	"github.com/redis/go-redis/v9"
 	"regexp"
 )
@@ -38,15 +39,16 @@ func NewSQLError(err error, details ...any) *Error {
 	if err == nil {
 		return nil
 	}
-	msg, pos := CallerMsg(err.Error(), 1)
+	msg := err.Error()
+	caller := utils.Caller(1)
 
 	errorMapping := map[error]func() *Error{
-		driver.ErrBadConn:        func() *Error { return NewE(pos + sqlBadConnMsg + msg).WithDetail(details...) },
-		driver.ErrSkip:           func() *Error { return NewE(pos + sqlSkipMsg + msg).WithDetail(details...) },
-		driver.ErrRemoveArgument: func() *Error { return NewE(pos + sqlRemoveArgMsg + msg).WithDetail(details...) },
+		driver.ErrBadConn:        func() *Error { return NewE(caller + sqlBadConnMsg + msg).WithDetail(details...) },
+		driver.ErrSkip:           func() *Error { return NewE(caller + sqlSkipMsg + msg).WithDetail(details...) },
+		driver.ErrRemoveArgument: func() *Error { return NewE(caller + sqlRemoveArgMsg + msg).WithDetail(details...) },
 		sql.ErrNoRows:            func() *Error { return ErrorNotFound }, // can't WithDetail, locked
-		sql.ErrConnDone:          func() *Error { return NewE(pos + sqlConnDoneMsg + msg).WithDetail(details...) },
-		sql.ErrTxDone:            func() *Error { return NewE(pos + sqlTxDoneMsg + msg).WithDetail(details...) },
+		sql.ErrConnDone:          func() *Error { return NewE(caller + sqlConnDoneMsg + msg).WithDetail(details...) },
+		sql.ErrTxDone:            func() *Error { return NewE(caller + sqlTxDoneMsg + msg).WithDetail(details...) },
 	}
 
 	for errType, handler := range errorMapping {
@@ -60,7 +62,7 @@ func NewSQLError(err error, details ...any) *Error {
 		return NewConflict("sql key").WithDetail(details...)
 	}
 
-	return NewE(pos + sqlErrorMsg + msg).WithDetail(details...)
+	return NewE(caller + sqlErrorMsg + msg).WithDetail(details...)
 }
 
 // NewRedisError 处理 Redis 错误
@@ -73,6 +75,7 @@ func NewRedisError(err error, details ...any) *Error {
 	if errors.Is(err, redis.Nil) {
 		return New(NotFound, "redis key not found").WithDetail(details...)
 	}
-	msg, pos := CallerMsg(err.Error(), 1)
-	return New(InternalServerError, pos+" redis: "+msg).WithDetail(details...)
+	msg := err.Error()
+	caller := utils.Caller(1)
+	return New(InternalServerError, caller+" redis: "+msg).WithDetail(details...)
 }

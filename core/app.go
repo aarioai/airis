@@ -27,7 +27,7 @@ func (app *App) Check(ctx context.Context, es ...*ae.Error) bool {
 		return true
 	}
 	if e.IsServerError() || e.Detail != "" {
-		app.Log.Error(ctx, e.Text())
+		app.Log.E(ctx, e)
 	}
 	return false
 }

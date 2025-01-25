@@ -3,9 +3,9 @@ package airis
 import (
 	"context"
 	"fmt"
-	"github.com/aarioai/airis/pkg/utils"
 	"github.com/kataras/iris/v12"
 	"runtime"
+	"strings"
 )
 
 func GetTraceId(ictx iris.Context) string {
@@ -42,6 +42,19 @@ func TraceInfo(ctx context.Context) string {
 	traceId, _ := ctx.Value(CtxTraceId).(string)
 	remoteAddr, _ := ctx.Value(CtxRemoteAddr).(string)
 	user, _ := ctx.Value(CtxRemoteUser).(string)
-	localPublicIP, _ := utils.LocalPublicIP(nil, false)
-	return fmt.Sprintf("((%s %s %s %s))", traceId, remoteAddr, user, localPublicIP)
+	var s strings.Builder
+	s.Grow(len(traceId) + len(remoteAddr) + len(user))
+	if traceId != "" {
+		s.WriteString("[" + traceId + "] ")
+	}
+	if remoteAddr != "" {
+		s.WriteString("[" + remoteAddr + "] ")
+	}
+	if user != "" {
+		s.WriteString("[" + user + "] ")
+	}
+	if s.Len() == 0 {
+		return ""
+	}
+	return s.String()
 }
