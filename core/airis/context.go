@@ -45,16 +45,22 @@ func TraceInfo(ctx context.Context) string {
 	var s strings.Builder
 	s.Grow(len(traceId) + len(remoteAddr) + len(user))
 	if traceId != "" {
-		s.WriteString("[" + traceId + "] ")
+		s.WriteString("trace_id:" + traceId)
 	}
 	if remoteAddr != "" {
-		s.WriteString("[" + remoteAddr + "] ")
+		if s.Len() > 0 {
+			s.WriteString(", ")
+		}
+		s.WriteString(" remote_addr:")
 	}
 	if user != "" {
-		s.WriteString("[" + user + "] ")
+		if s.Len() > 0 {
+			s.WriteString(", ")
+		}
+		s.WriteString(" user:" + user)
 	}
 	if s.Len() == 0 {
 		return ""
 	}
-	return s.String()
+	return " {" + s.String() + "}"
 }
