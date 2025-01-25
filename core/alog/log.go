@@ -1,6 +1,9 @@
 package alog
 
-import "context"
+import (
+	"context"
+	"strings"
+)
 
 type ErrorLevel uint8
 
@@ -23,58 +26,35 @@ const (
 var (
 	levelToName = map[ErrorLevel]string{
 		ErrAll: "",
-		Debug:  "DEBUG",
-		Info:   "INFO",
-		Notice: "NOTICE",
-		Warn:   "WARN",
-		Error:  "ERROR",
-		Fatal:  "FATAL",
-		Alert:  "ALERT",
-		Emerg:  "EMERG",
+		Debug:  "debug",
+		Info:   "info",
+		Notice: "notice",
+		Warn:   "warn",
+		Error:  "error",
+		Fatal:  "fatal",
+		Alert:  "alert",
+		Emerg:  "emerg",
 	}
 	nameToLevel = map[string]ErrorLevel{
-		"":          ErrAll,
-		"all":       ErrAll,
-		"All":       ErrAll,
-		"ALL":       ErrAll,
-		"debug":     Debug,
-		"Debug":     Debug,
-		"DEBUG":     Debug,
-		"info":      Info,
-		"Info":      Info,
-		"INFO":      Info,
-		"notice":    Notice,
-		"Notice":    Notice,
-		"NOTICE":    Notice,
-		"warn":      Warn,
-		"Warn":      Warn,
-		"WARN":      Warn,
-		"warning":   Warn,
-		"Warning":   Warn,
-		"WARNING":   Warn,
-		"error":     Error,
-		"Error":     Error,
-		"ERROR":     Error,
-		"fatal":     Fatal,
-		"Fatal":     Fatal,
-		"FATAL":     Fatal,
-		"critical":  Fatal,
-		"Critical":  Fatal,
-		"CRITICAL":  Fatal,
-		"alert":     Alert,
-		"Alert":     Alert,
-		"ALERT":     Alert,
-		"emerg":     Emerg,
-		"Emerg":     Emerg,
-		"EMERG":     Emerg,
-		"emergency": Emerg,
-		"Emergency": Emerg,
-		"EMERGENCY": Emerg,
+		"":         ErrAll,
+		"all":      ErrAll,
+		"debug":    Debug,
+		"info":     Info,
+		"notice":   Notice,
+		"warn":     Warn,
+		"warning":  Warn,
+		"error":    Error,
+		"ERROR":    Error,
+		"fatal":    Fatal,
+		"FATAL":    Fatal,
+		"critical": Fatal,
+		"alert":    Alert,
+		"emerg":    Emerg,
 	}
 )
 
 func NameToLevel(name string) ErrorLevel {
-	if level, ok := nameToLevel[name]; ok {
+	if level, ok := nameToLevel[strings.ToLower(name)]; ok {
 		return level
 	}
 	return ErrAll

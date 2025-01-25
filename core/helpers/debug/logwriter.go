@@ -109,7 +109,7 @@ func RedirectLog(dir string, perm os.FileMode, bufSize int, symlink ...string) e
 	}
 	// 设置日志输出
 	log.SetOutput(lw)
-	log.SetFlags(log.Lshortfile | log.Ltime | log.Ldate | log.Lmicroseconds)
+	log.SetFlags(log.Ltime)
 	return nil
 }
 

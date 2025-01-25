@@ -25,18 +25,9 @@ func Caller(skip int) string {
 	// 跳过 Caller 自身
 	skip++
 
-	pc, file, line, ok := runtime.Caller(skip)
+	_, file, line, ok := runtime.Caller(skip)
 	if !ok {
 		return ""
-	}
-
-	// 获取函数名
-	funcName := runtime.FuncForPC(pc).Name()
-	if idx := strings.LastIndexByte(funcName, '.'); idx >= 0 {
-		funcName = funcName[idx+1:]
-	}
-	if funcName == "func1" {
-		funcName = ""
 	}
 
 	// 处理文件路径
@@ -61,15 +52,9 @@ func Caller(skip int) string {
 
 	// 构建调用位置信息
 	var builder strings.Builder
-	builder.WriteString("[")
 	builder.WriteString(filePath)
 	builder.WriteString(":")
 	builder.WriteString(types.FormatInt(line))
-	if funcName != "" {
-		builder.WriteString(" ")
-		builder.WriteString(funcName)
-	}
-	builder.WriteString("]")
 
 	return builder.String()
 }

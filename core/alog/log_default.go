@@ -29,13 +29,16 @@ func xlogHeader(ctx context.Context, caller string, level ErrorLevel) string {
 	traceInfo := airis.TraceInfo(ctx)
 	b := strings.Builder{}
 	b.Grow(15 + len(traceInfo))
+
+	if level != ErrAll {
+		b.WriteString(" [")
+		b.WriteString(level.Name())
+		b.WriteString("] ")
+	}
+	
 	b.WriteString(caller)
 	b.WriteString(traceInfo)
-	if level != ErrAll {
-		b.WriteByte(' ')
-		b.WriteString(level.Name()) // 使用 ERROR: ，而不是 [error]，可以减少 [] 的使用，方便日后丰富日志
-		b.WriteString(": ")
-	}
+
 	return b.String()
 }
 
