@@ -106,6 +106,12 @@ func (r *Request) parseInt64s(method func(string, ...any) (*RawValue, *ae.Error)
 	}
 	var v []int64
 	d := q.Raw()
+	if d == nil {
+		if required {
+			return nil, ae.NewBadParam(p)
+		}
+		return nil, nil
+	}
 	if _, ok := d.(string); ok {
 		return r.sepInt64s(method, p, ",", required, allowZero, bitSize)
 	}
@@ -141,6 +147,12 @@ func (r *Request) parseUint64s(method func(string, ...any) (*RawValue, *ae.Error
 	}
 	var v []uint64
 	d := q.Raw()
+	if d == nil {
+		if required {
+			return nil, ae.NewBadParam(p)
+		}
+		return nil, nil
+	}
 	if _, ok := d.(string); ok {
 		return r.separatedUint64s(method, p, ",", required, allowZero, bitSize)
 	}
@@ -177,6 +189,12 @@ func (r *Request) parseStrings(method func(string, ...any) (*RawValue, *ae.Error
 	defer q.Release()
 	var v []string
 	d := q.Raw()
+	if d == nil {
+		if required {
+			return nil, ae.NewBadParam(p)
+		}
+		return nil, nil
+	}
 	if _, ok := d.(string); ok {
 		return sepStrings(method, p, ",", required, allowEmptyString)
 	}
