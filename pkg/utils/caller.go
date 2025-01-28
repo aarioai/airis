@@ -14,7 +14,10 @@ func Caller(skip int) string {
 	if !ok {
 		return ""
 	}
-	
+	if strings.Contains(file, "airis") {
+		return Caller(skip + 1)
+	}
+
 	parts := strings.Split(file, "/")
 	fileLen := len(parts)
 	var filePath string
@@ -23,9 +26,6 @@ func Caller(skip int) string {
 	case 1:
 		filePath = parts[0]
 	default:
-		if parts[fileLen-2] == "alog" {
-			return Caller(skip + 1)
-		}
 		filePath = strings.Join(parts[fileLen-2:], "/")
 	}
 
