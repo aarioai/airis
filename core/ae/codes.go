@@ -104,6 +104,7 @@ func NewNotAcceptable(msg ...any) *Error {
 func NewProxyAuthRequired(msg ...any) *Error {
 	return New(ProxyAuthRequired).AppendMsg(msg...)
 }
+
 func NewConflict(name string) *Error {
 	return New(Conflict).AppendMsg(name)
 }
