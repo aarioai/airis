@@ -14,20 +14,16 @@ func Caller(skip int) string {
 	if !ok {
 		return ""
 	}
-	if strings.Contains(file, "/airis/") {
+
+	// maybe /airis@v1.0.0 or /airis/
+	if strings.Contains(file, "/airis") {
 		return Caller(skip + 1)
 	}
 
 	parts := strings.Split(file, "/")
 	fileLen := len(parts)
-	var filePath string
-	switch fileLen {
-	case 0:
-	case 1:
-		filePath = parts[0]
-	default:
-		filePath = strings.Join(parts[fileLen-2:], "/")
+	if len(parts) > 2 {
+		file = strings.Join(parts[fileLen-2:], "/")
 	}
-
-	return filePath + ":" + types.FormatInt(line)
+	return file + ":" + types.FormatInt(line)
 }
