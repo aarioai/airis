@@ -114,13 +114,17 @@ func (e *Error) WithTraceInfo(ctx iris.Context) *Error {
 	return e
 }
 
-// Text 输出错误信息，最好不要使用 Error，避免跟 error 一致，导致人写的时候发生失误
+// String 输出错误信息，最好不要使用 Error，避免跟 error 一致，导致人写的时候发生失误
 // $caller {$trace_info} code:$code $msg\n$detail
-func (e *Error) Text() string {
+func (e *Error) String() string {
 	capacity := len(e.TraceInfo) + len(e.Msg) + len(e.Detail) + 10
 	var s strings.Builder
 	s.Grow(capacity)
-	s.WriteString(e.TraceInfo)
+	if e.TraceInfo != "" {
+		s.WriteString(e.TraceInfo)
+		s.WriteByte(' ')
+	}
+
 	s.WriteString("code:")
 	s.WriteString(types.FormatInt(e.Code))
 	s.WriteByte(' ')
@@ -131,9 +135,12 @@ func (e *Error) Text() string {
 	}
 	return s.String()
 }
+func (e *Error) Text() string {
+	return e.Caller + " " + e.String()
+}
 
 func (e *Error) Trace(ctx iris.Context) string {
-	return e.WithTraceInfo(ctx).Text()
+	return e.WithTraceInfo(ctx).String()
 }
 
 func (e *Error) IsNotFound() bool {

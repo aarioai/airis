@@ -210,7 +210,7 @@ func (w *Writer) WriteJSONP(v any, opts ...iris.JSONP) error {
 	data, e := w.decorateData(v)
 	if e != nil {
 		w.StatusCode(ae.InternalServerError)
-		return errors.New("handle json data error: " + e.Text())
+		return errors.New("handle json data error: " + e.String())
 	}
 	return w.ictx.JSONP(data, opts...)
 }

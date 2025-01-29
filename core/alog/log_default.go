@@ -39,7 +39,7 @@ func format(ctx context.Context, level ErrorLevel, caller, msg string) string {
 		b.WriteString(level.Name())
 		b.WriteString("] ")
 	}
-
+	
 	b.WriteString(caller)
 	b.WriteByte(' ')
 	b.WriteString(msg)
@@ -87,7 +87,7 @@ func (l *xlog) Error(ctx context.Context, msg string, args ...any) {
 	l.print(ctx, Error, utils.Caller(1), msg, args...)
 }
 func (l *xlog) E(ctx context.Context, e *ae.Error, msg ...any) {
-	s := e.Text()
+	s := e.String()
 	if len(msg) > 0 {
 		s = fmt.Sprint(msg...)
 	}

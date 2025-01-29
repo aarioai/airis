@@ -14,7 +14,7 @@ func Caller(skip int) string {
 	if !ok {
 		return ""
 	}
-	if strings.Contains(file, "airis") {
+	if strings.Contains(file, "/airis/") {
 		return Caller(skip + 1)
 	}
 

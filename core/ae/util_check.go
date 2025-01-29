@@ -28,7 +28,7 @@ func Panic(format string, args ...any) {
 // PanicOn 如果存在服务器错误则触发 panic
 func PanicOn(es ...*Error) {
 	if e := First(es...); e != nil {
-		PanicWithCaller(2, e.Text())
+		PanicWithCaller(2, e.String())
 	}
 }
 

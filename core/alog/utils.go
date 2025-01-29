@@ -23,6 +23,6 @@ func PrintError(err error) {
 
 func PrintE(e *ae.Error) {
 	if e != nil {
-		Println(e.Text())
+		Println(e.String())
 	}
 }

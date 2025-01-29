@@ -11,7 +11,7 @@ import (
 
 func jsons(v any, e *ae.Error) string {
 	if e != nil {
-		fmt.Println(e.Text())
+		fmt.Println(e.String())
 		return ""
 	}
 	s, err := json.Marshal(v)
