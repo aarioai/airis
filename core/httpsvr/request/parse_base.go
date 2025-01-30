@@ -17,12 +17,6 @@ import (
 	"strings"
 )
 
-const (
-	maxMultiSize = 32 << 20 // 32M
-	maxInt64     = int64(1<<63 - 1)
-	maxFormSize  = 10 << 20 // 10 MB is a lot of json/form data.
-)
-
 type userDataInterface interface {
 	Get(key string) string
 }
@@ -47,6 +41,13 @@ func (v *RawValue) Release() error {
 	}
 	return nil
 }
+func errorOnEmpty(p string, required bool) *ae.Error {
+	if required {
+		return ae.NewBadParam(p)
+	}
+	return nil
+}
+
 func findDefaultValue(patterns []any) any {
 	// 处理默认值
 	for _, pat := range patterns {
@@ -274,19 +275,15 @@ func (r *Request) parseBodyStream() *ae.Error {
 
 // parseSimpleBody 解析简单请求体
 func (r *Request) parseSimpleBody() *ae.Error {
-	maxSize := maxInt64
-
 	var reader io.Reader = r.r.Body
-
 	if _, ok := reader.(*maxBytesReader); !ok {
-		maxSize = maxFormSize
-		reader = io.LimitReader(r.r.Body, maxSize+1)
+		reader = io.LimitReader(r.r.Body, r.maxFormSize+1)
 	}
 	b, err := io.ReadAll(reader)
 	if err != nil {
 		return ae.NewError(err)
 	}
-	if int64(len(b)) > maxSize {
+	if int64(len(b)) > r.maxFormSize {
 		return ae.ErrorRequestEntityTooLarge
 	}
 	switch r.ContentType() {
@@ -306,7 +303,9 @@ func (r *Request) parseFormBody(b []byte) *ae.Error {
 	if err != nil {
 		return ae.NewUnsupportedMedia("form data")
 	}
-	r.setPartialBodyData(values)
+	if len(values) > 0 {
+		r.setPartialBodyData(values)
+	}
 	return nil
 }
 
@@ -323,11 +322,16 @@ func (r *Request) parseMultipartBody(boundary string) *ae.Error {
 		return ae.NewPreconditionFailed("missing boundary")
 	}
 
-	form, err := multipart.NewReader(r.r.Body, boundary).ReadForm(maxMultiSize)
+	form, err := multipart.NewReader(r.r.Body, boundary).ReadForm(r.maxMultipartSize)
 	if err != nil {
 		return ae.NewUnsupportedMedia("multipart form")
 	}
-	r.setPartialBodyData(form.Value)
+	if len(form.Value) > 0 {
+		r.setPartialBodyData(form.Value)
+	}
+	if len(form.File) > 0 {
+		r.injectedFiles = form.File
+	}
 	return nil
 }
 

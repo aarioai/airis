@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/aarioai/airis/core/airis"
 	"github.com/kataras/iris/v12"
+	"mime/multipart"
 	"net/http"
 	"sync"
 )
@@ -11,17 +12,20 @@ import (
 // Request 每个请求独立request，因此几乎不存在并发问题，不用sync.Map
 // @extend type T interface{Release()error}
 type Request struct {
-	ictx        iris.Context
-	ctx         context.Context
-	r           *http.Request
-	contentType string
-	userAgent   string
-	bodyParsed  bool
+	ictx             iris.Context
+	ctx              context.Context
+	r                *http.Request
+	contentType      string
+	userAgent        string
+	bodyParsed       bool
+	maxMultipartSize int64
+	maxFormSize      int64
 
 	// 程序注入的参数，优先读取（相较于客户端传递的参数）
 	injectedHeaders map[string]any
 	injectedQueries map[string]any // 程序注入的参数，包括 path params, 以及 SetQueryData 设置的参数
 	injectedBodies  map[string]any
+	injectedFiles   map[string][]*multipart.FileHeader
 }
 
 var (
@@ -42,9 +46,12 @@ func New(ictx iris.Context) *Request {
 	req.contentType = ""
 	req.userAgent = ""
 	req.bodyParsed = false
+	req.maxMultipartSize = 10 << 20 // 32M
+	req.maxFormSize = 2 << 20       // 10 MB is a lot of json/form data.
 	req.injectedHeaders = nil
 	req.injectedQueries = nil
 	req.injectedBodies = nil
+	req.injectedFiles = nil
 
 	paramsLen := ictx.Params().Len()
 	if paramsLen > 0 {
@@ -55,6 +62,12 @@ func New(ictx iris.Context) *Request {
 		req.injectedQueries = params
 	}
 	return req
+}
+func (r *Request) SetMaxMultipartSize(size int64) {
+	r.maxMultipartSize = size
+}
+func (r *Request) SetMaxFormSize(size int64) {
+	r.maxFormSize = size
 }
 
 // InjectHeader 注入header

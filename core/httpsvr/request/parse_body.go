@@ -2,6 +2,7 @@ package request
 
 import (
 	"github.com/aarioai/airis/core/ae"
+	"mime/multipart"
 	"strings"
 )
 
@@ -64,6 +65,25 @@ func (r *Request) BodyEnum8i(p string, required bool, validators []int8) (int8, 
 		}
 	}
 	return x, ae.NewBadParam(p)
+}
+
+func (r *Request) Files(p string, required ...bool) ([]*multipart.FileHeader, *ae.Error) {
+	isRequiredBool := isRequired(required)
+	if len(r.injectedFiles) == 0 {
+		return nil, errorOnEmpty(p, isRequiredBool)
+	}
+	files, ok := r.injectedFiles[p]
+	if !ok || len(files) == 0 {
+		return nil, errorOnEmpty(p, isRequiredBool)
+	}
+	return files, nil
+}
+func (r *Request) File(p string, required ...bool) (*multipart.FileHeader, *ae.Error) {
+	files, err := r.Files(p, required...)
+	if err != nil {
+		return nil, err
+	}
+	return files[0], nil
 }
 
 func (r *Request) BodyInt(p string, required ...bool) (int, *ae.Error) {

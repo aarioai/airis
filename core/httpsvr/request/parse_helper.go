@@ -212,20 +212,20 @@ func (r *Request) parseStrings(method func(string, ...any) (*RawValue, *ae.Error
 	if _, ok := d.(string); ok {
 		return sepStrings(method, p, ",", required, allowEmptyString)
 	}
-	if d != nil {
-		switch reflect.TypeOf(d).Kind() {
-		case reflect.Slice: // 有可能是 [1,"2",3] 这种混合的数组
-			s := reflect.ValueOf(d)
-			v = make([]string, 0, s.Len())
-			for i := 0; i < s.Len(); i++ {
-				// 不能用 s.Index(i).String()，否则返回：<interface {} Value>
-				ts := atype.String(s.Index(i).Interface())
-				if allowEmptyString || (ts != "" && ts != "0") {
-					v = append(v, ts)
-				}
+
+	if reflect.TypeOf(d).Kind() == reflect.Slice {
+		// 有可能是 [1,"2",3] 这种混合的数组
+		s := reflect.ValueOf(d)
+		v = make([]string, 0, s.Len())
+		for i := 0; i < s.Len(); i++ {
+			// 不能用 s.Index(i).String()，否则返回：<interface {} Value>
+			ts := atype.String(s.Index(i).Interface())
+			if allowEmptyString || (ts != "" && ts != "0") {
+				v = append(v, ts)
 			}
 		}
 	}
+
 	if len(v) == 0 && required {
 		return nil, ae.NewBadParam(p)
 	}
