@@ -46,8 +46,8 @@ func New(ictx iris.Context) *Request {
 	req.contentType = ""
 	req.userAgent = ""
 	req.bodyParsed = false
-	req.maxMultipartSize = 10 << 20 // 32M
-	req.maxFormSize = 2 << 20       // 10 MB is a lot of json/form data.
+	req.maxMultipartSize = 5 << 20 // 5M equals to 500KB * 9 images
+	req.maxFormSize = 1 << 20      // 10 MB is a lot of json/form data.
 	req.injectedHeaders = nil
 	req.injectedQueries = nil
 	req.injectedBodies = nil
