@@ -59,7 +59,7 @@ func findDefaultValue(patterns []any) any {
 	}
 	return nil
 }
-func parseValidationRules(patterns []any) (bool, *regexp.Regexp, error) {
+func parseValidationRules(name string, patterns []any) (bool, *regexp.Regexp, error) {
 	required := true // 默认为true
 	var re *regexp.Regexp
 	// 解析验证规则
@@ -69,7 +69,7 @@ func parseValidationRules(patterns []any) (bool, *regexp.Regexp, error) {
 			if p != "" && re == nil {
 				var err error
 				if re, err = regexp.Compile(p); err != nil {
-					return false, nil, fmt.Errorf("invalid request pattern `%s`", p)
+					return false, nil, fmt.Errorf("bad parameter `%s`: invalid request string pattern `%s`", name, p)
 				}
 			}
 		case bool:
@@ -79,14 +79,14 @@ func parseValidationRules(patterns []any) (bool, *regexp.Regexp, error) {
 		case *atype.Atype:
 		case atype.Atype:
 		default:
-			return false, nil, fmt.Errorf("invalid request pattern `%s`", p)
+			return false, nil, fmt.Errorf("bad parameter `%s`: invalid request pattern `%s`", name, p)
 		}
 	}
 	return required, re, nil
 }
-func (v *RawValue) ReleaseValidate(patterns ...any) *ae.Error {
+func (v *RawValue) ReleaseValidate(patterns []any) *ae.Error {
 	defer v.Release()
-	return v.Validate(patterns...)
+	return v.Validate(patterns)
 }
 
 // Validate 验证并过滤值
@@ -95,14 +95,14 @@ func (v *RawValue) ReleaseValidate(patterns ...any) *ae.Error {
 // Filter(required bool)
 // Filter(pattern string)
 // Filter(default atype.Atype)
-func (v *RawValue) Validate(patterns ...any) *ae.Error {
+func (v *RawValue) Validate(patterns []any) *ae.Error {
 
 	if v.IsEmpty() {
 		if defaultVal := findDefaultValue(patterns); defaultVal != nil {
 			v.Reload(defaultVal)
 		}
 	}
-	required, re, err := parseValidationRules(patterns)
+	required, re, err := parseValidationRules(v.name, patterns)
 	if err != nil {
 		return ae.NewVariantAlsoNegotiates(err.Error())
 	}
@@ -165,7 +165,7 @@ func (r *Request) findStringFast(programData map[string]any, userData userDataIn
 func (r *Request) find(programData map[string]any, userData userDataInterface, name string, patterns ...any) (*RawValue, *ae.Error) {
 	v := r.findAny(programData, userData, name)
 	raw := newRawValue(name, v)
-	e := raw.Validate(patterns...)
+	e := raw.Validate(patterns)
 	if e != nil {
 		raw.Release()
 		return nil, e
@@ -370,7 +370,7 @@ func (r *Request) Body(name string, patterns ...any) (*RawValue, *ae.Error) {
 			raw.Reload(v)
 		}
 	}
-	return raw, raw.Validate(patterns...)
+	return raw, raw.Validate(patterns)
 }
 func (r *Request) Cookie(name string) (*http.Cookie, error) {
 	return r.r.Cookie(name)
@@ -444,7 +444,7 @@ func (r *Request) HeaderWild(name string, patterns ...any) (*RawValue, *ae.Error
 		value.Release()
 	}
 	if strings.HasPrefix(key, "X-") {
-		return nil, validateEmpty(name, patterns...)
+		return nil, validateEmpty(name, patterns)
 	}
 	// 3. X-前缀格式
 	return r.Header("X-"+key, patterns...)
@@ -531,7 +531,7 @@ func (r *Request) QueryWild(name string, patterns ...any) (*RawValue, *ae.Error)
 	if v == nil {
 		v = newRawValue(name, "")
 	}
-	e = v.Validate(patterns...) // 空值也需要判断是否符合pattern，如 required=false
+	e = v.Validate(patterns) // 空值也需要判断是否符合pattern，如 required=false
 	if e != nil {
 		v.Release()
 		return nil, e
@@ -564,15 +564,15 @@ func (r *Request) QueryWildString(name string, patterns ...any) (string, *ae.Err
 
 	// 3. Cookie
 	if cookie, err := r.Cookie(name); err == nil {
-		return cookie.Value, newRawValue(cookie.Name, cookie.Value).ReleaseValidate(patterns...)
+		return cookie.Value, newRawValue(cookie.Name, cookie.Value).ReleaseValidate(patterns)
 	}
 	if guessName != name {
 		if cookie, err := r.Cookie(guessName); err == nil {
-			return cookie.Value, newRawValue(cookie.Name, cookie.Value).ReleaseValidate(patterns...)
+			return cookie.Value, newRawValue(cookie.Name, cookie.Value).ReleaseValidate(patterns)
 		}
 	}
 	// 返回空值
-	return v, newRawValue(name, v).ReleaseValidate(patterns...)
+	return v, newRawValue(name, v).ReleaseValidate(patterns)
 }
 
 // QueryWildFast 更高效地快速查询字符串
@@ -643,6 +643,6 @@ func onlyRequired(patterns []any) (only bool, required bool) {
 	}
 	return false, false
 }
-func validateEmpty(name string, patterns ...any) *ae.Error {
-	return newRawValue(name, "").ReleaseValidate(patterns...)
+func validateEmpty(name string, patterns []any) *ae.Error {
+	return newRawValue(name, "").ReleaseValidate(patterns)
 }
