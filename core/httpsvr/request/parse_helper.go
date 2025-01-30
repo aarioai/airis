@@ -73,7 +73,14 @@ func parseInt64(method func(string, ...any) (*RawValue, *ae.Error), p string, re
 	if e != nil {
 		return 0, e
 	}
-	v, err := types.ParseInt64(value.String(), bitSize)
+	s := value.String()
+	if s == "" {
+		if required {
+			return 0, ae.NewBadParam(p)
+		}
+		return 0, nil
+	}
+	v, err := types.ParseInt64(s, bitSize)
 	if err != nil {
 		return 0, ae.NewBadParam(p)
 	}
@@ -93,7 +100,14 @@ func parseUint64(method func(string, ...any) (*RawValue, *ae.Error), p string, r
 	if e != nil {
 		return 0, e
 	}
-	v, err := types.ParseUint64(value.String())
+	s := value.String()
+	if s == "" {
+		if required {
+			return 0, ae.NewBadParam(p)
+		}
+		return 0, nil
+	}
+	v, err := types.ParseUint64(s)
 	if err != nil {
 		return 0, ae.NewBadParam(p)
 	}
