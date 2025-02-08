@@ -11,7 +11,7 @@ import (
 func First(es ...*Error) *Error {
 	return afmt.First(es)
 }
-func FirstErr(errs ...error) error {
+func FirstError(errs ...error) error {
 	return afmt.First(errs)
 }
 func IsNotFound(err error) bool {
@@ -38,7 +38,7 @@ func PanicOn(es ...*Error) {
 
 // PanicOnErrors 断言检查标准错误，如果存在错误则触发 panic
 func PanicOnErrs(errs ...error) {
-	if e := FirstErr(errs...); e != nil {
+	if e := FirstError(errs...); e != nil {
 		PanicWithCaller(2, e.Error())
 	}
 }

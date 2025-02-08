@@ -339,7 +339,7 @@ func ParseYear(year string) (Year, error) {
 func ParseYearMonth(year, month string) (YearMonth, error) {
 	y, err1 := types.ParseUint16(year)
 	m, err2 := types.ParseUint8(month)
-	if err := ae.FirstErr(err1, err2); err != nil {
+	if err := ae.FirstError(err1, err2); err != nil {
 		return 0, err
 	}
 	return YearMonth(uint32(y)*100 + uint32(m)), nil
@@ -370,7 +370,7 @@ func ParseYMD(year, month, day string) (YMD, error) {
 	y, err1 := types.ParseUint16(year)
 	m, err2 := types.ParseUint8(month)
 	d, err3 := types.ParseUint8(day)
-	if err := ae.FirstErr(err1, err2, err3); err != nil {
+	if err := ae.FirstError(err1, err2, err3); err != nil {
 		return 0, err
 	}
 	return YMD(uint(y)*10000 + uint(m)*100 + uint(d)), nil
