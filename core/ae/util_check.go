@@ -1,6 +1,7 @@
 package ae
 
 import (
+	"errors"
 	"fmt"
 	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/aarioai/airis/pkg/utils"
@@ -12,6 +13,9 @@ func First(es ...*Error) *Error {
 }
 func FirstErr(errs ...error) error {
 	return afmt.First(errs)
+}
+func IsNotFound(err error) bool {
+	return errors.Is(err, ErrNotFound)
 }
 
 func PanicWithCaller(callerSkip int, format string, args ...any) {

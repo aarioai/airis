@@ -7,6 +7,13 @@ import (
 )
 
 func (r *Request) Files(p string, required ...bool) ([]*multipart.FileHeader, *ae.Error) {
+	if !r.bodyParsed {
+		e := r.parseBodyStream()
+		if e != nil {
+			return nil, e
+		}
+	}
+
 	isRequiredBool := isRequired(required)
 	if len(r.injectedFiles) == 0 {
 		return nil, errorOnEmpty(p, isRequiredBool)
