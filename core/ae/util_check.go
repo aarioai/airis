@@ -37,12 +37,12 @@ func PanicOn(es ...*Error) {
 }
 
 // PanicOnErrors 断言检查标准错误，如果存在错误则触发 panic
-func PanicOnErrs(errs ...error) {
+func PanicOnErrors(errs ...error) {
 	if e := FirstError(errs...); e != nil {
 		PanicWithCaller(2, e.Error())
 	}
 }
-func StopOnFirstError(callables ...func() *Error) *Error {
+func StopOnFirstE(callables ...func() *Error) *Error {
 	for _, callable := range callables {
 		if err := callable(); err != nil {
 			return err
@@ -50,7 +50,7 @@ func StopOnFirstError(callables ...func() *Error) *Error {
 	}
 	return nil
 }
-func StopOnFirstErr(callables ...func() error) error {
+func StopOnFirstError(callables ...func() error) error {
 	for _, callable := range callables {
 		if err := callable(); err != nil {
 			return err
