@@ -1,10 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
-
-readonly CUR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CUR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly CUR
 # aarioai/airis
-readonly ROOT_DIR="$(cd "${CUR}/.." && pwd)"
+ROOT_DIR="$(cd "${CUR}/.." && pwd)"
+readonly ROOT_DIR
 readonly MOD_UPDATE_FILE="${ROOT_DIR}/.modupdate"
 
 declare comment

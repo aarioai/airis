@@ -1,0 +1,44 @@
+package demo
+
+import (
+	"driver/index"
+	"github.com/aarioai/airis/core/atype"
+)
+
+type BsonDemo struct {
+	Id            uint64         `bson:"id"`
+	Content       atype.Text     `bson:"text"`
+	Image         atype.Image    `bson:"image"`
+	Images        atype.Images   `bson:"images"`
+	Audio         atype.Audio    `bson:"audio"`
+	Audios        atype.Audios   `bson:"audio"`
+	Video         atype.Video    `bson:"video"`
+	Videos        atype.Videos   `bson:"video"`
+	Position      atype.Position `bson:"pos" options:"no_update"`
+	EffectiveDate atype.Date     `bson:"effective_date" options:"no_update"`
+	CreatedAt     atype.Datetime `bson:"created_at"`
+	UpdatedAt     atype.Datetime `bson:"updated_at"`
+}
+
+func (t BsonDemo) Table() string {
+	return "law"
+}
+
+func (t BsonDemo) Indexes() index.Indexes {
+	return index.Indexes{
+		"PRIMARY":   index.Primary("id"),
+		"k_image":   index.Index("image"),
+		"s_pos":     index.Spatial2D("pos"),
+		"f_content": index.FullText("content"),
+	}
+}
+
+// same as above
+func (t SqlDemo) Indexes() index.Indexes {
+	return index.NewIndexes(
+		index.Primary("id"),
+		index.Index("image"),
+		index.Spatial2D("pos"),
+		index.FullText("content"),
+	)
+}
