@@ -15,8 +15,8 @@ type Model struct {
 }
 
 var (
-	modelOnce sync.Once
-	modelObj  *Model
+	modelOnce          sync.Once
+	modelObj           *Model
 )
 
 func New(app *core.App) *Model {
@@ -25,6 +25,9 @@ func New(app *core.App) *Model {
 	})
 	return modelObj
 }
+
 func (m *Model) db() *sqlhelper.DB {
 	return sqlhelper.AliveDriver(driver.NewMysql(m.app, conf.MysqlConfigSection))
 }
+
+

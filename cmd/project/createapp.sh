@@ -12,13 +12,13 @@ readonly PROJECT_NAME
 PROJECT_BASE="project/${PROJECT_NAME}"
 readonly PROJECT_BASE
 readonly GLOBAL_DIRS=(
-    app/router          \
-    boot                \
-    config              \
-    deploy/asset_src    \
-    deploy/view_src     \
-    repair              \
-    sdk                 \
+    app/router/middleware   \
+    boot                    \
+    config                  \
+    deploy/asset_src        \
+    deploy/view_src         \
+    repair                  \
+    sdk                     \
     tests
 )
 readonly APP_GLOBAL_DIRS=(
@@ -26,6 +26,7 @@ readonly APP_GLOBAL_DIRS=(
     cache               \
     conf                \
     entity              \
+    entity/bson         \
     entity/po           \
     enum                \
     job/queue           \
@@ -63,6 +64,13 @@ createDirs(){
     done
 }
 
+createMiddlewareFile(){
+    local demo="${CUR}/demo/middleware.go.demo"
+    local dst="${ROOT_DIR}/app/router/middleware/middleware.go"
+    [ ! -f "$dst" ] || return 0
+    cp "$demo" "$dst"
+}
+
 createBaseConfFile(){
     local app_root="$1"
     local app_name="$2"
@@ -90,7 +98,7 @@ createModuleServiceFile(){
     local template="${CUR}/project_template/module_service.go.tpl"
     local dst="${module_dir}/service.go"
     [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_BASE}}#${app_base}#g"  -e "s#{{MODULE_NAME}}#${module}#g" "$template" > "$dst"
+    sed -e "s#{{APP_BASE}}#${app_base}#g" -e "s#{{MODULE_NAME}}#${module}#g" "$template" > "$dst"
 }
 
 createModuleModelFile(){
@@ -100,7 +108,7 @@ createModuleModelFile(){
     local template="${CUR}/project_template/model.go.tpl"
     local dst="${model_dir}/model.go"
     [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_BASE}}#${app_base}#g"  -e "s#{{DRIVER_BASE}}#${driver_base}#g" "$template" > "$dst"
+    sed -e "s#{{APP_BASE}}#${app_base}#g" -e "s#{{DRIVER_BASE}}#${driver_base}#g" "$template" > "$dst"
 }
 createModuleControllerFile(){
     local app_base="$1"
@@ -138,11 +146,13 @@ createModules(){
 
 createBaseServiceFile(){
     local dir="$1"
+    local app_base="$2"
+    local driver_base="$3"
     local pkg=${dir##*/}
     local template="${CUR}/project_template/base_service.go.tpl"
     local dst="${dir}/service.go"
     [ ! -f "$dst" ] || return 0
-    sed -e "s#{{PACKAGE_NAME}}#${pkg}#g" "$template" > "$dst"
+    sed -e "s#{{PACKAGE_NAME}}#${pkg}#g" -e "s#{{APP_BASE}}#${app_base}#g" -e "s#{{DRIVER_BASE}}#${driver_base}#g" "$template" > "$dst"
 }
 
 
@@ -150,10 +160,11 @@ createBaseServiceFile(){
 createServiceFile(){
     local app_root="$1"
     local app_base="$2"
+    local driver_base="$3"
     local template="${CUR}/project_template/service.go.tpl"
     local dst="${app_root}/service/service.go"
     [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
+    sed -e "s#{{APP_BASE}}#${app_base}#g" -e "s#{{DRIVER_BASE}}#${driver_base}#g" "$template" > "$dst"
 }
 
 goModTidy(){
@@ -177,11 +188,12 @@ main(){
     createDirs "$app_root" "${APP_GLOBAL_DIRS[@]}"
 
     createMainGo
+    createMiddlewareFile
     createBaseConfFile "$app_root" "$app_name"
     createCacheFile "$app_root" "$app_base" "$driver_base"
     createModules "$app_root" "$app_base" "$driver_base" "$@"
-    createBaseServiceFile "${app_root}/private"
-    createServiceFile "$app_root" "$app_base"
+    createBaseServiceFile "${app_root}/private" "$app_base" "$driver_base"
+    createServiceFile "$app_root" "$app_base" "$driver_base"
 
     goModTidy
 }
