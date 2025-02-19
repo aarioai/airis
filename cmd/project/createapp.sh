@@ -45,6 +45,14 @@ readonly MODULE_DIRS=(
     dto
     model
 )
+
+createMainGo(){
+    local demo="${CUR}/demo/main.go.demo"
+    local dst="${ROOT_DIR}/main.go"
+    [ ! -f "$dst" ] || return 0
+    cp "$demo" "$dst"
+}
+
 createDirs(){
     local base="$1"
     shift
@@ -151,7 +159,7 @@ createServiceFile(){
 goModTidy(){
     cdOrPanic "$ROOT_DIR"
     if [ ! -f "go.mod" ]; then
-        go mod init "project/$PROJECT_NAME"
+        go mod init "project/${PROJECT_NAME}"
     fi
     go mod tidy
 }
@@ -168,6 +176,7 @@ main(){
     mkdir -p "$app_root"
     createDirs "$app_root" "${APP_GLOBAL_DIRS[@]}"
 
+    createMainGo
     createBaseConfFile "$app_root" "$app_name"
     createCacheFile "$app_root" "$app_base" "$driver_base"
     createModules "$app_root" "$app_base" "$driver_base" "$@"
