@@ -37,7 +37,7 @@ func (r *Request) BodyBool(p string) (bool, *ae.Error) {
 	if e != nil {
 		return false, e
 	}
-	defer x.Release()
+	defer x.Close()
 	return x.DefaultBool(false), e
 }
 func (r *Request) BodyBytes(p string) ([]byte, *ae.Error) {

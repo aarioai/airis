@@ -1,6 +1,5 @@
 #!/bin/bash
 set -euo pipefail
-projectproject
 
 CUR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly CUR

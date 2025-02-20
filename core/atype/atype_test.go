@@ -7,7 +7,7 @@ import (
 
 func TestAtype(t *testing.T) {
 	zero := atype.New()
-	defer zero.Release()
+	defer zero.Close()
 	if zero.String() != "" {
 		t.Errorf("String() should return empty string")
 	}
@@ -33,7 +33,7 @@ func TestAtypeGet(t *testing.T) {
 	}
 
 	d := atype.New(arr)
-	defer d.Release()
+	defer d.Close()
 	v, err := d.Get("name")
 	if err != nil {
 		t.Error("get name failed")

@@ -7,7 +7,7 @@ import (
 )
 
 // Atype 提供类型安全和高效的类型转换
-// @extend type T interface{Release()error}
+// @extend type T interface{Close()error}
 type Atype struct {
 	raw any
 }
@@ -38,7 +38,7 @@ func New(data ...any) *Atype {
 
 // Release 释放实例到对象池
 // 即使这个atype 不是从对象池中获取的，也会放入对象池。不影响使用。
-func (p *Atype) Release() error {
+func (p *Atype) Close() error {
 	p.raw = nil
 	atypePool.Put(p)
 	return nil
@@ -68,21 +68,21 @@ func (p *Atype) String() string {
 	return String(p.raw)
 }
 func (p *Atype) ReleaseString() string {
-	defer p.Release()
+	defer p.Close()
 	return String(p.raw)
 }
 func (p *Atype) Bytes() []byte {
 	return Bytes(p.raw)
 }
 func (p *Atype) ReleaseBytes() []byte {
-	defer p.Release()
+	defer p.Close()
 	return Bytes(p.raw)
 }
 func (p *Atype) Bool() (bool, error) {
 	return Bool(p.raw)
 }
 func (p *Atype) ReleaseBool() (bool, error) {
-	defer p.Release()
+	defer p.Close()
 	return Bool(p.raw)
 }
 
@@ -90,7 +90,7 @@ func (p *Atype) NullString() sql.NullString {
 	return sql.NullString{String: p.String(), Valid: p.NotEmpty()}
 }
 func (p *Atype) ReleaseNullString() sql.NullString {
-	defer p.Release()
+	defer p.Close()
 	return p.NullString()
 }
 func (p *Atype) NullInt64() sql.NullInt64 {
@@ -98,7 +98,7 @@ func (p *Atype) NullInt64() sql.NullInt64 {
 	return sql.NullInt64{Int64: v, Valid: p.NotEmpty()}
 }
 func (p *Atype) ReleaseNullInt64() sql.NullInt64 {
-	defer p.Release()
+	defer p.Close()
 	return p.NullInt64()
 }
 func (p *Atype) SqlFloat64() sql.NullFloat64 {
@@ -106,7 +106,7 @@ func (p *Atype) SqlFloat64() sql.NullFloat64 {
 	return sql.NullFloat64{Float64: v, Valid: p.NotEmpty()}
 }
 func (p *Atype) ReleaseNullFloat64() sql.NullFloat64 {
-	defer p.Release()
+	defer p.Close()
 	return p.SqlFloat64()
 }
 func (p *Atype) IsEmpty() bool {
@@ -126,7 +126,7 @@ func (p *Atype) DefaultBool(defaultValue bool) bool {
 	return v
 }
 func (p *Atype) ReleaseDefaultBool(defaultValue bool) bool {
-	defer p.Release()
+	defer p.Close()
 	return p.DefaultBool(defaultValue)
 }
 func (p *Atype) DefaultString(defaultValue string) string {
@@ -137,7 +137,7 @@ func (p *Atype) DefaultString(defaultValue string) string {
 	return v
 }
 func (p *Atype) ReleaseDefaultString(defaultValue string) string {
-	defer p.Release()
+	defer p.Close()
 	return p.DefaultString(defaultValue)
 }
 func (p *Atype) DefaultBytes(defaultValue []byte) []byte {
@@ -148,7 +148,7 @@ func (p *Atype) DefaultBytes(defaultValue []byte) []byte {
 	return v
 }
 func (p *Atype) ReleaseDefaultBytes(defaultValue []byte) []byte {
-	defer p.Release()
+	defer p.Close()
 	return p.DefaultBytes(defaultValue)
 }
 
@@ -156,7 +156,7 @@ func (p *Atype) Int8() (int8, error) {
 	return Int8(p.raw)
 }
 func (p *Atype) ReleaseInt8() (int8, error) {
-	defer p.Release()
+	defer p.Close()
 	return p.Int8()
 }
 func (p *Atype) DefaultInt8(defaultValue int8) int8 {
@@ -171,7 +171,7 @@ func (p *Atype) Int16() (int16, error) {
 	return Int16(p.raw)
 }
 func (p *Atype) ReleaseInt16() (int16, error) {
-	defer p.Release()
+	defer p.Close()
 	return p.Int16()
 }
 func (p *Atype) DefaultInt16(defaultValue int16) int16 {
@@ -182,7 +182,7 @@ func (p *Atype) DefaultInt16(defaultValue int16) int16 {
 	return v
 }
 func (p *Atype) ReleaseDefaultInt16(defaultValue int16) int16 {
-	defer p.Release()
+	defer p.Close()
 	return p.DefaultInt16(defaultValue)
 }
 
@@ -190,7 +190,7 @@ func (p *Atype) Int32() (int32, error) {
 	return Int32(p.raw)
 }
 func (p *Atype) ReleaseInt32() (int32, error) {
-	defer p.Release()
+	defer p.Close()
 	return p.Int32()
 }
 func (p *Atype) DefaultInt32(defaultValue int32) int32 {
@@ -201,7 +201,7 @@ func (p *Atype) DefaultInt32(defaultValue int32) int32 {
 	return v
 }
 func (p *Atype) ReleaseDefaultInt32(defaultValue int32) int32 {
-	defer p.Release()
+	defer p.Close()
 	return p.DefaultInt32(defaultValue)
 }
 
@@ -209,7 +209,7 @@ func (p *Atype) Int() (int, error) {
 	return Int(p.raw)
 }
 func (p *Atype) ReleaseInt() (int, error) {
-	defer p.Release()
+	defer p.Close()
 	return p.Int()
 }
 func (p *Atype) DefaultInt(defaultValue int) int {
@@ -220,7 +220,7 @@ func (p *Atype) DefaultInt(defaultValue int) int {
 	return v
 }
 func (p *Atype) ReleaseDefaultInt(defaultValue int) int {
-	defer p.Release()
+	defer p.Close()
 	return p.DefaultInt(defaultValue)
 }
 
@@ -228,7 +228,7 @@ func (p *Atype) Int64() (int64, error) {
 	return Int64(p.raw)
 }
 func (p *Atype) ReleaseInt64() (int64, error) {
-	defer p.Release()
+	defer p.Close()
 	return p.Int64()
 }
 func (p *Atype) DefaultInt64(defaultValue int64) int64 {
@@ -239,7 +239,7 @@ func (p *Atype) DefaultInt64(defaultValue int64) int64 {
 	return v
 }
 func (p *Atype) ReleaseDefaultInt64(defaultValue int64) int64 {
-	defer p.Release()
+	defer p.Close()
 	return p.DefaultInt64(defaultValue)
 }
 
@@ -247,7 +247,7 @@ func (p *Atype) Uint8() (uint8, error) {
 	return Uint8(p.raw)
 }
 func (p *Atype) ReleaseUint8() (uint8, error) {
-	defer p.Release()
+	defer p.Close()
 	return p.Uint8()
 }
 func (p *Atype) DefaultUint8(defaultValue uint8) uint8 {
@@ -258,7 +258,7 @@ func (p *Atype) DefaultUint8(defaultValue uint8) uint8 {
 	return v
 }
 func (p *Atype) ReleaseDefaultUint8(defaultValue uint8) uint8 {
-	defer p.Release()
+	defer p.Close()
 	return p.DefaultUint8(defaultValue)
 }
 
@@ -266,7 +266,7 @@ func (p *Atype) Uint16() (uint16, error) {
 	return Uint16(p.raw)
 }
 func (p *Atype) ReleaseUint16() (uint16, error) {
-	defer p.Release()
+	defer p.Close()
 	return p.Uint16()
 }
 
@@ -278,7 +278,7 @@ func (p *Atype) DefaultUint16(defaultValue uint16) uint16 {
 	return v
 }
 func (p *Atype) ReleaseDefaultUint16(defaultValue uint16) uint16 {
-	defer p.Release()
+	defer p.Close()
 	return p.DefaultUint16(defaultValue)
 }
 
@@ -286,7 +286,7 @@ func (p *Atype) Uint24() (Uint24, error) {
 	return Uint24b(p.raw)
 }
 func (p *Atype) ReleaseUint24() (Uint24, error) {
-	defer p.Release()
+	defer p.Close()
 	return p.Uint24()
 }
 func (p *Atype) DefaultUint24(defaultValue Uint24) Uint24 {
@@ -297,7 +297,7 @@ func (p *Atype) DefaultUint24(defaultValue Uint24) Uint24 {
 	return v
 }
 func (p *Atype) ReleaseDefaultUint24(defaultValue Uint24) Uint24 {
-	defer p.Release()
+	defer p.Close()
 	return p.DefaultUint24(defaultValue)
 }
 
@@ -305,7 +305,7 @@ func (p *Atype) Uint32() (uint32, error) {
 	return Uint32(p.raw)
 }
 func (p *Atype) ReleaseUint32() (uint32, error) {
-	defer p.Release()
+	defer p.Close()
 	return p.Uint32()
 }
 func (p *Atype) DefaultUint32(defaultValue uint32) uint32 {
@@ -316,7 +316,7 @@ func (p *Atype) DefaultUint32(defaultValue uint32) uint32 {
 	return v
 }
 func (p *Atype) ReleaseDefaultUint32(defaultValue uint32) uint32 {
-	defer p.Release()
+	defer p.Close()
 	return p.DefaultUint32(defaultValue)
 }
 
@@ -324,7 +324,7 @@ func (p *Atype) Uint() (uint, error) {
 	return Uint(p.raw)
 }
 func (p *Atype) ReleaseUint() (uint, error) {
-	defer p.Release()
+	defer p.Close()
 	return p.Uint()
 }
 func (p *Atype) DefaultUint(defaultValue uint) uint {
@@ -335,7 +335,7 @@ func (p *Atype) DefaultUint(defaultValue uint) uint {
 	return v
 }
 func (p *Atype) ReleaseDefaultUint(defaultValue uint) uint {
-	defer p.Release()
+	defer p.Close()
 	return p.DefaultUint(defaultValue)
 }
 
@@ -344,7 +344,7 @@ func (p *Atype) Uint64() (uint64, error) {
 }
 
 func (p *Atype) ReleaseUint64() (uint64, error) {
-	defer p.Release()
+	defer p.Close()
 	return p.Uint64()
 }
 
@@ -356,7 +356,7 @@ func (p *Atype) DefaultUint64(defaultValue uint64) uint64 {
 	return v
 }
 func (p *Atype) ReleaseDefaultUint64(defaultValue uint64) uint64 {
-	defer p.Release()
+	defer p.Close()
 	return p.DefaultUint64(defaultValue)
 }
 
@@ -364,7 +364,7 @@ func (p *Atype) Float32() (float32, error) {
 	return Float32(p.raw)
 }
 func (p *Atype) ReleaseFloat32() (float32, error) {
-	defer p.Release()
+	defer p.Close()
 	return p.Float32()
 }
 func (p *Atype) DefaultFloat32(defaultValue float32) float32 {
@@ -375,7 +375,7 @@ func (p *Atype) DefaultFloat32(defaultValue float32) float32 {
 	return v
 }
 func (p *Atype) ReleaseDefaultFloat32(defaultValue float32) float32 {
-	defer p.Release()
+	defer p.Close()
 	return p.DefaultFloat32(defaultValue)
 }
 
@@ -383,7 +383,7 @@ func (p *Atype) Float64() (float64, error) {
 	return Float64(p.raw, 64)
 }
 func (p *Atype) ReleaseFloat64() (float64, error) {
-	defer p.Release()
+	defer p.Close()
 	return p.Float64()
 }
 func (p *Atype) DefaultFloat64(defaultValue float64) float64 {
@@ -394,6 +394,6 @@ func (p *Atype) DefaultFloat64(defaultValue float64) float64 {
 	return v
 }
 func (p *Atype) ReleaseDefaultFloat64(defaultValue float64) float64 {
-	defer p.Release()
+	defer p.Close()
 	return p.DefaultFloat64(defaultValue)
 }

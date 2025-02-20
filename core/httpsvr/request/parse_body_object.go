@@ -11,7 +11,7 @@ func (r *Request) BodyAnyMap(p string, requireds ...bool) (map[string]any, *ae.E
 	if e != nil {
 		return nil, e
 	}
-	defer x.Release()
+	defer x.Close()
 	if x.IsNil() || x.String() == "" {
 		if required {
 			return nil, ae.NewBadParam(p)
@@ -52,7 +52,7 @@ func (r *Request) BodyAnySlice(p string, requireds ...bool) ([]any, *ae.Error) {
 	if e != nil {
 		return nil, e
 	}
-	defer x.Release()
+	defer x.Close()
 	if x.IsNil() || x.String() == "" {
 		if required {
 			return nil, ae.NewBadParam(p)

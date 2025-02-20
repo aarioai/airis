@@ -22,7 +22,7 @@ type userDataInterface interface {
 }
 
 // RawValue
-// @extend type T interface{Release()error}
+// @extend io.Closer
 type RawValue struct {
 	*atype.Atype
 	name string
@@ -35,9 +35,9 @@ func newRawValue(name string, value any) *RawValue {
 	}
 }
 
-func (v *RawValue) Release() error {
+func (v *RawValue) Close() error {
 	if v.Atype != nil {
-		return v.Atype.Release()
+		return v.Atype.Close()
 	}
 	return nil
 }
@@ -86,7 +86,7 @@ func parseValidationRules(name string, patterns []any) (bool, *regexp.Regexp, er
 	return required, re, nil
 }
 func (v *RawValue) ReleaseValidate(patterns []any) *ae.Error {
-	defer v.Release()
+	defer v.Close()
 	return v.Validate(patterns)
 }
 
@@ -168,7 +168,7 @@ func (r *Request) find(programData map[string]any, userData userDataInterface, n
 	raw := newRawValue(name, v)
 	e := raw.Validate(patterns)
 	if e != nil {
-		raw.Release()
+		raw.Close()
 		return nil, e
 	}
 	return raw, nil
@@ -365,7 +365,7 @@ func (r *Request) Body(name string, patterns ...any) (*RawValue, *ae.Error) {
 	if !r.bodyParsed {
 		e := r.parseBodyStream()
 		if e != nil {
-			raw.Release()
+			raw.Close()
 			return nil, e
 		}
 	}
@@ -436,7 +436,7 @@ func (r *Request) HeaderWild(name string, patterns ...any) (*RawValue, *ae.Error
 	if e == nil && value.NotEmpty() {
 		return value, nil
 	}
-	value.Release()
+	value.Close()
 
 	// 	2. 标准格式
 	key := cases.Title(language.English).String(strings.ReplaceAll(name, "_", "-"))
@@ -445,7 +445,7 @@ func (r *Request) HeaderWild(name string, patterns ...any) (*RawValue, *ae.Error
 		if e == nil && value.NotEmpty() {
 			return value, nil
 		}
-		value.Release()
+		value.Close()
 	}
 	if strings.HasPrefix(key, "X-") {
 		return nil, validateEmpty(name, patterns)
@@ -503,7 +503,7 @@ func (r *Request) QueryWild(name string, patterns ...any) (*RawValue, *ae.Error)
 	if e == nil && v.NotEmpty() {
 		return v, nil
 	}
-	utils.Release(v)
+	utils.Close(v)
 	guessName := name
 	// 1.1. URL参数替换格式查询，可能使用的是Header（大写开头）参数名，改为小写下划线模式
 	if strings.HasPrefix(name, "X-") {
@@ -513,7 +513,7 @@ func (r *Request) QueryWild(name string, patterns ...any) (*RawValue, *ae.Error)
 			if e == nil && v.NotEmpty() {
 				return v, nil
 			}
-			utils.Release(v)
+			utils.Close(v)
 		}
 	}
 
@@ -522,7 +522,7 @@ func (r *Request) QueryWild(name string, patterns ...any) (*RawValue, *ae.Error)
 	if e == nil && v.NotEmpty() {
 		return v, nil
 	}
-	utils.Release(v)
+	utils.Close(v)
 
 	// 3. Cookie
 	if cookie, err := r.Cookie(name); err == nil && cookie.Value != "" {
@@ -537,7 +537,7 @@ func (r *Request) QueryWild(name string, patterns ...any) (*RawValue, *ae.Error)
 	}
 	e = v.Validate(patterns) // 空值也需要判断是否符合pattern，如 required=false
 	if e != nil {
-		v.Release()
+		v.Close()
 		return nil, e
 	}
 	return v, nil

@@ -10,7 +10,7 @@ import (
 )
 
 // Request 每个请求独立request，因此几乎不存在并发问题，不用sync.Map
-// @extend type T interface{Release()error}
+// @extend type T interface{Close()error}
 type Request struct {
 	ictx             iris.Context
 	ctx              context.Context
@@ -98,9 +98,9 @@ func (r *Request) Context() context.Context {
 	return r.ctx
 }
 
-// Release 释放实例到对象池
+// Close 释放实例到对象池
 // 即使这个对象不是从对象池中获取的，也会放入对象池。不影响使用。
-func (r *Request) Release() error {
+func (r *Request) Close() error {
 	requestPool.Put(r)
 	return nil
 }

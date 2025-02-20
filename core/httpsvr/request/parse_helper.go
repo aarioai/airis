@@ -200,7 +200,7 @@ func (r *Request) parseStrings(method func(string, ...any) (*RawValue, *ae.Error
 	if e != nil {
 		return nil, e
 	}
-	defer q.Release()
+	defer q.Close()
 	var v []string
 	d := q.Raw()
 	if d == nil {
