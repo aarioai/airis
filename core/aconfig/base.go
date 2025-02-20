@@ -33,11 +33,12 @@ var (
 type Env string
 
 func (env Env) String() string          { return string(env) }
-func (env Env) IsLocal() bool           { return env == EnvLocal }
-func (env Env) IsDevelopment() bool     { return env == EnvDevelopment }
-func (env Env) IsTesting() bool         { return env == EnvTesting }
-func (env Env) IsStaging() bool         { return env == EnvStaging }
-func (env Env) IsProduction() bool      { return env == EnvProduction }
+func (env Env) Decode() string          { return strings.SplitN(env.String(), "_", 2)[0] }
+func (env Env) IsLocal() bool           { return env.Decode() == EnvLocal }
+func (env Env) IsDevelopment() bool     { return env.Decode() == EnvDevelopment }
+func (env Env) IsTesting() bool         { return env.Decode() == EnvTesting }
+func (env Env) IsStaging() bool         { return env.Decode() == EnvStaging }
+func (env Env) IsProduction() bool      { return env.Decode() == EnvProduction }
 func (env Env) BeforeDevelopment() bool { return env.IsLocal() || env.IsDevelopment() }
 func (env Env) BeforeTesting() bool {
 	return env.IsTesting() || env.BeforeDevelopment()
