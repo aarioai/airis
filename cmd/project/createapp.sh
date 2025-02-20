@@ -26,7 +26,7 @@ readonly APP_GLOBAL_DIRS=(
     cache               \
     conf                \
     entity              \
-    entity/bson         \
+    entity/mo           \
     entity/po           \
     enum                \
     job/queue           \
@@ -79,7 +79,18 @@ createBaseConfFile(){
     [ ! -f "$dst" ] || return 0
     sed -e "s#{{APP_NAME}}#${app_name}#g"  "$template" > "$dst"
 }
-
+createRouterFile(){
+    local demo="${CUR}/demo/router.go.demo"
+    local dst="${ROOT_DIR}/app/router/router.go"
+    [ ! -f "$dst" ] || return 0
+    cp "$demo" "$dst"
+}
+createRouterEngineFile(){
+    local demo="${CUR}/demo/router_engine.go.demo"
+    local dst="${ROOT_DIR}/app/router/engine.go"
+    [ ! -f "$dst" ] || return 0
+    cp "$demo" "$dst"
+}
 createCacheFile(){
     local app_root="$1"
     local app_base="$2"
@@ -87,18 +98,19 @@ createCacheFile(){
     local template="${CUR}/project_template/cache.go.tpl"
     local dst="${app_root}/cache/cache.go"
     [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_BASE}}#${app_base}#g" -e "s#{{DRIVER_BASE}}#${driver_base}#g"  "$template" > "$dst"
+    sed -e "s#{{APP_BASE}}#${app_base}#g" -e "s#{{DRIVER_BASE}}#${driver_base}#g" "$template" > "$dst"
 }
 
 createModuleServiceFile(){
     local app_root="$1"
     local app_base="$2"
-    local module="$3"
-    local module_dir="$4"
+    local driver_base="$3"
+    local module="$4"
+    local module_dir="$5"
     local template="${CUR}/project_template/module_service.go.tpl"
     local dst="${module_dir}/service.go"
     [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_BASE}}#${app_base}#g" -e "s#{{MODULE_NAME}}#${module}#g" "$template" > "$dst"
+    sed -e "s#{{APP_BASE}}#${app_base}#g" -e "s#{{MODULE_NAME}}#${module}#g" -e "s#{{DRIVER_BASE}}#${driver_base}#g" "$template" > "$dst"
 }
 
 createModuleModelFile(){
@@ -138,7 +150,7 @@ createModules(){
     for module in "${modules[@]}"; do
         local module_dir="${module_root}/${module}"
         createDirs "$module_dir" "${MODULE_DIRS[@]}"
-        createModuleServiceFile "$app_root" "$app_base" "$module" "$module_dir"
+        createModuleServiceFile "$app_root" "$app_base" "$driver_base" "$module" "$module_dir"
         createModuleModelFile "$app_base" "$driver_base" "${module_dir}/model"
         createModuleControllerFile "$app_base" "$module" "${module_dir}/controller"
     done
@@ -167,6 +179,26 @@ createServiceFile(){
     sed -e "s#{{APP_BASE}}#${app_base}#g" -e "s#{{DRIVER_BASE}}#${driver_base}#g" "$template" > "$dst"
 }
 
+createJobInitFile(){
+    local app_root="$1"
+    local app_base="$2"
+    local driver_base="$3"
+    local template="${CUR}/project_template/job_init.go.tpl"
+    local dst="${app_root}/job/init.go"
+    [ ! -f "$dst" ] || return 0
+    sed -e "s#{{APP_BASE}}#${app_base}#g" -e "s#{{DRIVER_BASE}}#${driver_base}#g" "$template" > "$dst"
+}
+
+createJobInitMongodbFile(){
+    local app_root="$1"
+    local app_base="$2"
+    local driver_base="$3"
+    local template="${CUR}/project_template/job_init_mongodb.go.tpl"
+    local dst="${app_root}/job/init_mongodb.go"
+    [ ! -f "$dst" ] || return 0
+    sed -e "s#{{APP_BASE}}#${app_base}#g" -e "s#{{DRIVER_BASE}}#${driver_base}#g" "$template" > "$dst"
+}
+
 goModTidy(){
     cdOrPanic "$ROOT_DIR"
     if [ ! -f "go.mod" ]; then
@@ -174,6 +206,8 @@ goModTidy(){
     fi
     go mod tidy
 }
+
+
 main(){
     [ $# -ge 2 ] || e_usage "$0 <app name> <driver base> [<module>...]${LF}Example: $0 test_app sdk/lib/driver"
     local app_name="$1"
@@ -190,10 +224,15 @@ main(){
     createMainGo
     createMiddlewareFile
     createBaseConfFile "$app_root" "$app_name"
+    createRouterFile
+    createRouterEngineFile
     createCacheFile "$app_root" "$app_base" "$driver_base"
     createModules "$app_root" "$app_base" "$driver_base" "$@"
     createBaseServiceFile "${app_root}/private" "$app_base" "$driver_base"
     createServiceFile "$app_root" "$app_base" "$driver_base"
+
+    createJobInitFile "$app_root" "$app_base" "$driver_base"
+    createJobInitMongodbFile "$app_root" "$app_base" "$driver_base"
 
     goModTidy
 }
