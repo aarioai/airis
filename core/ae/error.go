@@ -1,7 +1,6 @@
 package ae
 
 import (
-	"fmt"
 	"github.com/aarioai/airis/core/airis"
 	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/aarioai/airis/pkg/types"
@@ -68,7 +67,7 @@ func (e *Error) WithMsg(format string, args ...any) *Error {
 		Panic("unable change locked error")
 		return e
 	}
-	e.Msg = fmt.Sprintf(format, args...)
+	e.Msg = afmt.Sprintf(format, args...)
 	return e
 }
 
