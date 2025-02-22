@@ -49,7 +49,14 @@ const MaxUint64Len = 20 // 0 ~ 18446744073709551615
 */
 func IsNil(x any) bool {
 	// @warn 断言和反射性能不是特别好，如果不得已再使用，控制使用有助于提升程序性能。
-	return x == nil || (reflect.ValueOf(x).Kind() == reflect.Ptr && reflect.ValueOf(x).IsNil())
+	if x == nil {
+		return true
+	}
+	switch reflect.ValueOf(x).Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Array, reflect.Chan, reflect.Slice:
+		return reflect.ValueOf(x).IsNil()
+	}
+	return false
 }
 
 func IsEmpty(v any) bool {
