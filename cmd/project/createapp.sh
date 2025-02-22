@@ -124,12 +124,13 @@ createModuleModelFile(){
 }
 createModuleControllerFile(){
     local app_base="$1"
-    local module="$2"
-    local ctrl_dir="$3"
+    local driver_base="$2"
+    local module="$3"
+    local ctrl_dir="$4"
     local template="${CUR}/project_template/controller.go.tpl"
     local dst="${ctrl_dir}/controller.go"
     [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_BASE}}#${app_base}#g"  -e "s#{{MODULE_NAME}}#${module}#g" "$template" > "$dst"
+    sed -e "s#{{APP_BASE}}#${app_base}#g"  -e "s#{{MODULE_NAME}}#${module}#g" -e "s#{{DRIVER_BASE}}#${driver_base}#g" "$template" > "$dst"
 }
 
 createModules(){
@@ -152,7 +153,7 @@ createModules(){
         createDirs "$module_dir" "${MODULE_DIRS[@]}"
         createModuleServiceFile "$app_root" "$app_base" "$driver_base" "$module" "$module_dir"
         createModuleModelFile "$app_base" "$driver_base" "${module_dir}/model"
-        createModuleControllerFile "$app_base" "$module" "${module_dir}/controller"
+        createModuleControllerFile "$app_base" "$driver_base" "$module" "${module_dir}/controller"
     done
 }
 
