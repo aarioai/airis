@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/binary"
+	"errors"
 	"github.com/aarioai/airis/core/ae"
 	"github.com/aarioai/airis/pkg/types"
 	"io"
@@ -404,6 +405,9 @@ func (d Date) Valid() bool {
 }
 func (d Date) String() string { return string(d) }
 func (d Date) Time(loc *time.Location) (time.Time, error) {
+	if d == MinDate {
+		return time.Time{}, errors.New("min date")
+	}
 	return time.ParseInLocation("2006-01-02", string(d), loc)
 }
 func (d Date) OrMin() Date {
@@ -431,6 +435,9 @@ func (d Date) Ymd() YMD {
 	return YMD(n)
 }
 func (d Date) Int64(loc *time.Location) int64 {
+	if d == MinDate {
+		return 0
+	}
 	tm, err := time.ParseInLocation("2006-01-02", string(d), loc)
 	if err != nil {
 		return 0
@@ -438,6 +445,9 @@ func (d Date) Int64(loc *time.Location) int64 {
 	return tm.Unix()
 }
 func (d Date) Unix(loc *time.Location) UnixTime {
+	if d == MinDate {
+		return 0
+	}
 	t, _ := d.Time(loc)
 	return UnixTime(t.Unix())
 }
@@ -464,6 +474,9 @@ func (d Datetime) Valid() bool {
 }
 func (d Datetime) String() string { return string(d) }
 func (d Datetime) Time(loc *time.Location) (time.Time, error) {
+	if d == MinDatetime {
+		return time.Time{}, errors.New("min datetime")
+	}
 	return time.ParseInLocation("2006-01-02 15:04:05", string(d), loc)
 }
 func (d Datetime) Date() Date { return Date(d[0:len(MinDate)]) }
@@ -486,6 +499,9 @@ func (d Datetime) OrNow(loc *time.Location) Datetime {
 	return d
 }
 func (d Datetime) Int64(loc *time.Location) int64 {
+	if d == MinDatetime {
+		return 0
+	}
 	tm, err := time.ParseInLocation("2006-01-02 15:04:05", string(d), loc)
 	if err != nil {
 		return 0
@@ -493,6 +509,9 @@ func (d Datetime) Int64(loc *time.Location) int64 {
 	return tm.Unix()
 }
 func (d Datetime) Unix(loc *time.Location) UnixTime {
+	if d == MinDatetime {
+		return 0
+	}
 	t, _ := d.Time(loc)
 	return UnixTime(t.Unix())
 }
