@@ -1,0 +1,26 @@
+package main
+
+import (
+	"flag"
+	"fmt"
+	"runtime"
+	"time"
+)
+
+func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in f", r) // 方便docker或本地调试
+		}
+	}()
+	loc, _ := time.LoadLocation("Asia/Shanghai")
+	time.Local = loc
+
+	configPath := flag.String("config", "./config/app-local.ini", "config path")
+	doSelfTest := flag.Bool("selftest", true, "self test")
+	flag.Parse()
+
+	fmt.Printf("config: %s, self test: %v\n", *configPath, *doSelfTest)
+}

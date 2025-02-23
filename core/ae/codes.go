@@ -1,7 +1,6 @@
 package ae
 
 import (
-	"fmt"
 	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/aarioai/airis/pkg/types"
 	"net/http"
@@ -88,7 +87,7 @@ func NewRetryWith(redirect string) *Error {
 	return New(RetryWith, redirect) // 特殊错误码，msg 用于跳转
 }
 func NewConflictWith(format string, args ...any) *Error {
-	return New(ConflictWith, fmt.Sprintf(format, args...))
+	return New(ConflictWith, afmt.Sprintf(format, args...))
 }
 
 func NewBadParam(param string, tips ...string) *Error {

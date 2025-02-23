@@ -1,0 +1,45 @@
+package entity
+
+import (
+	"driver/index"
+	"github.com/aarioai/airis/core/atype"
+)
+
+type SqlDemo struct {
+	// SQL demo:
+	Id            uint64         `name:"id"`
+	Content       atype.Text     `name:"text"`
+	Image         atype.Image    `name:"image"`
+	Images        atype.Images   `name:"images"`
+	Audio         atype.Audio    `name:"audio"`
+	Audios        atype.Audios   `name:"audio"`
+	Video         atype.Video    `name:"video"`
+	Videos        atype.Videos   `name:"video"`
+	Position      atype.Position `name:"pos" options:"no_update"`
+	EffectiveDate atype.Date     `name:"effective_date"  options:"no_update"`
+	CreatedAt     atype.Datetime `name:"created_at"`
+	UpdatedAt     atype.Datetime `name:"updated_at"`
+}
+
+func (t SqlDemo) Table() string {
+	return "law"
+}
+
+func (t SqlDemo) Indexes() index.Indexes {
+	return index.Indexes{
+		"PRIMARY":   index.Primary("id"),
+		"k_image":   index.Index("image"),
+		"s_pos":     index.Spatial2D("pos"),
+		"f_content": index.FullText("content"),
+	}
+}
+
+// same as above
+func (t SqlDemo) Indexes() index.Indexes {
+	return index.NewIndexes(
+		index.Primary("id"),
+		index.Index("image"),
+		index.Spatial2D("pos"),
+		index.FullText("content"),
+	)
+}

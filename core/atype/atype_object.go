@@ -50,7 +50,7 @@ func (p *Atype) Strings() ([]string, bool) {
 }
 
 func (p *Atype) ReleaseStrings() ([]string, bool) {
-	defer p.Release()
+	defer p.Close()
 	return p.Strings()
 }
 
@@ -62,7 +62,7 @@ func (p *Atype) Ints() ([]int, bool) {
 	case []any:
 		result := make([]int, len(v))
 		newV := New()
-		defer newV.Release()
+		defer newV.Close()
 		for i, item := range v {
 			newV.Reload(item)
 			val, err := newV.Int()
@@ -77,7 +77,7 @@ func (p *Atype) Ints() ([]int, bool) {
 	return nil, false
 }
 func (p *Atype) ReleaseInts() ([]int, bool) {
-	defer p.Release()
+	defer p.Close()
 	return p.Ints()
 }
 func (p *Atype) Uints() ([]uint, bool) {
@@ -88,7 +88,7 @@ func (p *Atype) Uints() ([]uint, bool) {
 	case []any:
 		result := make([]uint, len(v))
 		newV := New()
-		defer newV.Release()
+		defer newV.Close()
 		for i, item := range v {
 			val, err := newV.Reload(item).Uint()
 			if err != nil {
@@ -102,7 +102,7 @@ func (p *Atype) Uints() ([]uint, bool) {
 	return nil, false
 }
 func (p *Atype) ReleaseUints() ([]uint, bool) {
-	defer p.Release()
+	defer p.Close()
 	return p.Uints()
 }
 
@@ -114,7 +114,7 @@ func (p *Atype) Int64s() ([]int64, bool) {
 	case []any:
 		result := make([]int64, len(v))
 		newV := New()
-		defer newV.Release()
+		defer newV.Close()
 		for i, item := range v {
 			val, err := newV.Reload(item).Int64()
 			if err != nil {
@@ -128,7 +128,7 @@ func (p *Atype) Int64s() ([]int64, bool) {
 	return nil, false
 }
 func (p *Atype) ReleaseInt64s() ([]int64, bool) {
-	defer p.Release()
+	defer p.Close()
 	return p.Int64s()
 }
 
@@ -140,7 +140,7 @@ func (p *Atype) Uint64s() ([]uint64, bool) {
 	case []any:
 		result := make([]uint64, len(v))
 		newV := New()
-		defer newV.Release()
+		defer newV.Close()
 		for i, item := range v {
 			val, err := newV.Reload(item).Uint64()
 			if err != nil {
@@ -154,7 +154,7 @@ func (p *Atype) Uint64s() ([]uint64, bool) {
 	return nil, false
 }
 func (p *Atype) ReleaseUint64s() ([]uint64, bool) {
-	defer p.Release()
+	defer p.Close()
 	return p.Uint64s()
 }
 
@@ -166,7 +166,7 @@ func (p *Atype) Float32s() ([]float32, bool) {
 	case []any:
 		result := make([]float32, len(v))
 		newV := New()
-		defer newV.Release()
+		defer newV.Close()
 		for i, item := range v {
 			val, err := newV.Reload(item).Float32()
 			if err != nil {
@@ -180,7 +180,7 @@ func (p *Atype) Float32s() ([]float32, bool) {
 	return nil, false
 }
 func (p *Atype) ReleaseFloat32s() ([]float32, bool) {
-	defer p.Release()
+	defer p.Close()
 	return p.Float32s()
 }
 func (p *Atype) Float64s() ([]float64, bool) {
@@ -191,7 +191,7 @@ func (p *Atype) Float64s() ([]float64, bool) {
 	case []any:
 		result := make([]float64, len(v))
 		newV := New()
-		defer newV.Release()
+		defer newV.Close()
 		for i, item := range v {
 			val, err := newV.Reload(item).Float64()
 			if err != nil {
@@ -205,7 +205,7 @@ func (p *Atype) Float64s() ([]float64, bool) {
 	return nil, false
 }
 func (p *Atype) ReleaseFloat64s() ([]float64, bool) {
-	defer p.Release()
+	defer p.Close()
 	return p.Float64s()
 }
 
@@ -238,7 +238,7 @@ func (p *Atype) ArrayJson(allowNil bool) (json.RawMessage, bool) {
 	return nil, false
 }
 func (p *Atype) ReleaseArrayJson(allowNil bool) (json.RawMessage, bool) {
-	defer p.Release()
+	defer p.Close()
 	return p.ArrayJson(allowNil)
 }
 
@@ -269,6 +269,6 @@ func (p *Atype) MapJson(allowNil bool) (json.RawMessage, bool) {
 	return nil, false
 }
 func (p *Atype) ReleaseMapJson(allowNil bool) (json.RawMessage, bool) {
-	defer p.Release()
+	defer p.Close()
 	return p.MapJson(allowNil)
 }

@@ -8,13 +8,14 @@ import (
 	"github.com/aarioai/airis/core/httpsvr/request"
 	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/kataras/iris/v12"
+	"io"
 	"net/http"
 	"slices"
 	"sync"
 )
 
 // Writer
-// @extend type T interface{Release()error}
+// @extend io.Closer
 type Writer struct {
 	SerializeTag      string
 	serveContentTypes []string
@@ -400,16 +401,18 @@ func (w *Writer) TryWrite(a any, e *ae.Error) (int, error) {
 	return w.Write(a)
 }
 
-// Release 释放实例到对象池
+// Close 释放实例到对象池
 // 即使这个对象不是从对象池中获取的，也会放入对象池。不影响使用。
-func (w *Writer) Release() error {
+func (w *Writer) Close() error {
 	writerPool.Put(w)
 	return nil
 }
 
-func (w *Writer) ReleaseWith(r *request.Request) error {
-	if r != nil {
-		r.Release()
+func (w *Writer) CloseWith(closers ...io.Closer) error {
+	for _, closer := range closers {
+		if err := closer.Close(); err != nil {
+			return err
+		}
 	}
-	return w.Release()
+	return w.Close()
 }
