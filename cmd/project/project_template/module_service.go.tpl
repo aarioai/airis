@@ -3,7 +3,6 @@ package {{MODULE_NAME}}
 import (
 	"github.com/aarioai/airis/core"
 	"{{APP_BASE}}/cache"
-	"{{APP_BASE}}/conf"
 	"{{APP_BASE}}/module/{{MODULE_NAME}}/model"
 	"{{APP_BASE}}/service"
 	"{{DRIVER_BASE}}/mongodbhelper"
@@ -27,13 +26,14 @@ var (
 
 func New(app *core.App) *Service {
 	svcOnce.Do(func() {
+		s := service.New(app)
 		svcObj = &Service{
 			app:   app,
 			loc:   app.Config.TimeLocation,
-			h:     cache.New(app),
-			mongo: mongodbhelper.NewDB(app, conf.MongoDBConfigSection),
+			h:     s.Cache(),
+			mongo: s.Mongo(),
 			m:     model.New(app),
-			s:     service.New(app),
+			s:     s,
 		}
 	})
 	return svcObj

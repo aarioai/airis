@@ -3,7 +3,6 @@ package controller
 import (
 	"github.com/aarioai/airis/core"
     "{{APP_BASE}}/cache"
-    "{{APP_BASE}}/conf"
 	"{{APP_BASE}}/module/{{MODULE_NAME}}"
 	"{{APP_BASE}}/module/{{MODULE_NAME}}/model"
 	"{{APP_BASE}}/service"
@@ -29,13 +28,14 @@ var (
 
 func New(app *core.App) *Controller {
 	ctrlOnce.Do(func() {
+	    s := service.New(app)
 		ctrlObj = &Controller{
 			app:   app,
 			loc:   app.Config.TimeLocation,
-			h:     cache.New(app),
-			mongo: mongodbhelper.NewDB(app, conf.MongoDBConfigSection),
+			h:     s.Cache(),
+			mongo: s.Mongo(),
 			m:     model.New(app),
-			s:     service.New(app),
+			s:     s,
 		    {{MODULE_NAME}}: {{MODULE_NAME}}.New(app),
 		}
 	})

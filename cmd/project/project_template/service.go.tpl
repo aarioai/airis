@@ -44,3 +44,15 @@ func New(app *core.App) *Service {
 	})
 	return svcObj
 }
+
+func (s *Service) Cache() *cache.Cache {
+	return s.h
+}
+
+func (s *Service) Mongo() *mongodbhelper.Model {
+	return s.mongo
+}
+
+func (s *Service) Private() *private.Service {
+	return s.private
+}
