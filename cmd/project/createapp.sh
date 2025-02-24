@@ -5,12 +5,16 @@ set -euo pipefail
 
 CUR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly CUR
+
 ROOT_DIR="$(cd "${CUR}/../.." && pwd)"
 readonly ROOT_DIR
+
 PROJECT_NAME="${ROOT_DIR##*/}"
 readonly PROJECT_NAME
+
 PROJECT_BASE="project/${PROJECT_NAME}"
 readonly PROJECT_BASE
+
 readonly GLOBAL_DIRS=(
     app/router/middleware   \
     boot                    \
