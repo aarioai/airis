@@ -21,6 +21,7 @@ const (
 	ParamStringify = "_stringify"
 	ParamField     = "_field"
 	ParamPage      = "page"
+	ParamPageSize  = "page_size"
 	ParamPageEnd   = "page_end"
 )
 

@@ -7,6 +7,29 @@ import (
 	"time"
 )
 
+func (r *Request) Paging() atype.Paging {
+	page, _ := r.QueryInt(ParamPage, false)
+	pageSize, _ := r.QueryInt(ParamPageSize, false)
+	pageEnd, _ := r.QueryInt(ParamPageEnd, false)
+	if pageSize > atype.DefaultPageSize {
+		pageSize = atype.DefaultPageSize
+	}
+	return atype.NewPaging(page, pageEnd, pageSize)
+}
+
+func (r *Request) PagingWithSize(maxPageSize int) atype.Paging {
+	page, _ := r.QueryInt(ParamPage, false)
+	pageSize, _ := r.QueryInt(ParamPageSize, false)
+	pageEnd, _ := r.QueryInt(ParamPageEnd, false)
+	if maxPageSize <= 0 {
+		maxPageSize = atype.DefaultPageSize
+	}
+	if pageSize > maxPageSize {
+		pageSize = maxPageSize
+	}
+	return atype.NewPaging(page, pageEnd, pageSize)
+}
+
 func (r *Request) QueryBooln(p string) (atype.Booln, *ae.Error) {
 	b, e := r.QueryBool(p)
 	if e != nil {
@@ -59,20 +82,6 @@ func (r *Request) QueryInt24s(p string, required, allowZero bool) ([]atype.Int24
 }
 func (r *Request) QueryMoney(p string, ranges ...atype.Money) (atype.Money, *ae.Error) {
 	return parseMoney(r.Query, p, ranges...)
-}
-
-// QueryPaging 不可再指定offset/limit了，单一原则，通过page分页
-// @param firstPageLimit 首页行数
-func (r *Request) QueryPaging(perPageLimit, firstPageEnd uint) atype.Paging {
-	page, _ := r.QueryUint(ParamPage, false)
-	pageEnd, _ := r.QueryUint(ParamPageEnd, false)
-	return atype.NewPaging(perPageLimit, page, pageEnd, firstPageEnd)
-}
-
-func (r *Request) QueryPage() atype.Paging {
-	page, _ := r.QueryUint(ParamPage, false)
-	pageEnd, _ := r.QueryUint(ParamPageEnd, false)
-	return atype.NewPage(page, pageEnd)
 }
 
 func (r *Request) QueryProvince(p string, required ...bool) (atype.Province, *ae.Error) {

@@ -1,47 +1,50 @@
 package atype
 
 type Paging struct {
-	Page         uint `json:"page"`
-	PageEnd      uint `json:"page_end"`
-	PerPageLimit uint `json:"per_page_limit"`
-	Offset       uint `json:"offset"`
-	Limit        uint `json:"limit"`
-	Prev         uint `json:"prev"`
-	Next         uint `json:"next"`
+	Page     int `json:"page"`
+	PageEnd  int `json:"page_end"`
+	PageSize int `json:"page_size"`
+	Offset   int `json:"offset"`
+	Limit    int `json:"limit"`
+	Prev     int `json:"prev"`
+	Next     int `json:"next"`
 }
 
-// @param perPageLimit 每页行数
-// @param page 起始页数
-// @param pageEnd 截止页数
-// @param firstPageEnd  如果page是第一页时，pageEnd为此
-func NewPaging(perPageLimit, page, pageEnd, firstPageEnd uint) Paging {
-	var offset uint
-	var prev uint
-	if page <= 1 {
-		page = 1
+const (
+	DefaultPageSize = 10
+)
+
+// NewPaging
+// @param pageStart page start
+// @param [ends] [pageEnd[, pageSize]]
+func NewPaging(pageStart int, ends ...int) Paging {
+	if pageStart <= 1 {
+		pageStart = 1
 	}
-	if pageEnd < page {
-		pageEnd = page
+	pageEnd := pageStart
+	if len(ends) > 0 && ends[0] > 0 {
+		pageEnd = ends[0]
 	}
-	if pageEnd == 1 && firstPageEnd > pageEnd {
-		pageEnd = firstPageEnd
+	pageSize := DefaultPageSize
+	if len(ends) > 1 && ends[1] > 0 {
+		pageSize = ends[1]
 	}
+
+	var offset int
+	var prev int
+
 	next := pageEnd + 1
-	limit := perPageLimit * (next - page)
-	offset = (page - 1) * perPageLimit
-	prev = page - 1
+	limit := pageSize * (next - pageStart)
+	offset = (pageStart - 1) * pageSize
+	prev = pageStart - 1
 
 	return Paging{
-		Page:         page,
-		PageEnd:      pageEnd,
-		PerPageLimit: perPageLimit,
-		Offset:       offset,
-		Limit:        limit,
-		Prev:         prev,
-		Next:         next,
+		Page:     pageStart,
+		PageEnd:  pageEnd,
+		PageSize: pageSize,
+		Offset:   offset,
+		Limit:    limit,
+		Prev:     prev,
+		Next:     next,
 	}
-}
-
-func NewPage(page, pageEnd uint) Paging {
-	return NewPaging(10, page, pageEnd, pageEnd)
 }
