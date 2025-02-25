@@ -29,6 +29,18 @@ func (r *Request) PagingWithSize(maxPageSize int) atype.Paging {
 	}
 	return atype.NewPaging(page, pageEnd, pageSize)
 }
+func (r *Request) PagingWithFirstPageEnd(defaultPageEnd int) atype.Paging {
+	page, _ := r.QueryInt(ParamPage, false)
+	pageSize, _ := r.QueryInt(ParamPageSize, false)
+	pageEnd, _ := r.QueryInt(ParamPageEnd, false)
+	if pageSize > atype.DefaultPageSize {
+		pageSize = atype.DefaultPageSize
+	}
+	if page < 2 && pageEnd <= page {
+		pageEnd = defaultPageEnd
+	}
+	return atype.NewPaging(page, pageEnd, pageSize)
+}
 
 func (r *Request) QueryBooln(p string) (atype.Booln, *ae.Error) {
 	b, e := r.QueryBool(p)
