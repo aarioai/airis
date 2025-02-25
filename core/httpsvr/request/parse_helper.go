@@ -196,7 +196,7 @@ func (r *Request) parseUint64s(method func(string, ...any) (*RawValue, *ae.Error
 	return v, nil
 }
 func (r *Request) parseStrings(method func(string, ...any) (*RawValue, *ae.Error), p string, required, allowEmptyString bool) ([]string, *ae.Error) {
-	q, e := r.Body(p, required)
+	q, e := method(p, required)
 	if e != nil {
 		return nil, e
 	}
