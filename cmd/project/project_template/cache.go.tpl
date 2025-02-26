@@ -21,7 +21,6 @@ var (
 )
 
 func New(app *core.App) *Cache {
-
 	cacheOnce.Do(func() {
 		cacheObj = &Cache{
 			app: app,
