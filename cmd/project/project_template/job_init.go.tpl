@@ -8,7 +8,7 @@ import (
 
 func Init(app *core.App, profile *debug.Profile) {
 	ctx := context.Background()
-	profile.Mark("init {{APP_NAME}}")
+	profile.Mark("job init app:{{APP_NAME}}")
 
 	initMongodb(ctx, app, profile)
 }

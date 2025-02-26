@@ -33,7 +33,7 @@ readonly APP_GLOBAL_DIRS=(
     entity/mo           \
     entity/po           \
     enum                \
-    job/queue           \
+    job/queue/consumer  \
     module              \
     mservice            \
     private             \
@@ -238,7 +238,8 @@ main(){
 
     createJobInitFile "$app_root" "$app_name"
     createJobInitMongodbFile "$app_root" "$app_base"
-    createCommonServiceFile "${app_root}/job/queue" "$app_base"
+    createBaseServiceFile "${app_root}/job/queue" "$app_base"
+    createCommonServiceFile "${app_root}/job/queue/consumer" "$app_base"
 
     goModTidy
     echo "${app_name} (${app_root}) done"
