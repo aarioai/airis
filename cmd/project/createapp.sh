@@ -178,11 +178,11 @@ createServiceFile(){
 
 createJobInitFile(){
     local app_root="$1"
-    local app_base="$2"
+    local app_name="$2"
     local template="${CUR}/project_template/job_init.go.tpl"
     local dst="${app_root}/job/init.go"
     [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
+    sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
 }
 
 createJobInitMongodbFile(){
@@ -236,7 +236,7 @@ main(){
     createBaseServiceFile "${app_root}/private" "$app_base"
     createServiceFile "$app_root" "$app_base"
 
-    createJobInitFile "$app_root" "$app_base"
+    createJobInitFile "$app_root" "$app_name"
     createJobInitMongodbFile "$app_root" "$app_base"
     createCommonServiceFile "${app_root}/job/queue" "$app_base"
 
