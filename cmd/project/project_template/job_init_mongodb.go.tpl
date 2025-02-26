@@ -2,12 +2,12 @@ package job
 
 import (
 	"context"
+	"github.com/aarioai/airis-driver/driver/index"
+    "github.com/aarioai/airis-driver/driver/mongodbhelper"
 	"github.com/aarioai/airis/core"
 	"github.com/aarioai/airis/core/ae"
 	"github.com/aarioai/airis/core/helpers/debug"
 	"{{APP_BASE}}/conf"
-	"{{DRIVER_BASE}}/index"
-	"{{DRIVER_BASE}}/mongodbhelper"
 )
 
 var (

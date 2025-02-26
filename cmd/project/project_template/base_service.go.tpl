@@ -1,10 +1,10 @@
 package {{PACKAGE_NAME}}
 
 import (
+    "github.com/aarioai/airis-driver/driver/mongodbhelper"
 	"github.com/aarioai/airis/core"
     "{{APP_BASE}}/cache"
     "{{APP_BASE}}/conf"
-    "{{DRIVER_BASE}}/mongodbhelper"
 	"sync"
 	"time"
 )

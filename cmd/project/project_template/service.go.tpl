@@ -1,6 +1,7 @@
 package service
 
 import (
+    "github.com/aarioai/airis-driver/driver/mongodbhelper"
 	"github.com/aarioai/airis/core"
 	"{{APP_BASE}}/cache"
 	"{{APP_BASE}}/conf"
@@ -8,7 +9,6 @@ import (
 	mcns "{{APP_BASE}}/module/cns/model"
 	mss "{{APP_BASE}}/module/ss/model"
 	"{{APP_BASE}}/private"
-    "{{DRIVER_BASE}}/mongodbhelper"
 	"sync"
 	"time"
 )

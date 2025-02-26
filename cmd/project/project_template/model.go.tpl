@@ -1,10 +1,10 @@
 package model
 
 import (
+	"github.com/aarioai/airis-driver/driver"
+	"github.com/aarioai/airis-driver/driver/sqlhelper"
 	"github.com/aarioai/airis/core"
 	"{{APP_BASE}}/conf"
-	"{{DRIVER_BASE}}"
-	"{{DRIVER_BASE}}/sqlhelper"
 	"sync"
 	"time"
 )

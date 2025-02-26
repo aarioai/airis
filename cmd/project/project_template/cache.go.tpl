@@ -2,10 +2,10 @@ package cache
 
 import (
 	"context"
+	"github.com/aarioai/airis-driver/driver"
 	"github.com/aarioai/airis/core"
 	"github.com/redis/go-redis/v9"
 	"{{APP_BASE}}/conf"
-	"{{DRIVER_BASE}}"
 	"sync"
 	"time"
 )
