@@ -17,6 +17,7 @@ readonly PROJECT_BASE
 
 readonly GLOBAL_DIRS=(
     app/router/middleware   \
+    app/rpc                 \
     boot                    \
     config                  \
     deploy/asset_src        \
