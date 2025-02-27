@@ -3,17 +3,11 @@ set -euo pipefail
 
 . /opt/aa/lib/aa-posix-lib.sh
 
+# createapp.sh
+# 生成app目录的脚本
+
 CUR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly CUR
-
-ROOT_DIR="$(cd "${CUR}/../.." && pwd)"
-readonly ROOT_DIR
-
-PROJECT_NAME="${ROOT_DIR##*/}"
-readonly PROJECT_NAME
-
-PROJECT_BASE="project/${PROJECT_NAME}"
-readonly PROJECT_BASE
 
 readonly GLOBAL_DIRS=(
     app/router/middleware   \
@@ -53,8 +47,9 @@ readonly MODULE_DIRS=(
 )
 
 createMainGo(){
+    local project_root="$1"
     local demo="${CUR}/demo/main.go.demo"
-    local dst="${ROOT_DIR}/main.go"
+    local dst="${project_root}/main.go"
     [ ! -f "$dst" ] || return 0
     cp "$demo" "$dst"
 }
@@ -70,8 +65,9 @@ createDirs(){
 }
 
 createMiddlewareFile(){
+    local project_root="$1"
     local demo="${CUR}/demo/middleware.go.demo"
-    local dst="${ROOT_DIR}/app/router/middleware/middleware.go"
+    local dst="${project_root}/app/router/middleware/middleware.go"
     [ ! -f "$dst" ] || return 0
     cp "$demo" "$dst"
 }
@@ -85,14 +81,16 @@ createBaseConfFile(){
     sed -e "s#{{APP_NAME}}#${app_name}#g"  "$template" > "$dst"
 }
 createRouterFile(){
+    local project_root="$1"
     local demo="${CUR}/demo/router.go.demo"
-    local dst="${ROOT_DIR}/app/router/router.go"
+    local dst="${project_root}/app/router/router.go"
     [ ! -f "$dst" ] || return 0
     cp "$demo" "$dst"
 }
 createRouterEngineFile(){
+    local project_root="$1"
     local demo="${CUR}/demo/router_engine.go.demo"
-    local dst="${ROOT_DIR}/app/router/engine.go"
+    local dst="${project_root}/app/router/engine.go"
     [ ! -f "$dst" ] || return 0
     cp "$demo" "$dst"
 }
@@ -207,31 +205,39 @@ createCommonServiceFile(){
 }
 
 goModTidy(){
-    cdOrPanic "$ROOT_DIR"
+    local project_root="$1"
+    local project_base="$2"
+    cdOrPanic "$project_root"
     if [ ! -f "go.mod" ]; then
-        go mod init "project/${PROJECT_NAME}"
+        go mod init "$project_base"
     fi
     go mod tidy
 }
 
 
 main(){
-    [ $# -ge 1 ] || e_usage "$0 <app name> [<module>...]${LF}Example: $0 test_app"
+    [ $# -ge 2 ] || e_usage "$0 <project root> <app name> [<module>...]${LF}Example: $0 test_app"
 
-    local app_name="$1"
+    local project_root="$1"
+    local app_name="$2"
     shift
-    createDirs "$ROOT_DIR" "${GLOBAL_DIRS[@]}"
+    shift
+    local project_name="${project_root##*/}"
+    local project_base="project/${project_name}"
 
-    local app_root="${ROOT_DIR}/app/${app_name}"
-    local app_base="${PROJECT_BASE}/app/${app_name}"
+
+    createDirs "$project_root" "${GLOBAL_DIRS[@]}"
+
+    local app_root="${project_root}/app/${app_name}"
+    local app_base="${project_base}/app/${app_name}"
     mkdir -p "$app_root"
     createDirs "$app_root" "${APP_GLOBAL_DIRS[@]}"
 
-    createMainGo
-    createMiddlewareFile
+    createMainGo "$project_root"
+    createMiddlewareFile "$project_root"
     createBaseConfFile "$app_root" "$app_name"
-    createRouterFile
-    createRouterEngineFile
+    createRouterFile "$project_root"
+    createRouterEngineFile "$project_root"
     createCacheFile "$app_root" "$app_base"
     createModules "$app_root" "$app_base" "$@"
     createBaseServiceFile "${app_root}/private" "$app_base"
@@ -242,7 +248,7 @@ main(){
     createBaseServiceFile "${app_root}/job/queue" "$app_base"
     createCommonServiceFile "${app_root}/job/queue/consumer" "$app_base"
 
-    goModTidy
+    goModTidy "$project_root" "$project_base"
     echo "${app_name} (${app_root}) done"
 }
 

@@ -3,20 +3,12 @@ set -euo pipefail
 
 . /opt/aa/lib/aa-posix-lib.sh
 
-DEFAULT_PROTOC_VERSION="29.3"
-
-CUR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly CUR
-
-ROOT_DIR="$(cd "${CUR}/.." && pwd)"
-readonly ROOT_DIR
-
-PROTO_ROOT="${ROOT_DIR}/app/rpc"
-readonly PROTO_ROOT
-
+# protoc.sh
+# 在项目内自动查找.proto文件，并生成对应protobuf go文件的脚本
 
 installProtoc(){
-    local protoc_version="$1"
+    local project_root="$1"
+    local protoc_version="$2"
     if command -v protoc >/dev/null 2>&1; then
         protoc --version
         return 0
@@ -31,6 +23,7 @@ installProtoc(){
     unzip "$zip_filename" -d "${zip_filename}.d"
     sudo mv "${zip_filename}.d/bin/"* /usr/local/bin/
 
+    cdOrPanic "$project_root"
     go get -u google.golang.org/grpc
     go get -u google.golang.org/protobuf
     # Must use github.com/golang/protobuf, but not google.golang.org/protobuf
@@ -40,7 +33,8 @@ installProtoc(){
 }
 
 parseProto(){
-    local rpc_root="$1"
+    local project_root="$1"
+    local rpc_root="${project_root}/app/rpc"
     cdOrPanic "$rpc_root"
     for dir in "$rpc_root"/*; do
         [ -d "$dir" ] || continue
@@ -56,9 +50,13 @@ parseProto(){
     done
 }
 
+
 main(){
-    local protoc_version=${1:"$DEFAULT_PROTOC_VERSION"}
-    installProtoc "$protoc_version"
-    parseProto "$PROTO_ROOT"
+    cmd=$(basename "$0")
+    [ "$#" -ge 1 ] || e_usage "$cmd <project root> [protoc version]${LF}Example: $cmd project 29.3"
+    local project_root="$1"
+    local protoc_version="${2-""}"
+    installProtoc "$project_root" "$protoc_version"
+    parseProto "$project_root"
 }
 main "$@"
