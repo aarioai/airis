@@ -1,6 +1,7 @@
 package alog
 
 import (
+	"fmt"
 	"github.com/aarioai/airis/core/ae"
 	"github.com/aarioai/airis/pkg/afmt"
 	"log"
@@ -13,6 +14,11 @@ func Println(msg string, styles ...string) {
 	afmt.Println(msg, styles...)
 	// log file is no way to display color
 	log.Println(msg)
+}
+
+func Log(msg string, a ...any) {
+	msg = fmt.Sprintf(msg+"\n", a...)
+	Println(msg)
 }
 
 func PrintError(err error) {
