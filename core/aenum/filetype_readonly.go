@@ -40,9 +40,6 @@ const (
     Gzip        FileType = 7004
     Json        FileType = 10000
 )
-var DataTypes = map[FileType][]string{
-    Json        : {".json", "application/json"},
-}
 var ImageTypes = map[FileType][]string{
     Gif         : {".gif", "image/gif"},
     Heic        : {".heic", "image/heic", ".heif", ".avci", "image/heif"},
@@ -88,19 +85,22 @@ var CompressedTypes = map[FileType][]string{
     Rar         : {".rar", "application/vnd.rar", "application/x-rar-compressed"},
     Zip         : {".zip", "application/zip", "application/x-zip-compressed", "multipart/x-zip"},
 }
-func NewAudioType(mime string) (FileType, bool) {return ParseFileType(mime, AudioTypes)}
-func NewVideoType(mime string) (FileType, bool) {return ParseFileType(mime, VideoTypes)}
+var DataTypes = map[FileType][]string{
+    Json        : {".json", "application/json"},
+}
 func NewDocumentType(mime string) (FileType, bool) {return ParseFileType(mime, DocumentTypes)}
 func NewCompressedType(mime string) (FileType, bool) {return ParseFileType(mime, CompressedTypes)}
 func NewDataType(mime string) (FileType, bool) {return ParseFileType(mime, DataTypes)}
 func NewImageType(mime string) (FileType, bool) {return ParseFileType(mime, ImageTypes)}
+func NewAudioType(mime string) (FileType, bool) {return ParseFileType(mime, AudioTypes)}
+func NewVideoType(mime string) (FileType, bool) {return ParseFileType(mime, VideoTypes)}
 func (t FileType) ContentType() string {
+    if d, ok := AudioTypes[t]; ok {return d[1]}
     if d, ok := VideoTypes[t]; ok {return d[1]}
     if d, ok := DocumentTypes[t]; ok {return d[1]}
     if d, ok := CompressedTypes[t]; ok {return d[1]}
     if d, ok := DataTypes[t]; ok {return d[1]}
     if d, ok := ImageTypes[t]; ok {return d[1]}
-    if d, ok := AudioTypes[t]; ok {return d[1]}
     return ""
 }
 func (t FileType) Ext() string {

@@ -7,28 +7,27 @@ import (
 	"log"
 )
 
-// Println Print message to docker/console debugging, and save it in the log file
+// Console Printc message to docker/console debugging, and save it in the log file
 // styles: afmt Colors
-func Println(msg string, styles ...string) {
+func Console(msg string, styles ...string) {
 	// for docker or console debugging
-	afmt.Println(msg, styles...)
+	afmt.Console(msg, styles...)
 	// log file is no way to display color
 	log.Println(msg)
 }
 
 func Log(msg string, a ...any) {
-	msg = fmt.Sprintf(msg+"\n", a...)
-	Println(msg)
+	Console(fmt.Sprintf(msg, a...))
 }
 
-func PrintError(err error) {
+func LogOnError(err error) {
 	if err != nil {
-		Println(err.Error())
+		Console(err.Error())
 	}
 }
 
-func PrintE(e *ae.Error) {
+func LogOn(e *ae.Error) {
 	if e != nil {
-		Println(e.String())
+		Console(e.String())
 	}
 }
