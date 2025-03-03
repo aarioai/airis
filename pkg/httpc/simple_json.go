@@ -1,8 +1,8 @@
 package httpc
 
 import (
-	"bytes"
 	"encoding/json"
+	"io"
 	"net/http"
 )
 
@@ -11,11 +11,11 @@ var (
 )
 
 func requestJsonBody(req *http.Request, target interface{}) (int, error) {
-	code, body, err := requestBody(req)
+	code, data, err := requestBody(req)
 	if err != nil {
 		return code, err
 	}
-	return code, JsonUnmarshal(body, &target)
+	return code, JsonUnmarshal(data, &target)
 }
 
 func addJsonHeaders(req *http.Request, headers []map[string]string) {
@@ -40,12 +40,8 @@ func RequestJson(method, url string, params map[string]string, headers ...map[st
 	return request(req)
 }
 
-func RequestJsonBody(target interface{}, method, url string, params map[string]string, body []byte, headers ...map[string]string) (int, error) {
-	var b *bytes.Reader
-	if len(body) > 0 {
-		b = bytes.NewReader(body)
-	}
-	req, err := http.NewRequest(method, url, b)
+func RequestJsonBody(target interface{}, method, url string, params map[string]string, data io.Reader, headers ...map[string]string) (int, error) {
+	req, err := http.NewRequest(method, url, data)
 	if err != nil {
 		return 0, err
 	}
@@ -64,14 +60,14 @@ func GetJson(target interface{}, url string, params map[string]string, headers .
 	return RequestJsonBody(target, "GET", url, params, nil, headers...)
 }
 
-func PatchJson(target interface{}, url string, body []byte, headers ...map[string]string) (int, error) {
-	return RequestJsonBody(target, "PATCH", url, nil, body, headers...)
+func PatchJson(target interface{}, url string, data io.Reader, headers ...map[string]string) (int, error) {
+	return RequestJsonBody(target, "PATCH", url, nil, data, headers...)
 }
 
-func PostJson(target interface{}, url string, body []byte, headers ...map[string]string) (int, error) {
-	return RequestJsonBody(target, "POST", url, nil, body, headers...)
+func PostJson(target interface{}, url string, data io.Reader, headers ...map[string]string) (int, error) {
+	return RequestJsonBody(target, "POST", url, nil, data, headers...)
 }
 
-func PutJson(target interface{}, url string, body []byte, headers ...map[string]string) (int, error) {
-	return RequestJsonBody(target, "PUT", url, nil, body, headers...)
+func PutJson(target interface{}, url string, data io.Reader, headers ...map[string]string) (int, error) {
+	return RequestJsonBody(target, "PUT", url, nil, data, headers...)
 }
