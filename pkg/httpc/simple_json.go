@@ -56,22 +56,22 @@ func RequestJsonBody(target interface{}, method, url string, params map[string]s
 	return requestJsonBody(req, target)
 }
 
+func DeleteJson(target interface{}, url string, params map[string]string, headers ...map[string]string) (int, error) {
+	return RequestJsonBody(target, "DELETE", url, params, nil, headers...)
+}
+
 func GetJson(target interface{}, url string, params map[string]string, headers ...map[string]string) (int, error) {
 	return RequestJsonBody(target, "GET", url, params, nil, headers...)
+}
+
+func PatchJson(target interface{}, url string, body []byte, headers ...map[string]string) (int, error) {
+	return RequestJsonBody(target, "PATCH", url, nil, body, headers...)
 }
 
 func PostJson(target interface{}, url string, body []byte, headers ...map[string]string) (int, error) {
 	return RequestJsonBody(target, "POST", url, nil, body, headers...)
 }
 
-func DeleteJson(target interface{}, url string, params map[string]string, headers ...map[string]string) (int, error) {
-	return RequestJsonBody(target, "DELETE", url, params, nil, headers...)
-}
-
 func PutJson(target interface{}, url string, body []byte, headers ...map[string]string) (int, error) {
 	return RequestJsonBody(target, "PUT", url, nil, body, headers...)
-}
-
-func PatchJson(target interface{}, url string, body []byte, headers ...map[string]string) (int, error) {
-	return RequestJsonBody(target, "PATCH", url, nil, body, headers...)
 }
