@@ -35,7 +35,7 @@ func New(app *core.App) *Cache {
 // @doc https://pkg.go.dev/github.com/redis/go-redis/v9#Client.Close
 // It is rare to Close a Client, as the Client is meant to be long-lived and shared between many goroutines.
 func (h *Cache) rdb(ctx context.Context) (*redis.Client, bool) {
-	cli, e := driver.NewRedis(h.app, conf.RedisConfigSection)
+	cli, e := driver.NewRedisPool(h.app, conf.RedisConfigSection)
 	if e != nil {
 		h.app.Log.Error(ctx, e.Text())
 		return nil, false
@@ -43,7 +43,7 @@ func (h *Cache) rdb(ctx context.Context) (*redis.Client, bool) {
 	return cli, true
 }
 func (h *Cache) persistentRdb(ctx context.Context) (*redis.Client, bool) {
-	cli, e := driver.NewRedis(h.app, conf.PersistentRedisConfigSection)
+	cli, e := driver.NewRedisPool(h.app, conf.PersistentRedisConfigSection)
 	if !h.app.Check(ctx, e) {
 		return nil, false
 	}

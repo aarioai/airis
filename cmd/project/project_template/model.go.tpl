@@ -27,7 +27,7 @@ func New(app *core.App) *Model {
 }
 
 func (m *Model) db() *sqlhelper.DB {
-	return sqlhelper.AliveDriver(driver.NewMysql(m.app, conf.MysqlConfigSection))
+	return sqlhelper.AliveDriver(driver.NewMysqlPool(m.app, conf.MysqlConfigSection))
 }
 
 
