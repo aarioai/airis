@@ -1,7 +1,7 @@
 package ae
 
 import (
-	"github.com/aarioai/airis/aa/airis"
+	"github.com/aarioai/airis/aa/acontext"
 	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/aarioai/airis/pkg/types"
 	"github.com/aarioai/airis/pkg/utils"
@@ -109,7 +109,7 @@ func (e *Error) WithTraceInfo(ctx iris.Context) *Error {
 		log.Println("[error] failed to change trace info to a locked error")
 		return e
 	}
-	e.TraceInfo = airis.TraceInfo(ctx)
+	e.TraceInfo = acontext.TraceInfo(ctx)
 	return e
 }
 

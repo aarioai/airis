@@ -3,8 +3,8 @@ package response
 import (
 	"errors"
 	"fmt"
+	"github.com/aarioai/airis/aa/acontext"
 	"github.com/aarioai/airis/aa/ae"
-	"github.com/aarioai/airis/aa/airis"
 	"github.com/aarioai/airis/aa/httpsvr/request"
 	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/kataras/iris/v12"
@@ -116,7 +116,7 @@ func (w *Writer) ContentType() string {
 		return ct
 	}
 	// ② 读取通过middleware统一对ictx设置的
-	ct = w.ictx.Values().GetString(airis.CtxContentType)
+	ct = w.ictx.Values().GetString(acontext.CtxContentType)
 	if ct != "" {
 		w.WithHeader("Content-Type", ct)
 		return ct

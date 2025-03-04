@@ -2,7 +2,7 @@ package request
 
 import (
 	"context"
-	"github.com/aarioai/airis/aa/airis"
+	"github.com/aarioai/airis/aa/acontext"
 	"github.com/kataras/iris/v12"
 	"mime/multipart"
 	"net/http"
@@ -41,7 +41,7 @@ var (
 func New(ictx iris.Context) *Request {
 	req := requestPool.Get().(*Request)
 	req.ictx = ictx
-	req.ctx = airis.Context(ictx)
+	req.ctx = acontext.Context(ictx)
 	req.r = ictx.Request()
 	req.contentType = ""
 	req.userAgent = ""

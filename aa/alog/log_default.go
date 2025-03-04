@@ -3,7 +3,7 @@ package alog
 import (
 	"context"
 	"fmt"
-	"github.com/aarioai/airis/aa/airis"
+	"github.com/aarioai/airis/aa/acontext"
 	"github.com/aarioai/airis/pkg/utils"
 	"log"
 	"strings"
@@ -30,7 +30,7 @@ func NewDefaultLog(level ErrorLevel) LogInterface {
 	return xlogInstance
 }
 func format(ctx context.Context, level ErrorLevel, caller, msg string) string {
-	traceInfo := airis.TraceInfo(ctx)
+	traceInfo := acontext.TraceInfo(ctx)
 	b := strings.Builder{}
 	b.Grow(15 + len(traceInfo))
 
@@ -111,6 +111,6 @@ func (l *xlog) Print(ctx context.Context, msg string, args ...any) {
 }
 
 func (l *xlog) Trace(ctx context.Context) {
-	traceInfo := airis.TraceInfo(ctx)
+	traceInfo := acontext.TraceInfo(ctx)
 	log.Printf("[TRACE]%s %s\n", traceInfo, utils.Caller(1))
 }

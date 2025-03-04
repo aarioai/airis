@@ -1,16 +1,14 @@
-package airis
+package acontext
 
 import (
 	"context"
-	"fmt"
 	"github.com/kataras/iris/v12"
-	"runtime"
 	"strings"
 )
 
 // Context
 // 后面可以使用 ictx.Request().Context() 直接访问
-func Context(ictx iris.Context) context.Context {
+func FromIris(ictx iris.Context) context.Context {
 	// Nginx proxy_set_header X-Request-Id $request_id;
 	traceId := ictx.GetHeader("X-Request-Id")
 	// Nginx proxy_set_header X-Remote-Addr $remote_addr;
@@ -25,15 +23,6 @@ func Context(ictx iris.Context) context.Context {
 	ctx = context.WithValue(ctx, CtxRemoteUser, user)
 	ictx.ResetRequest(ictx.Request().WithContext(ctx))
 	return ctx
-}
-
-// JobContext 后台任务
-// Job 后台任务；Task 往往需要交互的任务
-func JobContext(parent context.Context) context.Context {
-	pc, file, line, _ := runtime.Caller(2)
-	// 这个和log 的caller并不相同。这里仅表示context位置，并非日志caller调用位置
-	traceId := fmt.Sprintf("%s:%d.%s", file, line, runtime.FuncForPC(pc).Name())
-	return context.WithValue(parent, CtxTraceId, traceId)
 }
 
 func TraceInfo(ctx context.Context) string {

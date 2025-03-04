@@ -8,8 +8,6 @@ import (
 	"github.com/aarioai/airis/pkg/afmt"
 )
 
-type Context context.Context // global context with cancel
-
 type App struct {
 	Config *aconfig.Config
 	Log    alog.LogInterface
