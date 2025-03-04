@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	StartPrefix = "<start> "
-	StopPrefix  = "<stop> "
+	StartPrefix = "start "
+	StopPrefix  = "stop "
 )
 
 // Console Printc message to docker/console debugging, and save it in the log file
@@ -35,6 +35,18 @@ func LogOn(e *ae.Error) {
 	if e != nil {
 		Console(e.String())
 	}
+}
+
+func Alerting(msg string, args ...any) {
+	Console(afmt.Sprintf(msg, args...), afmt.Red)
+}
+
+func Warning(msg string, args ...any) {
+	Console(afmt.Sprintf(msg, args...), afmt.Yellow)
+}
+
+func Information(msg string, args ...any) {
+	Console(afmt.Sprintf(msg, args...), afmt.Magenta)
 }
 
 func Start(name string, args ...any) {
