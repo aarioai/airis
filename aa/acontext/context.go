@@ -9,6 +9,14 @@ import (
 
 type Context context.Context // global context with cancel
 
+func WithTrace(parent Context) Context {
+	pc, file, line, _ := runtime.Caller(2)
+	traceId := fmt.Sprintf("%s:%d.%s", file, line, runtime.FuncForPC(pc).Name())
+	return WithValue(parent, CtxTraceId, traceId)
+}
+
+// alias to context
+
 func Background() Context {
 	return context.Background()
 }
@@ -45,10 +53,4 @@ func WithTimeoutCause(parent Context, timeout time.Duration, cause error) (Conte
 }
 func WithValue(parent Context, key, val any) Context {
 	return context.WithValue(parent, key, val)
-}
-
-func WithTrace(parent Context) interface{} {
-	pc, file, line, _ := runtime.Caller(2)
-	traceId := fmt.Sprintf("%s:%d.%s", file, line, runtime.FuncForPC(pc).Name())
-	return context.WithValue(parent, CtxTraceId, traceId)
 }
