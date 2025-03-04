@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	StartPrefix = "start "
-	StopPrefix  = "stop "
+	StartPrefix = "start: "
+	StopPrefix  = "stop: "
 )
 
 // Console Printc message to docker/console debugging, and save it in the log file
