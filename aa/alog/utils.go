@@ -7,6 +7,11 @@ import (
 	"log"
 )
 
+var (
+	StartPrefix = "<start> "
+	StopPrefix  = "<stop> "
+)
+
 // Console Printc message to docker/console debugging, and save it in the log file
 // styles: afmt Colors
 func Console(msg string, styles ...string) {
@@ -30,4 +35,12 @@ func LogOn(e *ae.Error) {
 	if e != nil {
 		Console(e.String())
 	}
+}
+
+func Start(name string) {
+	Console(StartPrefix+name, afmt.Green)
+}
+
+func Stop(name string) {
+	Console(StopPrefix+name, afmt.Red)
 }
