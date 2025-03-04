@@ -3,7 +3,7 @@ package model
 import (
 	"github.com/aarioai/airis-driver/driver"
 	"github.com/aarioai/airis-driver/driver/sqlhelper"
-	"github.com/aarioai/airis/core"
+	"github.com/aarioai/airis/aa"
 	"{{APP_BASE}}/conf"
 	"sync"
 	"time"

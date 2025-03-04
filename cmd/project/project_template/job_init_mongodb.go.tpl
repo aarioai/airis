@@ -4,9 +4,9 @@ import (
 	"context"
 	"github.com/aarioai/airis-driver/driver/index"
     "github.com/aarioai/airis-driver/driver/mongodbhelper"
-	"github.com/aarioai/airis/core"
-	"github.com/aarioai/airis/core/ae"
-	"github.com/aarioai/airis/core/helpers/debug"
+	"github.com/aarioai/airis/aa"
+	"github.com/aarioai/airis/aa/ae"
+	"github.com/aarioai/airis/aa/helpers/debug"
 	"{{APP_BASE}}/conf"
 )
 

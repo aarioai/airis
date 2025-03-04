@@ -2,7 +2,7 @@ package {{MODULE_NAME}}
 
 import (
 	"github.com/aarioai/airis-driver/driver/mongodbhelper"
-	"github.com/aarioai/airis/core"
+	"github.com/aarioai/airis/aa"
 	"{{APP_BASE}}/cache"
 	"{{APP_BASE}}/module/{{MODULE_NAME}}/model"
 	"{{APP_BASE}}/service"

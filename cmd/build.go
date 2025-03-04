@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/aarioai/airis/core/ae"
+	"github.com/aarioai/airis/aa/ae"
 	"github.com/aarioai/airis/pkg/afmt"
 	"os"
 	"path"
@@ -88,8 +88,8 @@ func main() {
 	root := flag.String("root", "../", "root of airis")
 	flag.StringVar(&aaJsFile, "js", "", "path to generated filetype.js")
 	flag.Parse()
-	jsonFile = path.Join(*root, "core/aenum/filetype.jsonp")
-	dstFile = path.Join(*root, "core/aenum/filetype_readonly.go")
+	jsonFile = path.Join(*root, "aa/aenum/filetype.jsonp")
+	dstFile = path.Join(*root, "aa/aenum/filetype_readonly.go")
 
 	b, err := readJsonFile(jsonFile)
 	if err != nil {

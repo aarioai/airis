@@ -2,7 +2,7 @@ package entity
 
 import (
 	"github.com/aarioai/airis-driver/driver/index"
-	"github.com/aarioai/airis/core/atype"
+	"github.com/aarioai/airis/aa/atype"
 )
 
 type SqlDemo struct {

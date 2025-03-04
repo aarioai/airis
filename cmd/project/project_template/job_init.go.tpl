@@ -2,8 +2,8 @@ package job
 
 import (
 	"context"
-	"github.com/aarioai/airis/core"
-	"github.com/aarioai/airis/core/helpers/debug"
+	"github.com/aarioai/airis/aa"
+	"github.com/aarioai/airis/aa/helpers/debug"
 )
 
 func Init(app *core.App, profile *debug.Profile) {
