@@ -44,8 +44,17 @@ const MaxUintLen = 10   // 0 ~ 4294967295
 const MaxInt64Len = 20  // -9223372036854775808 ~ 9223372036854775807
 const MaxUint64Len = 20 // 0 ~ 18446744073709551615
 
-// Ref returns the reference to the variable
+// Ref return the reference to the variable
 func Ref[T any](n T) *T {
+	return &n
+}
+
+// RefNz return the reference to the variable, return nil when the variable is zero
+func RefNz[T ~byte | ~rune | ~string | Number](n T) *T {
+	var zero T
+	if n == zero {
+		return nil
+	}
 	return &n
 }
 
