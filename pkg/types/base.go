@@ -44,9 +44,21 @@ const MaxUintLen = 10   // 0 ~ 4294967295
 const MaxInt64Len = 20  // -9223372036854775808 ~ 9223372036854775807
 const MaxUint64Len = 20 // 0 ~ 18446744073709551615
 
-/*
-在Go语言中，一个any类型的变量包含了2个指针，一个指针指向值的在编译时确定的类型，另外一个指针指向实际的值。
-*/
+// Ref returns the reference to the variable
+func Ref[T any](n T) *T {
+	return &n
+}
+
+// Deref dereference a pointer to its value. return zero on the pointer is nil
+func Deref[T any](n *T) T {
+	if n == nil {
+		var zero T
+		return zero
+	}
+	return *n
+}
+
+// IsNil 在Go语言中，一个any类型的变量包含了2个指针，一个指针指向值的在编译时确定的类型，另外一个指针指向实际的值。
 func IsNil(x any) bool {
 	// @warn 断言和反射性能不是特别好，如果不得已再使用，控制使用有助于提升程序性能。
 	if x == nil {
@@ -99,4 +111,15 @@ func IsEmpty(v any) bool {
 }
 func NotEmpty(v any) bool {
 	return !IsEmpty(v)
+}
+
+// IsUnsigned 判断类型是否为无符号整数
+func IsUnsigned[T constraints.Integer](_ T) bool {
+	var zero T
+	switch any(zero).(type) {
+	case uint8, uint16, uint32, uint64:
+		return true
+	default:
+		return false
+	}
 }

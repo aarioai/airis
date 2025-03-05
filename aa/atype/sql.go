@@ -399,13 +399,18 @@ func NewDate(d string, loc *time.Location) Date {
 	}
 	return Date(d)
 }
-func ToDate(t time.Time) Date { return Date(t.Format("2006-01-02")) }
+func ToDate(t *time.Time) Date {
+	if t == nil || t.IsZero() {
+		return MinDate
+	}
+	return Date(t.Format("2006-01-02"))
+}
 func (d Date) Valid() bool {
 	return len(d) == 10 && d != MinDate && d != MaxDate && d != "1970-01-01"
 }
 func (d Date) String() string { return string(d) }
 func (d Date) Time(loc *time.Location) (time.Time, error) {
-	if d == MinDate {
+	if !d.Valid() {
 		return time.Time{}, errors.New("min date")
 	}
 	return time.ParseInLocation("2006-01-02", string(d), loc)
@@ -435,7 +440,7 @@ func (d Date) Ymd() YMD {
 	return YMD(n)
 }
 func (d Date) Int64(loc *time.Location) int64 {
-	if d == MinDate {
+	if !d.Valid() {
 		return 0
 	}
 	tm, err := time.ParseInLocation("2006-01-02", string(d), loc)
@@ -445,7 +450,7 @@ func (d Date) Int64(loc *time.Location) int64 {
 	return tm.Unix()
 }
 func (d Date) Unix(loc *time.Location) UnixTime {
-	if d == MinDate {
+	if !d.Valid() {
 		return 0
 	}
 	t, _ := d.Time(loc)
@@ -464,9 +469,15 @@ func NewDatetime(d string, loc *time.Location) Datetime {
 	return Datetime(d)
 }
 func Now(loc *time.Location) Datetime {
-	return ToDatetime(time.Now().In(loc))
+	t := time.Now().In(loc)
+	return ToDatetime(&t)
 }
-func ToDatetime(t time.Time) Datetime                     { return Datetime(t.Format("2006-01-02 15:04:05")) }
+func ToDatetime(t *time.Time) Datetime {
+	if t == nil || t.IsZero() {
+		return MinDatetime
+	}
+	return Datetime(t.Format("2006-01-02 15:04:05"))
+}
 func UnixToDatetime(u int64, loc *time.Location) Datetime { return NewUnixTime(u).Datetime(loc) }
 
 func (d Datetime) Valid() bool {
@@ -474,7 +485,7 @@ func (d Datetime) Valid() bool {
 }
 func (d Datetime) String() string { return string(d) }
 func (d Datetime) Time(loc *time.Location) (time.Time, error) {
-	if d == MinDatetime {
+	if !d.Valid() {
 		return time.Time{}, errors.New("min datetime")
 	}
 	return time.ParseInLocation("2006-01-02 15:04:05", string(d), loc)
@@ -499,7 +510,7 @@ func (d Datetime) OrNow(loc *time.Location) Datetime {
 	return d
 }
 func (d Datetime) Int64(loc *time.Location) int64 {
-	if d == MinDatetime {
+	if !d.Valid() {
 		return 0
 	}
 	tm, err := time.ParseInLocation("2006-01-02 15:04:05", string(d), loc)
@@ -509,7 +520,7 @@ func (d Datetime) Int64(loc *time.Location) int64 {
 	return tm.Unix()
 }
 func (d Datetime) Unix(loc *time.Location) UnixTime {
-	if d == MinDatetime {
+	if !d.Valid() {
 		return 0
 	}
 	t, _ := d.Time(loc)
@@ -524,13 +535,15 @@ func (u UnixTime) Date(loc *time.Location) Date {
 	if u == 0 {
 		return MinDate
 	}
-	return ToDate(time.Unix(u.Int64(), 0).In(loc))
+	t := time.Unix(u.Int64(), 0).In(loc)
+	return ToDate(&t)
 }
 func (u UnixTime) Datetime(loc *time.Location) Datetime {
 	if u == 0 {
 		return MinDatetime
 	}
-	return ToDatetime(time.Unix(u.Int64(), 0).In(loc))
+	t := time.Unix(u.Int64(), 0).In(loc)
+	return ToDatetime(&t)
 }
 
 func ToSepStrings(elems []string, delimiters ...string) SepStrings {
