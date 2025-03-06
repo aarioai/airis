@@ -245,6 +245,7 @@ main(){
 
     createJobInitFile "$app_root" "$app_name"
     createJobInitMongodbFile "$app_root" "$app_base"
+    createCommonServiceFile "${app_root}/job" "$app_base"
     createBaseServiceFile "${app_root}/job/queue" "$app_base"
     createCommonServiceFile "${app_root}/job/queue/consumer" "$app_base"
 
