@@ -10,7 +10,7 @@ import (
 )
 
 type Model struct {
-	app *core.App
+	app *aa.App
 	loc *time.Location
 }
 
@@ -19,7 +19,7 @@ var (
 	modelObj           *Model
 )
 
-func New(app *core.App) *Model {
+func New(app *aa.App) *Model {
 	modelOnce.Do(func() {
 		modelObj = &Model{app: app, loc: app.Config.TimeLocation}
 	})

@@ -14,7 +14,7 @@ import (
 )
 
 type Service struct {
-	app     *core.App
+	app     *aa.App
 	loc     *time.Location
 	private *private.Service
 	h       *cache.Cache
@@ -29,7 +29,7 @@ var (
 	svcObj  *Service
 )
 
-func New(app *core.App) *Service {
+func New(app *aa.App) *Service {
 	svcOnce.Do(func() {
 		svcObj = &Service{
 		    app:        app,

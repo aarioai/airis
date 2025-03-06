@@ -61,6 +61,8 @@ main(){
             local protoc_version="${1-"$PROTOC_VERSION"}"
             "${repo_cmd}"/project/protoc.sh "$ROOT_DIR" "$protoc_version"
             ;;
+        *)
+            panic "invalid command: ${cmd}"
     esac
 }
 

@@ -12,7 +12,7 @@ import (
 )
 
 type Controller struct {
-	app   *core.App
+	app   *aa.App
 	loc   *time.Location
 	h     *cache.Cache
 	mongo *mongodbhelper.Model
@@ -26,7 +26,7 @@ var (
 	ctrlObj  *Controller
 )
 
-func New(app *core.App) *Controller {
+func New(app *aa.App) *Controller {
 	ctrlOnce.Do(func() {
 	    s := service.New(app)
 		ctrlObj = &Controller{

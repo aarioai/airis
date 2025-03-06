@@ -11,7 +11,7 @@ import (
 )
 
 type Cache struct {
-	app *core.App
+	app *aa.App
 	loc *time.Location
 }
 
@@ -20,7 +20,7 @@ var (
 	cacheObj  *Cache
 )
 
-func New(app *core.App) *Cache {
+func New(app *aa.App) *Cache {
 	cacheOnce.Do(func() {
 		cacheObj = &Cache{
 			app: app,

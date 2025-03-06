@@ -13,7 +13,7 @@ var (
 	mongoIndexEntities []index.Entity
 )
 
-func (s *Service) initMongodb(ctx acontext.Context, app *core.App, profile *debug.Profile) {
+func (s *Service) initMongodb(ctx acontext.Context, profile *debug.Profile) {
 	profile.Mark("init mongodb: %s", conf.MongoDBConfigSection)
 	mongoObj := mongodbhelper.NewDB(s.app, conf.MongoDBConfigSection)
 	// create table and indexes

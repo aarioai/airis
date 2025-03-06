@@ -11,7 +11,7 @@ import (
 )
 
 type Service struct {
-	app   *core.App
+	app   *aa.App
 	loc   *time.Location
 	h     *cache.Cache
 	mongo *mongodbhelper.Model
@@ -24,7 +24,7 @@ var (
 	svcObj  *Service
 )
 
-func New(app *core.App) *Service {
+func New(app *aa.App) *Service {
 	svcOnce.Do(func() {
 		s := service.New(app)
 		svcObj = &Service{

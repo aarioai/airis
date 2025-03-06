@@ -6,7 +6,7 @@ import (
 )
 
 type Middleware struct {
-	app *core.App
+	app *aa.App
 }
 
 var (
@@ -14,7 +14,7 @@ var (
 	mwObj  *Middleware
 )
 
-func NewMiddleware(app *core.App) *Middleware {
+func NewMiddleware(app *aa.App) *Middleware {
 	mwOnce.Do(func() {
 		mwObj = &Middleware{
 			app: app,
