@@ -289,6 +289,20 @@ func (w *Writer) WriteOK() (int, error) {
 		Data: nil,
 	})
 }
+func (w *Writer) WriteCreated(object []byte) (int, error) {
+	return w.writeDTO(Body{
+		Code: ae.Created,
+		Msg:  "Created",
+		Data: object,
+	})
+}
+func (w *Writer) WriteAccepted() (int, error) {
+	return w.writeDTO(Body{
+		Code: ae.Accepted,
+		Msg:  "Accepted",
+		Data: nil,
+	})
+}
 func (w *Writer) WriteCode(code int) (int, error) {
 	return w.writeDTO(Body{
 		Code: code,

@@ -135,8 +135,7 @@ createModuleControllerFile(){
 createModules(){
     local app_root="$1"
     local app_base="$2"
-    shift
-    shift
+    shift 2
     local modules=("${COMMON_MODULES[@]}")
     if [ $# -gt 0 ]; then
         modules=("${modules[@]}" "$@")
@@ -220,8 +219,7 @@ main(){
 
     local project_root="$1"
     local app_name="$2"
-    shift
-    shift
+    shift 2
     local project_name="${project_root##*/}"
     local project_base="project/${project_name}"
 

@@ -9,4 +9,13 @@ func (s *Service) Init(ctx acontext.Context, profile *debug.Profile) {
 	profile.Mark("job init app:{{APP_NAME}}")
 
 	s.initMongodb(ctx, profile)
+
+	//go func() {
+	//	for {
+	//		select {
+	//		case <-ctx.Done():
+	//			return
+	//		}
+	//	}
+	//}()
 }

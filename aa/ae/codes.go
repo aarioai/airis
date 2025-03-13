@@ -10,8 +10,12 @@ import (
 // HTTP 扩展状态码
 const (
 	// 2xx 成功
-	OK        = http.StatusOK        // 请求成功
-	NoContent = http.StatusNoContent // 请求成功但无内容返回
+	OK             = http.StatusOK             // 请求成功。可用于 GET/POST/DELETE/PUT/PATCH 等，data 返回标准（如json）数据
+	Created        = http.StatusCreated        // 创建成功，body 会返回新建的对象（非标准数据类型）。通常用于POST，data 返回特殊字节流
+	Accepted       = http.StatusAccepted       // 创建的请求操作成功（不代表创建成功），异步创建过程开始，通常用于POST后异步创建
+	NoContent      = http.StatusNoContent      // 请求成功但无内容返回，通常用于DELETE/PUT/PATCH
+	ResetContent   = http.StatusResetContent   // 请求成功，服务端做了更新，要求客户端刷新页面，重新拉取接口
+	PartialContent = http.StatusPartialContent // 断点续传会使用到
 
 	NotModified = http.StatusNotModified
 
