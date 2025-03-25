@@ -457,7 +457,6 @@ func (d Date) Unix(loc *time.Location) UnixTime {
 	return UnixTime(t.Unix())
 }
 
-// time.Now().In()  loc 直接通过 in 传递
 func NewDatetime(d string, loc *time.Location) Datetime {
 	if d == "" || d == MinDatetime.String() {
 		return MinDatetime
@@ -469,14 +468,20 @@ func NewDatetime(d string, loc *time.Location) Datetime {
 	return Datetime(d)
 }
 func Now(loc *time.Location) Datetime {
-	t := time.Now().In(loc)
-	return ToDatetime(&t)
+	return ToDatetime(time.Now(), loc)
 }
-func ToDatetime(t *time.Time) Datetime {
+
+func ToDatetime(t time.Time, loc *time.Location) Datetime {
+	if t.IsZero() {
+		return MinDatetime
+	}
+	return Datetime(t.In(loc).Format("2006-01-02 15:04:05"))
+}
+func ToDatetime2(t *time.Time, loc *time.Location) Datetime {
 	if t == nil || t.IsZero() {
 		return MinDatetime
 	}
-	return Datetime(t.Format("2006-01-02 15:04:05"))
+	return ToDatetime(*t, loc)
 }
 func UnixToDatetime(u int64, loc *time.Location) Datetime { return NewUnixTime(u).Datetime(loc) }
 
@@ -542,8 +547,8 @@ func (u UnixTime) Datetime(loc *time.Location) Datetime {
 	if u == 0 {
 		return MinDatetime
 	}
-	t := time.Unix(u.Int64(), 0).In(loc)
-	return ToDatetime(&t)
+	t := time.Unix(u.Int64(), 0)
+	return ToDatetime(t, loc)
 }
 
 func ToSepStrings(elems []string, delimiters ...string) SepStrings {
