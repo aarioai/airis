@@ -6,7 +6,6 @@ import (
 	"github.com/aarioai/airis/pkg/types"
 	"github.com/aarioai/airis/pkg/utils"
 	"github.com/kataras/iris/v12"
-	"log"
 	"strings"
 )
 
@@ -21,13 +20,13 @@ type Error struct {
 }
 
 // New 使用错误码和消息创建 Error
-func New(code int, msgs ...any) *Error {
+func New(code int, message ...any) *Error {
 	e := &Error{
 		Code:   code,
 		Caller: utils.Caller(1),
 	}
 
-	if msg := afmt.SprintfArgs(msgs); msg != "" {
+	if msg := afmt.SprintfArgs(message); msg != "" {
 		e.Msg = msg
 	} else {
 		e.Msg = CodeText(code)
@@ -52,6 +51,22 @@ func NewError(err error, details ...any) *Error {
 	}
 	return NewE(err.Error()).WithCaller(1).WithDetail(details...)
 }
+func (e *Error) Clone() *Error {
+	return &Error{
+		Code:      e.Code,
+		Msg:       e.Msg,
+		Caller:    e.Caller,
+		Detail:    e.Detail,
+		TraceInfo: e.TraceInfo,
+	}
+}
+
+func (e *Error) handleLock() *Error {
+	if e.locked {
+		return e.Clone()
+	}
+	return e
+}
 
 // Lock 锁定后不可再修改或复用，一般作为常量使用
 func (e *Error) Lock() *Error {
@@ -63,54 +78,41 @@ func (e *Error) Unlock() *Error {
 	return e
 }
 func (e *Error) WithMsg(format string, args ...any) *Error {
-	if e.locked {
-		Panic("unable change locked error")
-		return e
-	}
-	e.Msg = afmt.Sprintf(format, args...)
-	return e
+	newE := e.handleLock()
+	newE.Msg = afmt.Sprintf(format, args...)
+	return newE
 }
 
 // AppendMsg 尝试添加消息
-func (e *Error) AppendMsg(msgs ...any) *Error {
-	msg := afmt.SprintfArgs(msgs)
-	if e.locked {
-		log.Printf("[error] failed to append message %s to a locked error\n", msg)
+func (e *Error) AppendMsg(message ...any) *Error {
+	msg := afmt.SprintfArgs(message)
+	if msg == "" {
 		return e
 	}
 
-	if msg != "" {
-		e.Msg += " - " + msg
-	}
-	return e
+	newE := e.handleLock()
+	newE.Msg += " - " + msg
+	return newE
 }
 
 // WithCaller 添加调用者信息
 func (e *Error) WithCaller(skip int) *Error {
-	if e.locked {
-		log.Printf("[error] failed to change caller(%d) to a locked error\n", skip)
-		return e
-	}
-	e.Caller = utils.Caller(skip)
-	return e
+	newE := e.handleLock()
+	newE.Caller = utils.Caller(skip)
+	return newE
 }
 
 func (e *Error) WithDetail(detail ...any) *Error {
+	newE := e.handleLock()
 	s := afmt.SprintfArgs(detail)
-	if e.locked {
-		log.Printf("[error] failed to change locked Error with detail: %s\n", s)
-		return e
-	}
-	e.Detail = s
-	return e
+	newE.Detail = s
+	return newE
 }
+
 func (e *Error) WithTraceInfo(ctx iris.Context) *Error {
-	if e.locked {
-		log.Println("[error] failed to change trace info to a locked error")
-		return e
-	}
-	e.TraceInfo = acontext.TraceInfo(ctx)
-	return e
+	newE := e.handleLock()
+	newE.TraceInfo = acontext.TraceInfo(ctx)
+	return newE
 }
 
 // String 输出错误信息，最好不要使用 Error，避免跟 error 一致，导致人写的时候发生失误
