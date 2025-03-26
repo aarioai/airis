@@ -1,6 +1,6 @@
 /** @note this is an auto-generated file, do not modify it! */
 
-/** @typedef {".mpeg"|"video/mpeg"|".mp4"|"video/mp4"|".3gp"|"video/3gpp"|".3g2"|"video/3gpp2"|".webm"|"video/webm"|".wav"|"video/x-wav"|".avi"|"video/x-msvideo"|".mov"|"video/quicktime"|".pdf"|"application/pdf"|".txt"|"text/plain"|".md"|"text/markdown"|".docx"|"application/vnd.openxmlformats-officedocument.wordprocessingml.document"|".xls"|"application/vnd.ms-excel"|".xlsx"|"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"|".doc"|"application/msword"|".ppt"|"application/vnd.ms-powerpoint"|".pptx"|"application/vnd.openxmlformats-officedocument.presentationml.presentation"|".gz"|"application/gzip"|"application/x-gzip"|".zip"|"application/zip"|"application/x-zip-compressed"|"multipart/x-zip"|".rar"|"application/vnd.rar"|"application/x-rar-compressed"|".bz"|"application/x-bzip"|".bz2"|"application/x-bzip2"|".json"|"application/json"|".svg"|"image/svg+xml"|".jpg"|"image/jpeg"|".jpeg"|".png"|"image/png"|".gif"|"image/gif"|".webp"|"image/webp"|".heic"|"image/heic"|".heif"|".avci"|"image/heif"|".ico"|"image/vnd.microsoft.icon"|"image/x-icon"|".mp3"|"audio/mpeg"|"audio/mp3"|"audio/3gpp"|"audio/3gpp2"|".aiff"|"audio/aiff"|".aif"|".aifc"|"audio/x-aiff"|"audio/wav"|"audio/webm"} AaFileTypeMime */
+/** @typedef {".mov"|"video/quicktime"|".mpeg"|"video/mpeg"|".mp4"|"video/mp4"|".3gp"|"video/3gpp"|".3g2"|"video/3gpp2"|".webm"|"video/webm"|".wav"|"video/x-wav"|".avi"|"video/x-msvideo"|".pdf"|"application/pdf"|".doc"|"application/msword"|".xlsx"|"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"|".ppt"|"application/vnd.ms-powerpoint"|".pptx"|"application/vnd.openxmlformats-officedocument.presentationml.presentation"|".txt"|"text/plain"|".md"|"text/markdown"|".docx"|"application/vnd.openxmlformats-officedocument.wordprocessingml.document"|".xls"|"application/vnd.ms-excel"|".zip"|"application/zip"|"application/x-zip-compressed"|"multipart/x-zip"|".rar"|"application/vnd.rar"|"application/x-rar-compressed"|".bz"|"application/x-bzip"|".bz2"|"application/x-bzip2"|".gz"|"application/gzip"|"application/x-gzip"|".json"|"application/json"|".gif"|"image/gif"|".webp"|"image/webp"|".heic"|"image/heic"|".heif"|".avci"|"image/heif"|".ico"|"image/vnd.microsoft.icon"|"image/x-icon"|".svg"|"image/svg+xml"|".jpg"|"image/jpeg"|".jpeg"|".png"|"image/png"|".mp3"|"audio/mpeg"|"audio/mp3"|"audio/3gpp"|"audio/3gpp2"|".aiff"|"audio/aiff"|".aif"|".aifc"|"audio/x-aiff"|"audio/wav"|"audio/webm"} AaFileTypeMime */
 
 class AaFileType {
     /** @enum */
@@ -44,23 +44,6 @@ class AaFileType {
         Json        : 10000,
     }
     static Mimes = {
-        Image : {
-            Gif         : [".gif", "image/gif"],
-            Heic        : [".heic", "image/heic", ".heif", ".avci", "image/heif"],
-            Ico         : [".ico", "image/vnd.microsoft.icon", "image/x-icon"],
-            Jpeg        : [".jpg", "image/jpeg", ".jpeg"],
-            Png         : [".png", "image/png"],
-            Svg         : [".svg", "image/svg+xml"],
-            Webp        : [".webp", "image/webp"],
-        },
-        Audio : {
-            Aiff        : [".aiff", "audio/aiff", ".aif", ".aifc", "audio/x-aiff"],
-            Audio3gpp   : [".3gp", "audio/3gpp"],
-            Audio3gpp2  : [".3g2", "audio/3gpp2"],
-            AudioWav    : [".webm", "audio/webm"],
-            AudioWebm   : [".wav", "audio/wav"],
-            Mp3         : [".mp3", "audio/mpeg", "audio/mp3"],
-        },
         Video : {
             Avi         : [".avi", "video/x-msvideo"],
             Mov         : [".mov", "video/quicktime"],
@@ -91,6 +74,23 @@ class AaFileType {
         },
         Data : {
             Json        : [".json", "application/json"],
+        },
+        Image : {
+            Gif         : [".gif", "image/gif"],
+            Heic        : [".heic", "image/heic", ".heif", ".avci", "image/heif"],
+            Ico         : [".ico", "image/vnd.microsoft.icon", "image/x-icon"],
+            Jpeg        : [".jpg", "image/jpeg", ".jpeg"],
+            Png         : [".png", "image/png"],
+            Svg         : [".svg", "image/svg+xml"],
+            Webp        : [".webp", "image/webp"],
+        },
+        Audio : {
+            Aiff        : [".aiff", "audio/aiff", ".aif", ".aifc", "audio/x-aiff"],
+            Audio3gpp   : [".3gp", "audio/3gpp"],
+            Audio3gpp2  : [".3g2", "audio/3gpp2"],
+            AudioWav    : [".webm", "audio/webm"],
+            AudioWebm   : [".wav", "audio/wav"],
+            Mp3         : [".mp3", "audio/mpeg", "audio/mp3"],
         },
     }
     contentType

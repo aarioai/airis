@@ -40,6 +40,14 @@ const (
     Gzip        FileType = 7004
     Json        FileType = 10000
 )
+var AudioTypes = map[FileType][]string{
+    Aiff        : {".aiff", "audio/aiff", ".aif", ".aifc", "audio/x-aiff"},
+    Audio3gpp   : {".3gp", "audio/3gpp"},
+    Audio3gpp2  : {".3g2", "audio/3gpp2"},
+    AudioWav    : {".webm", "audio/webm"},
+    AudioWebm   : {".wav", "audio/wav"},
+    Mp3         : {".mp3", "audio/mpeg", "audio/mp3"},
+}
 var VideoTypes = map[FileType][]string{
     Avi         : {".avi", "video/x-msvideo"},
     Mov         : {".mov", "video/quicktime"},
@@ -80,20 +88,12 @@ var ImageTypes = map[FileType][]string{
     Svg         : {".svg", "image/svg+xml"},
     Webp        : {".webp", "image/webp"},
 }
-var AudioTypes = map[FileType][]string{
-    Aiff        : {".aiff", "audio/aiff", ".aif", ".aifc", "audio/x-aiff"},
-    Audio3gpp   : {".3gp", "audio/3gpp"},
-    Audio3gpp2  : {".3g2", "audio/3gpp2"},
-    AudioWav    : {".webm", "audio/webm"},
-    AudioWebm   : {".wav", "audio/wav"},
-    Mp3         : {".mp3", "audio/mpeg", "audio/mp3"},
-}
+func NewVideoType(mime string) (FileType, bool) {return ParseFileType(mime, VideoTypes)}
+func NewDocumentType(mime string) (FileType, bool) {return ParseFileType(mime, DocumentTypes)}
 func NewCompressedType(mime string) (FileType, bool) {return ParseFileType(mime, CompressedTypes)}
 func NewDataType(mime string) (FileType, bool) {return ParseFileType(mime, DataTypes)}
 func NewImageType(mime string) (FileType, bool) {return ParseFileType(mime, ImageTypes)}
 func NewAudioType(mime string) (FileType, bool) {return ParseFileType(mime, AudioTypes)}
-func NewVideoType(mime string) (FileType, bool) {return ParseFileType(mime, VideoTypes)}
-func NewDocumentType(mime string) (FileType, bool) {return ParseFileType(mime, DocumentTypes)}
 func (t FileType) ContentType() string {
     if d, ok := ImageTypes[t]; ok {return d[1]}
     if d, ok := AudioTypes[t]; ok {return d[1]}
