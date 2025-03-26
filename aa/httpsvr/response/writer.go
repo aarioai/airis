@@ -9,7 +9,6 @@ import (
 	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/kataras/iris/v12"
 	"io"
-	"net/http"
 	"slices"
 	"sync"
 )
@@ -306,7 +305,7 @@ func (w *Writer) WriteAccepted() (int, error) {
 func (w *Writer) WriteCode(code int) (int, error) {
 	return w.writeDTO(Body{
 		Code: code,
-		Msg:  http.StatusText(code),
+		Msg:  ae.Text(code),
 	})
 }
 

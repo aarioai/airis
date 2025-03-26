@@ -58,9 +58,11 @@ const (
 )
 
 var (
+	// 自定义状态码
 	defaultCodeTexts = map[int]string{
-		NoRowsAvailable: "No rows available",
-		RetryWith:       "Retry with",
+		NoRowsAvailable: "No Rows Available",
+		RetryWith:       "Retry With",
+		ConflictWith:    "Conflict With",
 	}
 
 	// 快捷变量，使用时候不需要指定message的，其他的一般都需要指定message供调试或反馈给客户端
@@ -133,8 +135,8 @@ func NewLoopDetected(msg ...any) *Error {
 	return New(LoopDetected).AppendMsg(msg...)
 }
 
-// CodeText 获取错误码对应的文本描述
-func CodeText(code int) string {
+// Text 获取错误码对应的文本描述
+func Text(code int) string {
 	if text, ok := defaultCodeTexts[code]; ok {
 		return text
 	}

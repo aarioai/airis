@@ -29,7 +29,7 @@ func New(code int, message ...any) *Error {
 	if msg := afmt.SprintfArgs(message); msg != "" {
 		e.Msg = msg
 	} else {
-		e.Msg = CodeText(code)
+		e.Msg = Text(code)
 	}
 
 	return e

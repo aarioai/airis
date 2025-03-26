@@ -1,15 +1,28 @@
 package response
 
 import (
+	"github.com/aarioai/airis/aa/ae"
 	"github.com/kataras/iris/v12"
-	"net/http"
 )
 
-func JsonOK(ictx iris.Context, data any, opts ...iris.JSON) error {
+func JSON(ictx iris.Context, data any, opts ...iris.JSON) error {
 	d := Body{
-		Code: http.StatusOK,
+		Code: ae.OK,
 		Msg:  "OK",
 		Data: data,
+	}
+	return ictx.JSON(d, opts...)
+}
+
+func JsonOK(ictx iris.Context, opts ...iris.JSON) error {
+	return JSON(ictx, nil, opts...)
+}
+
+func JsonCode(ictx iris.Context, code int, opts ...iris.JSON) error {
+	d := Body{
+		Code: code,
+		Msg:  ae.Text(code),
+		Data: nil,
 	}
 	return ictx.JSON(d, opts...)
 }
