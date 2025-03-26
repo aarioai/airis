@@ -26,11 +26,21 @@ func JsonCode(ictx iris.Context, code int, opts ...iris.JSON) error {
 	}
 	return ictx.JSON(d, opts...)
 }
-
-func JsonE(ictx iris.Context, code int, msg string, opts ...iris.JSON) error {
+func JsonError(ictx iris.Context, code int, msg string, opts ...iris.JSON) error {
 	d := Body{
 		Code: code,
 		Msg:  msg,
+		Data: nil,
+	}
+	return ictx.JSON(d, opts...)
+}
+func JsonE(ictx iris.Context, e *ae.Error, opts ...iris.JSON) error {
+	if e == nil {
+		return JsonOK(ictx)
+	}
+	d := Body{
+		Code: e.Code,
+		Msg:  e.Msg,
 		Data: nil,
 	}
 	return ictx.JSON(d, opts...)
