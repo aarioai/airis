@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.23.6
 
 require (
-	github.com/kataras/iris/v12 v12.2.11
+	github.com/kataras/iris/v12 v12.2.10
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394
 	golang.org/x/sys v0.31.0
 	golang.org/x/text v0.23.0
