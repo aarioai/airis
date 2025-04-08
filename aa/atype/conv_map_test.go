@@ -22,6 +22,7 @@ func TestConvStrings(t *testing.T) {
 		t.Error("parse strings fail")
 	}
 }
+
 func TestConvStringMap(t *testing.T) {
 	s := `{"k":{"a":"100","b":"200"}}`
 	var x map[string]any
@@ -33,6 +34,7 @@ func TestConvStringMap(t *testing.T) {
 		t.Error("parse string map fail")
 	}
 }
+
 func TestConvComplexStringMap(t *testing.T) {
 	s := `{"k":{"a":{"b":"100"}}}`
 	var x map[string]any

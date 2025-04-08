@@ -36,7 +36,7 @@ func TestAtypeGet(t *testing.T) {
 	defer d.Close()
 	v, err := d.Get("name")
 	if err != nil {
-		t.Error("get name failed")
+		t.Fatal("get name failed")
 	}
 
 	if v.String() != "Aario" {
@@ -45,7 +45,7 @@ func TestAtypeGet(t *testing.T) {
 
 	v, err = d.Get(1)
 	if err != nil {
-		t.Error("get 1 failed")
+		t.Fatal("get 1 failed")
 	}
 
 	i, err := v.Int()
@@ -55,7 +55,7 @@ func TestAtypeGet(t *testing.T) {
 
 	v, err = d.Get("1")
 	if err != nil {
-		t.Error(`get "1" failed`)
+		t.Fatal(`get "1" failed`)
 	}
 	if v.String() != "999" {
 		t.Errorf("[\"1\"] %s != 999", v.String())
@@ -63,7 +63,7 @@ func TestAtypeGet(t *testing.T) {
 
 	v, err = d.Get("test.nation")
 	if err != nil {
-		t.Error("get test.nation failed")
+		t.Fatal("get test.nation failed")
 	}
 	if v.String() != "China" {
 		t.Errorf("test.nation %s != China", v.String())
@@ -71,7 +71,7 @@ func TestAtypeGet(t *testing.T) {
 
 	v, err = d.Get(2, "sex")
 	if err != nil {
-		t.Error("get 2.sex failed")
+		t.Fatal("get 2.sex failed")
 	}
 	if v.String() != "male" {
 		t.Errorf("2.sex %s != male", v.String())

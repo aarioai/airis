@@ -70,12 +70,14 @@ fi
 build() {
     cd "$ROOT_DIR/cmd" || panic "failed to cd $ROOT_DIR/cmd"
     info "building project..."
+    # @TODO
     go run build.go --root="$ROOT_DIR" --js="/data/Aa/proj/go/src/project/xixi/deploy/asset_src/lib_dev/aa-js/src/f_oss_filetype_readonly.js" || panic "Build failed"
 }
 
 handleUpdateMod(){
-    local today=$(date +%Y-%m-%d)
     local latest_update=''
+    local today
+    today="$(date +"%Y-%m-%d")"
     if [ -s "${MOD_UPDATE_FILE}" ]; then
         latest_update=$(cat "${MOD_UPDATE_FILE}")
     fi
@@ -83,10 +85,14 @@ handleUpdateMod(){
     if [[ "$today" = "$latest_update" ]]; then
         return 0
     fi
-
-    info "go test -u -v ./..."
-    go get -u -v ./...
-    printf '%s' "$today" > "${MOD_UPDATE_FILE}"
+    info "go get -u -v ./..."
+    if ! go get -u -v ./... >/dev/null 2>&1; then
+        warn "update go modules failed"
+    fi
+    sudo chmod a+rw "$MOD_UPDATE_FILE"
+    info "save update mod date to $MOD_UPDATE_FILE"
+    printf '%s' "$today" > "$MOD_UPDATE_FILE"
+    cat "$MOD_UPDATE_FILE"
 }
 
 pushAndUpgradeMod() {
@@ -94,19 +100,15 @@ pushAndUpgradeMod() {
 
     handleUpdateMod
 
+    info "go mod tidy"
     go mod tidy || panic "failed go mod tidy"
 
     info "go test ./..."
     go test ./... || panic "failed go test ./... failed"
 
-    if [ -z "$(git status --porcelain)" ]; then
-        echo "No changes to commit"
-        exit 0
-    fi
-
     # check there are changes or not
     if [ -z "$(git status --porcelain)" ]; then
-        echo "No changes to commit"
+        info "No changes to commit"
         exit 0
     fi
     info "committing changes..."

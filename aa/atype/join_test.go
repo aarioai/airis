@@ -6,8 +6,8 @@ import (
 )
 
 type stru struct {
-	Name string `name:"name"`
-	Age  int    `name:"age"`
+	Name string `db:"name"`
+	Age  int    `db:"age"`
 }
 
 func TestJoinTypeEnum(t *testing.T) {

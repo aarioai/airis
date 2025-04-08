@@ -159,11 +159,11 @@ func JoinByTags(u any, ty JoinType, sep string, tagname string, tags ...string) 
 }
 
 func JoinByNames(u any, ty JoinType, sep string, names ...string) string {
-	return JoinByTags(u, ty, sep, "name", names...)
+	return JoinByTags(u, ty, sep, "db", names...)
 }
 
 func JoinNamesByElements(u any, ty JoinType, sep string, eles ...string) string {
-	return JoinTagsByElements(u, ty, sep, "name", eles...)
+	return JoinTagsByElements(u, ty, sep, "db", eles...)
 }
 
 func JoinInt[T constraints.Signed](ids []T, sep string) string {
