@@ -44,6 +44,6 @@ func New(app *aa.App) *Controller {
 	return ctrlObj
 }
 
-func (s *Service) mo(t index.Entity) *mongodb.ORMS {
-	return s.mongo.ORM(t)
+func (c *Controller) mo(t index.Entity) *mongodb.ORMS {
+	return c.mongo.ORM(t)
 }
