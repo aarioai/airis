@@ -3,7 +3,6 @@ package {{PACKAGE_NAME}}
 import (
 	"github.com/aarioai/airis-driver/driver/index"
 	"github.com/aarioai/airis-driver/driver/mongodb"
-    "github.com/aarioai/airis-driver/driver/mongodbhelper"
 	"github.com/aarioai/airis/aa"
     "{{APP_BASE}}/cache"
     "{{APP_BASE}}/conf"
@@ -15,7 +14,7 @@ type Service struct {
 	app   *aa.App
 	loc   *time.Location
 	h     *cache.Cache
-	mongo *mongodbhelper.Model
+	mongo *mongodb.Model
 }
 
 var (
@@ -29,7 +28,7 @@ func New(app *aa.App) *Service {
 			app:   app,
 			loc:   app.Config.TimeLocation,
             h:     cache.New(app),
-            mongo: mongodbhelper.NewDB(app, conf.MongoDBConfigSection),
+            mongo: mongodb.NewDB(app, conf.MongoDBConfigSection),
 		}
 	})
 	return svcObj
