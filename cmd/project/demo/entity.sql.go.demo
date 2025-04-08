@@ -7,18 +7,18 @@ import (
 
 type SqlDemo struct {
 	// SQL demo:
-	Id            uint64         `name:"id"`
-	Content       atype.Text     `name:"text"`
-	Image         atype.Image    `name:"image"`
-	Images        atype.Images   `name:"images"`
-	Audio         atype.Audio    `name:"audio"`
-	Audios        atype.Audios   `name:"audio"`
-	Video         atype.Video    `name:"video"`
-	Videos        atype.Videos   `name:"video"`
-	Position      atype.Position `name:"pos" options:"no_update"`
-	EffectiveDate atype.Date     `name:"effective_date"  options:"no_update"`
-	CreatedAt     atype.Datetime `name:"created_at"`
-	UpdatedAt     atype.Datetime `name:"updated_at"`
+	Id            uint64         `db:"id"`
+	Content       atype.Text     `db:"text"`
+	Image         atype.Image    `db:"image"`
+	Images        atype.Images   `db:"images"`
+	Audio         atype.Audio    `db:"audio"`
+	Audios        atype.Audios   `db:"audio"`
+	Video         atype.Video    `db:"video"`
+	Videos        atype.Videos   `db:"video"`
+	Position      atype.Position `db:"pos" options:"no_update"`
+	EffectiveDate atype.Date     `db:"effective_date"  options:"no_update"`
+	CreatedAt     atype.Datetime `db:"created_at"`
+	UpdatedAt     atype.Datetime `db:"updated_at"`
 }
 
 func (t SqlDemo) Table() string {

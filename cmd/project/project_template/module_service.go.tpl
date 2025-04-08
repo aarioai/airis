@@ -1,6 +1,8 @@
 package {{MODULE_NAME}}
 
 import (
+	"github.com/aarioai/airis-driver/driver/index"
+	"github.com/aarioai/airis-driver/driver/mongodb"
 	"github.com/aarioai/airis-driver/driver/mongodbhelper"
 	"github.com/aarioai/airis/aa"
 	"{{APP_BASE}}/cache"
@@ -37,4 +39,8 @@ func New(app *aa.App) *Service {
 		}
 	})
 	return svcObj
+}
+
+func (s *Service) mo(t index.Entity) *mongodb.ORMS {
+	return s.mongo.ORM(t)
 }
