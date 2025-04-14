@@ -41,7 +41,7 @@ findRepoCmdDir(){
 
 main(){
     findRepoCmdDir
-    run "$ROOT_DIR" "$@"
+    run "$@"
 }
 
 main "$@"
