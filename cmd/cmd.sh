@@ -55,10 +55,12 @@ main(){
     findRepoCmdDir
     case "$cmd" in
         new|createapp|createapp.sh)
+            info "${repo_cmd}/project/createapp.sh $ROOT_DIR ${args[*]}"
             "${repo_cmd}"/project/createapp.sh "$ROOT_DIR" "${args[@]}"
             ;;
         protoc|protoc.sh)
             local protoc_version="${1-"$PROTOC_VERSION"}"
+            info "${repo_cmd}/project/protoc.sh $ROOT_DIR $protoc_version"
             "${repo_cmd}"/project/protoc.sh "$ROOT_DIR" "$protoc_version"
             ;;
         *)
