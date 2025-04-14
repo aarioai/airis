@@ -15,6 +15,6 @@ git-push.sh [options] [comment]
 
 ## cmd.sh
 ```shell
-cmd.sh createapp <project_name>  # 在app目录下创建新项目
+cmd.sh new <project_name>  # 在app目录下创建新项目
 cmd.sh protoc [protoc_version]  # 在项目内自动查找.proto文件，并生成对应protobuf go文件的脚本
 ```

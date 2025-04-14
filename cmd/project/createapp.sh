@@ -223,7 +223,6 @@ main(){
     local project_name="${project_root##*/}"
     local project_base="project/${project_name}"
 
-
     createDirs "$project_root" "${GLOBAL_DIRS[@]}"
 
     local app_root="${project_root}/app/${app_name}"
@@ -248,7 +247,7 @@ main(){
     createCommonServiceFile "${app_root}/job/queue/consumer" "$app_base"
 
     goModTidy "$project_root" "$project_base"
-    echo "${app_name} (${app_root}) done"
+    info "${app_name} (${app_root}) done"
 }
 
 main "$@"
