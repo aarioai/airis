@@ -3,7 +3,7 @@ set -euo pipefail
 
 . /opt/aa/lib/aa-posix-lib.sh
 
-# copy this file to your project <project>/cmd/cmd.sh
+# copy this file to your project <project>/cmd/cmd
 
 AA_GITHUB="github.com/aarioai"
 MOD_ROOT="${GOPATH}/pkg/mod/${AA_GITHUB}"

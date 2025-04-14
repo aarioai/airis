@@ -13,8 +13,9 @@ git-push.sh [options] [comment]
 ```
 
 
-## cmd.sh
+## cmd
+把 airis/cmd/cmd 脚本复制到项目 ./cmd/ 目录下
 ```shell
-cmd.sh new <project_name>  # 在app目录下创建新项目
-cmd.sh protoc [protoc_version]  # 在项目内自动查找.proto文件，并生成对应protobuf go文件的脚本
+cmd new <project_name>  # 在app目录下创建新项目
+cmd protoc [protoc_version]  # 在项目内自动查找.proto文件，并生成对应protobuf go文件的脚本
 ```
