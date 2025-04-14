@@ -3,9 +3,6 @@ set -euo pipefail
 
 . /opt/aa/lib/aa-posix-lib.sh
 
-# cmd.sh
-# 项目内快捷使用的脚本，可以将本脚本复制至 project/xxx/cmd/cmd.sh， 方便使用
-
 PROTOC_VERSION="29.3"
 
 AA_GITHUB="github.com/aarioai"
@@ -19,12 +16,12 @@ readonly ROOT_DIR
 
 usage(){
     cat << EOF
-Usage: $0 <command>
-    $0 createapp <app name>
-    $0 protoc [libprotoc version]
+Usage: $0 <project_project_root> <command>
+    $0 <project_root> new|createapp <app name>
+    $0 <project_root> protoc [libprotoc_version]
 Example:
-    $0 createapp testapp
-    $0 protoc 29.3
+    $0 ../ new test
+    $0 ../ protoc 29.3
 EOF
     exit 1
 }
@@ -47,21 +44,22 @@ findRepoCmdDir(){
  }
 
 main(){
-    [ "$#" -ge 1 ] || usage
-    local cmd="$1"
-    shift
+    [ "$#" -ge 2 ] || usage
+    local project_root="$1"
+    local cmd="$2"
+    shift 2
     local args=("$@")
 
     findRepoCmdDir
     case "$cmd" in
         new|createapp|createapp.sh)
-            info "${repo_cmd}/project/createapp.sh $ROOT_DIR ${args[*]}"
-            "${repo_cmd}"/project/createapp.sh "$ROOT_DIR" "${args[@]}"
+            info "${repo_cmd}/project/createapp.sh $project_root ${args[*]}"
+            "${repo_cmd}"/project/createapp.sh "$project_root" "${args[@]}"
             ;;
         protoc|protoc.sh)
             local protoc_version="${1-"$PROTOC_VERSION"}"
-            info "${repo_cmd}/project/protoc.sh $ROOT_DIR $protoc_version"
-            "${repo_cmd}"/project/protoc.sh "$ROOT_DIR" "$protoc_version"
+            info "${repo_cmd}/project/protoc.sh $project_root $protoc_version"
+            "${repo_cmd}"/project/protoc.sh "$project_root" "$protoc_version"
             ;;
         *)
             panic "invalid command: ${cmd}"

@@ -1,0 +1,47 @@
+#!/bin/bash
+set -euo pipefail
+
+. /opt/aa/lib/aa-posix-lib.sh
+
+# copy this file to your project <project>/cmd/cmd.sh
+
+AA_GITHUB="github.com/aarioai"
+MOD_ROOT="${GOPATH}/pkg/mod/${AA_GITHUB}"
+
+CUR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly CUR
+
+ROOT_DIR="$(cd "${CUR}/.." && pwd)"
+readonly ROOT_DIR
+
+declare repo_cmd
+
+findRepoCmdDir(){
+    if [ ! -f "${ROOT_DIR}/go.mod" ];then
+        go mod tidy
+        panic "missing ${ROOT_DIR}/go.mod"
+    fi
+    airis="$(grep "${AA_GITHUB}/airis v" "${ROOT_DIR}/go.mod")"
+    version=${airis##* v}
+    [ -n "$version" ] || panic "go.mod missing ${AA_GITHUB}/airis"
+
+    repo_cmd="${MOD_ROOT}/airis@v${version}/cmd"
+    if [ ! -d "${repo_cmd}" ]; then
+        go mod tidy
+    fi
+ }
+
+ run(){
+    findRepoCmdDir
+    local base="${repo_cmd}/cmd-base.sh"
+    [ -f "$base" ] || panic "$base not found"
+    info "${base} ${ROOT_DIR} ${*}"
+    "$base" "$ROOT_DIR" "$@"
+ }
+
+main(){
+    findRepoCmdDir
+    run cmd.sh "$ROOT_DIR" "$@"
+}
+
+main "$@"
