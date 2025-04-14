@@ -152,8 +152,8 @@ func (e *Error) IsServerError() bool {
 	return e.Code >= 500 && e.Code <= 599
 }
 
-func (e *Error) IsRetryWith() bool {
-	return e.Code == RetryWith && e.Msg != ""
+func (e *Error) IsFailedAndSeeOther() bool {
+	return e.Code == FailedAndSeeOther && e.Msg != ""
 }
 
 func (e *Error) ExceptNotFound() *Error {
