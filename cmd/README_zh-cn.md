@@ -1,0 +1,20 @@
+# 命令说明
+
+## git-push.sh 
+
+options:
+* -u    执行 go get -u -v ./...
+* -t    跳过本次版本号+1
+* -i    跳过 go mod tidy
+* -h    帮助
+
+```shell
+git-push.sh [options] [comment]
+```
+
+
+## cmd.sh
+```shell
+cmd.sh createapp <project_name>  # 在app目录下创建新项目
+cmd.sh protoc [protoc_version]  # 在项目内自动查找.proto文件，并生成对应protobuf go文件的脚本
+```

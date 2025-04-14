@@ -1,6 +1,7 @@
 package ae
 
 import (
+	"fmt"
 	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/aarioai/airis/pkg/types"
 	"net/http"
@@ -57,6 +58,8 @@ const (
 	StatusException       = 590                              // http 状态码出错，未达到程序阶段。一般由路由层，或nginx等代理层抛出
 )
 
+var BadParameterFormat = "bad parameter `%s`"
+
 var (
 	// 自定义状态码
 	defaultCodeTexts = map[int]string{
@@ -97,9 +100,9 @@ func NewConflictWith(format string, args ...any) *Error {
 }
 
 func NewBadParam(param string, tips ...string) *Error {
-	msg := "bad param `" + param + "`"
+	msg := fmt.Sprintf(BadParameterFormat, param)
 	if len(tips) > 0 {
-		msg += ": " + strings.Join(tips, " ")
+		msg += "\n " + strings.Join(tips, "\n")
 	}
 	return New(BadRequest, msg)
 }

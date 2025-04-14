@@ -60,7 +60,7 @@ func findDefaultValue(patterns []any) any {
 	}
 	return nil
 }
-func parseValidationRules(name string, patterns []any) (bool, *regexp.Regexp, error) {
+func parseValidationRules(name string, patterns []any) (bool, *regexp.Regexp, *ae.Error) {
 	required := true // 默认为true
 	var re *regexp.Regexp
 	// 解析验证规则
@@ -70,7 +70,7 @@ func parseValidationRules(name string, patterns []any) (bool, *regexp.Regexp, er
 			if p != "" && re == nil {
 				var err error
 				if re, err = regexp.Compile(p); err != nil {
-					return false, nil, fmt.Errorf("bad parameter `%s`: invalid request string pattern `%s`", name, p)
+					return false, nil, ae.NewBadParam(name, fmt.Sprintf("invalid request string pattern `%s`", p))
 				}
 			}
 		case bool:
@@ -80,7 +80,7 @@ func parseValidationRules(name string, patterns []any) (bool, *regexp.Regexp, er
 		case *atype.Atype:
 		case atype.Atype:
 		default:
-			return false, nil, fmt.Errorf("bad parameter `%s`: invalid request pattern `%s`", name, p)
+			return false, nil, ae.NewBadParam(name, fmt.Sprintf("invalid request pattern `%s`", p))
 		}
 	}
 	return required, re, nil
@@ -97,15 +97,14 @@ func (v *RawValue) ReleaseValidate(patterns []any) *ae.Error {
 // Filter(pattern string)
 // Filter(default atype.Atype)
 func (v *RawValue) Validate(patterns []any) *ae.Error {
-
 	if v.IsEmpty() {
 		if defaultVal := findDefaultValue(patterns); defaultVal != nil {
 			v.Reload(defaultVal)
 		}
 	}
-	required, re, err := parseValidationRules(v.name, patterns)
-	if err != nil {
-		return ae.NewVariantAlsoNegotiates(err.Error())
+	required, re, e := parseValidationRules(v.name, patterns)
+	if e != nil {
+		return e
 	}
 
 	if required && v.IsEmpty() {
