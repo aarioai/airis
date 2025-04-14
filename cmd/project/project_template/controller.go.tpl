@@ -3,7 +3,6 @@ package controller
 import (
 	"github.com/aarioai/airis-driver/driver/index"
 	"github.com/aarioai/airis-driver/driver/mongodb"
-	"github.com/aarioai/airis-driver/driver/mongodb"
 	"github.com/aarioai/airis/aa"
     "{{APP_BASE}}/cache"
 	"{{APP_BASE}}/module/{{MODULE_NAME}}"
