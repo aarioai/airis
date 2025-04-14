@@ -1,9 +1,25 @@
+# https://github.com/aarioai/rules/blob/main/config/.gitignore
+
+# .aa-env, .aa-update
+.aa-
+
+# Mac OS auto generated file
 .DS_Store
+
+# jetbrain IDE config directory
 .idea
+
+# python venv
+.venv
+
+# golang sum
 go.sum
 
-/tmp
+# js node modules
+node_modules
 
-build/*.js
+# default nohup output
+nohup.out
 
-.modupdate
+# Windows auto generated file
+Thumbs.db

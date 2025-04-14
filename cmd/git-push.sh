@@ -6,7 +6,7 @@ readonly CUR
 # aarioai/airis
 ROOT_DIR="$(cd "${CUR}/.." && pwd)"
 readonly ROOT_DIR
-readonly MOD_UPDATE_FILE="${ROOT_DIR}/.modupdate"
+readonly MOD_UPDATE_FILE="${ROOT_DIR}/.aa-update"
 
 declare comment
 needCloseVPN=0
@@ -89,9 +89,9 @@ handleUpdateMod(){
     if ! go get -u -v ./... >/dev/null 2>&1; then
         warn "update go modules failed"
     fi
-    if [ ! -w "$MOD_UPDATE_FILE" ]; then
-         sudo chmod a+rw "$MOD_UPDATE_FILE"
-    fi
+    
+    [ -f "$MOD_UPDATE_FILE" ] || touch "$MOD_UPDATE_FILE"
+    [ -w "$MOD_UPDATE_FILE" ] || sudo chmod a+rw "$MOD_UPDATE_FILE"
     info "save update mod date to $MOD_UPDATE_FILE"
     printf '%s' "$today" > "$MOD_UPDATE_FILE"
     cat "$MOD_UPDATE_FILE"
