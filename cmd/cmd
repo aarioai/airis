@@ -41,7 +41,7 @@ findRepoCmdDir(){
 
 main(){
     findRepoCmdDir
-    run cmd.sh "$ROOT_DIR" "$@"
+    run "$ROOT_DIR" "$@"
 }
 
 main "$@"
