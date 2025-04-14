@@ -247,7 +247,7 @@ main(){
     createCommonServiceFile "${app_root}/job/queue/consumer" "$app_base"
 
     goModTidy "$project_root" "$project_base"
-    info "${app_name} (${app_root}) done"
+    info "created app ${app_name} (${app_root})"
 }
 
 main "$@"
