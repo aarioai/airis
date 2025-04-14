@@ -89,7 +89,9 @@ handleUpdateMod(){
     if ! go get -u -v ./... >/dev/null 2>&1; then
         warn "update go modules failed"
     fi
-    sudo chmod a+rw "$MOD_UPDATE_FILE"
+    if [ ! -w "$MOD_UPDATE_FILE" ]; then
+         sudo chmod a+rw "$MOD_UPDATE_FILE"
+    fi
     info "save update mod date to $MOD_UPDATE_FILE"
     printf '%s' "$today" > "$MOD_UPDATE_FILE"
     cat "$MOD_UPDATE_FILE"
