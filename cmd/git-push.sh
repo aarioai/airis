@@ -89,7 +89,7 @@ handleUpdateMod(){
     if ! go get -u -v ./... >/dev/null 2>&1; then
         warn "update go modules failed"
     fi
-    
+
     [ -f "$MOD_UPDATE_FILE" ] || touch "$MOD_UPDATE_FILE"
     [ -w "$MOD_UPDATE_FILE" ] || sudo chmod a+rw "$MOD_UPDATE_FILE"
     info "save update mod date to $MOD_UPDATE_FILE"
@@ -103,6 +103,7 @@ pushAndUpgradeMod() {
     handleUpdateMod
 
     info "go mod tidy"
+    [ -f "go.mod" ] || go mod init
     go mod tidy || panic "failed go mod tidy"
 
     info "go test ./..."

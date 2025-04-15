@@ -137,7 +137,7 @@ func formatBase64Uint[T constraints.Unsigned](v T) string {
 	return string(a[i:])
 }
 
-// 这种程序员人为错误，应当直接崩溃。strconv 也是这样做的
+// 人为崩溃原则。strconv 也是这样做的
 func checkBase(base int) {
 	if base < 2 || (base > 32 && base != 64) {
 		panic("atype: illegal number base")

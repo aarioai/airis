@@ -49,7 +49,7 @@ var (
 )
 
 func NameToLevel(name string) ErrorLevel {
-	return nameToLevel[strings.ToLower(name)] // 人为错误，直接panic即可
+	return nameToLevel[strings.ToLower(name)] // 人为崩溃原则
 }
 func (lvl ErrorLevel) Name() string {
 	return levelToName[lvl]

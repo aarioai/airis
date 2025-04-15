@@ -30,7 +30,7 @@ func clearSlice[S ~[]E, E any](s S) {
 	}
 }
 
-// Compact slice 元素去重
+// Compact remove duplicated slice items
 // slices.Compact() 仅对连续的重复去重，因此最好先进行 sort
 // slices.Compact([]) []  移除连续重复项 --> [5,1,2,2,3,3,4,5,5] ==> [5, 1,2,3,4,5] len=6(), cap()=9
 // 这里对全部去重
