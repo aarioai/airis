@@ -11,8 +11,8 @@ import (
 func FromIris(ictx iris.Context) context.Context {
 	// Nginx proxy_set_header X-Request-Id $request_id;
 	traceId := ictx.GetHeader("X-Request-Id")
-	// Nginx proxy_set_header X-Remote-Addr $remote_addr;
-	remoteAddr := ictx.GetHeader("X-Remote-Addr")
+	// Nginx proxy_set_header X-Real-IP $remote_addr;
+	remoteAddr := ClientIP(ictx)
 	if remoteAddr == "" {
 		remoteAddr = ictx.RemoteAddr()
 	}
