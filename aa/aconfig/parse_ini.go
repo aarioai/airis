@@ -6,6 +6,7 @@ import (
 	"github.com/aarioai/airis/pkg/arrmap"
 	"gopkg.in/ini.v1"
 	"strings"
+	"time"
 )
 
 // convertIniToMap 将 ini.File 转换为扁平化的 map[string]string
@@ -161,7 +162,7 @@ func (c *Config) MustGet(key string) (*atype.Atype, error) {
 	return atype.New(v), nil
 }
 
-// Get(key) or Get(key, defaultValue)
+// Get get value from config by key name
 // 先从 ini 文件读取，找不到再去从其他 provider （如数据库拉下来的配置）里面找
 func (c *Config) Get(key string, defaultValue ...any) *atype.Atype {
 	v, _ := c.MustGetString(key)
@@ -172,4 +173,29 @@ func (c *Config) Get(key string, defaultValue ...any) *atype.Atype {
 		return atype.New(defaultValue[0])
 	}
 	return atype.New("")
+}
+
+// MustGetDuration parses a valid duration string from config
+// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+// A duration string is a possibly signed sequence of decimal numbers,
+// each with optional fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m".
+func (c *Config) MustGetDuration(key string) (time.Duration, error) {
+	s, err := c.MustGetString(key)
+	if err != nil {
+		return 0, err
+	}
+	return time.ParseDuration(s)
+}
+
+// GetDuration parses a duration string from config
+func (c *Config) GetDuration(key string, defaultValue time.Duration) time.Duration {
+	s := c.GetString(key)
+	if s == "" {
+		return defaultValue
+	}
+	d, err := time.ParseDuration(s)
+	if err != nil {
+		return defaultValue
+	}
+	return d
 }
