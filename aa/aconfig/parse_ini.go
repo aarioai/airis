@@ -162,8 +162,7 @@ func (c *Config) MustGet(key string) (*atype.Atype, error) {
 	return atype.New(v), nil
 }
 
-// Get get value from config by key name
-// 先从 ini 文件读取，找不到再去从其他 provider （如数据库拉下来的配置）里面找
+// Get value from config by key name
 func (c *Config) Get(key string, defaultValue ...any) *atype.Atype {
 	v, _ := c.MustGetString(key)
 	if v != "" {

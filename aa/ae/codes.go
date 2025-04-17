@@ -67,6 +67,7 @@ const (
 	_                            = 430
 	RequestHeaderFieldsTooLarge  = 431
 	LoginTimeout                 = 440
+	NoResponse                   = 444
 	UnavailableForLegalReasons   = 451
 	NoRowsAvailable              = 494 // [NEW] other servers may use {code:200, text:[]} for empty list
 	ConflictWith                 = 499 // [NEW] msg contains conflict data
@@ -87,12 +88,6 @@ const (
 )
 
 var (
-	Separator          = "\n"
-	BadParameterFormat = "bad parameter `%s`"
-)
-
-var (
-	// 自定义状态码
 	newCodeTexts = map[int]string{
 		FailedAndSeeOther: "Failed And See Other",
 		PageExpired:       "Page Expired",
@@ -101,29 +96,78 @@ var (
 		ConflictWith:      "Conflict With",
 		Exception:         "Exception",
 	}
+)
 
-	// 快捷变量，使用时候不需要指定message的，其他的一般都需要指定message供调试或反馈给客户端
-	// ErrorXXX/ErrXXX  都应被视为常量，不应修改
+// constant errors
+var (
+	ErrorContinue        = New(Continue).Lock()
+	ErrorSwitchProtocols = New(SwitchingProtocols).Lock()
+	ErrorProcessing      = New(Processing).Lock()
+	ErrorEarlyHints      = New(EarlyHints).Lock()
 
-	ErrorNoContent   = New(NoContent).Lock()
-	ErrorNotModified = New(NotModified).Lock()
+	ErrorOK               = New(OK).Lock()
+	ErrorCreated          = New(Created).Lock()
+	ErrorAccepted         = New(Accepted).Lock()
+	ErrorNonAuthoritative = New(NonAuthoritativeInfo).Lock()
+	ErrorNoContent        = New(NoContent).Lock()
+	ErrorResetContent     = New(ResetContent).Lock()
+	ErrorPartialContent   = New(PartialContent).Lock()
+	ErrorMultiStatus      = New(MultiStatus).Lock()
+	ErrorAlreadyReported  = New(AlreadyReported).Lock()
+	ErrorIMUsed           = New(IMUsed).Lock()
 
-	ErrorUnauthorized    = New(Unauthorized).Lock()
-	ErrorPaymentRequired = New(PaymentRequired).Lock()
-	ErrorForbidden       = New(Forbidden).Lock()
-	ErrorNotFound        = New(NotFound).Lock()
+	ErrorMultipleChoices   = New(MultipleChoices).Lock()
+	ErrorMovePermanently   = New(MovePermanently).Lock()
+	ErrorFound             = New(Found).Lock()
+	ErrorSeeOther          = New(SeeOther).Lock()
+	ErrorNotModified       = New(NotModified).Lock()
+	ErrorUseProxy          = New(UseProxy).Lock()
+	ErrorTemporaryRedirect = New(TemporaryRedirect).Lock()
+	ErrorPermanentRedirect = New(PermanentRedirect).Lock()
 
-	ErrorTimeout               = New(RequestTimeout).Lock()
-	ErrorGone                  = New(Gone).Lock()
-	ErrorRequestEntityTooLarge = New(RequestEntityTooLarge).Lock()
-	ErrorLocked                = New(Locked).Lock()
-	ErrorTooEarly              = New(TooEarly).Lock()
-	ErrorIllegal               = New(UnavailableForLegalReasons).Lock()
-	ErrorNoRows                = New(NoRowsAvailable).Lock() // 自定义状态码
+	ErrorBadRequest                   = New(BadRequest).Lock()
+	ErrorUnauthorized                 = New(Unauthorized).Lock()
+	ErrorPaymentRequired              = New(PaymentRequired).Lock()
+	ErrorForbidden                    = New(Forbidden).Lock()
+	ErrorNotFound                     = New(NotFound).Lock()
+	ErrorMethodNotAllowed             = New(MethodNotAllowed).Lock()
+	ErrorNotAcceptable                = New(NotAcceptable).Lock()
+	ErrorProxyAuthRequired            = New(ProxyAuthRequired).Lock()
+	ErrorRequestTimeout               = New(RequestTimeout).Lock()
+	ErrorConflict                     = New(Conflict).Lock()
+	ErrorGone                         = New(Gone).Lock()
+	ErrorLengthRequired               = New(LengthRequired).Lock()
+	ErrorPreconditionFailed           = New(PreconditionFailed).Lock()
+	ErrorRequestEntityTooLarge        = New(RequestEntityTooLarge).Lock()
+	ErrorRequestURIInvalid            = New(RequestURIInvalid).Lock()
+	ErrorUnsupportedMedia             = New(UnsupportedMedia).Lock()
+	ErrorRequestedRangeNotSatisfiable = New(RequestedRangeNotSatisfiable).Lock()
+	ErrorExpectationFailed            = New(ExpectationFailed).Lock()
+	ErrorPageExpired                  = New(PageExpired).Lock()
+	ErrorEnhanceYourCalm              = New(EnhanceYourCalm).Lock()
+	ErrorLocked                       = New(Locked).Lock()
+	ErrorFailedDependency             = New(FailedDependency).Lock()
+	ErrorTooEarly                     = New(TooEarly).Lock()
+	ErrorUpgradeRequired              = New(UpgradeRequired).Lock()
+	ErrorPreconditionRequired         = New(PreconditionRequired).Lock()
+	ErrorTooManyRequests              = New(TooManyRequests).Lock()
+	ErrorRequestHeaderFieldsTooLarge  = New(RequestHeaderFieldsTooLarge).Lock()
+	ErrorLoginTimeout                 = New(LoginTimeout).Lock()
+	ErrorNoResponse                   = New(NoResponse).Lock()
+	ErrorUnavailableForLegalReasons   = New(UnavailableForLegalReasons).Lock()
+	ErrorNoRowsAvailable              = New(NoRowsAvailable).Lock()
 
-	ErrorNotImplemented     = New(NotImplemented).Lock()
-	ErrorBadGateway         = New(BadGateway).Lock()
-	ErrorServiceUnavailable = New(ServiceUnavailable).Lock()
+	ErrorInternalServerError           = New(InternalServerError).Lock()
+	ErrorNotImplemented                = New(NotImplemented).Lock()
+	ErrorBadGateway                    = New(BadGateway).Lock()
+	ErrorServiceUnavailable            = New(ServiceUnavailable).Lock()
+	ErrorGatewayTimeout                = New(GatewayTimeout).Lock()
+	ErrorVariantAlsoNegotiates         = New(VariantAlsoNegotiates).Lock()
+	ErrorInsufficientStorage           = New(InsufficientStorage).Lock()
+	ErrorLoopDetected                  = New(LoopDetected).Lock()
+	ErrorNotExtended                   = New(NotExtended).Lock()
+	ErrorNetworkAuthenticationRequired = New(NetworkAuthenticationRequired).Lock()
+	ErrorException                     = New(Exception).Lock()
 )
 
 func NewFailedAndSeeOther(redirect string) *Error {
@@ -172,7 +216,7 @@ func NewLoopDetected(msg ...any) *Error {
 	return New(LoopDetected).AppendMsg(msg...)
 }
 
-// Text 获取错误码对应的文本描述
+// Text returns a text for the code. It returns the empty string if the code is unknown.
 func Text(code int) string {
 	if text, ok := newCodeTexts[code]; ok {
 		return text

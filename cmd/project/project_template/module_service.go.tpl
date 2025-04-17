@@ -6,6 +6,7 @@ import (
 	"github.com/aarioai/airis/aa"
 	"{{APP_BASE}}/cache"
 	"{{APP_BASE}}/module/{{MODULE_NAME}}/model"
+	"{{APP_BASE}}/private"
 	"{{APP_BASE}}/service"
 	"sync"
 	"time"
@@ -14,6 +15,7 @@ import (
 type Service struct {
 	app   *aa.App
 	loc   *time.Location
+	private *private.Service
 	h     *cache.Cache
 	mongo *mongodb.Model
 	m     *model.Model
@@ -31,6 +33,7 @@ func New(app *aa.App) *Service {
 		svcObj = &Service{
 			app:   app,
 			loc:   app.Config.TimeLocation,
+			private: private.New(app),
 			h:     s.Cache(),
 			mongo: s.Mongo(),
 			m:     model.New(app),
