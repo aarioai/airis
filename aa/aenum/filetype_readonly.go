@@ -40,6 +40,25 @@ const (
     Gzip        FileType = 7004
     Json        FileType = 10000
 )
+var CompressedTypes = map[FileType][]string{
+    Bzip        : {".bz", "application/x-bzip"},
+    Bzip2       : {".bz2", "application/x-bzip2"},
+    Gzip        : {".gz", "application/gzip", "application/x-gzip"},
+    Rar         : {".rar", "application/vnd.rar", "application/x-rar-compressed"},
+    Zip         : {".zip", "application/zip", "application/x-zip-compressed", "multipart/x-zip"},
+}
+var DataTypes = map[FileType][]string{
+    Json        : {".json", "application/json"},
+}
+var ImageTypes = map[FileType][]string{
+    Gif         : {".gif", "image/gif"},
+    Heic        : {".heic", "image/heic", ".heif", ".avci", "image/heif"},
+    Ico         : {".ico", "image/vnd.microsoft.icon", "image/x-icon"},
+    Jpeg        : {".jpg", "image/jpeg", ".jpeg"},
+    Png         : {".png", "image/png"},
+    Svg         : {".svg", "image/svg+xml"},
+    Webp        : {".webp", "image/webp"},
+}
 var AudioTypes = map[FileType][]string{
     Aiff        : {".aiff", "audio/aiff", ".aif", ".aifc", "audio/x-aiff"},
     Audio3gpp   : {".3gp", "audio/3gpp"},
@@ -69,25 +88,6 @@ var DocumentTypes = map[FileType][]string{
     Xls         : {".xls", "application/vnd.ms-excel"},
     Xlsx        : {".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
 }
-var CompressedTypes = map[FileType][]string{
-    Bzip        : {".bz", "application/x-bzip"},
-    Bzip2       : {".bz2", "application/x-bzip2"},
-    Gzip        : {".gz", "application/gzip", "application/x-gzip"},
-    Rar         : {".rar", "application/vnd.rar", "application/x-rar-compressed"},
-    Zip         : {".zip", "application/zip", "application/x-zip-compressed", "multipart/x-zip"},
-}
-var DataTypes = map[FileType][]string{
-    Json        : {".json", "application/json"},
-}
-var ImageTypes = map[FileType][]string{
-    Gif         : {".gif", "image/gif"},
-    Heic        : {".heic", "image/heic", ".heif", ".avci", "image/heif"},
-    Ico         : {".ico", "image/vnd.microsoft.icon", "image/x-icon"},
-    Jpeg        : {".jpg", "image/jpeg", ".jpeg"},
-    Png         : {".png", "image/png"},
-    Svg         : {".svg", "image/svg+xml"},
-    Webp        : {".webp", "image/webp"},
-}
 func NewImageType(mime string) (FileType, bool) {return ParseFileType(mime, ImageTypes)}
 func NewAudioType(mime string) (FileType, bool) {return ParseFileType(mime, AudioTypes)}
 func NewVideoType(mime string) (FileType, bool) {return ParseFileType(mime, VideoTypes)}
@@ -95,12 +95,12 @@ func NewDocumentType(mime string) (FileType, bool) {return ParseFileType(mime, D
 func NewCompressedType(mime string) (FileType, bool) {return ParseFileType(mime, CompressedTypes)}
 func NewDataType(mime string) (FileType, bool) {return ParseFileType(mime, DataTypes)}
 func (t FileType) ContentType() string {
+    if d, ok := VideoTypes[t]; ok {return d[1]}
     if d, ok := DocumentTypes[t]; ok {return d[1]}
     if d, ok := CompressedTypes[t]; ok {return d[1]}
     if d, ok := DataTypes[t]; ok {return d[1]}
     if d, ok := ImageTypes[t]; ok {return d[1]}
     if d, ok := AudioTypes[t]; ok {return d[1]}
-    if d, ok := VideoTypes[t]; ok {return d[1]}
     return ""
 }
 func (t FileType) Ext() string {

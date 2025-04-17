@@ -145,26 +145,26 @@ func (r *Request) Origin() string {
 	return h
 }
 
-func (r *Request) findAny(programData map[string]any, userData userDataInterface, name string) any {
+func (r *Request) findAny(programData map[string]any, userData userDataInterface, key string) any {
 	// 1. 优先读取程序设置的数据
 	if programData != nil {
-		if v, exists := programData[name]; exists {
+		if v, exists := programData[key]; exists {
 			return v
 		}
 	}
 
 	if userData != nil {
-		return userData.Get(name)
+		return userData.Get(key)
 	}
 	return nil
 }
-func (r *Request) findStringFast(programData map[string]any, userData userDataInterface, name string) string {
-	v := r.findAny(programData, userData, name)
+func (r *Request) findStringFast(programData map[string]any, userData userDataInterface, key string) string {
+	v := r.findAny(programData, userData, key)
 	return atype.String(v)
 }
-func (r *Request) find(programData map[string]any, userData userDataInterface, name string, patterns ...any) (*RawValue, *ae.Error) {
-	v := r.findAny(programData, userData, name)
-	raw := newRawValue(name, v)
+func (r *Request) find(programData map[string]any, userData userDataInterface, key string, patterns ...any) (*RawValue, *ae.Error) {
+	v := r.findAny(programData, userData, key)
+	raw := newRawValue(key, v)
 	e := raw.Validate(patterns)
 	if e != nil {
 		raw.Close()
@@ -173,16 +173,16 @@ func (r *Request) find(programData map[string]any, userData userDataInterface, n
 	return raw, nil
 }
 
-func (r *Request) findString(programData map[string]any, userData userDataInterface, name string, patterns ...any) (string, *ae.Error) {
-	v := r.findStringFast(programData, userData, name)
+func (r *Request) findString(programData map[string]any, userData userDataInterface, key string, patterns ...any) (string, *ae.Error) {
+	v := r.findStringFast(programData, userData, key)
 	only, requiredWhenOnly := onlyRequired(patterns)
 	if only {
 		if requiredWhenOnly && v == "" {
-			return "", ae.NewBadParam(name)
+			return "", ae.NewBadParam(key)
 		}
 		return v, nil
 	}
-	return v, newRawValue(name, v).ReleaseValidate(patterns)
+	return v, newRawValue(key, v).ReleaseValidate(patterns)
 }
 func (r *Request) queryString(name string, patterns ...any) (string, *ae.Error) {
 	var userData url.Values
@@ -223,8 +223,8 @@ func (r *Request) queries(programData map[string]any, userData map[string][]stri
 	return nil
 }
 
-func (r *Request) Query(name string, patterns ...any) (*RawValue, *ae.Error) {
-	return r.query(name, patterns...)
+func (r *Request) Query(key string, patterns ...any) (*RawValue, *ae.Error) {
+	return r.query(key, patterns...)
 }
 
 func (r *Request) Queries() map[string]any {
@@ -359,8 +359,8 @@ func (r *Request) UserAgent() string {
 	}
 	return ua
 }
-func (r *Request) Body(name string, patterns ...any) (*RawValue, *ae.Error) {
-	raw := newRawValue(name, "")
+func (r *Request) Body(key string, patterns ...any) (*RawValue, *ae.Error) {
+	raw := newRawValue(key, "")
 	if !r.bodyParsed {
 		e := r.parseBodyStream()
 		if e != nil {
@@ -369,14 +369,14 @@ func (r *Request) Body(name string, patterns ...any) (*RawValue, *ae.Error) {
 		}
 	}
 	if r.injectedBodies != nil {
-		if v, ok := r.injectedBodies[name]; ok {
+		if v, ok := r.injectedBodies[key]; ok {
 			raw.Reload(v)
 		}
 	}
 	return raw, raw.Validate(patterns)
 }
-func (r *Request) Cookie(name string) (*http.Cookie, error) {
-	return r.r.Cookie(name)
+func (r *Request) Cookie(key string) (*http.Cookie, error) {
+	return r.r.Cookie(key)
 }
 
 func (r *Request) AddCookie(c *http.Cookie) {
@@ -387,101 +387,102 @@ func (r *Request) Cookies() []*http.Cookie {
 	return r.r.Cookies()
 }
 
-func (r *Request) headerString(name string, patterns ...any) (string, *ae.Error) {
+func (r *Request) headerString(key string, patterns ...any) (string, *ae.Error) {
 	var userData http.Header
 	if r.r != nil {
 		userData = r.r.Header
 	}
-	return r.findString(r.injectedHeaders, userData, name, patterns...)
+	return r.findString(r.injectedHeaders, userData, key, patterns...)
 }
-func (r *Request) header(name string, patterns ...any) (*RawValue, *ae.Error) {
+func (r *Request) header(key string, patterns ...any) (*RawValue, *ae.Error) {
 	var userData http.Header
 	if r.r != nil {
 		userData = r.r.Header
 	}
-	return r.find(r.injectedHeaders, userData, name, patterns...)
+	return r.find(r.injectedHeaders, userData, key, patterns...)
 }
 
-// @warn 尽量不要通过自定义header传参，因为可能某个web server会基于安全禁止某些无法识别的header
-func (r *Request) Header(name string, patterns ...any) (*RawValue, *ae.Error) {
-	return r.header(name, patterns...)
+func (r *Request) Header(key string, patterns ...any) (*RawValue, *ae.Error) {
+	return r.header(key, patterns...)
 }
-func (r *Request) HeaderFast(name string) string {
+func (r *Request) HeaderFast(key string) string {
 	// false 是必须的，表示 required=false。默认 required = true
-	v, _ := r.headerString(name, false)
+	v, _ := r.headerString(key, false)
 	return v
 }
 
 // HeaderString 查询更高效
-func (r *Request) HeaderString(name string, patterns ...any) (string, *ae.Error) {
+func (r *Request) HeaderString(key string, patterns ...any) (string, *ae.Error) {
 	// false 是必须的，表示
-	return r.headerString(name, patterns...)
+	return r.headerString(key, patterns...)
 }
 
-func (r *Request) HeaderValue(name string) *RawValue {
-	value, _ := r.Header(name)
+func (r *Request) HeaderValue(key string) *RawValue {
+	value, _ := r.Header(key)
 	return value
 }
 
-// HeaderWild 读取 HTTP HeaderValue（包括标准格式和 X- 前缀格式）
-//  1. 原始格式 如 name, Name, user_agent
-//  2. 标准格式  如 Referer, User-Agent,
-//  3. X-前缀格式  如 X-Csrf-Token, X-Request-Vuid, X-From, X-Inviter
+// HeaderWild read http header wildly (including standard or non-standard format)
+//  1. origin format, e.g. name, Name, user_agent
+//  2. standard format, e.g. Referer, User-Agent
+//  3. self-defined format, i.e. starts with X-, e.g. X-Csrf-Token, X-Request-Vuid, X-From, X-Inviter
 //
-// @warn 尽量不要通过自定义header传参，因为可能某个web server会基于安全禁止某些无法识别的header
-func (r *Request) HeaderWild(name string, patterns ...any) (*RawValue, *ae.Error) {
-	// 1. 原始格式
-	value, e := r.Header(name, patterns...)
+// Suggest any non-standard header should be allowed by the web server cors AllowedMethods
+func (r *Request) HeaderWild(key string, patterns ...any) (*RawValue, *ae.Error) {
+	// 1. origin format, e.g. key, Name, user_agent
+	value, e := r.Header(key, patterns...)
 	if e == nil && value.NotEmpty() {
 		return value, nil
 	}
 	value.Close()
 
-	// 	2. 标准格式
-	key := cases.Title(language.English).String(strings.ReplaceAll(name, "_", "-"))
-	if key != name {
-		value, e = r.Header(key, patterns...)
+	// 2. standard format, e.g. Referer, User-Agent
+	newKey := cases.Title(language.English).String(strings.ReplaceAll(key, "_", "-"))
+	if newKey != key {
+		value, e = r.Header(newKey, patterns...)
 		if e == nil && value.NotEmpty() {
 			return value, nil
 		}
 		value.Close()
 	}
-	if strings.HasPrefix(key, "X-") {
-		return nil, validateEmpty(name, patterns)
+	if strings.HasPrefix(newKey, "X-") {
+		return nil, validateEmpty(key, patterns)
 	}
-	// 3. X-前缀格式
-	return r.Header("X-"+key, patterns...)
+	// 3. self-defined format, i.e. starts with X-, e.g. X-Csrf-Token, X-Request-Vuid, X-From, X-Inviter
+	return r.Header("X-"+newKey, patterns...)
 }
-func (r *Request) HeaderWideString(name string, patterns ...any) (string, *ae.Error) {
-	header, e := r.HeaderWild(name, patterns...)
+
+func (r *Request) HeaderWideString(key string, patterns ...any) (string, *ae.Error) {
+	header, e := r.HeaderWild(key, patterns...)
 	if e != nil {
 		return "", e
 	}
 	return header.ReleaseString(), nil
 }
 
-// HeaderWildFast 对 HeaderWild 的性能优化、类型简化
-func (r *Request) HeaderWildFast(name string) string {
-	// 1. 原始格式
-	value := r.HeaderFast(name)
+// HeaderWildFast faster then HeaderWild
+func (r *Request) HeaderWildFast(key string) string {
+	// 1. origin format, e.g. key, Name, user_agent
+	value := r.HeaderFast(key)
 	if value != "" {
 		return value
 	}
-	// 	2. 标准格式
-	key := cases.Title(language.English).String(strings.ReplaceAll(name, "_", "-"))
-	if key != name {
-		value = r.HeaderFast(key)
-		if value != "" {
+	// 2. standard format, e.g. Referer, User-Agent
+	newKey := cases.Title(language.English).String(strings.ReplaceAll(key, "_", "-"))
+	if newKey != key {
+		if value = r.HeaderFast(newKey); value != "" {
 			return value
 		}
 	}
 
-	// 3. X-前缀格式
-	return r.HeaderFast("X-" + key)
+	// 3. self-defined format, i.e. starts with X-, e.g. X-Csrf-Token, X-Request-Vuid, X-From, X-Inviter
+	if !strings.HasPrefix(newKey, "X-") {
+		return r.HeaderFast("X-" + newKey)
+	}
+	return ""
 }
 
-// Headers 获取所有headers
-// 这个读取少，直接每次独立解析即可
+// Headers get all headers
 func (r *Request) Headers() map[string]any {
 	var userData http.Header
 	if r.r != nil {
@@ -490,24 +491,20 @@ func (r *Request) Headers() map[string]any {
 	return r.queries(r.injectedHeaders, userData)
 }
 
-// QueryWild 尝试从URL参数、HeaderValue（包括标准格式和X-前缀格式）、Cookie读取参数值
-//  1. URL参数
-//  2. HTTP头部 (支持标准和X-前缀格式)
-//  3. Cookie
-//
-// e.g.  csrf_token: in url params? -> Csrf-Token: in header?  X-Csrf-Token: in header-> csrf_token: in cookie
-func (r *Request) QueryWild(name string, patterns ...any) (*RawValue, *ae.Error) {
+// QueryWild query parameter from URL parameter, URL query, header and cookie
+// Example  csrf_token: in url params? -> Csrf-Token: in header?  X-Csrf-Token: in header-> csrf_token: in cookie
+func (r *Request) QueryWild(key string, patterns ...any) (*RawValue, *ae.Error) {
 	// 1. URL参数直接查询模式
-	v, e := r.Query(name, patterns...)
+	v, e := r.Query(key, patterns...)
 	if e == nil && v.NotEmpty() {
 		return v, nil
 	}
 	utils.Close(v)
-	guessName := name
+	guessName := key
 	// 1.1. URL参数替换格式查询，可能使用的是Header（大写开头）参数名，改为小写下划线模式
-	if strings.HasPrefix(name, "X-") {
-		guessName = strings.ToLower(strings.ReplaceAll(strings.TrimPrefix(name, "X-"), "-", "_"))
-		if guessName != name {
+	if strings.HasPrefix(key, "X-") {
+		guessName = strings.ToLower(strings.ReplaceAll(strings.TrimPrefix(key, "X-"), "-", "_"))
+		if guessName != key {
 			v, e = r.Query(guessName, patterns...)
 			if e == nil && v.NotEmpty() {
 				return v, nil
@@ -517,22 +514,22 @@ func (r *Request) QueryWild(name string, patterns ...any) (*RawValue, *ae.Error)
 	}
 
 	// 2. HTTP头部（包括标准格式和 X- 前缀）
-	v, e = r.HeaderWild(name, patterns...)
+	v, e = r.HeaderWild(key, patterns...)
 	if e == nil && v.NotEmpty() {
 		return v, nil
 	}
 	utils.Close(v)
 
 	// 3. Cookie
-	if cookie, err := r.Cookie(name); err == nil && cookie.Value != "" {
+	if cookie, err := r.Cookie(key); err == nil && cookie.Value != "" {
 		v = newRawValue(cookie.Name, cookie.Value)
-	} else if guessName != name {
+	} else if guessName != key {
 		if cookie, err = r.Cookie(guessName); err == nil && cookie.Value != "" {
 			v = newRawValue(cookie.Name, cookie.Value)
 		}
 	}
 	if v == nil {
-		v = newRawValue(name, "")
+		v = newRawValue(key, "")
 	}
 	e = v.Validate(patterns) // 空值也需要判断是否符合pattern，如 required=false
 	if e != nil {
@@ -542,17 +539,17 @@ func (r *Request) QueryWild(name string, patterns ...any) (*RawValue, *ae.Error)
 	return v, nil
 }
 
-func (r *Request) QueryWildString(name string, patterns ...any) (string, *ae.Error) {
+func (r *Request) QueryWildString(key string, patterns ...any) (string, *ae.Error) {
 	// 1. URL参数直接查询模式
-	v, e := r.QueryString(name, patterns...)
+	v, e := r.QueryString(key, patterns...)
 	if e == nil && v != "" {
 		return v, nil
 	}
 	// 1.1. URL参数替换格式查询，可能使用的是Header（大写开头）参数名，改为小写下划线模式
-	guessName := name
-	if strings.HasPrefix(name, "X-") {
-		guessName = strings.ToLower(strings.ReplaceAll(strings.TrimPrefix(name, "X-"), "-", "_"))
-		if guessName != name {
+	guessName := key
+	if strings.HasPrefix(key, "X-") {
+		guessName = strings.ToLower(strings.ReplaceAll(strings.TrimPrefix(key, "X-"), "-", "_"))
+		if guessName != key {
 			v, e = r.QueryString(guessName, patterns...)
 			if e == nil && v != "" {
 				return v, nil
@@ -560,35 +557,35 @@ func (r *Request) QueryWildString(name string, patterns ...any) (string, *ae.Err
 		}
 	}
 	// 2. HTTP头部（包括标准格式和 X- 前缀）
-	v, e = r.HeaderWideString(name, patterns...)
+	v, e = r.HeaderWideString(key, patterns...)
 	if e == nil && v != "" {
 		return v, nil
 	}
 
 	// 3. Cookie
-	if cookie, err := r.Cookie(name); err == nil {
+	if cookie, err := r.Cookie(key); err == nil {
 		return cookie.Value, newRawValue(cookie.Name, cookie.Value).ReleaseValidate(patterns)
 	}
-	if guessName != name {
+	if guessName != key {
 		if cookie, err := r.Cookie(guessName); err == nil {
 			return cookie.Value, newRawValue(cookie.Name, cookie.Value).ReleaseValidate(patterns)
 		}
 	}
 	// 返回空值
-	return v, newRawValue(name, v).ReleaseValidate(patterns)
+	return v, newRawValue(key, v).ReleaseValidate(patterns)
 }
 
 // QueryWildFast 更高效地快速查询字符串
-func (r *Request) QueryWildFast(name string) string {
+func (r *Request) QueryWildFast(key string) string {
 	// 1. URL参数直接查询模式
-	if v := r.QueryFast(name); v != "" {
+	if v := r.QueryFast(key); v != "" {
 		return v
 	}
 	// 1.1. URL参数替换格式查询，可能使用的是Header（大写开头）参数名，改为小写下划线模式
-	guessName := name
-	if strings.HasPrefix(name, "X-") {
-		guessName = strings.ToLower(strings.ReplaceAll(strings.TrimPrefix(name, "X-"), "-", "_"))
-		if guessName != name {
+	guessName := key
+	if strings.HasPrefix(key, "X-") {
+		guessName = strings.ToLower(strings.ReplaceAll(strings.TrimPrefix(key, "X-"), "-", "_"))
+		if guessName != key {
 			if v := r.QueryFast(guessName); v != "" {
 				return v
 			}
@@ -596,15 +593,15 @@ func (r *Request) QueryWildFast(name string) string {
 	}
 
 	// 2. HTTP头部（包括标准格式和 X- 前缀）
-	if v := r.HeaderWildFast(name); v != "" {
+	if v := r.HeaderWildFast(key); v != "" {
 		return v
 	}
 
 	// 3. Cookie
-	if cookie, err := r.Cookie(name); err == nil {
+	if cookie, err := r.Cookie(key); err == nil {
 		return cookie.Value
 	}
-	if guessName != name {
+	if guessName != key {
 		if cookie, err := r.Cookie(guessName); err == nil {
 			return cookie.Value
 		}
@@ -612,10 +609,10 @@ func (r *Request) QueryWildFast(name string) string {
 	// 返回空值
 	return ""
 }
-func (r *Request) QueryWildValue(name string) *RawValue {
-	v, err := r.QueryWild(name)
+func (r *Request) QueryWildValue(key string) *RawValue {
+	v, err := r.QueryWild(key)
 	if err != nil {
-		return newRawValue(name, "")
+		return newRawValue(key, "")
 	}
 	return v
 }
@@ -646,6 +643,6 @@ func onlyRequired(patterns []any) (only bool, required bool) {
 	}
 	return false, false
 }
-func validateEmpty(name string, patterns []any) *ae.Error {
-	return newRawValue(name, "").ReleaseValidate(patterns)
+func validateEmpty(key string, patterns []any) *ae.Error {
+	return newRawValue(key, "").ReleaseValidate(patterns)
 }
