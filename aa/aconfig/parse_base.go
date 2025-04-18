@@ -48,7 +48,7 @@ func (c *Config) endWrite() {
 }
 
 func (c *Config) initializeConfig() error {
-	c.Env = Env(c.GetString(CkEnv))
+	c.Env = NewEnv(c.GetString(CkEnv))
 	c.Mock, _ = c.Get(CkMock).ReleaseBool()
 	c.TextConfigDirs = textConfigDirs(c.GetString(CkTextConfigDirs))
 	// 初始化时区配置

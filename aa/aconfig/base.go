@@ -2,6 +2,7 @@ package aconfig
 
 import (
 	"io/fs"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -10,11 +11,11 @@ import (
 
 // Environment constants
 const (
-	EnvLocal       = "local"
-	EnvDevelopment = "development"
-	EnvProduction  = "production"
-	EnvTesting     = "testing"
-	EnvStaging     = "staging"
+	EnvLocal       Env = "local"
+	EnvDevelopment Env = "development"
+	EnvProduction  Env = "production"
+	EnvTesting     Env = "testing"
+	EnvStaging     Env = "staging"
 )
 
 // Reserved configuration keys
@@ -27,18 +28,33 @@ const (
 )
 
 var (
+	envs   = []string{EnvLocal.String(), EnvDevelopment.String(), EnvProduction.String(), EnvTesting.String(), EnvStaging.String()}
 	cfgMtx sync.RWMutex
 )
 
 type Env string
 
+// NewEnv
+// Example NewEnv("testing") NewEnv("testing_project") NewEnv("project_testing")
+func NewEnv(env string) Env {
+	// keep it, faster than check has prefix and has suffix
+	if slices.Contains(envs, env) {
+		return Env(env)
+	}
+	for _, environment := range envs {
+		if strings.HasPrefix(env, environment+"_") || strings.HasSuffix(env, "_"+environment) {
+			return Env(environment)
+		}
+	}
+	return Env(env)
+}
+
 func (env Env) String() string          { return string(env) }
-func (env Env) Decode() string          { return strings.SplitN(env.String(), "_", 2)[0] }
-func (env Env) IsLocal() bool           { return env.Decode() == EnvLocal }
-func (env Env) IsDevelopment() bool     { return env.Decode() == EnvDevelopment }
-func (env Env) IsTesting() bool         { return env.Decode() == EnvTesting }
-func (env Env) IsStaging() bool         { return env.Decode() == EnvStaging }
-func (env Env) IsProduction() bool      { return env.Decode() == EnvProduction }
+func (env Env) IsLocal() bool           { return env == EnvLocal }
+func (env Env) IsDevelopment() bool     { return env == EnvDevelopment }
+func (env Env) IsTesting() bool         { return env == EnvTesting }
+func (env Env) IsStaging() bool         { return env == EnvStaging }
+func (env Env) IsProduction() bool      { return env == EnvProduction }
 func (env Env) BeforeDevelopment() bool { return env.IsLocal() || env.IsDevelopment() }
 func (env Env) BeforeTesting() bool {
 	return env.IsTesting() || env.BeforeDevelopment()

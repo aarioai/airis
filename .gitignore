@@ -1,7 +1,7 @@
 # https://github.com/aarioai/rules/blob/main/config/.gitignore
 
 # .aa-env, .aa-update
-.aa-
+.aa-*
 
 # Mac OS auto generated file
 .DS_Store

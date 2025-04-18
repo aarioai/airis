@@ -57,11 +57,3 @@ func (s *Service) Cache() *cache.Cache {
 func (s *Service) Mongo() *mongodb.Model {
 	return s.mongo
 }
-
-func (s *Service) Mo(t index.Entity) *mongodb.ORMS {
-	return s.mo(t)
-}
-
-func (s *Service) Private() *private.Service {
-	return s.private
-}
