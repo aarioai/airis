@@ -100,6 +100,8 @@ var (
 
 // constant errors
 var (
+	ErrorCacheFailed = New(InternalServerError, "Cache Failed").Lock()
+
 	ErrorContinue        = New(Continue).Lock()
 	ErrorSwitchProtocols = New(SwitchingProtocols).Lock()
 	ErrorProcessing      = New(Processing).Lock()
@@ -211,6 +213,9 @@ func NewFailedDependency(msg ...any) *Error {
 }
 func NewVariantAlsoNegotiates(format string, args ...any) *Error {
 	return New(VariantAlsoNegotiates, afmt.Sprintf(format, args...))
+}
+func BadConfig(key string) *Error {
+	return New(VariantAlsoNegotiates, "bad configuration "+key)
 }
 func NewLoopDetected(msg ...any) *Error {
 	return New(LoopDetected).AppendMsg(msg...)
