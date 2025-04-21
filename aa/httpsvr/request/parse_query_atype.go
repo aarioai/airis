@@ -4,6 +4,7 @@ import (
 	"github.com/aarioai/airis/aa/ae"
 	"github.com/aarioai/airis/aa/aenum"
 	"github.com/aarioai/airis/aa/atype"
+	"github.com/aarioai/airis/pkg/afmt"
 	"time"
 )
 
@@ -49,9 +50,22 @@ func (r *Request) QueryBooln(p string) (atype.Booln, *ae.Error) {
 	}
 	return atype.ToBooln(b), nil
 }
-func (r *Request) QueryCountry(p string, xargs ...bool) (aenum.Country, *ae.Error) {
-	return parseCountry(r.QueryUint16, p, xargs...)
+
+func (r *Request) QueryCountry(p string, defaultCountry ...aenum.Country) (aenum.Country, *ae.Error) {
+	required := len(defaultCountry) == 0
+	cn, e := parseCountry(r.QueryUint16, p, required)
+	if e != nil {
+		return cn, e
+	}
+	if len(defaultCountry) == 0 {
+		return cn, nil
+	}
+	if cn == 0 {
+		return afmt.First(defaultCountry), nil
+	}
+	return cn, nil
 }
+
 func (r *Request) QueryDate(p string, loc *time.Location, required ...bool) (atype.Date, *ae.Error) {
 	x, e := r.Query(p, `^`+aenum.DateRegExp+`$`, isRequired(required))
 	if e != nil {

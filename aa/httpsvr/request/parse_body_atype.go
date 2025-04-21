@@ -4,6 +4,7 @@ import (
 	"github.com/aarioai/airis/aa/ae"
 	"github.com/aarioai/airis/aa/aenum"
 	"github.com/aarioai/airis/aa/atype"
+	"github.com/aarioai/airis/pkg/afmt"
 	"html/template"
 	"time"
 )
@@ -33,8 +34,19 @@ func (r *Request) BodyBooln(p string) (atype.Booln, *ae.Error) {
 	}
 	return atype.ToBooln(b), nil
 }
-func (r *Request) BodyCountry(p string, xargs ...bool) (aenum.Country, *ae.Error) {
-	return parseCountry(r.BodyUint16, p, xargs...)
+func (r *Request) BodyCountry(p string, defaultCountry ...aenum.Country) (aenum.Country, *ae.Error) {
+	required := len(defaultCountry) == 0
+	cn, e := parseCountry(r.BodyUint16, p, required)
+	if e != nil {
+		return cn, e
+	}
+	if len(defaultCountry) == 0 {
+		return cn, nil
+	}
+	if cn == 0 {
+		return afmt.First(defaultCountry), nil
+	}
+	return cn, nil
 }
 
 func (r *Request) BodyCoordinate(p string, required ...bool) (*atype.Coordinate, *ae.Error) {
