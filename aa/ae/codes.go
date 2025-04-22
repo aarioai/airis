@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// https://github.com/aarioai/rules/blob/main/api_doc/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E5%92%8C%E9%94%99%E8%AF%AF%E7%A0%81%E8%AF%B4%E6%98%8E.md
 const (
 	Continue           = 100
 	SwitchingProtocols = 101
@@ -50,8 +51,8 @@ const (
 	LengthRequired        = 411 // require content length, buffer length or other length
 	PreconditionFailed    = 412 // @notice diff with 424
 	RequestEntityTooLarge = 413 // post data oversize
-	// RequestURIInvalid is alias to RequestURITooLong
-	RequestURIInvalid            = 414 // invalid URI
+	// RequestTargetInvalid is alias to RequestURITooLong
+	RequestTargetInvalid         = 414 // invalid URI
 	UnsupportedMedia             = 415 // e.g. required json, but offers xml
 	RequestedRangeNotSatisfiable = 416 // e.g. user requires data from 1st page to 100th page, but only 3 pages available
 	ExpectationFailed            = 417
@@ -89,12 +90,13 @@ const (
 
 var (
 	newCodeTexts = map[int]string{
-		FailedAndSeeOther: "Failed And See Other",
-		PageExpired:       "Page Expired",
-		EnhanceYourCalm:   "Enhance Your Calm",
-		NoRowsAvailable:   "No Rows Available",
-		ConflictWith:      "Conflict With",
-		Exception:         "Exception",
+		FailedAndSeeOther:    "Failed And See Other",   // 391
+		RequestTargetInvalid: "Request Target Invalid", // 414
+		PageExpired:          "Page Expired",           // 419
+		EnhanceYourCalm:      "Enhance Your Calm",      // 420
+		NoRowsAvailable:      "No Rows Available",      //494
+		ConflictWith:         "Conflict With",          //499
+		Exception:            "Exception",              // 590
 	}
 )
 
@@ -141,7 +143,7 @@ var (
 	ErrorLengthRequired               = New(LengthRequired).Lock()
 	ErrorPreconditionFailed           = New(PreconditionFailed).Lock()
 	ErrorRequestEntityTooLarge        = New(RequestEntityTooLarge).Lock()
-	ErrorRequestURIInvalid            = New(RequestURIInvalid).Lock()
+	ErrorRequestTargetInvalid         = New(RequestTargetInvalid).Lock()
 	ErrorUnsupportedMedia             = New(UnsupportedMedia).Lock()
 	ErrorRequestedRangeNotSatisfiable = New(RequestedRangeNotSatisfiable).Lock()
 	ErrorExpectationFailed            = New(ExpectationFailed).Lock()
@@ -182,7 +184,7 @@ func NewConflictWith(format string, args ...any) *Error {
 func NewBadParam(param string, tips ...string) *Error {
 	msg := fmt.Sprintf(BadParameterFormat, param)
 	if len(tips) > 0 {
-		msg += Separator + " " + strings.Join(tips, Separator)
+		msg += Separator + strings.Join(tips, Separator)
 	}
 	return New(BadRequest, msg)
 }
