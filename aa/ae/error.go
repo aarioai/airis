@@ -144,8 +144,8 @@ func (e *Error) Trace(ctx iris.Context) string {
 	return e.WithTraceInfo(ctx).String()
 }
 
-func (e *Error) IsNotFound() bool {
-	return e.Code == NotFound || e.Code == NoRowsAvailable || e.Code == Gone
+func (e *Error) IsNotMatch() bool {
+	return e.Code == NotFound || e.Code == Gone || e.Code == NoRowsAvailable
 }
 
 func (e *Error) IsServerError() bool {
@@ -157,7 +157,7 @@ func (e *Error) IsFailedAndSeeOther() bool {
 }
 
 func (e *Error) ExceptNotFound() *Error {
-	if e == nil || e.IsNotFound() {
+	if e == nil || e.IsNotMatch() {
 		return nil
 	}
 	return e
