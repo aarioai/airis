@@ -96,12 +96,20 @@ func filterArrayFields(w any, tagname string, tags ...string) (ret []map[string]
 
 // ?_stringify=1  weak language, turn int64/uint64 fields into string
 func (w *Writer) stringifyBigint(payload any, tagname string) (any, *ae.Error) {
-	stringify, _ := w.request.QueryBool(request.ParamStringify)
+	var stringify bool
+	s := w.request.HeaderFast(request.HeaderStringify)
+	if s != "" {
+		stringify = s == "1" || s == "true" || s == "TRUE" || s == "True"
+	} else {
+		stringify, _ = w.request.QueryBool(request.ParamStringify)
+	}
+
 	if stringify {
 		return StringifyBigintFields(payload, tagname)
 	}
 	return payload, nil
 }
+
 func stringifySlice(v reflect.Value, tagname string) (any, *ae.Error) {
 	if v.Len() == 0 {
 		return nil, nil

@@ -18,11 +18,12 @@ const (
 )
 
 const (
-	ParamStringify = "_stringify"
-	ParamField     = "_field"
-	ParamPage      = "page"
-	ParamPageSize  = "page_size"
-	ParamPageEnd   = "page_end"
+	HeaderStringify = "X-Stringify"
+	ParamStringify  = "_stringify"
+	ParamField      = "_field"
+	ParamPage       = "page"
+	ParamPageSize   = "page_size"
+	ParamPageEnd    = "page_end"
 )
 
 func (t ContentTypes) String() string {
