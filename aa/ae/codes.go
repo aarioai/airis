@@ -182,12 +182,29 @@ func NewConflictWith(format string, args ...any) *Error {
 }
 
 func NewBadParam(param string, tips ...string) *Error {
-	msg := fmt.Sprintf(BadParameterFormat, param)
+	msg := fmt.Sprintf(BadParamFormat, param)
 	if len(tips) > 0 {
 		msg += Separator + strings.Join(tips, Separator)
 	}
 	return New(BadRequest, msg)
 }
+
+func NewParamTooShort(param string, tips ...string) *Error {
+	msg := fmt.Sprintf(ParamIsTooShort, param)
+	if len(tips) > 0 {
+		msg += Separator + strings.Join(tips, Separator)
+	}
+	return New(BadRequest, msg)
+}
+
+func NewParamTooLong(param string, tips ...string) *Error {
+	msg := fmt.Sprintf(ParamIsTooLong, param)
+	if len(tips) > 0 {
+		msg += Separator + strings.Join(tips, Separator)
+	}
+	return New(BadRequest, msg)
+}
+
 func NewNotAcceptable(msg ...any) *Error {
 	return New(NotAcceptable).AppendMsg(msg...)
 }
