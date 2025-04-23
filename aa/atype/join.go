@@ -8,8 +8,15 @@ import (
 	"golang.org/x/exp/constraints"
 	"log"
 	"reflect"
+	"slices"
 	"sort"
 	"strings"
+)
+
+var (
+	DefaultTagName = "name"
+	JsonTagName    = "json"
+	DbTagName      = "db"
 )
 
 type JoinType int
@@ -41,12 +48,30 @@ const (
 	JoinSortedURL             = JoinSortedBit | JoinURL
 )
 
+var (
+	mysqlJoinTypes = []JoinType{
+		JoinMySqlValues, JoinMySQL, JoinMySqlFullLike, JoinMySqlStartWith, JoinMySqlEndWith,
+		JoinMySqlLessThan, JoinMySqlGreaterThan, JoinMySqlGreaterOrEqualTo, JoinMySqlLessOrEqualTo,
+		JoinSortedMySqlValues, JoinSortedMySQL,
+	}
+)
+
 func toMySqlFieldName(k string) string {
 	fields := strings.Split(k, ".")
 	for i, field := range fields {
 		fields[i] = "`" + field + "`"
 	}
 	return strings.Join(fields, ".")
+}
+
+func (t JoinType) TagName() string {
+	if t == JoinJSON || t == JoinSortedJSON {
+		return JsonTagName
+	}
+	if slices.Contains(mysqlJoinTypes, t) {
+		return DbTagName
+	}
+	return DefaultTagName
 }
 
 func byJoinType(ty JoinType, k string, v any) string {
@@ -159,11 +184,11 @@ func JoinByTags(u any, ty JoinType, sep string, tagname string, tags ...string) 
 }
 
 func JoinByNames(u any, ty JoinType, sep string, names ...string) string {
-	return JoinByTags(u, ty, sep, "db", names...)
+	return JoinByTags(u, ty, sep, ty.TagName(), names...)
 }
 
 func JoinNamesByElements(u any, ty JoinType, sep string, eles ...string) string {
-	return JoinTagsByElements(u, ty, sep, "db", eles...)
+	return JoinTagsByElements(u, ty, sep, ty.TagName(), eles...)
 }
 
 func JoinInt[T constraints.Signed](ids []T, sep string) string {
