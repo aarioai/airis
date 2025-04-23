@@ -2,7 +2,7 @@ package model
 
 import (
 	"github.com/aarioai/airis-driver/driver"
-	"github.com/aarioai/airis-driver/driver/sqlhelper"
+	"github.com/aarioai/airis-driver/driver/mysqli"
 	"github.com/aarioai/airis/aa"
 	"{{APP_BASE}}/conf"
 	"sync"
@@ -26,8 +26,8 @@ func New(app *aa.App) *Model {
 	return modelObj
 }
 
-func (m *Model) DB() *sqlhelper.DB {
-	return sqlhelper.NewDriver(driver.NewMysqlPool(m.app, conf.MysqlConfigSection))
+func (m *Model) DB() *mysqli.DB {
+	return mysqli.NewDriver(driver.NewMysqlPool(m.app, conf.MysqlConfigSection))
 }
 
 
