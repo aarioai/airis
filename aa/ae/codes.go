@@ -88,21 +88,12 @@ const (
 	Exception                     = 590 // [NEW] exceptions
 )
 
-var (
-	newCodeTexts = map[int]string{
-		FailedAndSeeOther:    "Failed And See Other",   // 391
-		RequestTargetInvalid: "Request Target Invalid", // 414
-		PageExpired:          "Page Expired",           // 419
-		EnhanceYourCalm:      "Enhance Your Calm",      // 420
-		NoRowsAvailable:      "No Rows Available",      //494
-		ConflictWith:         "Conflict With",          //499
-		Exception:            "Exception",              // 590
-	}
-)
-
 // constant errors
 var (
-	ErrorCacheFailed = New(InternalServerError, "Cache Failed").Lock()
+	ErrorWrongPassword = New(FailedDependency, WrongPassword).Lock()
+	ErrorWrongToken    = New(FailedDependency, WrongToken).Lock()
+	ErrorTokenExpired  = New(PageExpired, TokenExpired).Lock()
+	ErrorCacheFailed   = New(InternalServerError, "Cache Failed").Lock()
 
 	ErrorContinue        = New(Continue).Lock()
 	ErrorSwitchProtocols = New(SwitchingProtocols).Lock()

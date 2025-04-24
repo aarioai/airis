@@ -1,6 +1,6 @@
 /** @note this is an auto-generated file, do not modify it! */
 
-/** @typedef {".txt"|"text/plain"|".md"|"text/markdown"|".xls"|"application/vnd.ms-excel"|".ppt"|"application/vnd.ms-powerpoint"|".pptx"|"application/vnd.openxmlformats-officedocument.presentationml.presentation"|".pdf"|"application/pdf"|".doc"|"application/msword"|".docx"|"application/vnd.openxmlformats-officedocument.wordprocessingml.document"|".xlsx"|"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"|".zip"|"application/zip"|"application/x-zip-compressed"|"multipart/x-zip"|".rar"|"application/vnd.rar"|"application/x-rar-compressed"|".bz"|"application/x-bzip"|".bz2"|"application/x-bzip2"|".gz"|"application/gzip"|"application/x-gzip"|".json"|"application/json"|".heic"|"image/heic"|".heif"|".avci"|"image/heif"|".ico"|"image/vnd.microsoft.icon"|"image/x-icon"|".svg"|"image/svg+xml"|".jpg"|"image/jpeg"|".jpeg"|".png"|"image/png"|".gif"|"image/gif"|".webp"|"image/webp"|".mp3"|"audio/mpeg"|"audio/mp3"|".3gp"|"audio/3gpp"|".3g2"|"audio/3gpp2"|".aiff"|"audio/aiff"|".aif"|".aifc"|"audio/x-aiff"|".wav"|"audio/wav"|".webm"|"audio/webm"|".mov"|"video/quicktime"|".mpeg"|"video/mpeg"|".mp4"|"video/mp4"|"video/3gpp"|"video/3gpp2"|"video/webm"|"video/x-wav"|".avi"|"video/x-msvideo"} AaFileTypeMime */
+/** @typedef {".zip"|"application/zip"|"application/x-zip-compressed"|"multipart/x-zip"|".rar"|"application/vnd.rar"|"application/x-rar-compressed"|".bz"|"application/x-bzip"|".bz2"|"application/x-bzip2"|".gz"|"application/gzip"|"application/x-gzip"|".json"|"application/json"|".jpg"|"image/jpeg"|".jpeg"|".png"|"image/png"|".gif"|"image/gif"|".webp"|"image/webp"|".heic"|"image/heic"|".heif"|".avci"|"image/heif"|".ico"|"image/vnd.microsoft.icon"|"image/x-icon"|".svg"|"image/svg+xml"|".mp3"|"audio/mpeg"|"audio/mp3"|".3gp"|"audio/3gpp"|".3g2"|"audio/3gpp2"|".aiff"|"audio/aiff"|".aif"|".aifc"|"audio/x-aiff"|".wav"|"audio/wav"|".webm"|"audio/webm"|"video/webm"|"video/x-wav"|".avi"|"video/x-msvideo"|".mov"|"video/quicktime"|".mpeg"|"video/mpeg"|".mp4"|"video/mp4"|"video/3gpp"|"video/3gpp2"|".pptx"|"application/vnd.openxmlformats-officedocument.presentationml.presentation"|".txt"|"text/plain"|".docx"|"application/vnd.openxmlformats-officedocument.wordprocessingml.document"|".ppt"|"application/vnd.ms-powerpoint"|".xls"|"application/vnd.ms-excel"|".xlsx"|"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"|".pdf"|"application/pdf"|".md"|"text/markdown"|".doc"|"application/msword"} AaFileTypeMime */
 
 class AaFileType {
     /** @enum */
@@ -44,17 +44,6 @@ class AaFileType {
         Json        : 10000,
     }
     static Mimes = {
-        Document : {
-            Doc         : [".doc", "application/msword"],
-            Docx        : [".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
-            Md          : [".md", "text/markdown"],
-            Pdf         : [".pdf", "application/pdf"],
-            Ppt         : [".ppt", "application/vnd.ms-powerpoint"],
-            Pptx        : [".pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation"],
-            Txt         : [".txt", "text/plain"],
-            Xls         : [".xls", "application/vnd.ms-excel"],
-            Xlsx        : [".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"],
-        },
         Compressed : {
             Bzip        : [".bz", "application/x-bzip"],
             Bzip2       : [".bz2", "application/x-bzip2"],
@@ -92,6 +81,17 @@ class AaFileType {
             Wav         : [".wav", "video/x-wav"],
             Webm        : [".webm", "video/webm"],
         },
+        Document : {
+            Doc         : [".doc", "application/msword"],
+            Docx        : [".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+            Md          : [".md", "text/markdown"],
+            Pdf         : [".pdf", "application/pdf"],
+            Ppt         : [".ppt", "application/vnd.ms-powerpoint"],
+            Pptx        : [".pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation"],
+            Txt         : [".txt", "text/plain"],
+            Xls         : [".xls", "application/vnd.ms-excel"],
+            Xlsx        : [".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"],
+        },
     }
     contentType
     ext
@@ -115,12 +115,12 @@ class AaFileType {
 			}
 		}
     }
-    isData(){return this.mimeType === "Data"}
     isImage(){return this.mimeType === "Image"}
     isAudio(){return this.mimeType === "Audio"}
     isVideo(){return this.mimeType === "Video"}
     isDocument(){return this.mimeType === "Document"}
     isCompressed(){return this.mimeType === "Compressed"}
+    isData(){return this.mimeType === "Data"}
     toJSON(){return this.value}
     valueOf(){return this.value}
 }
