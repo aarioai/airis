@@ -92,6 +92,9 @@ const (
 var (
 	ErrorWrongPassword = New(FailedDependency, WrongPassword).Lock()
 	ErrorWrongToken    = New(FailedDependency, WrongToken).Lock()
+	ErrorWrongVericode = New(FailedDependency, WrongVericode).Lock()
+	ErrorWrongCode     = New(FailedDependency, WrongCode).Lock()
+	ErrorWrongOpenid   = New(FailedDependency, WrongOpenid).Lock()
 	ErrorTokenExpired  = New(PageExpired, TokenExpired).Lock()
 	ErrorCacheFailed   = New(InternalServerError, "Cache Failed").Lock()
 

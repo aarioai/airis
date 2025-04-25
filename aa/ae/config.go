@@ -7,6 +7,9 @@ var (
 	ParamIsTooLong  = "Too Long Parameter: %s"
 	WrongPassword   = "Wrong Password"
 	WrongToken      = "Wrong Token"
+	WrongVericode   = "Wrong Vericode"
+	WrongCode       = "Wrong Code"
+	WrongOpenid     = "Wrong Openid"
 	TokenExpired    = "Token Expired"
 )
 
