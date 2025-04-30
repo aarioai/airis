@@ -7,7 +7,7 @@ import (
 	"{{APP_BASE}}/cache"
 	"{{APP_BASE}}/conf"
 	mbs "{{APP_BASE}}/module/bs/model"
-	mcns "{{APP_BASE}}/module/cns/model"
+	mcns "{{APP_BASE}}/module/cms/model"
 	mss "{{APP_BASE}}/module/ss/model"
 	"{{APP_BASE}}/private"
 	"sync"

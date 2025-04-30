@@ -14,8 +14,9 @@ readonly GLOBAL_DIRS=(
     app/rpc                 \
     boot                    \
     config                  \
-    deploy/asset_src        \
-    deploy/view_src         \
+    frontend/asset_src      \
+    frontend/view_src       \
+    frontend/dst            \
     repair                  \
     sdk                     \
     tests
@@ -36,7 +37,7 @@ readonly APP_GLOBAL_DIRS=(
 )
 readonly COMMON_MODULES=(
     bs                  \
-    cns                 \
+    cms                 \
     ss                  \
     task
 )
