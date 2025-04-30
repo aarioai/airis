@@ -41,7 +41,7 @@ type Point struct {
 type Position struct{ sql.NullString } // []byte // postion, coordinate or point
 
 // sql 可以使用 select *， cast(ip as CHAR) from table_name   进行显示
-type Ip struct{ sql.NullString } //  VARBINARY(16) | BINARY(16) 固定16位长度 net.IP               // IP Address
+type IP struct{ sql.NullString } //  VARBINARY(16) | BINARY(16) 固定16位长度 net.IP               // IP Address
 
 // https://en.wikipedia.org/wiki/Bit_numbering
 type BitPos uint8       // bit-position (in big endian)
@@ -225,8 +225,8 @@ func (p Position) Point() *Point {
 }
 
 // sql 可以使用 select *， cast(ip as CHAR) from table_name   进行显示
-func ToIp(addr string) Ip {
-	var ip Ip
+func ToIP(addr string) IP {
+	var ip IP
 	if addr == "" {
 		return ip
 	}
@@ -242,17 +242,17 @@ func ToIp(addr string) Ip {
 	ip.Scan(nip.String())
 	return ip
 }
-func (ip Ip) Bytes() []byte {
-	if !ip.Ok() {
+func (ip IP) Bytes() []byte {
+	if !ip.OK() {
 		return nil
 	}
 	return []byte(ip.String)
 }
 
-func (ip Ip) Ok() bool {
+func (ip IP) OK() bool {
 	return ip.Valid && len(ip.String) == net.IPv4len || len(ip.String) == net.IPv6len
 }
-func (ip Ip) Net() net.IP {
+func (ip IP) Net() net.IP {
 	b := ip.Bytes()
 	if b == nil {
 		return nil
@@ -261,12 +261,12 @@ func (ip Ip) Net() net.IP {
 }
 
 // 是不是 IPv4
-func (ip Ip) Is4() bool {
+func (ip IP) Is4() bool {
 	return len(ip.String) == net.IPv4len
 }
 
 // 无论是4字节的IPv4，还是16字节的IPv4或IPv6，都能输出可阅读的IP地址
-func (ip Ip) To16() string {
+func (ip IP) To16() string {
 	ip2 := ip.Net()
 	// 包括ipv4 / ipv16
 	nip := ip2.To16() // 此时IP长度为16
