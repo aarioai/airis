@@ -2,7 +2,16 @@ package afmt
 
 import (
 	"fmt"
+	"github.com/aarioai/airis/pkg/types"
 )
+
+func DefaultIfZero[T types.BasicType](v, defaultV T) T {
+	var zero T
+	if v == zero {
+		return defaultV
+	}
+	return v
+}
 
 // First 获取第一个参数，如果切片为空则返回零值。一般用于动态参数获取
 func First[T any](args []T) T {
