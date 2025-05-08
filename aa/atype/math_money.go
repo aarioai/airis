@@ -1,6 +1,5 @@
 package atype
 
-import "C"
 import (
 	"fmt"
 	"github.com/aarioai/airis/pkg/types"
