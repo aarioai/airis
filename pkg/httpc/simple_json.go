@@ -1,6 +1,7 @@
 package httpc
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -29,45 +30,46 @@ func addJsonHeaders(req *http.Request, headers []map[string]string) {
 // - RequestJson("HEAD", url, nil)
 // - RequestJson("TRACE", url, nil)
 // - RequestJson("CONNECT", url, nil)
-func RequestJson(method, url string, params map[string]string, headers ...map[string]string) (*http.Response, error) {
+func RequestJson(ctx context.Context, method, url string, params map[string]string, headers ...map[string]string) (*http.Response, error) {
 	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
 		return nil, err
 	}
+	req.WithContext(ctx)
 	req.Close = true
 	addJsonHeaders(req, headers)
 	SetQueries(req, params)
 	return request(req)
 }
 
-func RequestJsonBody(target interface{}, method, url string, params map[string]string, data io.Reader, headers ...map[string]string) (int, error) {
+func RequestJsonBody(ctx context.Context, target interface{}, method, url string, params map[string]string, data io.Reader, headers ...map[string]string) (int, error) {
 	req, err := http.NewRequest(method, url, data)
 	if err != nil {
 		return 0, err
 	}
+	req.WithContext(ctx)
 	req.Close = true
-
 	addJsonHeaders(req, headers)
 	SetQueries(req, params)
 	return requestJsonBody(req, target)
 }
 
-func DeleteJson(target interface{}, url string, params map[string]string, headers ...map[string]string) (int, error) {
-	return RequestJsonBody(target, "DELETE", url, params, nil, headers...)
+func DeleteJson(ctx context.Context, target interface{}, url string, params map[string]string, headers ...map[string]string) (int, error) {
+	return RequestJsonBody(ctx, target, "DELETE", url, params, nil, headers...)
 }
 
-func GetJson(target interface{}, url string, params map[string]string, headers ...map[string]string) (int, error) {
-	return RequestJsonBody(target, "GET", url, params, nil, headers...)
+func GetJson(ctx context.Context, target interface{}, url string, params map[string]string, headers ...map[string]string) (int, error) {
+	return RequestJsonBody(ctx, target, "GET", url, params, nil, headers...)
 }
 
-func PatchJson(target interface{}, url string, data io.Reader, headers ...map[string]string) (int, error) {
-	return RequestJsonBody(target, "PATCH", url, nil, data, headers...)
+func PatchJson(ctx context.Context, target interface{}, url string, data io.Reader, headers ...map[string]string) (int, error) {
+	return RequestJsonBody(ctx, target, "PATCH", url, nil, data, headers...)
 }
 
-func PostJson(target interface{}, url string, data io.Reader, headers ...map[string]string) (int, error) {
-	return RequestJsonBody(target, "POST", url, nil, data, headers...)
+func PostJson(ctx context.Context, target interface{}, url string, data io.Reader, headers ...map[string]string) (int, error) {
+	return RequestJsonBody(ctx, target, "POST", url, nil, data, headers...)
 }
 
-func PutJson(target interface{}, url string, data io.Reader, headers ...map[string]string) (int, error) {
-	return RequestJsonBody(target, "PUT", url, nil, data, headers...)
+func PutJson(ctx context.Context, target interface{}, url string, data io.Reader, headers ...map[string]string) (int, error) {
+	return RequestJsonBody(ctx, target, "PUT", url, nil, data, headers...)
 }
