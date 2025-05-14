@@ -9,31 +9,26 @@ import (
 )
 
 func (r *Request) Paging() atype.Paging {
-	page, _ := r.QueryInt(ParamPage, false)
-	pageSize, _ := r.QueryInt(ParamPageSize, false)
-	pageEnd, _ := r.QueryInt(ParamPageEnd, false)
-	if pageSize > atype.DefaultPageSize {
-		pageSize = atype.DefaultPageSize
-	}
+	page, _ := r.QueryUint(ParamPage, false)
+	pageSize, _ := r.QueryUint8(ParamPageSize, false)
+	pageEnd, _ := r.QueryUint(ParamPageEnd, false)
 	return atype.NewPaging(page, pageEnd, pageSize)
 }
 
-func (r *Request) PagingWithSize(maxPageSize int) atype.Paging {
-	page, _ := r.QueryInt(ParamPage, false)
-	pageSize, _ := r.QueryInt(ParamPageSize, false)
-	pageEnd, _ := r.QueryInt(ParamPageEnd, false)
-	if maxPageSize <= 0 {
-		maxPageSize = atype.DefaultPageSize
-	}
-	if pageSize > maxPageSize {
+func (r *Request) PagingWithSize(maxPageSize uint8) atype.Paging {
+	page, _ := r.QueryUint(ParamPage, false)
+	pageSize, _ := r.QueryUint8(ParamPageSize, false)
+	pageEnd, _ := r.QueryUint(ParamPageEnd, false)
+	if maxPageSize > 0 && (pageSize == 0 || pageSize > maxPageSize) {
 		pageSize = maxPageSize
 	}
 	return atype.NewPaging(page, pageEnd, pageSize)
 }
-func (r *Request) PagingWithFirstPageEnd(defaultPageEnd int) atype.Paging {
-	page, _ := r.QueryInt(ParamPage, false)
-	pageSize, _ := r.QueryInt(ParamPageSize, false)
-	pageEnd, _ := r.QueryInt(ParamPageEnd, false)
+
+func (r *Request) PagingWithFirstPageEnd(defaultPageEnd uint) atype.Paging {
+	page, _ := r.QueryUint(ParamPage, false)
+	pageSize, _ := r.QueryUint8(ParamPageSize, false)
+	pageEnd, _ := r.QueryUint(ParamPageEnd, false)
 	if pageSize > atype.DefaultPageSize {
 		pageSize = atype.DefaultPageSize
 	}
