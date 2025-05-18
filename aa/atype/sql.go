@@ -13,80 +13,6 @@ import (
 	"time"
 )
 
-type NullUint64 struct{ sql.NullInt64 }
-type NullString struct{ sql.NullString }
-
-type Location struct {
-	Valid     bool    `json:"-"`
-	Latitude  float64 `json:"lat"`
-	Longitude float64 `json:"lng"`
-	Height    float64 `json:"height"` // 保留
-	Name      string  `json:"name"`
-	Address   string  `json:"address"`
-}
-type Coordinate struct {
-	Latitude  float64 `json:"lat"`
-	Longitude float64 `json:"lng"`
-	Height    float64 `json:"height"` // 保留
-}
-
-type Point struct {
-	X float64 `json:"x"`
-	Y float64 `json:"y"`
-}
-
-/*
-一般point 需要建 spatial 索引，就需要单独到一个表里，不应该放在一起
-*/
-type Position struct{ sql.NullString } // []byte // postion, coordinate or point
-
-// sql 可以使用 select *， cast(ip as CHAR) from table_name   进行显示
-type IP struct{ sql.NullString } //  VARBINARY(16) | BINARY(16) 固定16位长度 net.IP               // IP Address
-
-// https://en.wikipedia.org/wiki/Bit_numbering
-type BitPos uint8       // bit-position (in big endian)
-type BitPosition uint16 // bit-position (in big endian)
-type Bitwise struct {
-	BitName  string // 该位名称
-	BitPos   BitPos // big endian 下，位所在位置
-	BitValue bool   // 该位的值
-	MaxBits  uint8
-}
-type Bitwiser struct {
-	BitName  string      // 该位名称
-	BitPos   BitPosition // big endian 下，位所在位置
-	BitValue bool        // 该位的值
-	MaxBits  uint8
-}
-type Bin string // binary string
-type Booln uint8
-type Int24 int32
-type Uint24 uint32
-type Year uint16      // uint16 date: yyyy
-type YearMonth Uint24 // uint24 date: yyyymm  不要用 Date，主要是不需要显示dd。
-type YMD uint         // YYYYMMDD
-type Date string      // yyyy-mm-dd
-type Datetime string  // yyyy-mm-dd hh:ii:ss
-type UnixTime int64   // int 形式 datetime，可与 datetime, date 互转
-
-type SepStrings string // a,b,c,d,e
-type SepUint8s string  // 1,2,3,4
-type SepUint16s string // 1,2,3,4
-type SepUint24s string // 1,2,3,4
-type SepUint32s string // 1,2,3,4
-type SepInts string    // 1,2,3,4
-type SepUints string   // 1,2,3,4
-type SepUint64s string // 1,2,3,4
-
-const (
-	False       Booln    = 0
-	True        Booln    = 1
-	MinDate     Date     = "0000-00-00"
-	MaxDate     Date     = "9999-12-31"
-	MinDatetime Datetime = "0000-00-00 00:00:00"
-	MaxDatetime Datetime = "9999-12-31 23:59:59"
-)
-
 func NewNullUint64(value uint64) NullUint64 {
 	var v NullUint64
 	if value > 0 {
@@ -449,12 +375,12 @@ func (d Date) Int64(loc *time.Location) int64 {
 	}
 	return tm.Unix()
 }
-func (d Date) Unix(loc *time.Location) UnixTime {
+func (d Date) Unix(loc *time.Location) Timestamp {
 	if !d.Valid() {
 		return 0
 	}
 	t, _ := d.Time(loc)
-	return UnixTime(t.Unix())
+	return Timestamp(t.Unix())
 }
 
 func NewDatetime(d string, loc *time.Location) Datetime {
@@ -524,26 +450,26 @@ func (d Datetime) Int64(loc *time.Location) int64 {
 	}
 	return tm.Unix()
 }
-func (d Datetime) Unix(loc *time.Location) UnixTime {
+func (d Datetime) Unix(loc *time.Location) Timestamp {
 	if !d.Valid() {
 		return 0
 	}
 	t, _ := d.Time(loc)
-	return UnixTime(t.Unix())
+	return Timestamp(t.Unix())
 }
 
-func NewUnixTime(u int64) UnixTime {
-	return UnixTime(u)
+func NewUnixTime(u int64) Timestamp {
+	return Timestamp(u)
 }
-func (u UnixTime) Int64() int64 { return int64(u) }
-func (u UnixTime) Date(loc *time.Location) Date {
+func (u Timestamp) Int64() int64 { return int64(u) }
+func (u Timestamp) Date(loc *time.Location) Date {
 	if u == 0 {
 		return MinDate
 	}
 	t := time.Unix(u.Int64(), 0).In(loc)
 	return ToDate(&t)
 }
-func (u UnixTime) Datetime(loc *time.Location) Datetime {
+func (u Timestamp) Datetime(loc *time.Location) Datetime {
 	if u == 0 {
 		return MinDatetime
 	}

@@ -5,12 +5,6 @@ import (
 	"github.com/aarioai/airis/pkg/types"
 )
 
-// type Html template.HTML   HTML 直接使用 template.HTML
-type Province uint8 // 2 位省份地址码
-type Dist uint16    // 4 位地址简码
-type Distri Uint24  // 6 位地址简码
-type AddrId uint64  // 12 位地址码
-
 var (
 	// 直辖市：北京、上海、天津、重庆
 	Municipalities = []Distri{110000, 310000, 120000, 500000}
@@ -60,7 +54,7 @@ func (d Distri) Province() Province {
 func (d Distri) Dist() Dist {
 	return Dist(d / 100)
 }
-func (d Distri) AddrId() AddrId {
+func (d Distri) AddrId() District {
 	return NewAddrId(uint64(d) * 1000000)
 }
 
@@ -126,19 +120,19 @@ func (d Dist) String() string {
 	return types.FormatUint(d)
 }
 
-func ParseAddrId(s string) (AddrId, error) {
+func ParseAddrId(s string) (District, error) {
 	n, err := types.ParseUint64(s)
 	if err != nil {
 		return 0, err
 	}
-	return AddrId(n), nil
+	return District(n), nil
 }
-func NewAddrId(a uint64) AddrId {
-	return AddrId(a)
+func NewAddrId(a uint64) District {
+	return District(a)
 }
-func (a AddrId) Uint64() uint64 {
+func (a District) Uint64() uint64 {
 	return uint64(a)
 }
-func (a AddrId) String() string {
+func (a District) String() string {
 	return types.FormatUint(a)
 }

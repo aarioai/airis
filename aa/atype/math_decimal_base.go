@@ -2,8 +2,6 @@ package atype
 
 import "math"
 
-type RoundType uint8
-
 const (
 	Round        RoundType = 0 // math.Round
 	Floor        RoundType = 1 // math.Floor  -> floor(0.1) =0; floor(-0.1) = -1

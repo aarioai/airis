@@ -6,7 +6,7 @@ import (
 )
 
 // virtual money
-type VMoney Money // 1 coin = 1 money    如 chatgpt 等消耗，单次消耗低于0.1分，因此需要更大的 coin比例
+
 const (
 	VCent              VMoney  = 100  // 1 律分
 	VDime              VMoney  = 1000 // 1 律币(角)

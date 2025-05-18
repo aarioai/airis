@@ -126,6 +126,7 @@ pushAndUpgradeMod() {
 
 handle_tags() {
     info "managing tags..."
+    git pull origin --tags
     git tag -l | xargs git tag -d
     git fetch origin --prune
     latestTag=$(git describe --tags "$(git rev-list --tags --max-count=1)" 2>/dev/null || echo "")

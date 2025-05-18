@@ -1,5 +1,7 @@
 package atype
 
+import "github.com/aarioai/airis/pkg/afmt"
+
 type Paging struct {
 	Page     uint   `json:"page"`
 	PageEnd  uint   `json:"page_end"`
@@ -15,16 +17,14 @@ var (
 	MaxPageRange    = uint8(5)
 )
 
-// NewPaging
-// @param pageStart page start
-// @param [ends] [pageEnd[, pageSize]]
-func NewPaging(pageStart, pageEnd uint, pageSize uint8) Paging {
+func NewPaging(pageStart, pageEnd uint, pageSizes ...uint8) Paging {
 	if pageStart <= 1 {
 		pageStart = 1
 	}
 	if pageEnd < pageStart {
 		pageEnd = pageStart
 	}
+	pageSize := afmt.First(pageSizes)
 	if pageSize == 0 {
 		pageSize = DefaultPageSize
 	}

@@ -11,7 +11,6 @@ import (
 // 数据库有 money() 函数 money 支持正负；
 // SmallMoney:  UNSIGNED INT 范围：42万元左右；
 // Money:      BIGINT 范围：正负100亿元；
-type Money int64 // 有效范围：正负100亿元；  ±100 0000亿
 
 const (
 	// 1 元 = 100 分 = 1000 毫 = 10000 money

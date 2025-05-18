@@ -7,20 +7,8 @@ import (
 	"strings"
 )
 
-type File string
-type Document string
-type Image string
-type Video string
-type Audio string
-type Files struct{ NullStrings }
-type Documents struct{ NullStrings }
-type Images struct{ NullStrings }
-type Videos struct{ NullStrings }
-type Audios struct{ NullStrings }
-
 // 文本不存在太长的；不要使用 null string，否则插入空字符串比较麻烦
 // HTML 一律采用 template.HTML
-type Text string // Text 65535 bytes
 
 func (p File) String() string                                        { return string(p) }
 func (p File) Src(filler func(string) *FileSrc) *FileSrc             { return filler(p.String()) }
