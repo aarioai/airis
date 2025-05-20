@@ -1,7 +1,26 @@
 package atype
 
+import "slices"
+
 // Iris path parameter types
 // See https://iris-go.gitbook.io/iris/contents/routing/routing-path-parameter-types
+
+var ParamTypes = []string{
+	":string", ":uuid",
+	":int8", ":int16", ":int32", ":int64", // no :int24 and :uint24
+	":uint8", ":uint16", ":uint32", ":uint64",
+	":bool", ":alphabetical",
+	":email", ":mail", // mail is same to email, but mail without server domain validation
+	":weekday",
+}
+
+func NewPathParamType(t string) (PathParamType, bool) {
+	return PathParamType(t), slices.Contains(ParamTypes, t)
+}
+
+func (t PathParamType) Valid() bool {
+	return slices.Contains(ParamTypes, string(t))
+}
 
 func NewUUID(s string) (UUID, bool) {
 	return UUID(s), IsUUID(s)
@@ -56,42 +75,6 @@ func NewWord(s string) (Word, bool) {
 
 func (s Word) Valid() bool {
 	return IsWord(string(s))
-}
-
-func NewFilename(s string) (Filename, bool) {
-	return Filename(s), IsFilename(s)
-}
-
-func (s Filename) Valid() bool {
-	return IsFilename(string(s))
-}
-
-func NewUnicodeFilename(s string) (UnicodeFilename, bool) {
-	return UnicodeFilename(s), IsUnicodeFilename(s)
-}
-
-func (s UnicodeFilename) Valid() bool {
-	return IsUnicodeFilename(string(s))
-}
-
-func NewPath(s string) (Path, bool) {
-	return Path(s), IsPath(s)
-}
-
-func (s Path) Valid() bool {
-	return IsPath(string(s))
-}
-
-func NewUnicodePath(s string) (UnicodePath, bool) {
-	return UnicodePath(s), IsUnicodePath(s)
-}
-
-func (s UnicodePath) Valid() bool {
-	return IsUnicodePath(string(s))
-}
-
-func NewEmail(s string) (Email, bool) {
-	return Email(s), IsEmail(s)
 }
 
 func (s Email) Valid() bool {

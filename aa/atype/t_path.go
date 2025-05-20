@@ -1,205 +1,102 @@
 package atype
 
-import (
-	"encoding/json"
-	"strings"
-)
+import "strings"
 
-// 文本不存在太长的；不要使用 null string，否则插入空字符串比较麻烦
-// HTML 一律采用 template.HTML
-
-func (p FilePath) String() string                                        { return string(p) }
-func (p FilePath) Src(filler func(string) *FileSrc) *FileSrc             { return filler(p.String()) }
-func (p DocumentPath) String() string                                    { return string(p) }
-func (p DocumentPath) Src(filler func(string) *DocumentSrc) *DocumentSrc { return filler(p.String()) }
-func (p ImagePath) String() string                                       { return string(p) }
-func (p ImagePath) Src(filler func(string) *ImgSrc) *ImgSrc              { return filler(p.String()) }
-func (p VideoPath) String() string                                       { return string(p) }
-func (p VideoPath) Src(filler func(string) *VideoSrc) *VideoSrc          { return filler(p.String()) }
-func (p AudioPath) String() string                                       { return string(p) }
-func (p AudioPath) Src(filler func(string) *AudioSrc) *AudioSrc          { return filler(p.String()) }
-
-func NewFiles(s string) FilePaths {
-	var x FilePaths
-	if s != "" && strings.ToLower(s) != "null" {
-		x.Scan(s)
+// NewFileType creates and formats a file type string
+func NewFileType(s string) (FileType, bool) {
+	if s == "" {
+		return "", false
 	}
-	return x
-}
-func ToFiles(v []FilePath) FilePaths {
-	if len(v) == 0 {
-		return FilePaths{}
+	if s[0] != '.' {
+		s = "." + s
 	}
-	s, _ := json.Marshal(v)
-	if len(s) == 0 {
-		return FilePaths{}
-	}
-
-	return NewFiles(string(s))
+	return FileType(s), true
 }
 
-func (im FilePaths) Srcs(filler func(path string) *FileSrc) []FileSrc {
-	if !im.Valid || im.String == "" {
-		return nil
-	}
-	ims := im.Strings()
-	srcs := make([]FileSrc, 0, len(ims))
-	for _, im := range ims {
-		if im != "" {
-			if fi := filler(im); fi != nil {
-				srcs = append(srcs, *fi)
-			}
-		}
-	}
-	return srcs
+func NewStdFilename(s string) (StdFilename, bool) { return StdFilename(s), IsFilename(s) }
+func (s StdFilename) Valid() bool {
+	return IsFilename(string(s))
 }
 
-func NewDocuments(s string) DocumentPaths {
-	var x DocumentPaths
-	if s != "" && strings.ToLower(s) != "null" {
-		x.Scan(s)
-	}
-	return x
+func NewFilename(s string) (Filename, bool) {
+	return Filename(s), IsUnicodeFilename(s)
 }
-func ToDocuments(v []DocumentPath) DocumentPaths {
-	if len(v) == 0 {
-		return DocumentPaths{}
-	}
-	s, _ := json.Marshal(v)
-	if len(s) == 0 {
-		return DocumentPaths{}
-	}
-
-	return NewDocuments(string(s))
+func (s Filename) Valid() bool {
+	return IsUnicodeFilename(string(s))
 }
 
-func (im DocumentPaths) Srcs(filler func(path string) *DocumentSrc) []DocumentSrc {
-	if !im.Valid || im.String == "" {
-		return nil
-	}
-	ims := im.Strings()
-	srcs := make([]DocumentSrc, 0, len(ims))
-	for _, im := range ims {
-		if im != "" {
-			if fi := filler(im); fi != nil {
-				srcs = append(srcs, *fi)
-			}
-		}
-	}
-	return srcs
+func NewStdPath(s string) (StdPath, bool) { return StdPath(s), IsPath(s) }
+func (s StdPath) Valid() bool {
+	return IsPath(string(s))
 }
 
-func NewImages(s string) ImagePaths {
-	var x ImagePaths
-	if s != "" && strings.ToLower(s) != "null" {
-		x.Scan(s)
-	}
-	return x
+func NewPath(s string) (Path, bool) {
+	return Path(s), IsUnicodePath(s)
 }
-func ToImages(v []ImagePath) ImagePaths {
-	s, _ := json.Marshal(v)
-	if len(s) == 0 {
-		return ImagePaths{}
-	}
-
-	return NewImages(string(s))
+func (s Path) Valid() bool {
+	return IsUnicodePath(string(s))
 }
 
-func (im ImagePaths) Srcs(filler func(path string) *ImgSrc) []ImgSrc {
-	if !im.Valid || im.String == "" {
-		return nil
-	}
-	ims := im.Strings()
-	srcs := make([]ImgSrc, 0, len(ims))
-	for _, im := range ims {
-		if im != "" {
-			if fi := filler(im); fi != nil {
-				srcs = append(srcs, *fi)
-			}
-		}
-	}
-	return srcs
+func NewEmail(s string) (Email, bool) {
+	return Email(s), IsEmail(s)
 }
 
-func NewVideos(s string) VideoPaths {
-	var x VideoPaths
-	if s != "" && strings.ToLower(s) != "null" {
-		x.Scan(s)
+func (p FilenamePattern) ReplaceAll(name, paramType, to string) FilenamePattern {
+	if p == "" {
+		return p
 	}
-	return x
+	s := strings.ReplaceAll(string(p), "{"+name+"}", to)
+	s = strings.ReplaceAll(s, "{"+name+paramType+"}", to)
+	return FilenamePattern(s)
 }
-func ToVideos(v []VideoPath) VideoPaths {
-	if len(v) == 0 {
-		return VideoPaths{}
+func (p FilenamePattern) ReplaceMany(d map[string]string) FilenamePattern {
+	if p == "" {
+		return p
 	}
-	s, _ := json.Marshal(v)
-	if len(s) == 0 {
-		return VideoPaths{}
+	s := string(p)
+	for old, to := range d {
+		s = strings.ReplaceAll(s, old, to)
 	}
+	return FilenamePattern(s)
+}
+func (p FilenamePattern) Filename() Filename { return Filename(p) }
 
-	return NewVideos(string(s))
+func (p PathPattern) ReplaceAll(name, paramType, to string) PathPattern {
+	if p == "" {
+		return p
+	}
+	s := strings.ReplaceAll(string(p), "{"+name+"}", to)
+	s = strings.ReplaceAll(s, "{"+name+paramType+"}", to)
+	return PathPattern(s)
 }
+func (p PathPattern) ReplaceMany(d map[string]string) PathPattern {
+	if p == "" {
+		return p
+	}
+	s := string(p)
+	for old, to := range d {
+		s = strings.ReplaceAll(s, old, to)
+	}
+	return PathPattern(s)
+}
+func (p PathPattern) Path() Path { return Path(p) }
 
-func NewAudios(s string) AudioPaths {
-	var x AudioPaths
-	if s != "" && strings.ToLower(s) != "null" {
-		x.Scan(s)
+func (p UrlPattern) ReplaceAll(name, paramType, to string) UrlPattern {
+	if p == "" {
+		return p
 	}
-	return x
+	s := strings.ReplaceAll(string(p), "{"+name+"}", to)
+	s = strings.ReplaceAll(s, "{"+name+paramType+"}", to)
+	return UrlPattern(s)
 }
-func ToAudios(v []AudioPath) AudioPaths {
-	if len(v) == 0 {
-		return AudioPaths{}
+func (p UrlPattern) ReplaceMany(d map[string]string) UrlPattern {
+	if p == "" {
+		return p
 	}
-	s, _ := json.Marshal(v)
-	if len(s) == 0 {
-		return AudioPaths{}
+	s := string(p)
+	for old, to := range d {
+		s = strings.ReplaceAll(s, old, to)
 	}
-
-	return NewAudios(string(s))
+	return UrlPattern(s)
 }
-
-func (im FilePaths) Files() []FilePath {
-	imgs := im.Strings()
-	if len(imgs) == 0 {
-		return nil
-	}
-	ims := make([]FilePath, len(imgs))
-	for i, img := range imgs {
-		ims[i] = FilePath(img)
-	}
-	return ims
-}
-func (im ImagePaths) Images() []ImagePath {
-	imgs := im.Strings()
-	if len(imgs) == 0 {
-		return nil
-	}
-	ims := make([]ImagePath, len(imgs))
-	for i, img := range imgs {
-		ims[i] = ImagePath(img)
-	}
-	return ims
-}
-func (im VideoPaths) Videos() []VideoPath {
-	imgs := im.Strings()
-	if len(imgs) == 0 {
-		return nil
-	}
-	ims := make([]VideoPath, len(imgs))
-	for i, img := range imgs {
-		ims[i] = VideoPath(img)
-	}
-	return ims
-}
-func (im AudioPaths) Audios() []AudioPath {
-	imgs := im.Strings()
-	if len(imgs) == 0 {
-		return nil
-	}
-	ims := make([]AudioPath, len(imgs))
-	for i, img := range imgs {
-		ims[i] = AudioPath(img)
-	}
-	return ims
-}
+func (p UrlPattern) URL() URL { return URL(p) }

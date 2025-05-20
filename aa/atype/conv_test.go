@@ -23,8 +23,8 @@ func TestString(t *testing.T) {
 		t.Errorf("byte(A) ==> string(%s)", atype.String(byte('A')))
 	}
 
-	if atype.String(atype.Char('A')) != "A" {
-		t.Errorf("atype.Abyte(A) ==> string(%s)", atype.String(atype.Char('A')))
+	if atype.String(atype.Byte('A')) != "A" {
+		t.Errorf("atype.Abyte(A) ==> string(%s)", atype.String(atype.Byte('A')))
 	}
 
 	if atype.String([]byte{'A', 'a', 'r', 'i', 'o'}) != "Aario" {

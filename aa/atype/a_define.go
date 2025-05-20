@@ -4,9 +4,10 @@ import "database/sql"
 
 // See ./t_basic.go
 
-type Char byte
+type Byte byte
 type Int24 int32
 type Uint24 uint32
+
 type Bin string         // binary string
 type BitPos uint8       // bit-position (in big endian)
 type BitPosition uint16 // bit-position (in big endian)
@@ -14,20 +15,40 @@ type Booln uint8        // 0 | 1
 
 // See ./t_path_param.go
 
-type UUID string            // 32 or 36 bytes, 8-4-4-4-12
-type Numerical string       // \d+
-type Lowers string          // [a-z]+
-type Uppers string          // [A-Z]+
-type Alphabetical string    // [a-zA-Z]+
-type AlphaDigit string      // [a-zA-Z\d]+
-type Word string            // \w+
-type Filename string        // [\w-.]+ // standard file name
-type UnicodeFilename string // [\w-.!@#$%^&(){}~]+ , support in windows/linux/unix
-type Path string            // [\w-.\/]+
-type UnicodePath string     // [\w-.!@#$%^&(){}~/]+
+type PathParamType string // e.g. :string, :uuid, :uint8
+type UUID string          // 32 or 36 bytes, 8-4-4-4-12
+type Numerical string     // \d+
+type Lowers string        // [a-z]+
+type Uppers string        // [A-Z]+
+type Alphabetical string  // [a-zA-Z]+
+type AlphaDigit string    // [a-zA-Z\d]+
+type Word string          // \w+
 type Email string
-type Weekday uint8  // [0-6] from sunday to saturday
-type WeekDay string // /([0-6]|sunday|monday|tuesday|wednesday|thursday|friday|saturday|sun.?|mon.?|tues?.?|wed.?|thur?.?|thurs.?|fri.?|sat.?)/i
+type Weekday uint8 // [0-6] from sunday to saturday
+
+// See ./t_path.go
+type FileType string        // e.g. .jpg
+type StdFilename string     // [\w-.]+ // standard file name
+type Filename string        // [\w-.!@#$%^&(){}~]+ , unicode filename
+type StdPath string         // [\w-.\/]+
+type Path string            // [\w-.!@#$%^&(){}~/]+ , unicode path
+type URL string             // e.g. https://xxx/video.avi?quality=80
+type FilenamePattern string //  e.g. {name}_{size:int}.avi
+type PathPattern string     //  e.g. /a/b/{name}_{size:int}.avi
+type UrlPattern string      // e.g. https://xxx/{user}/video.avi?quality={quality:int}
+
+// See ./t_path_mime.go
+
+type FilePath string
+type DocumentPath FilePath
+type ImagePath FilePath
+type VideoPath FilePath
+type AudioPath FilePath
+type FilePaths struct{ NullStrings }
+type DocumentPaths FilePaths
+type ImagePaths FilePaths
+type VideoPaths FilePaths
+type AudioPaths FilePaths
 
 // See ./t_decimal.go
 
@@ -93,19 +114,6 @@ type SepUint64s string // 1,2,3,4
 // See ./t_text.go
 
 type Text string // Text 65535 bytes
-
-// See ./t_path.go
-
-type FilePath string
-type DocumentPath string
-type ImagePath string
-type VideoPath string
-type AudioPath string
-type FilePaths struct{ NullStrings }
-type DocumentPaths struct{ NullStrings }
-type ImagePaths struct{ NullStrings }
-type VideoPaths struct{ NullStrings }
-type AudioPaths struct{ NullStrings }
 
 // See ./t_complex_bytes.go
 

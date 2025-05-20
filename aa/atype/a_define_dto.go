@@ -28,3 +28,11 @@ type Point struct {
 	X float64 `json:"x"`
 	Y float64 `json:"y"`
 }
+
+type VersionStruct struct {
+	Main  uint       `json:"main"` // Major*1000000 + Minor*1000 + Patch
+	Major uint       `json:"major"`
+	Minor uint       `json:"minor"`
+	Patch uint       `json:"patch"`
+	Tag   VersionTag `json:"tag"`
+}

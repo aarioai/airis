@@ -12,11 +12,3 @@ type Bitwiser struct {
 	BitValue bool        // 该位的值
 	MaxBits  uint8
 }
-
-type VersionStruct struct {
-	Main  uint // Major*1000000 + Minor*1000 + Patch
-	Major uint
-	Minor uint
-	Patch uint
-	Tag   VersionTag
-}

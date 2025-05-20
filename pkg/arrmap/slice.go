@@ -12,7 +12,7 @@ import "golang.org/x/exp/slices"
 // slices.Compare([], [])  若位置对应元素完全相同，0； -1 第一slice相同位置元素字母大于第二个slice相同位置元素字母，反之 1
 // slices.Delete([], start, end) []  ===>  append(a[0:start], a[end:]...)  完全等同
 // slices.Insert([], start, values...) []   在某个位置开始，插入一些元素
-// slices.Replace([], start, end, values...)  在区间内替换
+// slices.ReplaceAll([], start, end, values...)  在区间内替换
 // slices.IsSorted([]) bool
 // slices.Sort([]) []
 // slices.Revers([]) []  反转

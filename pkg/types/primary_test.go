@@ -9,8 +9,8 @@ import (
 type FakeInt24 int32
 type FakeImgSrc struct {
 	Provider      int    `json:"provider"`       // 图片处理ID，如阿里云图片处理、网易云图片处理等
-	CropPattern   string `json:"crop_pattern"`   // e.g.  https://xxx/img.jpg?width=${WIDTH}&height=${HEIGHT}
-	ResizePattern string `json:"resize_pattern"` // e.g. https://xxx/img.jpg?maxwidth=${MAXWIDTH}
+	CropPattern   string `json:"crop_pattern"`   // e.g.  https://xxx/img.jpg?width={width:int}&height={height:int}
+	ResizePattern string `json:"resize_pattern"` // e.g. https://xxx/img.jpg?maxwidth={max_width:int}
 	Origin        string `json:"origin"`         // 不一定是真实的
 	Path          string `json:"path"`           // path 可能是 filename，也可能是 带文件夹的文件名
 	/*

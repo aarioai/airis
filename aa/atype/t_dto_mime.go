@@ -3,13 +3,12 @@ package atype
 import (
 	"github.com/aarioai/airis/pkg/types"
 	"regexp"
-	"strings"
 )
 
 func (s AudioSrc) Filename() AudioPath { return AudioPath(s.Path) }
 
-func (s AudioSrc) Adjust(quality string) string {
-	return strings.ReplaceAll(s.Pattern, "${QUALITY}", quality)
+func (s AudioSrc) Adjust(quality string) URL {
+	return s.Pattern.ReplaceAll("quality", "int", quality).URL()
 }
 
 // 存储在数据库里面，图片列表，为了节省空间，用数组来；具体见 atype.NullStrings or string
@@ -20,7 +19,7 @@ func (s FileSrc) Filename() FilePath { return FilePath(s.Path) }
 
 func (s ImgSrc) Filename() ImagePath { return ImagePath(s.Path) }
 
-func (s ImgSrc) Crop(width, height int) string {
+func (s ImgSrc) Crop(width, height int) URL {
 	if s.Provider == 0 {
 		return s.Origin
 	}
@@ -71,13 +70,15 @@ func (s ImgSrc) Crop(width, height int) string {
 
 	sw := types.FormatInt(width)
 	sh := types.FormatInt(height)
-	u := s.CropPattern
-	u = strings.ReplaceAll(u, "${WIDTH}", sw)
-	u = strings.ReplaceAll(u, "${HEIGHT}", sh)
-	return u
+	return s.CropPattern.ReplaceMany(map[string]string{
+		"{width}":      sw,
+		"{width:int}":  sw,
+		"{height}":     sh,
+		"{height:int}": sh,
+	}).URL()
 }
 
-func (s ImgSrc) Resize(maxWidth int) string {
+func (s ImgSrc) Resize(maxWidth int) URL {
 	if s.Provider == 0 {
 		return s.Origin
 	}
@@ -120,12 +121,12 @@ func (s ImgSrc) Resize(maxWidth int) string {
 		}
 	}
 	sw := types.FormatInt(maxWidth)
-	return strings.ReplaceAll(s.ResizePattern, "${MAXWIDTH}", sw)
+	return s.ResizePattern.ReplaceAll("max_width", ":int", sw).URL()
 }
 
 func (s VideoSrc) Filename() VideoPath { return VideoPath(s.Path) }
-func (s VideoSrc) Adjust(quality string) string {
-	return strings.ReplaceAll(s.Pattern, "${QUALITY}", quality)
+func (s VideoSrc) Adjust(quality string) URL {
+	return s.Pattern.ReplaceAll("quality", ":int", quality).URL()
 }
 
 func ImageFill(width, height int) ImagePattern {
@@ -156,7 +157,7 @@ func ToImagePattern(tag string) ImagePattern {
 		case "v":
 			p.MaxWidth = v
 		case "q":
-			p.Quality = uint8(v)
+			p.Quality = v
 		case "k":
 			p.Watermark = match[2]
 		}

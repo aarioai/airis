@@ -8,7 +8,7 @@ import (
 )
 
 // String convert into string
-// @warn byte is a built-in alias of uint8, String('A') returns "97"; String(Char('A')) returns "A"
+// @warn byte is a built-in alias of uint8, String('A') returns "97"; String(Byte('A')) returns "A"
 func String(d any) string {
 	if d == nil {
 		return ""
@@ -18,7 +18,7 @@ func String(d any) string {
 		return v
 	case []byte:
 		return string(v)
-	case Char:
+	case Byte:
 		return v.String()
 	case Date:
 		return string(v)
@@ -80,7 +80,7 @@ func Bytes(d any) []byte {
 		return v
 	case string:
 		return []byte(v)
-	case Char:
+	case Byte:
 		return []byte{byte(v)}
 	}
 	// 很少会有number/bool转bytes的情况，因此，不需要过度优化
@@ -139,7 +139,7 @@ func Int64Base(d any, bitSize int) (int64, error) {
 	}
 
 	switch v := d.(type) {
-	case Char:
+	case Byte:
 		return int64(v), nil
 	case bool:
 		if v {
@@ -211,7 +211,7 @@ func Uint64Base(d any, bitSize int) (uint64, error) {
 		return 0, errors.New("nil to uint64")
 	}
 	switch v := d.(type) {
-	case Char:
+	case Byte:
 		return uint64(v), nil
 	case bool:
 		if v {
@@ -264,7 +264,7 @@ func Float64(d any, bitSize int) (float64, error) {
 		return 0.0, errors.New("nil to float64")
 	}
 	switch v := d.(type) {
-	case Char:
+	case Byte:
 		return float64(v), nil
 	case bool:
 		if v {

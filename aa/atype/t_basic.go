@@ -37,8 +37,8 @@ func (b Booln) Bool() bool           { return b > 0 }
 func (b Booln) IsFalse() bool        { return b == False }
 func (b Booln) IsTrue() bool         { return b == True }
 
-func NewChar(b byte) Char     { return Char(b) }
-func (c Char) String() string { return string(c) }
+func NewChar(b byte) Byte     { return Byte(b) }
+func (c Byte) String() string { return string(c) }
 
 func (n Uint24) Uint32() uint32 { return uint32(n) }
 
