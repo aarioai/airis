@@ -41,12 +41,12 @@ func NewEmail(s string) (Email, bool) {
 	return Email(s), IsEmail(s)
 }
 
-func (p FilenamePattern) ReplaceAll(name, paramType, to string) FilenamePattern {
+func (p FilenamePattern) ReplaceAll(name string, paramType PathParamType, to string) FilenamePattern {
 	if p == "" {
 		return p
 	}
 	s := strings.ReplaceAll(string(p), "{"+name+"}", to)
-	s = strings.ReplaceAll(s, "{"+name+paramType+"}", to)
+	s = strings.ReplaceAll(s, "{"+name+string(paramType)+"}", to)
 	return FilenamePattern(s)
 }
 func (p FilenamePattern) ReplaceMany(d map[string]string) FilenamePattern {
@@ -61,12 +61,12 @@ func (p FilenamePattern) ReplaceMany(d map[string]string) FilenamePattern {
 }
 func (p FilenamePattern) Filename() Filename { return Filename(p) }
 
-func (p PathPattern) ReplaceAll(name, paramType, to string) PathPattern {
+func (p PathPattern) ReplaceAll(name string, paramType PathParamType, to string) PathPattern {
 	if p == "" {
 		return p
 	}
 	s := strings.ReplaceAll(string(p), "{"+name+"}", to)
-	s = strings.ReplaceAll(s, "{"+name+paramType+"}", to)
+	s = strings.ReplaceAll(s, "{"+name+string(paramType)+"}", to)
 	return PathPattern(s)
 }
 func (p PathPattern) ReplaceMany(d map[string]string) PathPattern {
@@ -81,12 +81,12 @@ func (p PathPattern) ReplaceMany(d map[string]string) PathPattern {
 }
 func (p PathPattern) Path() Path { return Path(p) }
 
-func (p UrlPattern) ReplaceAll(name, paramType, to string) UrlPattern {
+func (p UrlPattern) ReplaceAll(name string, paramType PathParamType, to string) UrlPattern {
 	if p == "" {
 		return p
 	}
 	s := strings.ReplaceAll(string(p), "{"+name+"}", to)
-	s = strings.ReplaceAll(s, "{"+name+paramType+"}", to)
+	s = strings.ReplaceAll(s, "{"+name+string(paramType)+"}", to)
 	return UrlPattern(s)
 }
 func (p UrlPattern) ReplaceMany(d map[string]string) UrlPattern {
