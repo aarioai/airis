@@ -1,5 +1,8 @@
 package atype
 
+// Iris path parameter types
+// See https://iris-go.gitbook.io/iris/contents/routing/routing-path-parameter-types
+
 func NewUUID(s string) (UUID, bool) {
 	return UUID(s), IsUUID(s)
 }
@@ -8,11 +11,11 @@ func (s UUID) Valid() bool {
 	return IsUUID(string(s))
 }
 
-func NewNumberString(s string) (NumberString, bool) {
-	return NumberString(s), IsNumberString(s)
+func NewNumberString(s string) (Numerical, bool) {
+	return Numerical(s), IsNumberString(s)
 }
 
-func (s NumberString) Valid() bool {
+func (s Numerical) Valid() bool {
 	return IsNumberString(string(s))
 }
 

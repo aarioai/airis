@@ -9,21 +9,21 @@ import (
 	"time"
 )
 
-func (r *Request) BodyAudio(p string, required ...bool) (atype.Audio, *ae.Error) {
+func (r *Request) BodyAudio(p string, required ...bool) (atype.AudioPath, *ae.Error) {
 	x, e := r.BodyPath(p, required...)
 	if e != nil {
 		return "", e
 	}
-	return atype.Audio(x), e
+	return atype.AudioPath(x), e
 }
-func (r *Request) BodyAudios(p string, required ...bool) ([]atype.Audio, *ae.Error) {
+func (r *Request) BodyAudios(p string, required ...bool) ([]atype.AudioPath, *ae.Error) {
 	paths, e := r.BodyPaths(p, required...)
 	if e != nil {
 		return nil, e
 	}
-	audios := make([]atype.Audio, len(paths))
+	audios := make([]atype.AudioPath, len(paths))
 	for i, path := range paths {
-		audios[i] = atype.Audio(path)
+		audios[i] = atype.AudioPath(path)
 	}
 	return audios, nil
 }
@@ -107,21 +107,21 @@ func (r *Request) BodyHtml(p string, required ...any) (template.HTML, *ae.Error)
 	}
 	return template.HTML(x.ReleaseString()), nil
 }
-func (r *Request) BodyImage(p string, required ...bool) (atype.Image, *ae.Error) {
+func (r *Request) BodyImage(p string, required ...bool) (atype.ImagePath, *ae.Error) {
 	x, e := r.BodyPath(p, required...)
 	if e != nil {
 		return "", e
 	}
-	return atype.Image(x), nil
+	return atype.ImagePath(x), nil
 }
-func (r *Request) BodyImages(p string, required ...bool) ([]atype.Image, *ae.Error) {
+func (r *Request) BodyImages(p string, required ...bool) ([]atype.ImagePath, *ae.Error) {
 	paths, e := r.BodyPaths(p, required...)
 	if e != nil {
 		return nil, e
 	}
-	images := make([]atype.Image, len(paths))
+	images := make([]atype.ImagePath, len(paths))
 	for i, path := range paths {
-		images[i] = atype.Image(path)
+		images[i] = atype.ImagePath(path)
 	}
 	return images, nil
 }
@@ -205,21 +205,21 @@ func (r *Request) BodyUint24s(p string, required, allowZero bool) ([]atype.Uint2
 	values, e := r.parseUint64s(r.Body, p, required, allowZero, 24)
 	return toUint24s(values, e)
 }
-func (r *Request) BodyVideo(p string, required ...bool) (atype.Video, *ae.Error) {
+func (r *Request) BodyVideo(p string, required ...bool) (atype.VideoPath, *ae.Error) {
 	x, e := r.BodyPath(p, required...)
 	if e != nil {
 		return "", e
 	}
-	return atype.Video(x), e
+	return atype.VideoPath(x), e
 }
-func (r *Request) BodyVideos(p string, required ...bool) ([]atype.Video, *ae.Error) {
+func (r *Request) BodyVideos(p string, required ...bool) ([]atype.VideoPath, *ae.Error) {
 	paths, e := r.BodyPaths(p, required...)
 	if e != nil {
 		return nil, e
 	}
-	videos := make([]atype.Video, len(paths))
+	videos := make([]atype.VideoPath, len(paths))
 	for i, path := range paths {
-		videos[i] = atype.Video(path)
+		videos[i] = atype.VideoPath(path)
 	}
 	return videos, nil
 }

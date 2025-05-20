@@ -27,12 +27,12 @@ func TestStringifyPayloadFields(t *testing.T) {
 	}
 	type y struct {
 		Child
-		Bad    atype.Images   `json:"bad"`
-		Tmp    atype.ImgSrc   `json:"-"`
-		t      []atype.ImgSrc `json:"images"`
-		Y      *int           `json:"y"`
-		Img    *atype.ImgSrc  `json:"img"`
-		Images []atype.ImgSrc `json:"ims"`
+		Bad    atype.ImagePaths `json:"bad"`
+		Tmp    atype.ImgSrc     `json:"-"`
+		t      []atype.ImgSrc   `json:"images"`
+		Y      *int             `json:"y"`
+		Img    *atype.ImgSrc    `json:"img"`
+		Images []atype.ImgSrc   `json:"ims"`
 	}
 	type x struct {
 		Child

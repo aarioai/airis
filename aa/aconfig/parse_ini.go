@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-// convertIniToMap 将 ini.File 转换为扁平化的 map[string]string
+// convertIniToMap 将 ini.FilePath 转换为扁平化的 map[string]string
 func (c *Config) convertIniToMap(iniFile *ini.File, target map[string]string) error {
 	for _, section := range iniFile.Sections() {
 		prefix := ""

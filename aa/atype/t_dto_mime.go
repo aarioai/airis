@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func (s AudioSrc) Filename() Audio { return Audio(s.Path) }
+func (s AudioSrc) Filename() AudioPath { return AudioPath(s.Path) }
 
 func (s AudioSrc) Adjust(quality string) string {
 	return strings.ReplaceAll(s.Pattern, "${QUALITY}", quality)
@@ -14,11 +14,11 @@ func (s AudioSrc) Adjust(quality string) string {
 
 // 存储在数据库里面，图片列表，为了节省空间，用数组来；具体见 atype.NullStrings or string
 
-func (s FileSrc) Filename() File { return File(s.Path) }
+func (s FileSrc) Filename() FilePath { return FilePath(s.Path) }
 
 // 存储在数据库里面，图片列表，为了节省空间，用数组来；具体见 atype.NullStrings or string
 
-func (s ImgSrc) Filename() Image { return Image(s.Path) }
+func (s ImgSrc) Filename() ImagePath { return ImagePath(s.Path) }
 
 func (s ImgSrc) Crop(width, height int) string {
 	if s.Provider == 0 {
@@ -123,7 +123,7 @@ func (s ImgSrc) Resize(maxWidth int) string {
 	return strings.ReplaceAll(s.ResizePattern, "${MAXWIDTH}", sw)
 }
 
-func (s VideoSrc) Filename() Video { return Video(s.Path) }
+func (s VideoSrc) Filename() VideoPath { return VideoPath(s.Path) }
 func (s VideoSrc) Adjust(quality string) string {
 	return strings.ReplaceAll(s.Pattern, "${QUALITY}", quality)
 }
