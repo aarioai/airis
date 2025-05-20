@@ -16,8 +16,8 @@ func TestAtype(t *testing.T) {
 	if s != "234242342342423.3" {
 		t.Errorf("float64(%f) ==> string(%s)", b, s)
 	}
-
 }
+
 func TestAtypeGet(t *testing.T) {
 	arr := map[any]any{
 		1:      100,

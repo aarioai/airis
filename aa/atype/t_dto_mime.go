@@ -1,29 +1,22 @@
 package atype
 
 import (
-	"github.com/aarioai/airis/aa/aenum"
 	"github.com/aarioai/airis/pkg/types"
+	"regexp"
 	"strings"
 )
 
-// 存储在数据库里面，图片列表，为了节省空间，用数组来；具体见 atype.NullStrings or string
-type ImgSrc struct {
-	Provider      int    `json:"provider"`       // 图片处理ID，如阿里云图片处理、网易云图片处理等
-	CropPattern   string `json:"crop_pattern"`   // e.g.  https://xxx/img.jpg?width=${WIDTH}&height=${HEIGHT}
-	ResizePattern string `json:"resize_pattern"` // e.g. https://xxx/img.jpg?maxwidth=${MAXWIDTH}
-	Origin        string `json:"origin"`         // 不一定是真实的
-	Path          string `json:"path"`           // path 可能是 filename，也可能是 带文件夹的文件名
-	/*
-	   不要独立出来 filename，一方面太多内容了；另一方面增加业务侧复杂度
-	*/
-	//Filename  string `json:"filename"`  // basename + extension  直接交path给服务端处理
-	Filetype aenum.FileType `json:"filetype"` // aenum.Filetype.Int8()
-	Size     int            `json:"size"`     // atype.Uint24.Int8()
-	Width    int            `json:"width"`
-	Height   int            `json:"height"`
-	Allowed  [][2]int       `json:"allowed"` // 允许的width,height
-	Jsonkey  string         `json:"jsonkey"` // 特殊约定字段
+func (s AudioSrc) Filename() Audio { return Audio(s.Path) }
+
+func (s AudioSrc) Adjust(quality string) string {
+	return strings.ReplaceAll(s.Pattern, "${QUALITY}", quality)
 }
+
+// 存储在数据库里面，图片列表，为了节省空间，用数组来；具体见 atype.NullStrings or string
+
+func (s FileSrc) Filename() File { return File(s.Path) }
+
+// 存储在数据库里面，图片列表，为了节省空间，用数组来；具体见 atype.NullStrings or string
 
 func (s ImgSrc) Filename() Image { return Image(s.Path) }
 
@@ -128,4 +121,49 @@ func (s ImgSrc) Resize(maxWidth int) string {
 	}
 	sw := types.FormatInt(maxWidth)
 	return strings.ReplaceAll(s.ResizePattern, "${MAXWIDTH}", sw)
+}
+
+func (s VideoSrc) Filename() Video { return Video(s.Path) }
+func (s VideoSrc) Adjust(quality string) string {
+	return strings.ReplaceAll(s.Pattern, "${QUALITY}", quality)
+}
+
+func ImageFill(width, height int) ImagePattern {
+	return ImagePattern{Width: width, Height: height}
+}
+func ImageFitWidth(maxWidth int) ImagePattern {
+	return ImagePattern{MaxWidth: maxWidth}
+}
+func ToImagePattern(tag string) ImagePattern {
+	reg, _ := regexp.Compile(`([a-z]+)(\d+)`)
+	matches := reg.FindAllStringSubmatch(tag, -1)
+	var p ImagePattern
+	for _, match := range matches {
+		v, _ := types.Atoi(match[2])
+		/**
+		 * w width, h height, q quanlity, v max width, g max height
+		 *    	img.width <= v ,   img.width = w  两者区别
+		 * xN  有意义，对于不定尺寸的白名单，自动化方案是：先获取 x1 的尺寸，然后 xN ，之后把 source 裁剪
+		 */
+		t := match[1]
+		switch t {
+		case "h":
+			p.Height = v
+		case "w":
+			p.Width = v
+		case "g":
+			p.MaxHeight = v
+		case "v":
+			p.MaxWidth = v
+		case "q":
+			p.Quality = uint8(v)
+		case "k":
+			p.Watermark = match[2]
+		}
+	}
+	return p
+}
+
+func ToVideoPattern(tag string) VideoPattern {
+	return VideoPattern{}
 }

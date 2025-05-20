@@ -8,7 +8,7 @@ import (
 )
 
 // String convert into string
-// @warn byte is a built-in alias of uint8, String('A') returns "97"; String(AByte('A')) returns "A"
+// @warn byte is a built-in alias of uint8, String('A') returns "97"; String(Char('A')) returns "A"
 func String(d any) string {
 	if d == nil {
 		return ""
@@ -18,9 +18,8 @@ func String(d any) string {
 		return v
 	case []byte:
 		return string(v)
-	// Name(Abyte('A')) returns "A"
-	case AByte:
-		return string([]byte{byte(v)})
+	case Char:
+		return v.String()
 	case Date:
 		return string(v)
 	case Datetime:
@@ -81,7 +80,7 @@ func Bytes(d any) []byte {
 		return v
 	case string:
 		return []byte(v)
-	case AByte:
+	case Char:
 		return []byte{byte(v)}
 	}
 	// 很少会有number/bool转bytes的情况，因此，不需要过度优化
@@ -140,7 +139,7 @@ func Int64Base(d any, bitSize int) (int64, error) {
 	}
 
 	switch v := d.(type) {
-	case AByte:
+	case Char:
 		return int64(v), nil
 	case bool:
 		if v {
@@ -212,7 +211,7 @@ func Uint64Base(d any, bitSize int) (uint64, error) {
 		return 0, errors.New("nil to uint64")
 	}
 	switch v := d.(type) {
-	case AByte:
+	case Char:
 		return uint64(v), nil
 	case bool:
 		if v {
@@ -265,7 +264,7 @@ func Float64(d any, bitSize int) (float64, error) {
 		return 0.0, errors.New("nil to float64")
 	}
 	switch v := d.(type) {
-	case AByte:
+	case Char:
 		return float64(v), nil
 	case bool:
 		if v {

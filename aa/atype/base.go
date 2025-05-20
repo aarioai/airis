@@ -7,9 +7,6 @@ import (
 	"strconv"
 )
 
-// AByte String('A') will returns "97". So you have to use String(AByte('A')) to return "A"
-type AByte byte
-
 // MarshalUint8s 将 uint8 切片转换为 JSON 数组
 // json.Marshal() 不能正常转换 []byte 及 []uint8
 func MarshalUint8s(bytes []uint8) (json.RawMessage, bool) {
@@ -31,6 +28,7 @@ func MarshalUint8s(bytes []uint8) (json.RawMessage, bool) {
 	result = append(result, ']')
 	return result, true
 }
+
 func UnmarshalUint8s(x json.RawMessage) ([]uint8, error) {
 	if x == nil || len(x) < 2 {
 		return nil, nil

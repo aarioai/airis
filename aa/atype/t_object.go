@@ -1,28 +1,42 @@
 package atype
 
 import (
-	"database/sql"
 	"encoding/json"
 )
 
-type NullJson struct{ sql.NullString }              // any
-type NullUint8s struct{ sql.NullString }            // uint8 json array
-type NullUint16s struct{ sql.NullString }           // uint16 json array
-type NullUint24s struct{ sql.NullString }           // Uint24 json array
-type NullUint32s struct{ sql.NullString }           // uint32 json array
-type NullInts struct{ sql.NullString }              // int json array
-type NullUints struct{ sql.NullString }             // uint json array
-type NullUint64s struct{ sql.NullString }           // uint64 json array
-type NullStrings struct{ sql.NullString }           // string json array
-type NullStringMap struct{ sql.NullString }         // map[string]string   // JSON 规范，key 必须为字符串
-type NullStringMapsMap struct{ sql.NullString }     // map[string][]map[string]string
-type NullStringsMap struct{ sql.NullString }        // map[string][]string
-type NullComplexStringMap struct{ sql.NullString }  // map[string]map[string]string
-type NullComplexStringsMap struct{ sql.NullString } // map[string][][]string
-type NullStringMaps struct{ sql.NullString }        // []map[string]string
-type NullComplexStringMaps struct{ sql.NullString } // []map[string][]map[string]string
+func NewNullUint64(value uint64) NullUint64 {
+	var v NullUint64
+	if value > 0 {
+		v.Scan(value)
+	}
+	return v
+}
+func (t NullUint64) Uint64() uint64 {
+	if !t.Valid {
+		return 0
+	}
+	return uint64(t.Int64)
+}
+func (t NullUint64) Equal(b uint64) bool {
+	if !t.Valid {
+		return false
+	}
+	return t.Uint64() == b
+}
+func NewNullString(value string) NullString {
+	var v NullString
+	if value != "" {
+		v.Scan(value)
+	}
+	return v
+}
 
-type ComplexMaps struct{ sql.NullString } // []map[string]any
+func (t NullString) Equal(b string) bool {
+	if !t.Valid {
+		return false
+	}
+	return t.String == b
+}
 
 func NewNullJson(s []byte) NullJson {
 	var x NullJson

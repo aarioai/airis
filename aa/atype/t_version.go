@@ -5,6 +5,10 @@ import (
 	"strings"
 )
 
+// Version 版本，nginx 等比较版本，就是转为每节3位数字的整数进行比较
+// Semantic Versioning https://semver.org/lang/zh-CN/
+// [tag 0 release, 1 alpha, 2 beta,3 RC, 4 Revision][major 000-999][minor 000-999][build/patch 000-999]
+
 const (
 	TagRelease  VersionTag = 0
 	TagAlpha    VersionTag = 1

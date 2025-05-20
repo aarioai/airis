@@ -2,16 +2,6 @@ package atype
 
 import "github.com/aarioai/airis/pkg/afmt"
 
-type Paging struct {
-	Page     uint   `json:"page"`
-	PageEnd  uint   `json:"page_end"`
-	PageSize uint8  `json:"page_size"`
-	Offset   uint   `json:"offset"`
-	Limit    uint16 `json:"limit"`
-	Prev     uint   `json:"prev"`
-	Next     uint   `json:"next"`
-}
-
 var (
 	DefaultPageSize = uint8(10)
 	MaxPageRange    = uint8(5)
