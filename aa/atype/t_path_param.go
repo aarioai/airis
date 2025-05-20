@@ -30,11 +30,11 @@ func (s UUID) Valid() bool {
 	return IsUUID(string(s))
 }
 
-func NewNumberString(s string) (Numerical, bool) {
-	return Numerical(s), IsNumberString(s)
+func NewNumberString(s string) (Digits, bool) {
+	return Digits(s), IsNumberString(s)
 }
 
-func (s Numerical) Valid() bool {
+func (s Digits) Valid() bool {
 	return IsNumberString(string(s))
 }
 
@@ -61,11 +61,11 @@ func (s Alphabetical) Valid() bool {
 	return IsAlphabetical(string(s))
 }
 
-func NewAlphaDigit(s string) (AlphaDigit, bool) {
-	return AlphaDigit(s), IsAlphaDigit(s)
+func NewAlphaDigit(s string) (AlphaDigits, bool) {
+	return AlphaDigits(s), IsAlphaDigit(s)
 }
 
-func (s AlphaDigit) Valid() bool {
+func (s AlphaDigits) Valid() bool {
 	return IsAlphaDigit(string(s))
 }
 

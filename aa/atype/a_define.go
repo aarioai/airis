@@ -12,16 +12,18 @@ type Bin string         // binary string
 type BitPos uint8       // bit-position (in big endian)
 type BitPosition uint16 // bit-position (in big endian)
 type Booln uint8        // 0 | 1
+type Millisecond int64
+type Second int64
 
 // See ./t_path_param.go
 
 type PathParamType string // e.g. :string, :uuid, :uint8
 type UUID string          // 32 or 36 bytes, 8-4-4-4-12
-type Numerical string     // \d+
+type Digits string        // \d+
 type Lowers string        // [a-z]+
 type Uppers string        // [A-Z]+
 type Alphabetical string  // [a-zA-Z]+
-type AlphaDigit string    // [a-zA-Z\d]+
+type AlphaDigits string   // [a-zA-Z\d]+
 type Word string          // \w+
 type Email string
 type Weekday uint8 // [0-6] from sunday to saturday

@@ -3,6 +3,7 @@ package atype
 import (
 	"github.com/aarioai/airis/pkg/basic"
 	"github.com/aarioai/airis/pkg/types"
+	"time"
 )
 
 func NewBin(s string) (Bin, bool) { return Bin(s), IsBin(s) }
@@ -37,8 +38,13 @@ func (b Booln) Bool() bool           { return b > 0 }
 func (b Booln) IsFalse() bool        { return b == False }
 func (b Booln) IsTrue() bool         { return b == True }
 
-func NewChar(b byte) Byte     { return Byte(b) }
+func NewByte(b byte) Byte     { return Byte(b) }
 func (c Byte) String() string { return string(c) }
+
+func ToMillisecond(t time.Duration) Millisecond { return Millisecond(t / time.Millisecond) }
+func (s Millisecond) Duration() time.Duration   { return time.Duration(s) * time.Millisecond }
+func ToSecond(t time.Duration) Second           { return Second(t / time.Second) }
+func (s Second) Duration() time.Duration        { return time.Duration(s) * time.Second }
 
 func (n Uint24) Uint32() uint32 { return uint32(n) }
 
