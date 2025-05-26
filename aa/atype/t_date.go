@@ -8,6 +8,20 @@ import (
 	"time"
 )
 
+// IsZeroDate detects a string is empty/zero/min date or datetime
+func IsZeroDate(s string) bool {
+	if s == "" {
+		return true
+	}
+
+	if EnableZeroDate {
+		if s == ZeroDate.String() || s == ZeroDatetime.String() {
+			return true
+		}
+	}
+	return s == MinDate.String() || s == MinDatetime.String()
+}
+
 func ToYearMonth(year int, month time.Month) YearMonth {
 	if year < 0 {
 		return 0
@@ -74,15 +88,15 @@ func (y YMD) Date() Date {
 }
 
 // time.Now().In()  loc 直接通过 in 传递
-func NewDate(d string, loc *time.Location) Date {
-	if d == "" || d == MinDate.String() {
+func NewDate(s string, loc *time.Location) Date {
+	if IsZeroDate(s) {
 		return MinDate
 	}
-	_, err := time.ParseInLocation("2006-01-02", d, loc)
+	_, err := time.ParseInLocation("2006-01-02", s, loc)
 	if err != nil {
 		return MinDate
 	}
-	return Date(d)
+	return Date(s)
 }
 func ToDate(t *time.Time) Date {
 	if t == nil || t.IsZero() {
@@ -91,7 +105,7 @@ func ToDate(t *time.Time) Date {
 	return Date(t.Format("2006-01-02"))
 }
 func (d Date) Valid() bool {
-	return len(d) == 10 && d != MinDate && d != MaxDate && d != "1970-01-01"
+	return len(d) == 10
 }
 func (d Date) String() string { return string(d) }
 func (d Date) Time(loc *time.Location) (time.Time, error) {
@@ -135,22 +149,22 @@ func (d Date) Int64(loc *time.Location) int64 {
 	return tm.Unix()
 }
 func (d Date) Unix(loc *time.Location) Timestamp {
-	if !d.Valid() {
+	if !d.Valid() || IsZeroDate(d.String()) {
 		return 0
 	}
 	t, _ := d.Time(loc)
 	return Timestamp(t.Unix())
 }
 
-func NewDatetime(d string, loc *time.Location) Datetime {
-	if d == "" || d == MinDatetime.String() {
+func NewDatetime(s string, loc *time.Location) Datetime {
+	if IsZeroDate(s) {
 		return MinDatetime
 	}
-	_, err := time.ParseInLocation("2006-01-02 15:04:05", d, loc)
+	_, err := time.ParseInLocation("2006-01-02 15:04:05", s, loc)
 	if err != nil {
 		return MinDatetime
 	}
-	return Datetime(d)
+	return Datetime(s)
 }
 func Now(loc *time.Location) Datetime {
 	return ToDatetime(time.Now(), loc)

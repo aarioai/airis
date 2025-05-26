@@ -1,15 +1,18 @@
 package atype
 
-import "slices"
+import (
+	"slices"
+	"strings"
+)
 
 // Iris path parameter types
 // See https://iris-go.gitbook.io/iris/contents/routing/routing-path-parameter-types
 
 var ParamTypes = []string{
-	":string", ":uuid",
-	":int8", ":int16", ":int32", ":int64", // no :int24 and :uint24
-	":uint8", ":uint16", ":uint32", ":uint64",
-	":bool", ":alphabetical",
+	":bool",
+	":int8", ":int16", ":int32", ":int", ":int64", // no :int24 and :uint24, floats
+	":uint8", ":uint16", ":uint32", ":uint", ":uint64",
+	":string", ":alphabetical", ":uuid",
 	":email", ":mail", // mail is same to email, but mail without server domain validation
 	":weekday",
 }
@@ -38,17 +41,12 @@ func (s Digits) Valid() bool {
 	return IsNumberString(string(s))
 }
 
-func NewLowers(s string) (Lowers, bool) {
-	return Lowers(s), IsLowers(s)
-}
+func NewLowers(s string) Lowers { return Lowers(strings.ToLower(s)) }
 func (s Lowers) Valid() bool {
 	return IsLowers(string(s))
 }
 
-func NewUppers(s string) (Uppers, bool) {
-	return Uppers(s), IsUppers(s)
-}
-
+func NewUppers(s string) Uppers { return Uppers(strings.ToUpper(s)) }
 func (s Uppers) Valid() bool {
 	return IsUppers(string(s))
 }

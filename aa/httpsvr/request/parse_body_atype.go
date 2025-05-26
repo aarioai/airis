@@ -71,7 +71,7 @@ func (r *Request) BodyCoordinate(p string, required ...bool) (*atype.Coordinate,
 	return &coord, nil
 }
 func (r *Request) BodyDate(p string, loc *time.Location, required ...bool) (atype.Date, *ae.Error) {
-	x, e := r.Body(p, `^`+aenum.DateRegExp+`$`, isRequired(required))
+	x, e := r.Body(p, `^`+atype.DateRegExp+`$`, isRequired(required))
 	if e != nil {
 		return atype.MinDate, ae.NewBadParam(p)
 	}
@@ -79,7 +79,7 @@ func (r *Request) BodyDate(p string, loc *time.Location, required ...bool) (atyp
 }
 
 func (r *Request) BodyDatetime(p string, loc *time.Location, required ...bool) (atype.Datetime, *ae.Error) {
-	x, e := r.Body(p, `^`+aenum.DatetimeRegExp+`$`, isRequired(required))
+	x, e := r.Body(p, `^`+atype.DatetimeRegExp+`$`, isRequired(required))
 	if e != nil {
 		return atype.MinDatetime, ae.NewBadParam(p)
 	}

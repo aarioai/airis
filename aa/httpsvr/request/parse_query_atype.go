@@ -62,7 +62,7 @@ func (r *Request) QueryCountry(p string, defaultCountry ...aenum.Country) (aenum
 }
 
 func (r *Request) QueryDate(p string, loc *time.Location, required ...bool) (atype.Date, *ae.Error) {
-	x, e := r.Query(p, `^`+aenum.DateRegExp+`$`, isRequired(required))
+	x, e := r.Query(p, `^`+atype.DateRegExp+`$`, isRequired(required))
 	if e != nil {
 		return atype.MinDate, ae.NewBadParam(p)
 	}
@@ -70,7 +70,7 @@ func (r *Request) QueryDate(p string, loc *time.Location, required ...bool) (aty
 }
 
 func (r *Request) QueryDatetime(p string, loc *time.Location, required ...bool) (atype.Datetime, *ae.Error) {
-	x, e := r.Query(p, `^`+aenum.DatetimeRegExp+`$`, isRequired(required))
+	x, e := r.Query(p, `^`+atype.DatetimeRegExp+`$`, isRequired(required))
 	if e != nil {
 		return atype.MinDatetime, ae.NewBadParam(p)
 	}

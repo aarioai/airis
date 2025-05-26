@@ -4,14 +4,14 @@ import "database/sql"
 
 // See ./t_basic.go
 
-type Byte byte
+type Booln uint8 // 0 | 1
+type Char byte   // single character in ASCII characters [32, 126]
 type Int24 int32
 type Uint24 uint32
 
 type Bin string         // binary string
 type BitPos uint8       // bit-position (in big endian)
 type BitPosition uint16 // bit-position (in big endian)
-type Booln uint8        // 0 | 1
 type Millisecond int64
 type Second int64
 
@@ -26,7 +26,7 @@ type Alphabetical string  // [a-zA-Z]+
 type AlphaDigits string   // [a-zA-Z\d]+
 type Word string          // \w+
 type Email string
-type Weekday uint8 // [0-6] from sunday to saturday
+type Weekday int8 // [0-6] from sunday to saturday, -1 to invalid weekday
 
 // See ./t_path.go
 type FileType string        // e.g. .jpg
@@ -56,8 +56,8 @@ type AudioPaths FilePaths
 
 type RoundType uint8
 type Decimal int64 // [ -922337203685477.5808,  -922337203685477.5807]
-type Money Decimal // 有效范围：正负100亿元；  ±100 0000亿
-type VMoney Money  // 1 coin = 1 money    如 chatgpt 等消耗，单次消耗低于0.1分，因此需要更大的 coin比例
+type Money Decimal // ±100 000million to express ±10million
+type VMoney Money  // 1 coin = 1 money
 
 // See ./t_date.go
 

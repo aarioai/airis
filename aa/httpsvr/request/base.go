@@ -19,7 +19,7 @@ const (
 
 const (
 	HeaderStringify = "X-Stringify"
-	ParamStringify  = "_stringify"
+	ParamStringify  = "x-stringify"
 	ParamField      = "_field"
 	ParamPage       = "page"
 	ParamPageSize   = "page_size"

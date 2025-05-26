@@ -6,6 +6,17 @@ import (
 	"time"
 )
 
+func NewBooln(n uint8) (Booln, bool) { return basic.Ter(n == 1, True, False), n == 0 || n == 1 }
+func ToBooln(b bool) Booln           { return basic.Ter(b, True, False) }
+func (b Booln) Uint8() uint8         { return basic.Ter(b == True, uint8(1), uint8(0)) }
+func (b Booln) Valid() bool          { return b == True || b == False }
+func (b Booln) Bool() bool           { return b > 0 }
+func (b Booln) IsFalse() bool        { return b == False }
+func (b Booln) IsTrue() bool         { return b == True }
+
+func NewChar(b byte) (Char, bool) { return Char(b), b > 31 && b < 127 }
+func (c Char) String() string     { return string(c) }
+
 func NewBin(s string) (Bin, bool) { return Bin(s), IsBin(s) }
 func (b Bin) Normalize() string   { return "b'" + string(b) + "'" }
 
@@ -29,17 +40,6 @@ func (b Bitwise) unsetStmt(fieldName string) string {
 	bs := types.FormatInt(bv)
 	return fieldName + "=" + fieldName + "&" + bs
 }
-
-func NewBooln(n uint8) (Booln, bool) { return basic.Ter(n == 1, True, False), n == 0 || n == 1 }
-func ToBooln(b bool) Booln           { return basic.Ter(b, True, False) }
-func (b Booln) Uint8() uint8         { return basic.Ter(b == True, uint8(1), uint8(0)) }
-func (b Booln) Valid() bool          { return b == True || b == False }
-func (b Booln) Bool() bool           { return b > 0 }
-func (b Booln) IsFalse() bool        { return b == False }
-func (b Booln) IsTrue() bool         { return b == True }
-
-func NewByte(b byte) Byte     { return Byte(b) }
-func (c Byte) String() string { return string(c) }
 
 func ToMillisecond(t time.Duration) Millisecond { return Millisecond(t / time.Millisecond) }
 func (s Millisecond) Duration() time.Duration   { return time.Duration(s) * time.Millisecond }
