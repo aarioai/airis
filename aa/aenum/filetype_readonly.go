@@ -88,19 +88,19 @@ var DocumentTypes = map[FileType][]string{
     Xls         : {".xls", "application/vnd.ms-excel"},
     Xlsx        : {".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
 }
-func NewVideoType(mime string) (FileType, bool) {return ParseFileType(mime, VideoTypes)}
-func NewDocumentType(mime string) (FileType, bool) {return ParseFileType(mime, DocumentTypes)}
 func NewCompressedType(mime string) (FileType, bool) {return ParseFileType(mime, CompressedTypes)}
 func NewDataType(mime string) (FileType, bool) {return ParseFileType(mime, DataTypes)}
 func NewImageType(mime string) (FileType, bool) {return ParseFileType(mime, ImageTypes)}
 func NewAudioType(mime string) (FileType, bool) {return ParseFileType(mime, AudioTypes)}
+func NewVideoType(mime string) (FileType, bool) {return ParseFileType(mime, VideoTypes)}
+func NewDocumentType(mime string) (FileType, bool) {return ParseFileType(mime, DocumentTypes)}
 func (t FileType) ContentType() string {
+    if d, ok := CompressedTypes[t]; ok {return d[1]}
     if d, ok := DataTypes[t]; ok {return d[1]}
     if d, ok := ImageTypes[t]; ok {return d[1]}
     if d, ok := AudioTypes[t]; ok {return d[1]}
     if d, ok := VideoTypes[t]; ok {return d[1]}
     if d, ok := DocumentTypes[t]; ok {return d[1]}
-    if d, ok := CompressedTypes[t]; ok {return d[1]}
     return ""
 }
 func (t FileType) Ext() string {

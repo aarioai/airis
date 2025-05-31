@@ -8,16 +8,18 @@ import (
 // 文本不存在太长的；不要使用 null string，否则插入空字符串比较麻烦
 // HTML 一律采用 template.HTML
 
-func (p FilePath) String() string                                        { return string(p) }
-func (p FilePath) Src(filler func(string) *FileSrc) *FileSrc             { return filler(p.String()) }
-func (p DocumentPath) String() string                                    { return string(p) }
-func (p DocumentPath) Src(filler func(string) *DocumentSrc) *DocumentSrc { return filler(p.String()) }
-func (p ImagePath) String() string                                       { return string(p) }
-func (p ImagePath) Src(filler func(string) *ImgSrc) *ImgSrc              { return filler(p.String()) }
-func (p VideoPath) String() string                                       { return string(p) }
-func (p VideoPath) Src(filler func(string) *VideoSrc) *VideoSrc          { return filler(p.String()) }
-func (p AudioPath) String() string                                       { return string(p) }
-func (p AudioPath) Src(filler func(string) *AudioSrc) *AudioSrc          { return filler(p.String()) }
+func (p FilePath) String() string                                  { return string(p) }
+func (p FilePath) Src(filler func(string) *FileSrcOld) *FileSrcOld { return filler(p.String()) }
+func (p DocumentPath) String() string                              { return string(p) }
+func (p DocumentPath) Src(filler func(string) *DocumentSrcOld) *DocumentSrcOld {
+	return filler(p.String())
+}
+func (p ImagePath) String() string                                    { return string(p) }
+func (p ImagePath) Src(filler func(string) *ImgSrcOld) *ImgSrcOld     { return filler(p.String()) }
+func (p VideoPath) String() string                                    { return string(p) }
+func (p VideoPath) Src(filler func(string) *VideoSrcOld) *VideoSrcOld { return filler(p.String()) }
+func (p AudioPath) String() string                                    { return string(p) }
+func (p AudioPath) Src(filler func(string) *AudioSrcOld) *AudioSrcOld { return filler(p.String()) }
 
 func NewFiles(s string) FilePaths {
 	var x FilePaths
@@ -38,12 +40,12 @@ func ToFiles(v []FilePath) FilePaths {
 	return NewFiles(string(s))
 }
 
-func (im FilePaths) Srcs(filler func(path string) *FileSrc) []FileSrc {
+func (im FilePaths) Srcs(filler func(path string) *FileSrcOld) []FileSrcOld {
 	if !im.Valid || im.String == "" {
 		return nil
 	}
 	ims := im.Strings()
-	srcs := make([]FileSrc, 0, len(ims))
+	srcs := make([]FileSrcOld, 0, len(ims))
 	for _, im := range ims {
 		if im != "" {
 			if fi := filler(im); fi != nil {
@@ -73,12 +75,12 @@ func ToDocuments(v []DocumentPath) DocumentPaths {
 	return NewDocuments(string(s))
 }
 
-func (im DocumentPaths) Srcs(filler func(path string) *DocumentSrc) []DocumentSrc {
+func (im DocumentPaths) Srcs(filler func(path string) *DocumentSrcOld) []DocumentSrcOld {
 	if !im.Valid || im.String == "" {
 		return nil
 	}
 	ims := im.Strings()
-	srcs := make([]DocumentSrc, 0, len(ims))
+	srcs := make([]DocumentSrcOld, 0, len(ims))
 	for _, im := range ims {
 		if im != "" {
 			if fi := filler(im); fi != nil {
@@ -105,12 +107,12 @@ func ToImages(v []ImagePath) ImagePaths {
 	return NewImages(string(s))
 }
 
-func (im ImagePaths) Srcs(filler func(path string) *ImgSrc) []ImgSrc {
+func (im ImagePaths) Srcs(filler func(path string) *ImgSrcOld) []ImgSrcOld {
 	if !im.Valid || im.String == "" {
 		return nil
 	}
 	ims := im.Strings()
-	srcs := make([]ImgSrc, 0, len(ims))
+	srcs := make([]ImgSrcOld, 0, len(ims))
 	for _, im := range ims {
 		if im != "" {
 			if fi := filler(im); fi != nil {

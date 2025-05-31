@@ -4,20 +4,7 @@ import (
 	"github.com/aarioai/airis/aa/aenum"
 )
 
-type VideoPattern struct {
-}
-
-// ImagePattern 统一使用 int，方便替换 pattern
-type ImagePattern struct {
-	Height    int    `json:"height"`
-	Width     int    `json:"width"`
-	Quality   int    `json:"quality"`
-	MaxWidth  int    `json:"max_width"`
-	MaxHeight int    `json:"max_height"`
-	Watermark string `json:"watermark"`
-}
-
-type AudioSrc struct {
+type AudioSrcOld struct {
 	Provider int            `json:"provider"`
 	Pattern  UrlPattern     `json:"pattern"` // e.g. https://xxx/{user}/video.avi?quality={quality:int}
 	Origin   URL            `json:"origin"`
@@ -28,7 +15,7 @@ type AudioSrc struct {
 	Jsonkey  string         `json:"jsonkey"`  // 特殊约定字段
 }
 
-type DocumentSrc struct {
+type DocumentSrcOld struct {
 	Provider int            `json:"provider"`
 	Path     Path           `json:"path"`
 	Url      URL            `json:"url"`
@@ -39,7 +26,7 @@ type DocumentSrc struct {
 	Jsonkey  string         `json:"jsonkey"`  // 特殊约定字段
 }
 
-type FileSrc struct {
+type FileSrcOld struct {
 	Provider int  `json:"provider"` // 图片处理ID，如阿里云图片处理、网易云图片处理等
 	Path     Path `json:"path"`     // path 可能是 filename，也可能是 带文件夹的文件名
 	/*
@@ -53,7 +40,7 @@ type FileSrc struct {
 	Jsonkey  string         `json:"jsonkey"`  // 特殊约定字段
 }
 
-type ImgSrc struct {
+type ImgSrcOld struct {
 	Provider      int        `json:"provider"`       // 图片处理ID，如阿里云图片处理、网易云图片处理等
 	CropPattern   UrlPattern `json:"crop_pattern"`   // e.g.  https://xxx/img.jpg?width={width:int}&height={height:int}
 	ResizePattern UrlPattern `json:"resize_pattern"` // e.g. https://xxx/img.jpg?maxwidth={max_width:int}
@@ -71,7 +58,7 @@ type ImgSrc struct {
 	Jsonkey  string         `json:"jsonkey"` // 特殊约定字段
 }
 
-type VideoSrc struct {
+type VideoSrcOld struct {
 	Provider int        `json:"provider"`
 	Pattern  UrlPattern `json:"pattern"` // e.g.  https://xxx/video.avi?quality={quality:int}
 	Origin   URL        `json:"origin"`  // 不一定是真实的

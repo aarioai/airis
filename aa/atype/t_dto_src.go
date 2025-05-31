@@ -5,21 +5,21 @@ import (
 	"regexp"
 )
 
-func (s AudioSrc) Filename() AudioPath { return AudioPath(s.Path) }
+func (s AudioSrcOld) Filename() AudioPath { return AudioPath(s.Path) }
 
-func (s AudioSrc) Adjust(quality string) URL {
+func (s AudioSrcOld) Adjust(quality string) URL {
 	return s.Pattern.ReplaceAll("quality", "int", quality).URL()
 }
 
 // 存储在数据库里面，图片列表，为了节省空间，用数组来；具体见 atype.NullStrings or string
 
-func (s FileSrc) Filename() FilePath { return FilePath(s.Path) }
+func (s FileSrcOld) Filename() FilePath { return FilePath(s.Path) }
 
 // 存储在数据库里面，图片列表，为了节省空间，用数组来；具体见 atype.NullStrings or string
 
-func (s ImgSrc) Filename() ImagePath { return ImagePath(s.Path) }
+func (s ImgSrcOld) Filename() ImagePath { return ImagePath(s.Path) }
 
-func (s ImgSrc) Crop(width, height int) URL {
+func (s ImgSrcOld) Crop(width, height int) URL {
 	if s.Provider == 0 {
 		return s.Origin
 	}
@@ -78,7 +78,7 @@ func (s ImgSrc) Crop(width, height int) URL {
 	}).URL()
 }
 
-func (s ImgSrc) Resize(maxWidth int) URL {
+func (s ImgSrcOld) Resize(maxWidth int) URL {
 	if s.Provider == 0 {
 		return s.Origin
 	}
@@ -124,8 +124,8 @@ func (s ImgSrc) Resize(maxWidth int) URL {
 	return s.ResizePattern.ReplaceAll("max_width", ":int", sw).URL()
 }
 
-func (s VideoSrc) Filename() VideoPath { return VideoPath(s.Path) }
-func (s VideoSrc) Adjust(quality string) URL {
+func (s VideoSrcOld) Filename() VideoPath { return VideoPath(s.Path) }
+func (s VideoSrcOld) Adjust(quality string) URL {
 	return s.Pattern.ReplaceAll("quality", ":int", quality).URL()
 }
 

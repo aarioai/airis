@@ -12,6 +12,7 @@ type Uint24 uint32
 type Bin string         // binary string
 type BitPos uint8       // bit-position (in big endian)
 type BitPosition uint16 // bit-position (in big endian)
+
 type Millisecond int64
 type Second int64
 
