@@ -7,7 +7,7 @@ import (
 	"{{APP_BASE}}/cache"
 	"{{APP_BASE}}/conf"
 	mbs "{{APP_BASE}}/module/bs/model"
-	mcns "{{APP_BASE}}/module/cms/model"
+	mcms "{{APP_BASE}}/module/cms/model"
 	mss "{{APP_BASE}}/module/ss/model"
 	"{{APP_BASE}}/private"
 	"sync"
@@ -21,7 +21,7 @@ type Service struct {
 	h       *cache.Cache
 	mongo   *mongodb.Model
 	mbs     *mbs.Model
-	mcns    *mcns.Model
+	mcms    *mcms.Model
 	mss     *mss.Model
 }
 
@@ -39,7 +39,7 @@ func New(app *aa.App) *Service {
 			h:          cache.New(app),
 			mongo:      mongodb.NewDB(app, conf.MongoDBConfigSection),
             mbs:        mbs.New(app),
-            mcns:       mcns.New(app),
+            mcms:       mcms.New(app),
             mss:        mss.New(app),
 		}
 	})

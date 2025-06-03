@@ -19,7 +19,7 @@ func (s *Service) initMongodb(ctx acontext.Context, profile *debug.Profile) {
 	// create table and indexes
 	if len(mongoIndexEntities) > 0 {
 		for _, t := range mongoIndexEntities {
-			ae.PanicOn(mongoObj.CreateIndexes(ctx, t))
+			ae.PanicOn(mongoObj.ORM(t).CreateIndexes(ctx))
 		}
 	}
 }

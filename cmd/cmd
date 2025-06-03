@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+# Version: 2025-04-06
+
 . /opt/aa/lib/aa-posix-lib.sh
 
 # copy this file to your project <project>/cmd/cmd
