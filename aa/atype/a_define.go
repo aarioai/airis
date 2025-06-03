@@ -17,6 +17,9 @@ type BitPosition uint16 // bit-position (in big endian)
 type Millisecond int64
 type Second int64
 
+type Ext string       // extension name, e.g., jpg
+type Extension string // extension name starts with a dot, e.g., .jpg
+
 // See ./t_path_param.go
 
 type PathParamType string // e.g. :string, :uuid, :uint8

@@ -20,7 +20,7 @@ type FileSrc struct {
 	BaseURL         URL        `json:"base_url"`
 	Path            Path       `json:"path"`
 	Filetype        FileType   `json:"filetype"`
-	Size            int        `json:"size"`
+	Filesize        int        `json:"filesize"`
 	Info            string     `json:"info"`
 	Checksum        string     `json:"checksum"`
 	Jsonkey         string     `json:"jsonkey"`
