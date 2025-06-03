@@ -77,7 +77,7 @@ func (l *xlog) Info(ctx context.Context, msg string) {
 	l.print(ctx, LevelInfo, utils.Caller(1), msg)
 }
 
-func (l *xlog) InfoF(ctx context.Context, format string, args ...any) {
+func (l *xlog) Infof(ctx context.Context, format string, args ...any) {
 	l.print(ctx, LevelInfo, utils.Caller(1), fmt.Sprintf(format, args...))
 }
 func (l *xlog) Notice(ctx context.Context, msg string) {

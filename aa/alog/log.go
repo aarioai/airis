@@ -65,7 +65,7 @@ type LogInterface interface {
 
 	// Info 情报信息，正常的系统消息，比如骚扰报告，带宽数据等，不需要处理。
 	Info(ctx context.Context, msg string)
-	InfoF(ctx context.Context, format string, args ...any)
+	Infof(ctx context.Context, format string, args ...any)
 
 	// Notice 不是错误情况，也不需要立即处理。
 	Notice(ctx context.Context, msg string)
