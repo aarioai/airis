@@ -2,15 +2,15 @@ package atype
 
 import "strings"
 
-// NewFileType creates and formats a file type string
-func NewFileType(s string) (FileType, bool) {
-	if s == "" {
-		return "", false
-	}
-	if s[0] != '.' {
-		s = "." + s
-	}
-	return FileType(s), true
+func (t Ext) Extension() Extension {
+	return Extension("." + t)
+}
+func (t Ext) WithDot() string {
+	return "." + string(t)
+}
+
+func (t Extension) Ext() Ext {
+	return Ext(t[1:])
 }
 
 func NewStdFilename(s string) (StdFilename, bool) { return StdFilename(s), IsFilename(s) }

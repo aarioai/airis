@@ -22,15 +22,6 @@ func First[T any](args []T) T {
 	return args[0]
 }
 
-// Sprintf 是 fmt.Sprintf 的包装，增加了空参数处理
-// 当没有参数时直接返回格式字符串，避免不必要的格式化
-func Sprintf(format string, args ...any) string {
-	if len(args) == 0 {
-		return format
-	}
-	return fmt.Sprintf(format, args...)
-}
-
 // SprintfArgs 针对可选参数，格式化字符串
 func SprintfArgs[T any](args []T) string {
 	if len(args) == 0 {

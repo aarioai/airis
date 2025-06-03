@@ -37,8 +37,8 @@ const (
 	Reset     = "\033[0m"
 )
 
-// PrintcBorder 命令行中，输出边界
-func PrintcBorder(msg string, styles ...string) {
+// PrintBorder 命令行中，输出边界
+func PrintBorder(msg string, styles ...string) {
 	msg = PadBoth(strings.ToUpper(msg), "=", 80)
 	Printc("\n"+msg+"\n", styles...)
 }
@@ -61,77 +61,23 @@ func WithStyle(msg string, styles ...string) string {
 	return msg
 }
 
-// 前景色打印函数
-func PrintcRed(format string, args ...any) {
-	Printc(Sprintf(format, args...), Red)
+func PrintRed(msg string) {
+	Printc(msg, Red)
 }
 
-func PrintcGreen(format string, args ...any) {
-	Printc(Sprintf(format, args...), Green)
+func PrintfRed(format string, args ...any) {
+	PrintRed(fmt.Sprintf(format, args...))
 }
 
-func PrintcYellow(format string, args ...any) {
-	Printc(Sprintf(format, args...), Yellow)
+func PrintGreen(msg string) {
+	Printc(msg, Green)
 }
-
-func PrintcBlue(format string, args ...any) {
-	Printc(Sprintf(format, args...), Blue)
+func PrintfGreen(format string, args ...any) {
+	PrintGreen(fmt.Sprintf(format, args...))
 }
-
-func PrintcMagenta(format string, args ...any) {
-	Printc(Sprintf(format, args...), Magenta)
+func PrintYellow(msg string) {
+	Printc(msg, Yellow)
 }
-
-func PrintcCyan(format string, args ...any) {
-	Printc(Sprintf(format, args...), Cyan)
-}
-
-func PrintcWhite(format string, args ...any) {
-	Printc(Sprintf(format, args...), White)
-}
-
-// 背景色打印函数
-func PrintcBgBlack(format string, args ...any) {
-	Printc(Sprintf(format, args...), BgBlack)
-}
-
-func PrintcBgRed(format string, args ...any) {
-	Printc(Sprintf(format, args...), BgRed)
-}
-
-func PrintcBgGreen(format string, args ...any) {
-	Printc(Sprintf(format, args...), BgGreen)
-}
-
-func PrintcBgYellow(format string, args ...any) {
-	Printc(Sprintf(format, args...), BgYellow)
-}
-
-func PrintcBgBlue(format string, args ...any) {
-	Printc(Sprintf(format, args...), BgBlue)
-}
-
-func PrintcBgMagenta(format string, args ...any) {
-	Printc(Sprintf(format, args...), BgMagenta)
-}
-
-func PrintcBgCyan(format string, args ...any) {
-	Printc(Sprintf(format, args...), BgCyan)
-}
-
-func PrintcBgWhite(format string, args ...any) {
-	Printc(Sprintf(format, args...), BgWhite)
-}
-
-// 样式打印函数
-func PrintcBold(format string, args ...any) {
-	Printc(Sprintf(format, args...), Bold)
-}
-
-func PrintcUnderline(format string, args ...any) {
-	Printc(Sprintf(format, args...), Underline)
-}
-
-func PrintcReverse(format string, args ...any) {
-	Printc(Sprintf(format, args...), Reverse)
+func PrintfYellow(format string, args ...any) {
+	PrintYellow(fmt.Sprintf(format, args...))
 }

@@ -6,7 +6,6 @@ import (
 	"github.com/aarioai/airis/aa/acontext"
 	"github.com/aarioai/airis/aa/ae"
 	"github.com/aarioai/airis/aa/httpsvr/request"
-	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/kataras/iris/v12"
 	"io"
 	"slices"
@@ -329,11 +328,15 @@ func (w *Writer) WriteErr(err error) (int, error) {
 	})
 }
 
-func (w *Writer) WriteError(code int, msg string, args ...any) (int, error) {
+func (w *Writer) WriteMsg(code int, msg string) (int, error) {
 	return w.writeDTO(Body{
 		Code: code,
-		Msg:  afmt.Sprintf(msg, args...),
+		Msg:  msg,
 	})
+}
+
+func (w *Writer) WriteMsgf(code int, format string, args ...any) (int, error) {
+	return w.WriteMsg(code, fmt.Sprintf(format, args...))
 }
 
 // 返回插入数据的ID，ID 可能是联合主键，或者字段不为id，那么就会以对象形式返回

@@ -5,8 +5,9 @@ set -euo pipefail
 
 # copy this file to your project <project>/cmd/cmd
 
-AA_GITHUB="github.com/aarioai"
-MOD_ROOT="${GOPATH}/pkg/mod/${AA_GITHUB}"
+readonly AA_GITHUB="github.com/aarioai"
+readonly AIRIS="${AA_GITHUB}/airis"
+readonly MOD_ROOT="${GOPATH}/pkg/mod/${AA_GITHUB}"
 
 CUR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly CUR
@@ -17,18 +18,19 @@ readonly ROOT_DIR
 declare repo_cmd
 
 findRepoCmdDir(){
+    info "checking go.mod file"
     if [ ! -f "${ROOT_DIR}/go.mod" ];then
-        go mod tidy
-        panic "missing ${ROOT_DIR}/go.mod"
-    fi
-    airis="$(grep "${AA_GITHUB}/airis v" "${ROOT_DIR}/go.mod")"
-    version=${airis##* v}
-    [ -n "$version" ] || panic "go.mod missing ${AA_GITHUB}/airis"
+        go mod init
 
-    repo_cmd="${MOD_ROOT}/airis@v${version}/cmd"
-    if [ ! -d "${repo_cmd}" ]; then
-        go mod tidy
     fi
+    go mod tidy
+    go get "$AIRIS"
+
+    info "detecting airis version"
+    version=$(grep "$AIRIS" go.mod | sed -E 's/.*(v[0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+    info "airis version: ${version}"
+    repo_cmd="${MOD_ROOT}/airis@${version}/cmd"
+    [ -d "$repo_cmd" ] || panic "missing ${repo_cmd}"
  }
 
  run(){

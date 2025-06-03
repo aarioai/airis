@@ -7,7 +7,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/aarioai/airis/aa/ae"
-	"github.com/aarioai/airis/pkg/afmt"
 	"os"
 	"path"
 	"regexp"
@@ -63,10 +62,10 @@ func readJsonFile(file string) ([]byte, error) {
 }
 
 // writeFile 写入文件内容
-func writeFile(f *os.File, format string, args ...any) {
-	_, err := f.WriteString(afmt.Sprintf(format, args...))
+func writeFile(f *os.File, s string) {
+	_, err := f.WriteString(s)
 	if err != nil {
-		ae.Panic("write file error: %v", err)
+		ae.PanicF("write file error: %v", err)
 	}
 }
 func appendMimes(mimes []string, mime ...string) []string {
@@ -160,7 +159,7 @@ func buildFileTypeGo(enums [][2]any, types map[string]map[string][]string) {
 
 	//writeFile(f, "type FileType uint16\n")
 	writeFile(f, "const (\n")
-	writeFile(f, "%sUnknownType FileType = 0\n", tab)
+	writeFile(f, fmt.Sprintf("%sUnknownType FileType = 0\n", tab))
 	for _, enum := range enums {
 		writeFile(f, fmt.Sprintf("%s%-11s FileType = %v\n", tab, enum[0], enum[1]))
 	}
@@ -228,15 +227,15 @@ func buildFileTypeJS(enums [][2]any, types map[string]map[string][]string, mimes
 	writeFile(f, "} AaFileTypeMime */\n\n")
 
 	writeFile(f, "class AaFileType {\n")
-	writeFile(f, "%s/** @enum */\n", tab)
-	writeFile(f, "%sstatic Enum={\n", tab)
-	writeFile(f, "%s%sUnknownType: 0,\n", tab, tab)
+	writeFile(f, fmt.Sprintf("%s/** @enum */\n", tab))
+	writeFile(f, fmt.Sprintf("%sstatic Enum={\n", tab))
+	writeFile(f, fmt.Sprintf("%s%sUnknownType: 0,\n", tab, tab))
 	for _, enum := range enums {
 		writeFile(f, fmt.Sprintf("%s%s%-11s : %v,\n", tab, tab, enum[0], enum[1]))
 	}
-	writeFile(f, "%s}\n", tab)
+	writeFile(f, fmt.Sprintf("%s}\n", tab))
 
-	writeFile(f, "%sstatic Mimes = {\n", tab)
+	writeFile(f, fmt.Sprintf("%sstatic Mimes = {\n", tab))
 	for t, d := range types {
 		writeFile(f, fmt.Sprintf("%s%s%s : {\n", tab, tab, t))
 		ks := make([]string, 0, len(d))
@@ -255,18 +254,18 @@ func buildFileTypeJS(enums [][2]any, types map[string]map[string][]string, mimes
 			writeFile(f, "],\n")
 		}
 
-		writeFile(f, "%s%s},\n", tab, tab)
+		writeFile(f, fmt.Sprintf("%s%s},\n", tab, tab))
 	}
-	writeFile(f, "%s}\n", tab)
-	writeFile(f, "%scontentType\n", tab)
-	writeFile(f, "%sext\n", tab)
-	writeFile(f, "%smimeType\n", tab)
-	writeFile(f, "%svalue\n", tab)
+	writeFile(f, fmt.Sprintf("%s}\n", tab))
+	writeFile(f, fmt.Sprintf("%scontentType\n", tab))
+	writeFile(f, fmt.Sprintf("%sext\n", tab))
+	writeFile(f, fmt.Sprintf("%smimeType\n", tab))
+	writeFile(f, fmt.Sprintf("%svalue\n", tab))
 	// constructor
-	writeFile(f, "\n%s/**\n", tab)
-	writeFile(f, "%s * @param {AaFileTypeMime|number} mime\n", tab)
-	writeFile(f, "%s */\n", tab)
-	writeFile(f, "%sconstructor(mime){", tab)
+	writeFile(f, fmt.Sprintf("\n%s/**\n", tab))
+	writeFile(f, fmt.Sprintf("%s * @param {AaFileTypeMime|number} mime\n", tab))
+	writeFile(f, fmt.Sprintf("%s */\n", tab))
+	writeFile(f, fmt.Sprintf("%sconstructor(mime){", tab))
 	writeFile(f, `
 		this.value = AaFileType.Enum.UnknownType
 		for(const [type, cv] of Object.entries(AaFileType.Mimes)){
@@ -281,11 +280,11 @@ func buildFileTypeJS(enums [][2]any, types map[string]map[string][]string, mimes
 			}
 		}
 `)
-	writeFile(f, "%s}\n", tab)
+	writeFile(f, fmt.Sprintf("%s}\n", tab))
 	for t, _ := range types {
-		writeFile(f, `%sis%s(){return this.mimeType === "%s"}`+"\n", tab, t, t)
+		writeFile(f, fmt.Sprintf(`%sis%s(){return this.mimeType === "%s"}`+"\n", tab, t, t))
 	}
-	writeFile(f, "%stoJSON(){return this.value}\n", tab)
-	writeFile(f, "%svalueOf(){return this.value}\n", tab)
-	writeFile(f, "}\n")
+	writeFile(f, fmt.Sprintf("%stoJSON(){return this.value}\n", tab))
+	writeFile(f, fmt.Sprintf("%svalueOf(){return this.value}\n", tab))
+	writeFile(f, fmt.Sprintf("}\n"))
 }

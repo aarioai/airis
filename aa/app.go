@@ -36,7 +36,7 @@ func (app *App) Check(ctx context.Context, es ...*ae.Error) bool {
 func (app *App) CheckErrors(ctx context.Context, errs ...error) bool {
 	err := afmt.First(errs)
 	if err != nil && !ae.IsNotFound(err) {
-		app.Log.Error(ctx, err.Error())
+		app.Log.Errorf(ctx, err.Error())
 		return false
 	}
 	return true

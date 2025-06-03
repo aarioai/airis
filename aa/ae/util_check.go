@@ -18,15 +18,19 @@ func IsNotFound(err error) bool {
 	return errors.Is(err, ErrNotFound)
 }
 
-func PanicWithCaller(callerSkip int, format string, args ...any) {
+func PanicWithCaller(callerSkip int, msg string) {
 	now := time.Now().Format("2006-01-02 15:04:05")
-	msg := now + " [panic] " + utils.Caller(callerSkip) + " " + fmt.Sprintf(format, args...)
+	msg = now + " [panic] " + utils.Caller(callerSkip) + " " + msg
 	fmt.Println(msg) // convenient for docker/local debugging
 	panic(msg)
 }
 
-func Panic(format string, args ...any) {
-	PanicWithCaller(2, format, args...)
+func Panic(msg string) {
+	PanicWithCaller(2, msg)
+}
+
+func PanicF(format string, args ...any) {
+	PanicWithCaller(2, fmt.Sprintf(format, args...))
 }
 
 // PanicOn 如果存在服务器错误则触发 panic

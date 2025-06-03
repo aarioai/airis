@@ -174,7 +174,7 @@ func JoinByTags(u any, ty JoinType, sep string, tagname string, tags ...string) 
 			}
 		}
 		if !found {
-			ae.Panic(fmt.Sprintf(`not found %s:"%s"`, tagname, tag))
+			ae.PanicF(`not found %s:"%s"`, tagname, tag)
 		}
 	}
 	if len(ret) > len(sep) {

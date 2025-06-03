@@ -17,9 +17,6 @@ type BitPosition uint16 // bit-position (in big endian)
 type Millisecond int64
 type Second int64
 
-type Ext string       // extension name, e.g., jpg
-type Extension string // extension name starts with a dot, e.g., .jpg
-
 // See ./t_path_param.go
 
 type PathParamType string // e.g. :string, :uuid, :uint8
@@ -34,6 +31,9 @@ type Email string
 type Weekday int8 // [0-6] from sunday to saturday, -1 to invalid weekday
 
 // See ./t_path.go
+
+type Ext string             // extension name, e.g., jpg
+type Extension string       // extension name starts with a dot, e.g., .jpg
 type FileType string        // e.g. .jpg
 type StdFilename string     // [\w-.]+ // standard file name
 type Filename string        // [\w-.!@#$%^&(){}~]+ , unicode filename

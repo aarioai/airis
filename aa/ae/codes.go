@@ -2,7 +2,6 @@ package ae
 
 import (
 	"fmt"
-	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/aarioai/airis/pkg/types"
 	"net/http"
 	"strings"
@@ -171,8 +170,8 @@ var (
 func NewFailedAndSeeOther(redirect string) *Error {
 	return New(FailedAndSeeOther, redirect) // 特殊错误码，msg 用于跳转
 }
-func NewConflictWith(format string, args ...any) *Error {
-	return New(ConflictWith, afmt.Sprintf(format, args...))
+func NewConflictWith(msg string) *Error {
+	return New(ConflictWith, msg)
 }
 
 func NewBadParam(param string, tips ...string) *Error {
@@ -224,8 +223,8 @@ func NewUnsupportedMedia(wants ...string) *Error {
 func NewFailedDependency(msg ...any) *Error {
 	return New(FailedDependency).AppendMsg(msg...)
 }
-func NewVariantAlsoNegotiates(format string, args ...any) *Error {
-	return New(VariantAlsoNegotiates, afmt.Sprintf(format, args...))
+func NewVariantAlsoNegotiates(msg string) *Error {
+	return New(VariantAlsoNegotiates, msg)
 }
 func BadConfig(key string) *Error {
 	return New(VariantAlsoNegotiates, "bad configuration "+key)

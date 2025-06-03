@@ -13,7 +13,7 @@ import (
 func (c *Config) PanicIfNotEqual(key, want string) {
 	value := c.GetString(key)
 	if value != want {
-		ae.Panic("config %s = %s not equal to %s", key, value, want)
+		ae.PanicF("config %s = %s not equal to %s", key, value, want)
 	}
 }
 func (c *Config) Log() {
@@ -38,17 +38,17 @@ func (c *Config) Dump() {
 	// 结束符 \033[0m
 	// 每行尽量保持小于80字符长度
 
-	afmt.PrintcBorder("Config Dump", afmt.Yellow, afmt.Bold)
+	afmt.PrintBorder("Config Dump", afmt.Yellow, afmt.Bold)
 
 	for category, configs := range all {
 		fmt.Printf("\n")
 		switch category {
 		case "base":
-			afmt.PrintcYellow("[%s] %s", category, c.path)
+			afmt.PrintfYellow("[%s] %s", category, c.path)
 		case "text":
-			afmt.PrintcYellow("[%s] %s", category, strings.Join(c.TextConfigDirs, " "))
+			afmt.PrintfYellow("[%s] %s", category, strings.Join(c.TextConfigDirs, " "))
 		default:
-			afmt.PrintcYellow("[%s]", category)
+			afmt.PrintfYellow("[%s]", category)
 		}
 		fmt.Printf("\n")
 		for _, d := range configs {
@@ -58,15 +58,15 @@ func (c *Config) Dump() {
 			}
 			fmt.Print("  ")
 			if d[2] != "" {
-				afmt.PrintcRed("%s = %s", d[0], v)
-				afmt.PrintcGreen(" %s\n", d[2])
+				afmt.PrintfRed("%s = %s", d[0], v)
+				afmt.PrintfGreen(" %s\n", d[2])
 			} else {
-				afmt.PrintcGreen(d[0])
+				afmt.PrintGreen(d[0])
 				fmt.Println(" = " + v)
 			}
 		}
 	}
-	afmt.PrintcBorder("End of Config", afmt.Yellow, afmt.Bold)
+	afmt.PrintBorder("End of Config", afmt.Yellow, afmt.Bold)
 }
 
 func sortConfigKeys[T string | []rune | []byte](data map[string]T) [][3]string {

@@ -31,30 +31,21 @@ func LogOnError(err error) {
 	}
 }
 
-func LogOn(e *ae.Error) {
+func LogOnE(e *ae.Error) {
 	if e != nil {
 		Console(e.String())
 	}
 }
-
-func Alerting(msg string, args ...any) {
-	Console(afmt.Sprintf(msg, args...), afmt.Red)
-}
-
-func Warning(msg string, args ...any) {
-	Console(afmt.Sprintf(msg, args...), afmt.Yellow)
-}
-
-func Information(msg string, args ...any) {
-	Console(afmt.Sprintf(msg, args...), afmt.Magenta)
-}
-
-func Start(name string, args ...any) {
-	name = afmt.Sprintf(name, args...)
+func Start(name string) {
 	Console(StartPrefix+name, afmt.Green)
 }
+func Startf(format string, args ...any) {
+	Start(fmt.Sprintf(format, args...))
+}
 
-func Stop(name string, args ...any) {
-	name = afmt.Sprintf(name, args...)
+func Stop(name string) {
 	Console(StopPrefix+name, afmt.Red)
+}
+func Stopf(format string, args ...any) {
+	Stop(fmt.Sprintf(format, args...))
 }

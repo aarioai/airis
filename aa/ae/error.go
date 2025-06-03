@@ -1,6 +1,7 @@
 package ae
 
 import (
+	"fmt"
 	"github.com/aarioai/airis/aa/acontext"
 	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/aarioai/airis/pkg/types"
@@ -19,7 +20,6 @@ type Error struct {
 	locked    bool
 }
 
-// New 使用错误码和消息创建 Error
 func New(code int, message ...any) *Error {
 	e := &Error{
 		Code:   code,
@@ -34,17 +34,21 @@ func New(code int, message ...any) *Error {
 
 	return e
 }
-
-// NewE 使用消息创建 Error
-func NewE(format string, args ...any) *Error {
+func NewE(msg string) *Error {
 	return &Error{
 		Code:   InternalServerError,
-		Msg:    afmt.Sprintf(format, args...),
+		Msg:    msg,
+		Caller: utils.Caller(1),
+	}
+}
+func NewF(format string, args ...any) *Error {
+	return &Error{
+		Code:   InternalServerError,
+		Msg:    fmt.Sprintf(format, args...),
 		Caller: utils.Caller(1),
 	}
 }
 
-// NewError 从标准 error 创建 Error
 func NewError(err error, details ...any) *Error {
 	if err == nil {
 		return nil
@@ -77,10 +81,15 @@ func (e *Error) Unlock() *Error {
 	e.locked = false
 	return e
 }
-func (e *Error) WithMsg(format string, args ...any) *Error {
+
+func (e *Error) WithMsg(msg string) *Error {
 	newE := e.handleLock()
-	newE.Msg = afmt.Sprintf(format, args...)
+	newE.Msg = msg
 	return newE
+}
+
+func (e *Error) WithMsgf(format string, args ...any) *Error {
+	return e.WithMsg(fmt.Sprintf(format, args...))
 }
 
 // AppendMsg 尝试添加消息

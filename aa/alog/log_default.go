@@ -29,12 +29,12 @@ func NewDefaultLog(level ErrorLevel) LogInterface {
 	})
 	return xlogInstance
 }
-func format(ctx context.Context, level ErrorLevel, caller, msg string) string {
+func packMessage(ctx context.Context, level ErrorLevel, caller, msg string) string {
 	traceInfo := acontext.TraceInfo(ctx)
 	b := strings.Builder{}
 	b.Grow(15 + len(traceInfo))
 
-	if level != ErrAll {
+	if level != LevelErrAll {
 		b.WriteString("[")
 		b.WriteString(level.Name())
 		b.WriteString("] ")
@@ -48,11 +48,11 @@ func format(ctx context.Context, level ErrorLevel, caller, msg string) string {
 	return b.String()
 }
 
-func (l *xlog) print(ctx context.Context, level ErrorLevel, caller string, msg string, args ...any) {
+func (l *xlog) print(ctx context.Context, level ErrorLevel, caller string, msg string) {
 	if level > l.Level {
 		return
 	}
-	log.Println(format(ctx, level, caller, fmt.Sprintf(msg, args...)))
+	log.Println(packMessage(ctx, level, caller, msg))
 }
 func (l *xlog) New(prefix string, f func(context.Context, string, ...any), suffix ...string) func(context.Context, string, ...any) {
 	var s string
@@ -66,48 +66,77 @@ func (l *xlog) New(prefix string, f func(context.Context, string, ...any), suffi
 		f(ctx, prefix+msg+s, args...)
 	}
 }
-
-func (l *xlog) Debug(ctx context.Context, msg string, args ...any) {
-	l.print(ctx, Debug, utils.Caller(1), msg, args...)
+func (l *xlog) Debug(ctx context.Context, msg string) {
+	l.print(ctx, LevelDebug, utils.Caller(1), msg)
+}
+func (l *xlog) Debugf(ctx context.Context, msg string, args ...any) {
+	l.print(ctx, LevelDebug, utils.Caller(1), fmt.Sprintf(msg, args...))
 }
 
-func (l *xlog) Info(ctx context.Context, msg string, args ...any) {
-	l.print(ctx, Info, utils.Caller(1), msg, args...)
+func (l *xlog) Info(ctx context.Context, msg string) {
+	l.print(ctx, LevelInfo, utils.Caller(1), msg)
 }
 
-func (l *xlog) Notice(ctx context.Context, msg string, args ...any) {
-	l.print(ctx, Notice, utils.Caller(1), msg, args...)
+func (l *xlog) InfoF(ctx context.Context, format string, args ...any) {
+	l.print(ctx, LevelInfo, utils.Caller(1), fmt.Sprintf(format, args...))
+}
+func (l *xlog) Notice(ctx context.Context, msg string) {
+	l.print(ctx, LevelNotice, utils.Caller(1), msg)
+}
+func (l *xlog) Noticef(ctx context.Context, format string, args ...any) {
+	l.print(ctx, LevelNotice, utils.Caller(1), fmt.Sprintf(format, args...))
+}
+func (l *xlog) Warn(ctx context.Context, format string) {
+	l.print(ctx, LevelWarn, utils.Caller(1), format)
+}
+func (l *xlog) Warnf(ctx context.Context, format string, args ...any) {
+	l.print(ctx, LevelWarn, utils.Caller(1), fmt.Sprintf(format, args...))
 }
 
-func (l *xlog) Warn(ctx context.Context, msg string, args ...any) {
-	l.print(ctx, Warn, utils.Caller(1), msg, args...)
+func (l *xlog) Error(ctx context.Context, msg string) {
+	l.print(ctx, LevelError, utils.Caller(1), msg)
 }
-
-func (l *xlog) Error(ctx context.Context, msg string, args ...any) {
-	l.print(ctx, Error, utils.Caller(1), msg, args...)
+func (l *xlog) Errorf(ctx context.Context, format string, args ...any) {
+	l.print(ctx, LevelError, utils.Caller(1), fmt.Sprintf(format, args...))
 }
 func (l *xlog) E(ctx context.Context, e *ae.Error, msg ...any) {
 	s := e.String()
 	if len(msg) > 0 {
 		s = fmt.Sprint(msg...)
 	}
-	l.print(ctx, Error, e.Caller, s)
+	l.print(ctx, LevelError, e.Caller, s)
 }
 
-func (l *xlog) Fatal(ctx context.Context, msg string, args ...any) {
-	l.print(ctx, Fatal, utils.Caller(1), msg, args...)
+func (l *xlog) Fatal(ctx context.Context, msg string) {
+	l.print(ctx, LevelFatal, utils.Caller(1), msg)
 }
 
-func (l *xlog) Alert(ctx context.Context, msg string, args ...any) {
-	l.print(ctx, Alert, utils.Caller(1), msg, args...)
+func (l *xlog) Fatalf(ctx context.Context, format string, args ...any) {
+	l.print(ctx, LevelFatal, utils.Caller(1), fmt.Sprintf(format, args...))
 }
 
-func (l *xlog) Emerg(ctx context.Context, msg string, args ...any) {
-	l.print(ctx, Emerg, utils.Caller(1), msg, args...)
+func (l *xlog) Alert(ctx context.Context, msg string) {
+	l.print(ctx, LevelAlert, utils.Caller(1), msg)
 }
 
-func (l *xlog) Print(ctx context.Context, msg string, args ...any) {
-	log.Println(format(ctx, ErrAll, utils.Caller(1), fmt.Sprintf(msg, args...)))
+func (l *xlog) Alertf(ctx context.Context, format string, args ...any) {
+	l.print(ctx, LevelAlert, utils.Caller(1), fmt.Sprintf(format, args...))
+}
+
+func (l *xlog) Emerg(ctx context.Context, msg string) {
+	l.print(ctx, LevelEmerg, utils.Caller(1), msg)
+}
+
+func (l *xlog) Emergf(ctx context.Context, format string, args ...any) {
+	l.print(ctx, LevelEmerg, utils.Caller(1), fmt.Sprintf(format, args...))
+}
+
+func (l *xlog) Print(ctx context.Context, msg string) {
+	log.Println(packMessage(ctx, LevelErrAll, utils.Caller(1), msg))
+}
+
+func (l *xlog) Printf(ctx context.Context, format string, args ...any) {
+	log.Println(packMessage(ctx, LevelErrAll, utils.Caller(1), fmt.Sprintf(format, args...)))
 }
 
 func (l *xlog) Trace(ctx context.Context) {
