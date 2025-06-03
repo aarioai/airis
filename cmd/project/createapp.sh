@@ -204,6 +204,21 @@ createCommonServiceFile(){
     sed -e "s#{{PACKAGE_NAME}}#${pkg}#g" -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
 }
 
+createConfigFile(){
+    local project_root="$1"
+    local app_name="$2"
+    mkdir -p "${project_root}/config"
+    local template="${CUR}/project_template/app-local.ini.tpl"
+    local dst="${project_root}/config/app-local.ini"
+    [ ! -f "$dst" ] || return 0
+    sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+}
+
+createStorage(){
+    local project_root="$1"
+    mkdir -p "${project_root}/storage/log"
+}
+
 goModTidy(){
     local project_root="$1"
     local project_base="$2"
@@ -246,6 +261,9 @@ main(){
     createCommonServiceFile "${app_root}/job" "$app_base"
     createBaseServiceFile "${app_root}/job/queue" "$app_base"
     createCommonServiceFile "${app_root}/job/queue/consumer" "$app_base"
+
+    createConfigFile "$project_root" "$app_name"
+    createStorage "$project_root"
 
     goModTidy "$project_root" "$project_base"
     info "created app ${app_name} (${app_root})"
