@@ -23,10 +23,9 @@ findRepoCmdDir(){
     info "checking go.mod file"
     if [ ! -f "${ROOT_DIR}/go.mod" ];then
         go mod init
-
     fi
     go mod tidy
-    go get "$AIRIS"
+    go get -u "$AIRIS"
 
     info "detecting airis version"
     version=$(grep "$AIRIS" go.mod | sed -E 's/.*(v[0-9]+\.[0-9]+\.[0-9]+).*/\1/')
