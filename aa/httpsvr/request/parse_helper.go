@@ -2,8 +2,8 @@ package request
 
 import (
 	"github.com/aarioai/airis/aa/ae"
-	"github.com/aarioai/airis/aa/aenum"
 	"github.com/aarioai/airis/aa/atype"
+	"github.com/aarioai/airis/aa/atype/aenum"
 	"github.com/aarioai/airis/pkg/types"
 	"reflect"
 	"regexp"

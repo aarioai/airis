@@ -2,23 +2,13 @@ package aenum
 
 import "github.com/aarioai/airis/pkg/types"
 
-type Continent uint8
 type Country uint16
 
 const (
-	Asia         Continent = 1
-	Europe       Continent = 2
-	NorthAmerica Continent = 3
-	SouthAmerica Continent = 4
-	Oceania      Continent = 5
-	Africa       Continent = 6
-	Antarctica   Continent = 7
-)
+	NilCountry Country = 0     // no, or invalid country
+	Canada     Country = 50001 // Canada shares the same country calling code (+1) as the United States.
+	America    Country = 1
 
-const (
-	Canada        Country = 50001 // 国际区号跟美国一样 +1
-	America       Country = 1
-	Kazakhstan    Country = 997 // 2021年，哈萨克斯坦国际区号变更为 997。再次之前，跟俄罗斯一样都是7
 	Russia        Country = 7
 	Egypt         Country = 20
 	SouthAfrica   Country = 27
@@ -226,16 +216,10 @@ const (
 	Azerbaijan         Country = 994
 	Georgia            Country = 995
 	Kyrgyzstan         Country = 996
+	Kazakhstan         Country = 997
 	Uzbekistan         Country = 998
 )
 
-func ParseCountry(s string) (Country, error) {
-	n, err := types.ParseUint16(s)
-	if err != nil {
-		return 0, err
-	}
-	return Country(n), nil
-}
 func NewCountry(id uint16) (Country, bool) {
 	c := Country(id)
 	return c, true
@@ -243,15 +227,4 @@ func NewCountry(id uint16) (Country, bool) {
 func (c Country) Uint16() uint16 { return uint16(c) }
 func (c Country) String() string {
 	return types.FormatUint(c.Uint16())
-}
-func (c Country) Is(x uint16) bool {
-	return c.Uint16() == x
-}
-func (c Country) In(args ...Country) bool {
-	for _, a := range args {
-		if a == c {
-			return true
-		}
-	}
-	return false
 }

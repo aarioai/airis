@@ -14,6 +14,7 @@ type ImagePattern struct {
 
 type FileSrc struct {
 	Provider        int        `json:"provider"`
+	URL             URL        `json:"url"`         // e.g. https://xxx/img.jpg
 	UrlPattern      UrlPattern `json:"url_pattern"` // e.g. https://xxx/img.jpg?maxwidth={max_width:int}
 	AlterUrlPattern UrlPattern `json:"alter_url_pattern"`
 	BaseURL         URL        `json:"base_url"`
@@ -27,7 +28,9 @@ type FileSrc struct {
 
 type AudioSrc struct {
 	FileSrc
-	Duration Second `json:"duration"`
+	Bitrate    int    `json:"bitrate"` // bit per second
+	Duration   Second `json:"duration"`
+	SampleRate int    `json:"sample_rate"` // HZ
 }
 
 type DocSrc struct {
@@ -36,18 +39,21 @@ type DocSrc struct {
 
 type ImgSrc struct {
 	FileSrc
-
-	CropUrl UrlPattern `json:"crop_url"` // e.g.  https://xxx/img.jpg?width={width:int}&height={height:int}
-	Width   int        `json:"width"`
-	Height  int        `json:"height"`
-	Allowed [][2]int   `json:"allowed"` // allowed [width, height][]
+	Allowed        [][2]int   `json:"allowed"`          // allowed [width, height][]
+	CropUrlPattern UrlPattern `json:"crop_url_pattern"` // e.g.  https://xxx/img.jpg?width={width:int}&height={height:int}
+	Height         int        `json:"height"`
+	Width          int        `json:"width"`
 }
 
 type VideoSrc struct {
 	FileSrc
-	Preview  *ImgSrc  `json:"preview"`
-	Duration Second   `json:"duration"`
-	Width    int      `json:"width"`
-	Height   int      `json:"height"`
-	Allowed  [][2]int `json:"allowed"` // allowed [width, height][]
+	Allowed    [][2]int `json:"allowed"` // allowed [width, height][]
+	Bitrate    int      `json:"bitrate"`
+	Codec      string   `json:"codec"`
+	Duration   Second   `json:"duration"`
+	Framerate  int      `json:"framerate"`
+	Height     int      `json:"height"`
+	Preview    *ImgSrc  `json:"preview"`
+	SampleRate int      `json:"sample_rate"`
+	Width      int      `json:"width"`
 }

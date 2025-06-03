@@ -3,12 +3,13 @@ package atype
 import "database/sql"
 
 // See ./t_basic.go
-
+type Base64 string
 type Booln uint8 // 0 | 1
 type Char byte   // single character in ASCII characters [32, 126]
 type Int24 int32
 type Uint24 uint32
 
+type Enum uint8
 type Bin string         // binary string
 type BitPos uint8       // bit-position (in big endian)
 type BitPosition uint16 // bit-position (in big endian)
