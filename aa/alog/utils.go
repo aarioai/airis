@@ -25,7 +25,7 @@ func Log(msg string, args ...any) {
 	Console(fmt.Sprintf(msg, args...))
 }
 
-func LogOnError(err error) {
+func OnError(err error) {
 	if err != nil {
 		Console(err.Error())
 	}
