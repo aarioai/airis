@@ -11,7 +11,7 @@ import (
 
 func InitApp(ctx acontext.Context, configPath string, selfTest bool, profile *debug.Profile) *aa.App {
 	profile = profile.Fork("init app {{APP_NAME}}").WithLabel("boot")
-	cfg, err := aconfig.New(configPath, configProcessor)
+	cfg, err := aconfig.New(configPath, configValueProcessor)
 	ae.PanicOnErrs(err)
 
 	logLevel := alog.NameToLevel(cfg.GetString("log_level", "debug"))
