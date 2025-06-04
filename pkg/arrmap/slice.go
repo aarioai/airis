@@ -61,3 +61,14 @@ func Compact[S ~[]E, E comparable](s S, sorted bool) S {
 	clearSlice(s[i:]) // zero/nil out the obsolete elements, for GC
 	return s[:i]
 }
+
+func HasDuplicates[T comparable](arr []T) bool {
+	seen := make(map[T]bool)
+	for _, item := range arr {
+		if seen[item] {
+			return true
+		}
+		seen[item] = true
+	}
+	return false
+}
