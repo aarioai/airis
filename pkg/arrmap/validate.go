@@ -12,8 +12,8 @@ func IsBase(base int, digits []byte) bool {
 	return !HasDuplicates(digits)
 }
 
-func PanicIfNotBase(base int, digits []byte) {
+func PanicIfNotBase(name string, base int, digits []byte) {
 	if !IsBase(base, digits) {
-		panic(fmt.Sprintf("%s is not the base bytes of base%d", string(digits), base))
+		panic(fmt.Sprintf("%s: %s is not the base bytes of base%d", name, string(digits), base))
 	}
 }
