@@ -33,15 +33,13 @@ func PanicF(format string, args ...any) {
 	PanicWithCaller(2, fmt.Sprintf(format, args...))
 }
 
-// PanicOn 如果存在服务器错误则触发 panic
 func PanicOn(es ...*Error) {
 	if e := First(es...); e != nil {
 		PanicWithCaller(2, e.String())
 	}
 }
 
-// PanicOnErrors 断言检查标准错误，如果存在错误则触发 panic
-func PanicOnErrors(errs ...error) {
+func PanicOnErrs(errs ...error) {
 	if e := FirstError(errs...); e != nil {
 		PanicWithCaller(2, e.Error())
 	}

@@ -67,6 +67,7 @@ func (c *Config) initializeTimezone() error {
 		if c.TimeLocation, err = time.LoadLocation(tz); err != nil {
 			return fmt.Errorf("invalid timezone %s: %w", tz, err)
 		}
+		time.Local = c.TimeLocation
 	}
 	return nil
 }

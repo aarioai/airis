@@ -1,1 +1,11 @@
 package router
+
+import (
+	"github.com/aarioai/airis/aa"
+	"github.com/aarioai/airis/aa/acontext"
+	"github.com/aarioai/airis/aa/helpers/debug"
+)
+
+func Run(ctx acontext.Context, app *aa.App, prof *debug.Profile) {
+
+}

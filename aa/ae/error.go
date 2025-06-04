@@ -34,13 +34,15 @@ func New(code int, message ...any) *Error {
 
 	return e
 }
-func NewE(msg string) *Error {
+
+func NewError(msg string) *Error {
 	return &Error{
 		Code:   InternalServerError,
 		Msg:    msg,
 		Caller: utils.Caller(1),
 	}
 }
+
 func NewF(format string, args ...any) *Error {
 	return &Error{
 		Code:   InternalServerError,
@@ -49,12 +51,13 @@ func NewF(format string, args ...any) *Error {
 	}
 }
 
-func NewError(err error, details ...any) *Error {
+func NewErr(err error, details ...any) *Error {
 	if err == nil {
 		return nil
 	}
-	return NewE(err.Error()).WithCaller(1).WithDetail(details...)
+	return NewError(err.Error()).WithCaller(1).WithDetail(details...)
 }
+
 func (e *Error) Clone() *Error {
 	return &Error{
 		Code:      e.Code,

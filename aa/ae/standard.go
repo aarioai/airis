@@ -29,15 +29,15 @@ var (
 // *Error
 // ErrorXXX/ErrXXX  都应被视为常量，不应修改
 var (
-	ErrorDeprecated = NewError(ErrDeprecated).WithCaller(2).Lock()
+	ErrorDeprecated = NewErr(ErrDeprecated).WithCaller(2).Lock()
 
-	ErrorInvalidInput     = NewError(ErrInvalidInput).WithCaller(2).Lock()
-	ErrorInputWrongLength = NewError(ErrInputWrongLength).WithCaller(2).Lock()
-	ErrorEmptyInput       = NewError(ErrEmptyInput).WithCaller(2).Lock()
-	ErrorInputTooLong     = NewError(ErrInputTooLong).WithCaller(2).Lock()
-	ErrorInputTooShort    = NewError(ErrInputTooShort).WithCaller(2).Lock()
-	ErrorInputTooBig      = NewError(ErrInputTooBig).WithCaller(2).Lock()
-	ErrorInputTooSmall    = NewError(ErrInputTooSmall).WithCaller(2).Lock()
+	ErrorInvalidInput     = NewErr(ErrInvalidInput).WithCaller(2).Lock()
+	ErrorInputWrongLength = NewErr(ErrInputWrongLength).WithCaller(2).Lock()
+	ErrorEmptyInput       = NewErr(ErrEmptyInput).WithCaller(2).Lock()
+	ErrorInputTooLong     = NewErr(ErrInputTooLong).WithCaller(2).Lock()
+	ErrorInputTooShort    = NewErr(ErrInputTooShort).WithCaller(2).Lock()
+	ErrorInputTooBig      = NewErr(ErrInputTooBig).WithCaller(2).Lock()
+	ErrorInputTooSmall    = NewErr(ErrInputTooSmall).WithCaller(2).Lock()
 )
 
 func ErrInvalid(value any, name ...string) error {

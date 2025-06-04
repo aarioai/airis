@@ -11,15 +11,16 @@ readonly CUR
 
 readonly GLOBAL_DIRS=(
     app/router/middleware   \
-    app/rpc                 \
+    app/grpc                \
     boot                    \
     config                  \
     frontend/asset_src      \
     frontend/view_src       \
     frontend/dst            \
-    repair                  \
+    maintain/repair         \
+    maintain/tests          \
     sdk                     \
-    tests
+
 )
 readonly APP_GLOBAL_DIRS=(
     bo                  \
@@ -81,6 +82,7 @@ createBaseConfFile(){
     [ ! -f "$dst" ] || return 0
     sed -e "s#{{APP_NAME}}#${app_name}#g"  "$template" > "$dst"
 }
+
 createRouterFile(){
     local project_root="$1"
     local demo="${CUR}/demo/router.go.demo"
@@ -214,6 +216,30 @@ createConfigFile(){
     sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
 }
 
+createBootFiles(){
+    local project_root="$1"
+    local app_name="$2"
+    mkdir -p "${project_root}/boot"
+
+    # boot/init.go
+    local template="${CUR}/project_template/boot_init.go.tpl"
+    local dst="${project_root}/boot/init.go"
+    [ ! -f "$dst" ] || return 0
+    sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+
+    # boot/register.go
+    template="${CUR}/project_template/boot_register.go.tpl"
+    dst="${project_root}/boot/register.go"
+    [ ! -f "$dst" ] || return 0
+    sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+
+    # boot/tests/go
+    template="${CUR}/project_template/boot_tests.go.tpl"
+    dst="${project_root}/boot/tests.go"
+    [ ! -f "$dst" ] || return 0
+    sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+}
+
 createStorage(){
     local project_root="$1"
     mkdir -p "${project_root}/storage/log"
@@ -263,6 +289,8 @@ main(){
     createCommonServiceFile "${app_root}/job/queue/consumer" "$app_base"
 
     createConfigFile "$project_root" "$app_name"
+    createBootFiles "$project_root" "$app_name"
+
     createStorage "$project_root"
 
     goModTidy "$project_root" "$project_base"

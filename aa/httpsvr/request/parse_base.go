@@ -280,7 +280,7 @@ func (r *Request) parseSimpleBody() *ae.Error {
 	}
 	b, err := io.ReadAll(reader)
 	if err != nil {
-		return ae.NewError(err)
+		return ae.NewErr(err)
 	}
 	if int64(len(b)) > r.maxFormSize {
 		return ae.ErrorRequestEntityTooLarge

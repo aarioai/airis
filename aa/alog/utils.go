@@ -21,8 +21,27 @@ func Console(msg string, styles ...string) {
 	log.Println(msg)
 }
 
-func Log(msg string, args ...any) {
-	Console(fmt.Sprintf(msg, args...))
+func Print(msg string) {
+	Console(msg)
+}
+
+func Printf(format string, args ...any) {
+	Print(fmt.Sprintf(format, args...))
+}
+
+func Warn(msg string) {
+	Console(msg, afmt.Yellow)
+}
+
+func Warnf(format string, args ...any) {
+	Warn(fmt.Sprintf(format, args...))
+}
+
+func Error(msg string) {
+	Console(msg, afmt.Red)
+}
+func Errorf(format string, args ...any) {
+	Error(fmt.Sprintf(format, args...))
 }
 
 func OnError(err error) {
@@ -36,9 +55,11 @@ func LogOnE(e *ae.Error) {
 		Console(e.String())
 	}
 }
+
 func Start(name string) {
 	Console(StartPrefix+name, afmt.Green)
 }
+
 func Startf(format string, args ...any) {
 	Start(fmt.Sprintf(format, args...))
 }
