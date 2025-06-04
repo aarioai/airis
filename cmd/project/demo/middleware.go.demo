@@ -2,23 +2,14 @@ package middleware
 
 import (
 	"github.com/aarioai/airis/aa"
-	"sync"
 )
 
 type Middleware struct {
 	app *aa.App
 }
 
-var (
-	mwOnce sync.Once
-	mwObj  *Middleware
-)
-
-func NewMiddleware(app *aa.App) *Middleware {
-	mwOnce.Do(func() {
-		mwObj = &Middleware{
-			app: app,
-		}
-	})
-	return mwObj
+func New(app *aa.App) *Middleware {
+	return &Middleware{
+		app: app,
+	}
 }

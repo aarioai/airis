@@ -6,6 +6,14 @@ import (
 	"time"
 )
 
+func (s Sid) Nullable() NullableSid {
+	result := NullableSid{}
+	if s != "" {
+		result.Scan(string(s))
+	}
+	return result
+}
+
 func NewBooln(n uint8) (Booln, bool) { return basic.Ter(n == 1, True, False), n == 0 || n == 1 }
 func ToBooln(b bool) Booln           { return basic.Ter(b, True, False) }
 func (b Booln) Uint8() uint8         { return basic.Ter(b == True, uint8(1), uint8(0)) }

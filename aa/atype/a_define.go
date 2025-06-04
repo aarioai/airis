@@ -3,6 +3,9 @@ package atype
 import "database/sql"
 
 // See ./t_basic.go
+
+type Sid string // unique string format id, empty string is for null
+type NullableSid struct{ sql.NullString }
 type Base64 string
 type Booln uint8 // 0 | 1
 type Char byte   // single character in ASCII characters [32, 126]

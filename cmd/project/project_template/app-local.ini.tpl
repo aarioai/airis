@@ -18,7 +18,7 @@ log_symlink = /var/log/app-{{APP_NAME}}.log
 views_root = ./frontend/view
 emb_root = ./storage/emb
 
-[app_test]
+[svc_test]
 port = 80
 grpc_port = 8000
 
