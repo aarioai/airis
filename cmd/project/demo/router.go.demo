@@ -6,6 +6,6 @@ import (
 	"github.com/aarioai/airis/aa/helpers/debug"
 )
 
-func Run(ctx acontext.Context, app *aa.App, prof *debug.Profile) {
+func Run(app *aa.App, prof *debug.Profile) {
 
 }

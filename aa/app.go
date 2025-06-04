@@ -3,21 +3,31 @@ package aa
 import (
 	"context"
 	"github.com/aarioai/airis/aa/aconfig"
+	"github.com/aarioai/airis/aa/acontext"
 	"github.com/aarioai/airis/aa/ae"
 	"github.com/aarioai/airis/aa/alog"
 	"github.com/aarioai/airis/pkg/afmt"
 )
 
 type App struct {
-	Config *aconfig.Config
-	Log    alog.LogInterface
+	Config        *aconfig.Config
+	Log           alog.LogInterface
+	GlobalContext acontext.Context
+	GlobalCancel  context.CancelFunc
 }
 
-func New(config *aconfig.Config, logger alog.LogInterface) *App {
+func New(ctx acontext.Context, cancel context.CancelFunc, config *aconfig.Config) *App {
 	return &App{
-		Config: config,
-		Log:    logger,
+		Config:        config,
+		Log:           alog.NewDefaultLog(alog.LevelDebug),
+		GlobalContext: ctx,
+		GlobalCancel:  cancel,
 	}
+}
+
+func (app *App) WithLog(log alog.LogInterface) *App {
+	app.Log = log
+	return app
 }
 
 // Check 检查错误

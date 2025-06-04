@@ -3,48 +3,31 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/aarioai/airis-driver/driver"
 	"github.com/aarioai/airis/aa/acontext"
 	"github.com/aarioai/airis/aa/alog"
 	"github.com/aarioai/airis/aa/helpers/debug"
-	"os"
-	"os/signal"
 	"project/luexu/app/router"
 	"project/luexu/boot"
 	"runtime"
-	"syscall"
 )
 
 var (
 	configPath  = flag.String("config", "./config/app-local.ini", "config path")
 	selfTest    = flag.Bool("selftest", false, "self test")
 	ctx, cancel = acontext.WithCancel(acontext.Background())
-	sigs        = make(chan os.Signal, 1)
+	profile     = debug.DefaultProfile()
 )
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
-
+	flag.Parse()
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("recovered in main", r)  // for docker container log
+			fmt.Println("recovered in main", r) // for docker container log
 		}
 	}()
 
-	flag.Parse()
 	alog.Printf("config: %s, self test: %v", *configPath, *selfTest)
-	profile := debug.DefaultProfile()
-	app := boot.InitApp(ctx, *configPath, *selfTest, profile)
-	router.Run(ctx, app, profile)
-}
-
-func handleTerminate() {
-	// SIGINT: Ctrl + C; SIGTERM: shutdown or container stopped
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
-		sig := <-sigs
-		alog.Warnf("terminate signal: %d", sig)
-		cancel()
-		driver.CloseAllPools(nil)
-	}()
+	app := boot.InitApp(ctx, cancel, *configPath, *selfTest, profile)
+	router.Run(app, profile)
 }
