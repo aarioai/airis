@@ -17,19 +17,27 @@ const (
 	// 10 律币 = 100 律分 = 1000 律厘  = 1000 律毫 = 10000 coin
 
 	MoneyScale        uint8   = 4
-	Cent              Money   = 100   // 分
-	Dime              Money   = 1000  // 角
-	MoneyUnits        Money   = 10000 // 元
+	Cent              Money   = 100 // 0.01
+	Cents                     = Cent
+	Dime              Money   = 1000 // 0.1
+	Dimes                     = Dime
+	MoneyUnits        Money   = 10000 // any money unit, e.g., CNY 1, USD 1
 	moneyUnitsFloat64 float64 = 10000.0
 
 	Yuan    = MoneyUnits
-	WanYuan = 10000 * Yuan    // 万元
-	YiiYuan = 10000 * WanYuan // 亿元
+	KYuan   = 1000 * Yuan     // CNY 1000
+	WanYuan = 10000 * Yuan    // CNY 10,000
+	MYuan   = 100 * WanYuan   // CNY 1000,000
+	YiiYuan = 10000 * WanYuan // CNY 100,000,000
 
-	Dollar        = MoneyUnits
-	KiloDollar    = 1000 * Dollar        // 千元
-	MillionDollar = 1000 * KiloDollar    // 百万元    中文的话，就不要用百万、千万
-	BillionDollar = 1000 * MillionDollar // 十亿元
+	Dollar   = MoneyUnits
+	Dollars  = Dollar
+	KDollar  = 1000 * Dollar // 1000 dollar
+	KDollars = KDollar
+	MDollar  = 1000 * KDollar // million dollar
+	MDollars = MDollar
+	BDollar  = 1000 * MDollar // billion dollar
+	BDollars = BDollar
 
 	MaxMoneyU32 Money = 1<<32 - 1
 	MinMoney    Money = -1 << 63
