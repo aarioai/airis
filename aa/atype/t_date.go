@@ -182,7 +182,7 @@ func ToDatetime2(t *time.Time, loc *time.Location) Datetime {
 	}
 	return ToDatetime(*t, loc)
 }
-func UnixToDatetime(u int64, loc *time.Location) Datetime { return NewUnixTime(u).Datetime(loc) }
+func UnixToDatetime(u int64, loc *time.Location) Datetime { return NewTimestamp(u).Datetime(loc) }
 
 func (d Datetime) Valid() bool {
 	return len(d) == 19 && d != MinDatetime && d != MaxDatetime && d.String() != "1970-01-01 00:00:00"
@@ -231,7 +231,7 @@ func (d Datetime) Unix(loc *time.Location) Timestamp {
 	return Timestamp(t.Unix())
 }
 
-func NewUnixTime(u int64) Timestamp {
+func NewTimestamp(u int64) Timestamp {
 	return Timestamp(u)
 }
 func (u Timestamp) Int64() int64 { return int64(u) }
@@ -248,4 +248,16 @@ func (u Timestamp) Datetime(loc *time.Location) Datetime {
 	}
 	t := time.Unix(u.Int64(), 0)
 	return ToDatetime(t, loc)
+}
+
+func (u Timestamp) Add(duration Second) Timestamp {
+	return u + Timestamp(duration)
+}
+
+func (u Timestamp) Sub(b Timestamp) Second {
+	return Second(u - b)
+}
+
+func (u Timestamp) SubUnix(b int64) Second {
+	return Second(int64(u) - b)
 }

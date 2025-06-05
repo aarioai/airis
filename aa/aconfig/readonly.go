@@ -1,32 +1,33 @@
 package aconfig
 
+import "sync"
+
 type Readonly struct {
-	data map[string]string
+	data sync.Map
 }
 
 func NewReadonly() *Readonly {
 	return &Readonly{
-		data: make(map[string]string),
+		data: sync.Map{},
 	}
 }
-func (c *Readonly) Init(key string, value string) bool {
-	if _, ok := c.data[key]; ok {
-		return false
-	}
-	c.data[key] = value
-	return true
+
+func (c *Readonly) Set(key string, value string) bool {
+	_, loaded := c.data.LoadOrStore(key, value)
+	return !loaded
 }
 
 func (c *Readonly) Get(key string) string {
-	if v, ok := c.data[key]; ok {
-		return v
+	if value, ok := c.data.Load(key); ok {
+		return value.(string)
 	}
 	return ""
 }
 
 func (c *Readonly) GetBytes(key string) []byte {
-	if v, ok := c.data[key]; ok && v != "" {
-		return []byte(v)
+	s := c.Get(key)
+	if s == "" {
+		return nil
 	}
-	return nil
+	return []byte(s)
 }

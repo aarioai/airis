@@ -53,6 +53,7 @@ func ToMillisecond(t time.Duration) Millisecond { return Millisecond(t / time.Mi
 func (s Millisecond) Duration() time.Duration   { return time.Duration(s) * time.Millisecond }
 func ToSecond(t time.Duration) Second           { return Second(t / time.Second) }
 func (s Second) Duration() time.Duration        { return time.Duration(s) * time.Second }
+func (s Second) Add(t time.Duration) Second     { return ToSecond(s.Duration() + t) }
 
 func (n Uint24) Uint32() uint32 { return uint32(n) }
 

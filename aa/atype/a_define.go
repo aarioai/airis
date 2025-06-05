@@ -17,9 +17,6 @@ type Bin string         // binary string
 type BitPos uint8       // bit-position (in big endian)
 type BitPosition uint16 // bit-position (in big endian)
 
-type Millisecond int64
-type Second int64
-
 // See ./t_path_param.go
 
 type PathParamType string // e.g. :string, :uuid, :uint8
@@ -75,6 +72,8 @@ type YMD uint         // 8 digits number, format YYYYMMDD
 type Date string      // format YYYY-MM-DD
 type Datetime string  // format YYYY-MM-DD HH:mm:ss
 type Timestamp int64  // unix timestamp
+type Millisecond int64
+type Second int64
 
 // See ./t_district.go
 
