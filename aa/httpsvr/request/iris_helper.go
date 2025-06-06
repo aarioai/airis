@@ -35,7 +35,7 @@ func HeaderWild(ictx iris.Context, key string) string {
 
 // QueryWild query parameter from URL parameter, URL query, header and cookie
 // Example  csrf_token: in url params? -> Csrf-Token: in header?  X-Csrf-Token: in header-> csrf_token: in cookie
-func QueryWild(ictx iris.Context, key string) string {
+func QueryWild(ictx iris.Context, key string, includeCookie bool) string {
 	// 1. query from URL parameter
 	value := ictx.Params().GetString(key)
 	if value != "" {
@@ -50,5 +50,8 @@ func QueryWild(ictx iris.Context, key string) string {
 		return value
 	}
 	// 4. query from Cookie
-	return ictx.GetCookie(key)
+	if includeCookie {
+		return ictx.GetCookie(key)
+	}
+	return ""
 }
