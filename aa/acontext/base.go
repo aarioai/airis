@@ -1,10 +1,10 @@
 package acontext
 
 const (
-	CtxClientIP   = "ClientIP"
-	CtxTraceId    = "TraceId"
-	CtxRemoteAddr = "RemoteAddr"
-	CtxRemoteUser = "RemoteUser"
+	CtxClientIP   = "aa.client.ip"
+	CtxTraceId    = "aa.trace.id"
+	CtxRemoteAddr = "aa.remote.addr"
+	CtxRemoteUser = "aa.remote.user"
 
-	CtxContentType = "ContentType"
+	CtxContentType = "aa.content.type"
 )

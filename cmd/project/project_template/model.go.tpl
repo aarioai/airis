@@ -27,7 +27,7 @@ func New(app *aa.App) *Model {
 }
 
 func (m *Model) DB() *mysqli.DB {
-	return mysqli.NewDriver(driver.NewMysqlPool(m.app, conf.MysqlConfigSection))
+	return mysqli.NewDriver(driver.NewMysqlPool(m.app, conf.MysqlCfgSection))
 }
 
 

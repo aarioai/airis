@@ -3,14 +3,13 @@ package acontext
 import (
 	"context"
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/middleware/requestid"
 	"strings"
 )
 
 // Context
 // 后面可以使用 ictx.Request().Context() 直接访问
 func FromIris(ictx iris.Context) context.Context {
-	// Nginx proxy_set_header X-Request-Id $request_id;
-	traceId := ictx.GetHeader("X-Request-Id")
 	// Nginx proxy_set_header X-Real-IP $remote_addr;
 	remoteAddr := ClientIP(ictx)
 	if remoteAddr == "" {
@@ -18,7 +17,7 @@ func FromIris(ictx iris.Context) context.Context {
 	}
 
 	user := ictx.Values().GetString(CtxRemoteUser)
-	ctx := context.WithValue(ictx.Request().Context(), CtxTraceId, traceId)
+	ctx := context.WithValue(ictx.Request().Context(), CtxTraceId, requestid.Get(ictx))
 	ctx = context.WithValue(ctx, CtxRemoteAddr, remoteAddr)
 	ctx = context.WithValue(ctx, CtxRemoteUser, user)
 	ictx.ResetRequest(ictx.Request().WithContext(ctx))

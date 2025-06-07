@@ -28,7 +28,7 @@ func New(app *aa.App) *Service {
 			app:   app,
 			loc:   app.Config.TimeLocation,
             h:     cache.New(app),
-            mongo: mongodb.NewDB(app, conf.MongoDBConfigSection),
+            mongo: mongodb.NewDB(app, conf.MongoCfgSection),
 		}
 	})
 	return svcObj

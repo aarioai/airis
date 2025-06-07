@@ -37,7 +37,7 @@ func New(app *aa.App) *Service {
 			loc:        app.Config.TimeLocation,
 			private:    private.New(app),
 			h:          cache.New(app),
-			mongo:      mongodb.NewDB(app, conf.MongoDBConfigSection),
+			mongo:      mongodb.NewDB(app, conf.MongoCfgSection),
             mbs:        mbs.New(app),
             mcms:       mcms.New(app),
             mss:        mss.New(app),
