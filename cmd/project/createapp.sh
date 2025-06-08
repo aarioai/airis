@@ -223,9 +223,9 @@ createBootFiles(){
     local app_name="$2"
     mkdir -p "${project_root}/boot"
 
-    # boot/init.go
-    local template="${CUR}/project_template/boot_init.go.tpl"
-    local dst="${project_root}/boot/init.go"
+    # boot/boot.go
+    local template="${CUR}/project_template/boot.go.tpl"
+    local dst="${project_root}/boot/boot.go"
     [ ! -f "$dst" ] || return 0
     sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
 
