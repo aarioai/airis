@@ -14,7 +14,7 @@ var (
 )
 
 func (s *Service) initMongodb(ctx acontext.Context, profile *debug.Profile) {
-	profile.Mark("init mongodb: %s", conf.MongoCfgSection)
+	profile.Markf("init mongodb: %s", conf.MongoCfgSection)
 	mongoObj := mongodb.NewDB(s.app, conf.MongoCfgSection)
 	// create table and indexes
 	if len(mongoIndexEntities) > 0 {

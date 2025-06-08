@@ -1,7 +1,6 @@
-package grpc
+package server
 
 import (
-	"github.com/aarioai/airis/aa/acontext"
 	"github.com/aarioai/airis/aa/ae"
 	"github.com/aarioai/airis/aa/alog"
 	"github.com/aarioai/airis/aa/helpers/debug"
@@ -21,6 +20,6 @@ func (s *Service) Run(prof *debug.Profile) {
 		alog.Stopf("grpc server ({{APP_NAME}}:%s)", port)
 		server.Stop()
 	}()
-	profile.Mark("grpc server ({{APP_NAME}}) listening: " + port)
+	profile.Mark("grpc server ({{APP_NAME}}) listen: " + port)
 	ae.PanicOnErrs(server.Serve(listener))
 }
