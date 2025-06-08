@@ -177,11 +177,7 @@ createServiceFile(){
     sed -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
 }
 
-createGRPCFile(){
-    local app_root="$1"
-    local app_base="$2"
 
-}
 
 createJobInitFile(){
     local app_root="$1"
@@ -271,32 +267,53 @@ createJob(){
     createCommonServiceFile "${app_root}/job/queue/consumer" "$app_base"
 }
 
+createGRPCServer(){
+    local app_root="$1"
+    local app_base="$2"
+    local app_name="$3"
+    mkdir -p "${app_root}/grpc/server/helloworld/build"
+    createCommonServiceFile "${app_root}/grpc/server" "$app_base"
+    cp -f "${CUR}/project_template/grpc/server/helloworld/helloworld.proto" "${app_root}/grpc/server/helloworld/helloworld.proto"
+    cp -f "${CUR}/project_template/grpc/server/helloworld/build/helloworld.pb.go.tpl" "${app_root}/grpc/server/helloworld/build/helloworld.pb.go"
+    cp -f "${CUR}/project_template/grpc/server/helloworld/build/helloworld_grpc.pb.go.tpl" "${app_root}/grpc/server/helloworld/build/helloworld_grpc.pb.go"
+
+    local template="${CUR}/project_template/grpc/server/server.go.tpl"
+    local dst="${app_root}/grpc/server/server.go"
+    [ ! -f "$dst" ] || return 0
+    sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+
+    local template="${CUR}/project_template/grpc/server/register.go.tpl"
+    local dst="${app_root}/grpc/server/register.go"
+    [ ! -f "$dst" ] || return 0
+    sed -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
+
+    local template="${CUR}/project_template/grpc/server/helloworld/helloworld.go.tpl"
+    local dst="${app_root}/grpc/server/helloworld/helloworld.go"
+    [ ! -f "$dst" ] || return 0
+    sed -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
+}
+
+createGRPCClient(){
+    local app_root="$1"
+    local app_base="$2"
+    local app_name="$3"
+    mkdir -p "${app_root}/grpc/client/pb"
+    createCommonServiceFile "${app_root}/grpc/client" "$app_base"
+
+    local template="${CUR}/project_template/grpc/client/client.go.tpl"
+    local dst="${app_root}/grpc/client/client.go"
+    [ ! -f "$dst" ] || return 0
+    sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+}
+
 createGRPC(){
     local app_root="$1"
     local app_base="$2"
     local app_name="$3"
-    mkdir -p "${app_root}/grpc/helloworld/build"
+
     cp -f "${CUR}/project_template/grpc/README.md" "${app_root}/grpc/README.md"
-    cp -f "${CUR}/project_template/grpc/helloworld/helloworld.proto" "${app_root}/grpc/helloworld/helloworld.proto"
-    cp -f "${CUR}/project_template/grpc/helloworld/build/helloworld.pb.go" "${app_root}/grpc/helloworld/build/helloworld.pb.go"
-    cp -f "${CUR}/project_template/grpc/helloworld/build/helloworld_grpc.pb.go" "${app_root}/grpc/helloworld/build/helloworld_grpc.pb.go"
-    createGRPCFile "$app_root" "$app_base"
-    createCommonServiceFile "${app_root}/grpc" "$app_base"
-
-    local template="${CUR}/project_template/grpc/server.go.tpl"
-    local dst="${app_root}/grpc/server.go"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
-
-    local template="${CUR}/project_template/grpc/register.go.tpl"
-    local dst="${app_root}/grpc/register.go"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
-
-    local template="${CUR}/project_template/grpc/helloworld/helloworld.go.tpl"
-    local dst="${app_root}/grpc/helloworld/helloworld.go"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
+    createGRPCServer "$app_root" "$app_base" "$app_name"
+    createGRPCClient "$app_root" "$app_base" "$app_name"
 }
 
 main(){

@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	maxProfileLabelWidth     = 16
-	printProfileTimePerMicro = 1000 // 每1000微秒输出1次时间
-	profileTimeFormat        = "05.000"
+	maxProfileLabelWidth  = 16
+	printProfileTimePerMs = 1000
+	profileTimeFormat     = "05.000"
 )
 
 type Profile struct {
@@ -23,7 +23,7 @@ type Profile struct {
 	path       string
 	startTime  int64
 	lastTime   int64
-	disabled   bool // 停止标志
+	disabled   bool
 	bufferPool *sync.Pool
 
 	styles []string
@@ -54,19 +54,14 @@ func DefaultProfile() *Profile {
 	defaultProfile.Store(p)
 	return p
 }
-func Mark(marks ...any) int32 {
-	return DefaultProfile().Mark(marks...)
-}
 
-// NewProfile 创建新的性能分析器
-// 不重要的程序，而且异步概论几乎不存在
 func NewProfile(labels ...string) *Profile {
-	defaultProfile := DefaultProfile()
+	prof := DefaultProfile()
 	now := time.Now().UnixMicro()
 
-	if len(labels) == 0 && defaultProfile.seq.Load() == 0 {
-		defaultProfile.startTime = now
-		return defaultProfile
+	if len(labels) == 0 && prof.seq.Load() == 0 {
+		prof.startTime = now
+		return prof
 	}
 
 	return &Profile{
@@ -81,7 +76,6 @@ func NewProfile(labels ...string) *Profile {
 	}
 }
 
-// WithLabel 设置标签
 func (p *Profile) WithLabel(label string) *Profile {
 	if p == DefaultProfile() {
 		return newProfile().WithLabel(label)
@@ -89,24 +83,22 @@ func (p *Profile) WithLabel(label string) *Profile {
 	p.label = label
 	return p
 }
+
 func (p *Profile) WithStyles(styles ...string) *Profile {
 	p.styles = styles
 	return p
 }
 
-// Disable 禁用性能分析
 func (p *Profile) Disable() *Profile {
 	p.disabled = true
 	return p
 }
 
-// Enable 启用性能分析
 func (p *Profile) Enable() *Profile {
 	p.disabled = false
 	return p
 }
 
-// IsDisabled 检查是否被禁用
 func (p *Profile) IsDisabled() bool {
 	if p.disabled {
 		return true
@@ -121,8 +113,7 @@ func (p *Profile) Label() string {
 	return p.label
 }
 
-// Mark 记录性能标记点
-func (p *Profile) Mark(msg ...any) int32 {
+func (p *Profile) Mark(mark string) int32 {
 	if p.IsDisabled() {
 		return p.seq.Load()
 	}
@@ -138,7 +129,6 @@ func (p *Profile) Mark(msg ...any) int32 {
 		p.bufferPool.Put(buf)
 	}()
 
-	mark := afmt.SprintfArgs(msg)
 	estimatedSize := maxProfileLabelWidth + len(p.label) + len(mark) + 10 + buf.Len() // 10 是 \n 等其他字符估计值；buf.Len 是保留以后扩展允许临时插入
 	buf.Grow(estimatedSize)
 
@@ -149,6 +139,9 @@ func (p *Profile) Mark(msg ...any) int32 {
 	fmt.Print(buf.String())
 
 	return seq
+}
+func (p *Profile) Markf(format string, args ...any) int32 {
+	return p.Mark(fmt.Sprintf(format, args...))
 }
 
 // writePrefix 写入前缀信息
@@ -166,7 +159,7 @@ func (p *Profile) writeTimeInfo(buf *strings.Builder, id int32, now time.Time, n
 	prevStartTime := p.startTime
 	p.startTime = nowMicro
 	elapsed := nowMicro - p.lastTime
-	if id == 1 || elapsed > printProfileTimePerMicro {
+	if id == 1 || elapsed > printProfileTimePerMs {
 		p.lastTime = nowMicro
 		buf.WriteByte(' ')
 		buf.WriteString(now.Format(profileTimeFormat))
@@ -192,9 +185,11 @@ func (p *Profile) writeMsg(buf *strings.Builder, msg string, n int) {
 	buf.WriteByte('\n')
 }
 
-// Fork 创建子性能分析器
-func (p *Profile) Fork(msg ...any) *Profile {
-	id := p.Mark(msg...)
+func (p *Profile) Fork(mark string) *Profile {
+	if p.IsDisabled() {
+		return p
+	}
+	id := p.Mark(mark)
 	return &Profile{
 		label:     p.label,
 		parent:    p,
@@ -208,7 +203,10 @@ func (p *Profile) Fork(msg ...any) *Profile {
 	}
 }
 
-// buildPath 构建父序列号
+func (p *Profile) Forkf(format string, args ...any) *Profile {
+	return p.Fork(fmt.Sprintf(format, args...))
+}
+
 func (p *Profile) buildPath(id int32) string {
 	s := atype.String(id)
 	if p.path == "" {
