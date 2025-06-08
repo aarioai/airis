@@ -274,14 +274,19 @@ createJob(){
 createGRPC(){
     local app_root="$1"
     local app_base="$2"
+    local app_name="$3"
     mkdir -p "${app_root}/grpc/helloworld/build"
     cp -f "${CUR}/project_template/grpc/README.md" "${app_root}/grpc/README.md"
-    cp -f "${CUR}/project_template/grpc/server.go.tpl" "${app_root}/grpc/server.go"
     cp -f "${CUR}/project_template/grpc/helloworld/helloworld.proto" "${app_root}/grpc/helloworld/helloworld.proto"
     cp -f "${CUR}/project_template/grpc/helloworld/build/helloworld.pb.go" "${app_root}/grpc/helloworld/build/helloworld.pb.go"
     cp -f "${CUR}/project_template/grpc/helloworld/build/helloworld_grpc.pb.go" "${app_root}/grpc/helloworld/build/helloworld_grpc.pb.go"
     createGRPCFile "$app_root" "$app_base"
     createCommonServiceFile "${app_root}/grpc" "$app_base"
+
+    local template="${CUR}/project_template/grpc/server.go.tpl"
+    local dst="${app_root}/grpc/server.go"
+    [ ! -f "$dst" ] || return 0
+    sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
 
     local template="${CUR}/project_template/grpc/register.go.tpl"
     local dst="${app_root}/grpc/register.go"
@@ -319,7 +324,7 @@ main(){
     createModules "$app_root" "$app_base" "$@"
     createBaseServiceFile "${app_root}/private" "$app_base"
     createServiceFile "$app_root" "$app_base"
-    createGRPC "$app_root" "$app_base"
+    createGRPC "$app_root" "$app_base" "$app_name"
     createJob "$app_root" "$app_base" "$app_name"
     createConfigFile "$project_root" "$app_name"
     createBootFiles "$project_root" "$app_name"
