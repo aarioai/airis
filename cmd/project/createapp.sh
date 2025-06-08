@@ -11,7 +11,6 @@ readonly CUR
 
 readonly GLOBAL_DIRS=(
     app/router/middleware   \
-    app/grpc                \
     boot                    \
     config                  \
     frontend/asset_src      \
@@ -30,6 +29,7 @@ readonly APP_GLOBAL_DIRS=(
     entity/mo           \
     entity/po           \
     enum                \
+    grpc                \
     job/queue/consumer  \
     module              \
     mservice            \
@@ -177,6 +177,12 @@ createServiceFile(){
     sed -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
 }
 
+createGRPCFile(){
+    local app_root="$1"
+    local app_base="$2"
+
+}
+
 createJobInitFile(){
     local app_root="$1"
     local app_name="$2"
@@ -254,7 +260,39 @@ goModTidy(){
     fi
     go mod tidy
 }
+createJob(){
+    local app_root="$1"
+    local app_base="$2"
+    local app_name="$3"
+    createJobInitFile "$app_root" "$app_name"
+    createJobInitMongodbFile "$app_root" "$app_base"
+    createCommonServiceFile "${app_root}/job" "$app_base"
+    createBaseServiceFile "${app_root}/job/queue" "$app_base"
+    createCommonServiceFile "${app_root}/job/queue/consumer" "$app_base"
+}
 
+createGRPC(){
+    local app_root="$1"
+    local app_base="$2"
+    mkdir -p "${app_root}/grpc/helloworld/build"
+    cp -f "${CUR}/project_template/grpc/README.md" "${app_root}/grpc/README.md"
+    cp -f "${CUR}/project_template/grpc/server.go.tpl" "${app_root}/grpc/server.go"
+    cp -f "${CUR}/project_template/grpc/helloworld/helloworld.proto" "${app_root}/grpc/helloworld/helloworld.proto"
+    cp -f "${CUR}/project_template/grpc/helloworld/build/helloworld.pb.go" "${app_root}/grpc/helloworld/build/helloworld.pb.go"
+    cp -f "${CUR}/project_template/grpc/helloworld/build/helloworld_grpc.pb.go" "${app_root}/grpc/helloworld/build/helloworld_grpc.pb.go"
+    createGRPCFile "$app_root" "$app_base"
+    createCommonServiceFile "${app_root}/grpc" "$app_base"
+
+    local template="${CUR}/project_template/grpc/register.go.tpl"
+    local dst="${app_root}/grpc/register.go"
+    [ ! -f "$dst" ] || return 0
+    sed -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
+
+    local template="${CUR}/project_template/grpc/helloworld/helloworld.go.tpl"
+    local dst="${app_root}/grpc/helloworld/helloworld.go"
+    [ ! -f "$dst" ] || return 0
+    sed -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
+}
 
 main(){
     [ $# -ge 2 ] || e_usage "$0 <project root> <app name> [<module>...]${LF}Example: $0 test_app"
@@ -281,13 +319,8 @@ main(){
     createModules "$app_root" "$app_base" "$@"
     createBaseServiceFile "${app_root}/private" "$app_base"
     createServiceFile "$app_root" "$app_base"
-
-    createJobInitFile "$app_root" "$app_name"
-    createJobInitMongodbFile "$app_root" "$app_base"
-    createCommonServiceFile "${app_root}/job" "$app_base"
-    createBaseServiceFile "${app_root}/job/queue" "$app_base"
-    createCommonServiceFile "${app_root}/job/queue/consumer" "$app_base"
-
+    createGRPC "$app_root" "$app_base"
+    createJob "$app_root" "$app_base" "$app_name"
     createConfigFile "$project_root" "$app_name"
     createBootFiles "$project_root" "$app_name"
 
