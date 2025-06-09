@@ -6,8 +6,8 @@ import (
 	"github.com/aarioai/airis/aa/acontext"
 	"github.com/aarioai/airis/aa/alog"
 	"github.com/aarioai/airis/aa/helpers/debug"
-	"project/luexu/app/router"
-	"project/luexu/boot"
+	"{{ROOT}}/boot"
+	"{{ROOT}}/router"
 	"runtime"
 )
 

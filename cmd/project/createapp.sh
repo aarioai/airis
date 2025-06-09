@@ -10,7 +10,8 @@ CUR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly CUR
 
 readonly GLOBAL_DIRS=(
-    app/router/middleware   \
+    app                     \
+
     boot                    \
     config                  \
     frontend/asset_src      \
@@ -18,6 +19,7 @@ readonly GLOBAL_DIRS=(
     frontend/dst            \
     maintain/repair         \
     maintain/tests          \
+    router/middleware       \
     sdk                     \
 
 )
@@ -50,10 +52,10 @@ readonly MODULE_DIRS=(
 
 createMainGo(){
     local project_root="$1"
-    local demo="${CUR}/demo/main.go.demo"
+    local template="${CUR}/project_template/main.go.tpl"
     local dst="${project_root}/main.go"
     [ ! -f "$dst" ] || return 0
-    cp "$demo" "$dst"
+    sed -e "s#{{ROOT}}#${project_root}#g"  "$template" > "$dst"
 }
 
 createDirs(){
@@ -65,15 +67,6 @@ createDirs(){
         fi
     done
 }
-
-createMiddlewareFile(){
-    local project_root="$1"
-    local demo="${CUR}/demo/middleware.go.demo"
-    local dst="${project_root}/app/router/middleware/middleware.go"
-    [ ! -f "$dst" ] || return 0
-    cp "$demo" "$dst"
-}
-
 createBaseConfFile(){
     local app_root="$1"
     local app_name="$2"
@@ -83,17 +76,26 @@ createBaseConfFile(){
     sed -e "s#{{APP_NAME}}#${app_name}#g"  "$template" > "$dst"
 }
 
+createMiddlewareFile(){
+    local project_root="$1"
+    local demo="${CUR}/demo/router_middleware.go.demo"
+    local dst="${project_root}/router/middleware/middleware.go"
+    [ ! -f "$dst" ] || return 0
+    cp "$demo" "$dst"
+}
+
+
 createRouterFile(){
     local project_root="$1"
     local demo="${CUR}/demo/router.go.demo"
-    local dst="${project_root}/app/router/router.go"
+    local dst="${project_root}/router/router.go"
     [ ! -f "$dst" ] || return 0
     cp "$demo" "$dst"
 }
 createRouterEngineFile(){
     local project_root="$1"
     local demo="${CUR}/demo/router_engine.go.demo"
-    local dst="${project_root}/app/router/engine.go"
+    local dst="${project_root}/router/engine.go"
     [ ! -f "$dst" ] || return 0
     cp "$demo" "$dst"
 }

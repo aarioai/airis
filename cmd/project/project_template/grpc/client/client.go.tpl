@@ -5,7 +5,7 @@ import (
 )
 
 func (s *Service) Run(prof *debug.Profile) {
-	//profile := prof.Fork("staring grpc client ({{APP_NAME}})")
+	//prof.Fork("staring grpc client ({{APP_NAME}})")
 	//time.Sleep(10 * time.Second)
 	//addr := "localhost:8000"
 	//conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -25,12 +25,19 @@ func (s *Service) Run(prof *debug.Profile) {
 	//
 	//c := pb.NewHelloWorldClient(conn)
 	//
-	//ctx, cancel := context.WithTimeout(s.app.GlobalContext, 10*time.Second)
-	//defer cancel()
-	//r, err := c.SayHello(ctx, &pb.HelloRequest{Name: "World"})
-	//if err != nil {
-	//	ae.PanicF("could not greet: %v", err)
-	//}
+	//for {
+	//	t := time.NewTicker(3*time.Second)
+	//	defer t.Stop()
+	//	for range t.C {
+	//		ctx, cancel := context.WithTimeout(s.app.GlobalContext, 5*time.Second)
+	//		r, err := c.SayHello(ctx, &pb.HelloRequest{Name: "World"})
+	//		cancel()
+	//		if err != nil {
+	//			ae.PanicF("could not greet: %v", err)
+	//		}
 	//
-	//fmt.Printf("Greeting: %s\n", r.GetMessage())
+	//		fmt.Printf("Greeting: %s\n", r.GetMessage())
+	//
+	//	}
+	//}
 }
