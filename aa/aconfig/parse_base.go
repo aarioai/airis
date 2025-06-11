@@ -20,9 +20,6 @@ func (c *Config) Extend(otherConfigs ...map[string]string) error {
 
 	// 写锁范围一定要越小越好
 	cfgMtx.Lock()
-	if c.otherConfig == nil {
-		c.otherConfig = make(map[string]string)
-	}
 	for k, v := range cfgs {
 		c.otherConfig[k] = v
 	}
@@ -51,7 +48,6 @@ func (c *Config) initializeConfig() error {
 	c.Env = NewEnv(c.GetString(CkEnv))
 	c.Mock, _ = c.Get(CkMock).ReleaseBool()
 	c.TextConfigDirs = textConfigDirs(c.GetString(CkTextConfigDirs))
-	// 初始化时区配置
 	return c.initializeTimezone()
 }
 

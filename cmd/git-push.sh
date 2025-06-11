@@ -66,11 +66,11 @@ if [ $# -gt 0 ]; then
     comment="$1"
 fi
 
-
+ # @DEPRECATED
 build() {
     cd "$ROOT_DIR/cmd" || panic "failed to cd $ROOT_DIR/cmd"
     info "building project..."
-    # @TODO
+    # @DEPRECATED
     go run build.go --root="$ROOT_DIR" --js="/data/Aa/proj/go/src/project/xixi/deploy/asset_src/lib_dev/aa-js/src/f_oss_filetype_readonly.js" || panic "Build failed"
 }
 
@@ -181,7 +181,7 @@ setVPN() {
 
 main() {
   setVPN
-  build
+ # build
   pushAndUpgradeMod
   unsetVPN "$needCloseVPN"
   info "success!"

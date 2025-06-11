@@ -1,6 +1,7 @@
 package aconfig
 
 import (
+	"github.com/hashicorp/consul/api"
 	"io/fs"
 	"slices"
 	"strings"
@@ -72,7 +73,7 @@ type Snapshot struct {
 type Config struct {
 	/*
 		https://en.wikipedia.org/wiki/Deployment_environment
-		local -> development/trunk -> integration -> testing/test/qc/internal acceptnace -> staging/stage/model/pre-production/demo -> production/live
+		local -> development/trunk -> integration -> testing/test/qc/internal acceptance -> staging/stage/model/pre-production/demo -> production/live
 		development -> test -> pre-production -> production
 	*/
 	Env            Env
@@ -87,6 +88,7 @@ type Config struct {
 	baseConfig  map[string]string
 	textConfig  map[string]string // 使用字符串保存，避免[]byte被业务层修改
 	otherConfig map[string]string // 不要使用 sync.Map， 直接对整个map加锁设置
+	consulMap   map[string]*api.Client
 	snapshot    atomic.Pointer[Snapshot]
 
 	valueProcessor func(key string, value string) (string, error)
@@ -98,10 +100,38 @@ func New(path string, valueProcessor func(key string, value string) (string, err
 		TimezoneID:     time.Local.String(),
 		TimeLocation:   time.Local,
 		path:           path,
+		baseConfig:     make(map[string]string),
+		textConfig:     make(map[string]string),
+		otherConfig:    make(map[string]string),
+		consulMap:      make(map[string]*api.Client),
 		valueProcessor: valueProcessor,
 	}
 	err := cfg.Reload()
 	return cfg, err
+}
+
+func (c *Config) SetConsul(name string, client *api.Client) {
+	cfgMtx.Lock()
+	defer cfgMtx.Unlock()
+	c.consulMap[name] = client
+}
+
+func (c *Config) SetDefaultConsul(client *api.Client) {
+	cfgMtx.Lock()
+	defer cfgMtx.Unlock()
+	c.consulMap["DEFAULT"] = client
+}
+
+func (c *Config) Consul(name string) *api.Client {
+	cfgMtx.RLock()
+	defer cfgMtx.RUnlock()
+	return c.consulMap[name] // panic on doesn't exist
+}
+
+func (c *Config) DefaultConsul() *api.Client {
+	cfgMtx.RLock()
+	defer cfgMtx.RUnlock()
+	return c.consulMap["DEFAULT"] // panic on doesn't exist
 }
 
 // splitDots splits dot-separated strings into parts

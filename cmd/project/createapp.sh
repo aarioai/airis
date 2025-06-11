@@ -11,9 +11,9 @@ readonly CUR
 
 readonly GLOBAL_DIRS=(
     app                     \
-
     boot                    \
     config                  \
+    doc                     \
     frontend/asset_src      \
     frontend/view_src       \
     frontend/dst            \
