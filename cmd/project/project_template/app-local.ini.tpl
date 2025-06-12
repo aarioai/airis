@@ -22,6 +22,24 @@ emb_root = ./storage/emb
 port = 80
 grpc_port = 8000
 
+;[consul]
+;scheme = http
+;address = aa-consul:8500
+;path_prefix =
+;data_center =
+;username =
+;password =
+;wait_time =
+;token =
+;token_file =
+;namespace =
+;tls_address =
+;tls_ca_file =
+;tls_ca_path =
+;tls_cert_file =
+;tls_key_file =
+;tls_insecure_skip_verify =
+
 [mongodb]
 hosts = aa-mongodb:27017
 username =

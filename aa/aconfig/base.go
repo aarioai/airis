@@ -110,30 +110,6 @@ func New(path string, valueProcessor func(key string, value string) (string, err
 	return cfg, err
 }
 
-func (c *Config) SetConsul(name string, client *api.Client) {
-	cfgMtx.Lock()
-	defer cfgMtx.Unlock()
-	c.consulMap[name] = client
-}
-
-func (c *Config) SetDefaultConsul(client *api.Client) {
-	cfgMtx.Lock()
-	defer cfgMtx.Unlock()
-	c.consulMap["DEFAULT"] = client
-}
-
-func (c *Config) Consul(name string) *api.Client {
-	cfgMtx.RLock()
-	defer cfgMtx.RUnlock()
-	return c.consulMap[name] // panic on doesn't exist
-}
-
-func (c *Config) DefaultConsul() *api.Client {
-	cfgMtx.RLock()
-	defer cfgMtx.RUnlock()
-	return c.consulMap["DEFAULT"] // panic on doesn't exist
-}
-
 // splitDots splits dot-separated strings into parts
 // @example ["a.b.c", "d.e"] -> ["a", "b", "c", "d", "e"]
 func splitDots(keys ...string) []string {
