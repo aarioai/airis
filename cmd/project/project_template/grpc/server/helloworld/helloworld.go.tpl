@@ -3,7 +3,7 @@ package helloworld
 import (
 	"context"
 	"log"
-	"{{APP_BASE}}/grpc/server/helloworld/pb"
+	"{{APP_BASE}}/grpc/server/pb"
 )
 
 type HelloWorld struct {

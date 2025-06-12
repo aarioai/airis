@@ -3,7 +3,7 @@ package server
 import (
 	"google.golang.org/grpc"
 	"{{APP_BASE}}/grpc/server/helloworld"
-	"{{APP_BASE}}/grpc/server/helloworld/pb"
+	"{{APP_BASE}}/grpc/server/pb"
 )
 
 func newServer() *grpc.Server {

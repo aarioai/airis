@@ -15,7 +15,7 @@ func (s *Service) Run(prof *debug.Profile) {
 	ae.PanicOnErrs(err)
 	server := newServer()
 
-	go func() {s
+	go func() {
 		<-s.app.GlobalContext.Done()
 		alog.Stopf("grpc server ({{APP_NAME}}:%s)", port)
 		server.Stop()
