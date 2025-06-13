@@ -59,8 +59,11 @@ func (c *Config) RegisterGRPCService(serviceName, serviceID, address, checkAddr 
 		},
 	}
 	client := c.DefaultConsul()
+	if err := client.Agent().ServiceRegister(&reg); err != nil {
+		return fmt.Errorf("failed to register service: %w", err)
+	}
 	resolver.Register(consul.NewBuilder(client))
-	return client.Agent().ServiceRegister(&reg)
+	return nil
 }
 
 func (c *Config) DeregisterGRPCService(serviceID string) error {

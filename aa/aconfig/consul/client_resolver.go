@@ -28,7 +28,7 @@ type Resolver struct {
 	closeChannel chan struct{}
 }
 
-func NewResolver(cc resolver.ClientConn, client *api.Client, serviceName string, lastIndex uint64, closeChannel chan struct{}) resolver.Resolver {
+func NewResolver(cc resolver.ClientConn, client *api.Client, serviceName string, lastIndex uint64, closeChannel chan struct{}) *Resolver {
 	return &Resolver{
 		cc:           cc,
 		client:       client,
@@ -44,6 +44,11 @@ func (r *Resolver) ResolveNow(opts resolver.ResolveNowOptions) {
 		r.cc.ReportError(fmt.Errorf("consul resolver: query failed: %v", err))
 		return
 	}
+	if len(services) == 0 {
+		r.cc.ReportError(fmt.Errorf("consul resolver: no addresses found for %s", r.serviceName))
+		return
+	}
+
 	r.lastIndex = meta.LastIndex
 	var addrs []resolver.Address
 	for _, s := range services {
@@ -63,13 +68,10 @@ func (r *Resolver) ResolveNow(opts resolver.ResolveNowOptions) {
 		})
 		alog.Printf("%s (%s:%d) %s", s.Service.Service, addr, s.Service.Port, attrs.String())
 	}
-	if len(addrs) == 0 {
-		r.cc.ReportError(fmt.Errorf("consul resolver: no addresses found for %s", r.serviceName))
-		return
-	}
+
 	r.cc.UpdateState(resolver.State{
 		Addresses:     addrs,
-		ServiceConfig: r.cc.ParseServiceConfig(`{"loadBalancingConfig":[{"consul_load_balance":{"key":"value"}}]}`),
+		ServiceConfig: r.cc.ParseServiceConfig(`{"loadBalancingConfig":[{"round_robin":{}}]}`),
 	})
 }
 

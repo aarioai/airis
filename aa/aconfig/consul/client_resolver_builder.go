@@ -20,12 +20,7 @@ func NewBuilder(client *api.Client) resolver.Builder {
 }
 
 func (b *Builder) Build(t resolver.Target, cc resolver.ClientConn, o resolver.BuildOptions) (resolver.Resolver, error) {
-	r := &Resolver{
-		cc:           cc,
-		client:       b.client,
-		serviceName:  t.Endpoint(),
-		closeChannel: make(chan struct{}),
-	}
+	r := NewResolver(cc, b.client, t.Endpoint(), 0, make(chan struct{}))
 	r.ResolveNow(defaultResolveNowOptions)
 	go r.Watch()
 	return r, nil
