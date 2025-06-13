@@ -50,7 +50,7 @@ func (s *Service) listen() (net.Listener, string, error) {
 
     serviceName := s.app.Config.GetString("{{APP_NAME}}.grpc_service_name", "{{APP_NAME}}")
     serviceID := s.app.Config.GetString("{{APP_NAME}}.grpc_service_id", "{{APP_NAME}}-grpc")
-    err = s.app.Config.RegisterGRPCService(serviceName, serviceID, checkAddr, port)
+    err = s.app.Config.RegisterGRPCService(serviceName, serviceID, addr, checkAddr, port)
 
     return listener, serviceID, err
 }
