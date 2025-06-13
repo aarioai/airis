@@ -1,6 +1,7 @@
 package consul
 
 import (
+	"fmt"
 	"github.com/hashicorp/consul/api"
 	"google.golang.org/grpc/resolver"
 )
@@ -19,13 +20,20 @@ func NewBuilder(client *api.Client) resolver.Builder {
 	}
 }
 
+// Build creates a new resolver for the given target.
+// grpc.NewClient calls Build synchronously, and fails if the returned error is not nil.
 func (b *Builder) Build(t resolver.Target, cc resolver.ClientConn, o resolver.BuildOptions) (resolver.Resolver, error) {
+	fmt.Printf("consul build %s\n", t.String())
 	r := NewResolver(cc, b.client, t.Endpoint(), make(chan struct{}))
 	r.ResolveNow(defaultResolveNowOptions)
 	go r.Watch()
 	return r, nil
 }
 
+// Scheme returns the scheme supported by this resolver.  Scheme is defined
+// at https://github.com/grpc/grpc/blob/master/doc/naming.md.  The returned
+// string should not contain uppercase characters, as they will not match
+// the parsed target's scheme as defined in RFC 3986.
 func (b *Builder) Scheme() string {
 	return Scheme
 }

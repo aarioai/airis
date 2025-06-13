@@ -35,6 +35,10 @@ func NewResolver(cc resolver.ClientConn, client *api.Client, serviceName string,
 	}
 }
 
+// ResolveNow will be called by gRPC to try to resolve the target name
+// again. It's just a hint, resolver can ignore this if it's not necessary.
+//
+// It could be called multiple times concurrently.
 func (r *Resolver) ResolveNow(opts resolver.ResolveNowOptions) {
 	services, _, err := r.client.Health().Service(r.serviceName, "", true, nil)
 	if err != nil {
