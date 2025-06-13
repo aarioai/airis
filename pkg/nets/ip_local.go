@@ -1,4 +1,4 @@
-package utils
+package nets
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ var (
 	}
 )
 
-// LocalPublicIP 获取本机公网IP
+// LocalPublicIP public IP
 func LocalPublicIP(udpServers []string, renew bool) (string, error) {
 	if localPublicIP != "" && !renew {
 		return localPublicIP, nil
@@ -36,7 +36,6 @@ func LocalPublicIP(udpServers []string, renew bool) (string, error) {
 	return "", fmt.Errorf("failed to get local public IP from all servers")
 }
 
-// tryGetIP 尝试从单个服务器获取IP
 func tryGetIP(server string) (string, error) {
 	conn, err := net.DialTimeout("udp", server, time.Millisecond*100)
 	if err != nil {
@@ -49,4 +48,37 @@ func tryGetIP(server string) (string, error) {
 	}
 
 	return "", fmt.Errorf("invalid address type")
+}
+
+// LanIP Local Area Network IP, A (10.x.x.x), B (172.16.x.x - 172.31.x.x), C (192.168.x.x)
+func LanIP() (string, error) {
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		return "", err
+	}
+
+	for _, iface := range interfaces {
+		// Ignore loop back IP, 127.x.x.x
+		if iface.Flags&net.FlagLoopback != 0 || iface.Flags&net.FlagUp == 0 {
+			continue
+		}
+		// ignore Docker virtual network
+		if iface.Name == "docker0" || iface.Name == "br-" {
+			continue
+		}
+
+		addrs, err := iface.Addrs()
+		if err != nil {
+			continue
+		}
+
+		for _, addr := range addrs {
+			ip, ok := addr.(*net.IPNet)
+			if ok && ip.IP.To4() != nil {
+				return ip.IP.String(), nil
+			}
+		}
+	}
+
+	return "", fmt.Errorf("no LAN IP found")
 }
