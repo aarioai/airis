@@ -13,6 +13,7 @@ func (s *Service) registerServer() *grpc.Server {
 	pb.RegisterHelloWorldServer(serve, helloworld.NewHelloWorld(s.s))
 
     // register GRPC health check
+    // Can use `grpc_health_probe -addr=localhost:60000` to check GRPC health
     healthServer := health.NewServer()
     grpc_health_v1.RegisterHealthServer(serve, healthServer)
     healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)

@@ -5,6 +5,7 @@ import (
 	"github.com/aarioai/airis/aa/aconfig/consul"
 	"github.com/hashicorp/consul/api"
 	"google.golang.org/grpc/resolver"
+	"net"
 )
 
 func (c *Config) SetConsul(name string, client *api.Client) {
@@ -31,17 +32,30 @@ func (c *Config) DefaultConsul() *api.Client {
 	return c.consulMap["DEFAULT"] // panic on doesn't exist
 }
 
+func normalizeAddress(addr string) string {
+	if addr == "" || addr == "0.0.0.0" || addr == "127.0.0.1" || addr == "::" || addr == "::1" || addr == "[::]" || addr == "[::1]" {
+		if _, err := net.ResolveIPAddr("ip6", "::1"); err != nil {
+			return "127.0.0.1"
+		}
+		return "[::1]"
+	}
+	return addr
+}
+
 // RegisterGRPCService
 // Note: sometimes in docker container, remote address may be different with check address
-func (c *Config) RegisterGRPCService(serviceName, serviceID, address, checkAddress string, port int) error {
+func (c *Config) RegisterGRPCService(serviceName, serviceID, address, checkAddr string, port int) error {
+	address = normalizeAddress(address)
+	checkAddr = normalizeAddress(checkAddr)
 	reg := api.AgentServiceRegistration{
 		ID:      serviceID,
 		Name:    serviceName,
 		Port:    port,
 		Address: address,
+		Tags:    []string{"grpc"},
 		Check: &api.AgentServiceCheck{
-			GRPC:                           fmt.Sprintf("%s:%d", checkAddress, port),
-			Interval:                       "10s",
+			GRPC:                           fmt.Sprintf("%s:%d", checkAddr, port),
+			Interval:                       "15s",
 			Timeout:                        "5s",
 			DeregisterCriticalServiceAfter: "5m",
 		},

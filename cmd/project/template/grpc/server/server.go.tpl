@@ -4,7 +4,6 @@ import (
 	"github.com/aarioai/airis/aa/ae"
 	"github.com/aarioai/airis/aa/alog"
 	"github.com/aarioai/airis/aa/helpers/debug"
-    "github.com/aarioai/airis/pkg/basic"
     "github.com/aarioai/airis/pkg/types"
     "google.golang.org/grpc"
 	"net"
@@ -35,8 +34,13 @@ func (s *Service) Serve(prof *debug.Profile) {
 }
 
 func (s *Service) listen() (net.Listener, string, error) {
-	addr := s.app.Config.GetString("infra.grpc_addr", "127.0.0.1")
+	addr := s.app.Config.GetString("infra.grpc_addr", "0.0.0.0")
 	checkAddr := s.app.Config.GetString("infra.grpc_check_addr", addr)
+	if checkAddr == "" || checkAddr == "0.0.0.0" {
+		checkAddr = "127.0.0.1"
+	} else if checkAddr == "::" {
+		checkAddr = "::1"
+	}
 
     port, _ := types.ParseInt(s.app.Config.GetString("{{APP_NAME}}.grpc_port"))
     if port <= 0 {
