@@ -2,7 +2,6 @@ package consul
 
 import (
 	"fmt"
-	"github.com/aarioai/airis/aa/alog"
 	"github.com/hashicorp/consul/api"
 	"google.golang.org/grpc/attributes"
 	"google.golang.org/grpc/resolver"
@@ -66,7 +65,7 @@ func (r *Resolver) ResolveNow(opts resolver.ResolveNowOptions) {
 			ServerName: s.Service.Service,
 			Attributes: attrs,
 		})
-		alog.Printf("%s (%s:%d) %s", s.Service.Service, addr, s.Service.Port, attrs.String())
+		fmt.Printf("consul resolve %s (%s:%d) %s\n", s.Service.Service, addr, s.Service.Port, attrs.String())
 	}
 
 	r.cc.UpdateState(resolver.State{

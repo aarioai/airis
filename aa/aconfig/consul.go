@@ -63,10 +63,12 @@ func (c *Config) RegisterGRPCService(serviceName, serviceID, address, checkAddr 
 		return fmt.Errorf("failed to register service: %w", err)
 	}
 	resolver.Register(consul.NewBuilder(client))
+	fmt.Printf("Registered service: %s ID %s (%s:%d)\n", serviceName, serviceID, address, port)
 	return nil
 }
 
 func (c *Config) DeregisterGRPCService(serviceID string) error {
+	fmt.Printf("Deregistering service: ID %s\n", serviceID)
 	return c.DefaultConsul().Agent().ServiceDeregister(serviceID)
 }
 
