@@ -42,11 +42,11 @@ func NewResolver(cc resolver.ClientConn, client *api.Client, serviceName string,
 func (r *Resolver) ResolveNow(opts resolver.ResolveNowOptions) {
 	services, _, err := r.client.Health().Service(r.serviceName, "", true, nil)
 	if err != nil {
-		r.cc.ReportError(fmt.Errorf("consul resolve health service (%s) failed: %v", r.serviceName, err))
+		r.cc.ReportError(fmt.Errorf("consul resolve health service (%s) failed: %v\n", r.serviceName, err))
 		return
 	}
 	if len(services) == 0 {
-		r.cc.ReportError(fmt.Errorf("consul resolve no health service (%s)", r.serviceName))
+		r.cc.ReportError(fmt.Errorf("consul resolve no health service (%s)\n", r.serviceName))
 		return
 	}
 
@@ -66,8 +66,6 @@ func (r *Resolver) ResolveNow(opts resolver.ResolveNowOptions) {
 			ServerName: s.Service.Service,
 			Attributes: attrs,
 		})
-
-		fmt.Printf("consul resolve %s (%s:%d) %s\n", s.Service.Service, addr, s.Service.Port, attrs.String())
 	}
 
 	err = r.cc.UpdateState(resolver.State{
@@ -75,7 +73,7 @@ func (r *Resolver) ResolveNow(opts resolver.ResolveNowOptions) {
 		ServiceConfig: r.cc.ParseServiceConfig(`{"loadBalancingConfig":[{"round_robin":{}}]}`),
 	})
 	if err != nil {
-		r.cc.ReportError(fmt.Errorf("consul update state failed: %v", err))
+		r.cc.ReportError(fmt.Errorf("consul update state failed: %v\n", err))
 	}
 }
 
