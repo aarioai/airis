@@ -2,6 +2,7 @@ package aconfig
 
 import (
 	"fmt"
+	"github.com/aarioai/airis/pkg/nets"
 	"github.com/hashicorp/consul/api"
 )
 
@@ -30,11 +31,11 @@ func (c *Config) DefaultConsul() *api.Client {
 }
 
 func normalizeAddress(addr string) string {
-	if addr == "" || addr == "0.0.0.0" {
+	if addr == "" || addr == "localhost" || addr == "0.0.0.0" || addr == "::" || addr == "[::]" {
+		if ip, err := nets.LanIP(); err == nil {
+			return ip
+		}
 		return "127.0.0.1"
-	}
-	if addr == "::" || addr == "[::]" {
-		return "[::1]"
 	}
 	return addr
 }

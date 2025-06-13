@@ -57,17 +57,17 @@ func LanIP() (string, error) {
 		return "", err
 	}
 
-	for _, iface := range interfaces {
+	for _, inf := range interfaces {
 		// Ignore loop back IP, 127.x.x.x
-		if iface.Flags&net.FlagLoopback != 0 || iface.Flags&net.FlagUp == 0 {
+		if inf.Flags&net.FlagLoopback != 0 || inf.Flags&net.FlagUp == 0 {
 			continue
 		}
 		// ignore Docker virtual network
-		if iface.Name == "docker0" || iface.Name == "br-" {
+		if inf.Name == "docker0" || inf.Name == "br-" {
 			continue
 		}
 
-		addrs, err := iface.Addrs()
+		addrs, err := inf.Addrs()
 		if err != nil {
 			continue
 		}
