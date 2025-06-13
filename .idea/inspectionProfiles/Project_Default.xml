@@ -29,6 +29,7 @@
         <method importPath="io" receiver="ReadCloser" name="Close" />
         <method importPath="github.com/kataras/iris/v12" receiver="*Context" name="Write" />
         <method importPath="database/sql" receiver="*NullString" name="Scan" />
+        <method importPath="google.golang.org/grpc/resolver" receiver="ClientConn" name="UpdateState" />
       </methods>
     </inspection_tool>
   </profile>

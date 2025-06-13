@@ -51,7 +51,6 @@ func (c *Config) RegisterGRPCService(serviceName, serviceID, address, checkAddr 
 		Name:    serviceName,
 		Port:    port,
 		Address: address,
-		Tags:    []string{"grpc"},
 		Check: &api.AgentServiceCheck{
 			GRPC:                           fmt.Sprintf("%s:%d", checkAddr, port),
 			Interval:                       "15s",

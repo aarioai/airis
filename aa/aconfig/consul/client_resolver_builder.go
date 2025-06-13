@@ -5,6 +5,8 @@ import (
 	"google.golang.org/grpc/resolver"
 )
 
+const Scheme = "consul"
+
 // Builder Interface: https://pkg.go.dev/google.golang.org/grpc/resolver#Builder
 
 type Builder struct {
@@ -30,5 +32,5 @@ func (b *Builder) Build(t resolver.Target, cc resolver.ClientConn, o resolver.Bu
 }
 
 func (b *Builder) Scheme() string {
-	return "consul"
+	return Scheme
 }
