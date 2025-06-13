@@ -7,19 +7,50 @@ import (
 	"net"
 )
 
-func (s *Service) Run(prof *debug.Profile) {
-	profile := prof.Fork("starting grpc server ({{APP_NAME}})")
-	port, err := s.app.Config.MustGetString("{{APP_NAME}}.grpc_port")
-	ae.PanicOnErrs(err)
-	listener, err := net.Listen("tcp", ":"+port)
-	ae.PanicOnErrs(err)
-	server := newServer()
+func (s *Service) Serve(prof *debug.Profile) {
+	prof.Fork("starting grpc server ({{APP_NAME}})")
+
+	listener, serviceID, err := s.listen()
+	if err != nil {
+		return nil, err
+	}
+	server := s.registerServer()
 
 	go func() {
 		<-s.app.GlobalContext.Done()
-		alog.Stopf("grpc server ({{APP_NAME}}:%s)", port)
-		server.Stop()
+		alog.Stopf("grpc server ({{APP_NAME}})")
+		s.app.Config.DeregisterGRPCService(serviceID)
+		server.GracefulStop()
 	}()
-	profile.Mark("grpc server ({{APP_NAME}}) listen: " + port)
-	ae.PanicOnErrs(server.Serve(listener))
+
+	go func() {
+		defer s.app.Config.DeregisterGRPCService(serviceID)
+		ae.PanicOnErrs(server.Serve(listener))
+	}()
+
+	return server, nil
+}
+
+func (s *Service) listen() (net.Listener, string, error) {
+	addr, err := s.app.Config.MustGetString("{{APP_NAME}}.grpc_addr")
+	if err != nil {
+		return nil, "", err
+	}
+
+    port, _ := types.ParseInt(s.app.Config.GetString("{{APP_NAME}}.grpc_port"))
+    if port <= 0 {
+        return nil, "", errors.New("missing or invalid config {{APP_NAME}}.grpc_port")
+    }
+
+    var listener net.Listener
+    listener, err = net.Listen("tcp", fmt.Sprintf("%s:%d", addr, port))
+    if err != nil {
+        return nil, "", err
+    }
+
+    serviceName := s.app.Config.GetString("{{APP_NAME}}.grpc_service_name", "{{APP_NAME}}")
+    serviceID := s.app.Config.GetString("{{APP_NAME}}.grpc_service_id", "{{APP_NAME}}-grpc")
+    s.app.Config.RegisterGRPCService(serviceName, serviceID, addr, port)
+
+    return listener, serviceID, nil
 }

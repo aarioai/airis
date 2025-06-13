@@ -5,6 +5,10 @@ import (
 	"github.com/aarioai/airis-driver/driver/mongodb"
 	"github.com/aarioai/airis/aa"
 	"{{APP_BASE}}/cache"
+    "{{APP_BASE}}/module/bs"
+    "{{APP_BASE}}/module/cms"
+    "{{APP_BASE}}/module/ss"
+    "{{APP_BASE}}/private"
 	"{{APP_BASE}}/service"
 	"sync"
 	"time"
@@ -16,6 +20,10 @@ type Service struct {
 	h     *cache.Cache
 	mongo *mongodb.Model
 	s     *service.Service
+    bs      *bs.Service
+    cms     *cms.Service
+    ss      *ss.Service
+    private *private.Service
 }
 
 var (
@@ -27,11 +35,15 @@ func New(app *aa.App) *Service {
 	svcOnce.Do(func() {
 		s := service.New(app)
 		svcObj = &Service{
-			app:   app,
-			loc:   app.Config.TimeLocation,
-			h:     s.Cache(),
-			mongo: s.Mongo(),
-			s:     s,
+			app:     app,
+			loc:     app.Config.TimeLocation,
+			h:       s.Cache(),
+			mongo:   s.Mongo(),
+			s:       s,
+			bs:      bs.New(app),
+			cms:     cms.New(app),
+			ss:      ss.New(app),
+			private: private.New(app),
 		}
 	})
 	return svcObj

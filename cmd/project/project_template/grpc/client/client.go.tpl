@@ -5,19 +5,22 @@ import (
 )
 
 func (s *Service) Run(prof *debug.Profile) {
-	//prof.Fork("staring grpc client ({{APP_NAME}})")
-	//time.Sleep(10 * time.Second)
+	prof.Fork("staring grpc client ({{APP_NAME}})")
+	//time.Sleep(5 * time.Second)
+	//
 	//addr := "localhost:8000"
-	//conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	//conn, err := grpc.NewClient(addr,
+	//	grpc.WithTransportCredentials(insecure.NewCredentials()),
+	//	grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"round_robin"}`),
+	//)
 	//if err != nil {
 	//	log.Fatalf("did not connect: %v", err)
 	//}
-	//fmt.Println(err)
 	//defer conn.Close()
 	//
 	//go func() {
 	//	<-s.app.GlobalContext.Done()
-	//	alog.Stopf("grpc client ({{APP_NAME}}:%s)", addr)
+	//	alog.Stopf("grpc client (infra:%s)", addr)
 	//	if conn != nil {
 	//		conn.Close()
 	//	}
@@ -26,7 +29,7 @@ func (s *Service) Run(prof *debug.Profile) {
 	//c := pb.NewHelloWorldClient(conn)
 	//
 	//for {
-	//	t := time.NewTicker(3*time.Second)
+	//	t := time.NewTicker(3 * time.Second)
 	//	defer t.Stop()
 	//	for range t.C {
 	//		ctx, cancel := context.WithTimeout(s.app.GlobalContext, 5*time.Second)

@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+func (s Sid) String() string {
+	return string(s)
+}
+
 func (s Sid) Nullable() NullableSid {
 	result := NullableSid{}
 	if s != "" {
