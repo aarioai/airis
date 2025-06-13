@@ -24,8 +24,8 @@ func NewBuilder(client *api.Client) resolver.Builder {
 // Build creates a new resolver for the given target.
 // grpc.NewClient calls Build synchronously, and fails if the returned error is not nil.
 func (b *Builder) Build(t resolver.Target, cc resolver.ClientConn, o resolver.BuildOptions) (resolver.Resolver, error) {
-	fmt.Printf("consul build %s\n", t.String())
 	serviceName := basic.Ter(t.Endpoint() != "", t.Endpoint(), t.URL.Host)
+	fmt.Printf("consul build %s => %s\n", t.String(), serviceName)
 	r := NewResolver(cc, b.client, serviceName, make(chan struct{}))
 	r.ResolveNow(defaultResolveNowOptions)
 	go r.Watch()

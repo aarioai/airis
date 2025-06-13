@@ -46,7 +46,7 @@ func (r *Resolver) ResolveNow(opts resolver.ResolveNowOptions) {
 		return
 	}
 	if len(services) == 0 {
-		r.cc.ReportError(fmt.Errorf("consul resolve no health service found for %s", r.serviceName))
+		r.cc.ReportError(fmt.Errorf("consul resolve no health service (%s)", r.serviceName))
 		return
 	}
 

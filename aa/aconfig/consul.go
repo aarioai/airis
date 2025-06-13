@@ -58,13 +58,9 @@ func (c *Config) RegisterGRPCService(serviceName, serviceID, address, checkAddr 
 	}
 	client := c.DefaultConsul()
 
+	fmt.Printf("registered service %s (%s:%d), ID %s, \n", serviceName, address, port, serviceID)
 	// Register self to consul, each service instance should register once
-	if err := client.Agent().ServiceRegister(&reg); err != nil {
-		return fmt.Errorf("failed to register service: %w", err)
-	}
-
-	fmt.Printf("register service: %s ID %s (%s:%d)\n", serviceName, serviceID, address, port)
-	return nil
+	return client.Agent().ServiceRegister(&reg)
 }
 
 func (c *Config) DeregisterGRPCService(serviceID string) error {
