@@ -14,21 +14,6 @@ import (
 	"syscall"
 )
 
-var (
-	sigs = make(chan os.Signal, 1)
-)
-
-func listenTerminateSignals(app *aa.App) {
-	// SIGINT: Ctrl + C; SIGTERM: shutdown or container stopped
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
-		sig := <-sigs
-		app.Log.Warnf(app.GlobalContext, "terminate signal: %d", sig)
-		app.GlobalCancel()
-		driver.CloseAllPools(nil)
-	}()
-}
-
 func InitApp(ctx acontext.Context, cancel context.CancelFunc, configPath string, selfTest bool, profile *debug.Profile) *aa.App {
 	profile = profile.Fork("init app openlab").WithLabel("boot")
 	cfg, err := aconfig.New(configPath, configValueProcessor)
@@ -45,7 +30,6 @@ func InitApp(ctx acontext.Context, cancel context.CancelFunc, configPath string,
 	}
 
 	register(app)
-	listenTerminateSignals(app)
 	return app
 }
 

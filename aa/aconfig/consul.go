@@ -48,8 +48,8 @@ func (c *Config) RegisterGRPCService(serviceName, serviceID, address string, por
 	resolver.Register(consul.NewBuilder(client))
 	return client.Agent().ServiceRegister(&reg)
 }
+
 func (c *Config) DeregisterGRPCService(serviceID string) error {
-	
 	return c.DefaultConsul().Agent().ServiceDeregister(serviceID)
 }
 
