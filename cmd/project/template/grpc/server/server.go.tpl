@@ -34,13 +34,8 @@ func (s *Service) Serve(prof *debug.Profile) {
 }
 
 func (s *Service) listen() (net.Listener, string, error) {
-	addr := s.app.Config.GetString("infra.grpc_addr", "0.0.0.0")
-	checkAddr := s.app.Config.GetString("infra.grpc_check_addr", addr)
-	if checkAddr == "" || checkAddr == "0.0.0.0" {
-		checkAddr = "127.0.0.1"
-	} else if checkAddr == "::" {
-		checkAddr = "::1"
-	}
+	addr := s.app.Config.GetString("{{APP_NAME}}.grpc_addr", "0.0.0.0")
+	checkAddr := s.app.Config.GetString("{{APP_NAME}}.grpc_check_addr", addr)
 
     port, _ := types.ParseInt(s.app.Config.GetString("{{APP_NAME}}.grpc_port"))
     if port <= 0 {
