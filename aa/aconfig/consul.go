@@ -5,7 +5,6 @@ import (
 	"github.com/aarioai/airis/aa/aconfig/consul"
 	"github.com/hashicorp/consul/api"
 	"google.golang.org/grpc/resolver"
-	"net"
 )
 
 func (c *Config) SetConsul(name string, client *api.Client) {
@@ -33,10 +32,10 @@ func (c *Config) DefaultConsul() *api.Client {
 }
 
 func normalizeAddress(addr string) string {
-	if addr == "" || addr == "0.0.0.0" || addr == "127.0.0.1" || addr == "::" || addr == "::1" || addr == "[::]" || addr == "[::1]" {
-		if _, err := net.ResolveIPAddr("ip6", "::1"); err != nil {
-			return "127.0.0.1"
-		}
+	if addr == "" || addr == "0.0.0.0" {
+		return "127.0.0.1"
+	}
+	if addr == "::" || addr == "[::]" {
 		return "[::1]"
 	}
 	return addr
