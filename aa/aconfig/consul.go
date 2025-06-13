@@ -31,14 +31,16 @@ func (c *Config) DefaultConsul() *api.Client {
 	return c.consulMap["DEFAULT"] // panic on doesn't exist
 }
 
-func (c *Config) RegisterGRPCService(serviceName, serviceID, address string, port int) error {
+// RegisterGRPCService
+// Note: sometimes in docker container, remote address may be different with check address
+func (c *Config) RegisterGRPCService(serviceName, serviceID, address, checkAddress string, port int) error {
 	reg := api.AgentServiceRegistration{
 		ID:      serviceID,
 		Name:    serviceName,
 		Port:    port,
 		Address: address,
 		Check: &api.AgentServiceCheck{
-			GRPC:                           fmt.Sprintf("%s:%d", address, port),
+			GRPC:                           fmt.Sprintf("%s:%d", checkAddress, port),
 			Interval:                       "10s",
 			Timeout:                        "5s",
 			DeregisterCriticalServiceAfter: "5m",
