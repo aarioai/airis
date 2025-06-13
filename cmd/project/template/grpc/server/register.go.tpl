@@ -4,6 +4,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/reflection"
 	"{{APP_BASE}}/grpc/server/helloworld"
 	"{{APP_BASE}}/grpc/server/pb"
 )
@@ -18,5 +19,9 @@ func (s *Service) registerServer() *grpc.Server {
     grpc_health_v1.RegisterHealthServer(serve, healthServer)
     healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
 
+    // Enable `grpcurl -plaintext localhost:50000 list` to list all services and methods
+    if s.app.Config.Env.BeforeDevelopment() {
+        reflection.Register(server)
+    }
     return serve
 }

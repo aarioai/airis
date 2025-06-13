@@ -2,9 +2,7 @@ package aconfig
 
 import (
 	"fmt"
-	"github.com/aarioai/airis/aa/aconfig/consul"
 	"github.com/hashicorp/consul/api"
-	"google.golang.org/grpc/resolver"
 )
 
 func (c *Config) SetConsul(name string, client *api.Client) {
@@ -59,16 +57,18 @@ func (c *Config) RegisterGRPCService(serviceName, serviceID, address, checkAddr 
 		},
 	}
 	client := c.DefaultConsul()
+
+	// Register self to consul, each service instance should register once
 	if err := client.Agent().ServiceRegister(&reg); err != nil {
 		return fmt.Errorf("failed to register service: %w", err)
 	}
-	resolver.Register(consul.NewBuilder(client))
-	fmt.Printf("Registered service: %s ID %s (%s:%d)\n", serviceName, serviceID, address, port)
+
+	fmt.Printf("register service: %s ID %s (%s:%d)\n", serviceName, serviceID, address, port)
 	return nil
 }
 
 func (c *Config) DeregisterGRPCService(serviceID string) error {
-	fmt.Printf("Deregistering service: ID %s\n", serviceID)
+	fmt.Printf("deregister service: ID %s\n", serviceID)
 	return c.DefaultConsul().Agent().ServiceDeregister(serviceID)
 }
 

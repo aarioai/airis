@@ -23,22 +23,20 @@ type Resolver struct {
 	cc           resolver.ClientConn
 	client       *api.Client
 	serviceName  string
-	lastIndex    uint64
 	closeChannel chan struct{}
 }
 
-func NewResolver(cc resolver.ClientConn, client *api.Client, serviceName string, lastIndex uint64, closeChannel chan struct{}) *Resolver {
+func NewResolver(cc resolver.ClientConn, client *api.Client, serviceName string, closeChannel chan struct{}) *Resolver {
 	return &Resolver{
 		cc:           cc,
 		client:       client,
 		serviceName:  serviceName,
-		lastIndex:    lastIndex,
 		closeChannel: closeChannel,
 	}
 }
 
 func (r *Resolver) ResolveNow(opts resolver.ResolveNowOptions) {
-	services, meta, err := r.client.Health().Service(r.serviceName, "", true, &api.QueryOptions{WaitIndex: r.lastIndex})
+	services, _, err := r.client.Health().Service(r.serviceName, "", true, nil)
 	if err != nil {
 		r.cc.ReportError(fmt.Errorf("consul resolve health service (%s) failed: %v", r.serviceName, err))
 		return
@@ -48,7 +46,6 @@ func (r *Resolver) ResolveNow(opts resolver.ResolveNowOptions) {
 		return
 	}
 
-	r.lastIndex = meta.LastIndex
 	var addrs []resolver.Address
 	for _, s := range services {
 		addr := s.Service.Address
