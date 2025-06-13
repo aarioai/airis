@@ -2,6 +2,7 @@ package consul
 
 import (
 	"fmt"
+	"github.com/aarioai/airis/pkg/basic"
 	"github.com/hashicorp/consul/api"
 	"google.golang.org/grpc/resolver"
 )
@@ -24,7 +25,8 @@ func NewBuilder(client *api.Client) resolver.Builder {
 // grpc.NewClient calls Build synchronously, and fails if the returned error is not nil.
 func (b *Builder) Build(t resolver.Target, cc resolver.ClientConn, o resolver.BuildOptions) (resolver.Resolver, error) {
 	fmt.Printf("consul build %s\n", t.String())
-	r := NewResolver(cc, b.client, t.Endpoint(), make(chan struct{}))
+	serviceName := basic.Ter(t.Endpoint() != "", t.Endpoint(), t.URL.Host)
+	r := NewResolver(cc, b.client, serviceName, make(chan struct{}))
 	r.ResolveNow(defaultResolveNowOptions)
 	go r.Watch()
 	return r, nil
