@@ -57,7 +57,7 @@ func (r *Resolver) ResolveNow(opts resolver.ResolveNowOptions) {
 			addr = s.Node.Address
 		}
 		attrs := attributes.New("consul.service.id", s.Service.ID).
-			WithValue("consul.service.meta", s.Service.Meta).
+			WithValue("consul.service.meta", &s.Service.Meta).
 			WithValue("consul.node.id", s.Node.ID).
 			WithValue("consul.node.name", s.Node.Node)
 
@@ -66,6 +66,7 @@ func (r *Resolver) ResolveNow(opts resolver.ResolveNowOptions) {
 			ServerName: s.Service.Service,
 			Attributes: attrs,
 		})
+
 		fmt.Printf("consul resolve %s (%s:%d) %s\n", s.Service.Service, addr, s.Service.Port, attrs.String())
 	}
 
