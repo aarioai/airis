@@ -35,13 +35,13 @@ func (s *Service) Serve(prof *debug.Profile) {
 
 func (s *Service) listen() (net.Listener, string, error) {
 	addr := s.app.Config.GetString("{{APP_NAME}}.grpc_addr", "0.0.0.0")
-	checkAddr := s.app.Config.GetString("{{APP_NAME}}.grpc_check_addr", addr)
+	registerAddr := s.app.Config.GetString("{{APP_NAME}}.grpc_register_addr", "127.0.0.1")
+    checkAddr := s.app.Config.GetString("{{APP_NAME}}.grpc_check_addr", registerAddr)
 
     port, _ := types.ParseInt(s.app.Config.GetString("{{APP_NAME}}.grpc_port"))
     if port <= 0 {
         return nil, "", errors.New("missing or invalid config {{APP_NAME}}.grpc_port")
     }
-
 	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%d", addr, port))
     if err != nil {
         return nil, "", err
@@ -49,7 +49,7 @@ func (s *Service) listen() (net.Listener, string, error) {
 
     serviceName := s.app.Config.GetString("{{APP_NAME}}.grpc_service_name", "{{APP_NAME}}")
     serviceID := s.app.Config.GetString("{{APP_NAME}}.grpc_service_id", "{{APP_NAME}}-grpc")
-    err = s.app.Config.RegisterGRPCService(serviceName, serviceID, addr, checkAddr, port)
+    err = s.app.Config.RegisterGRPCService(serviceName, serviceID, registerAddr, checkAddr, port)
 
     return listener, serviceID, err
 }
