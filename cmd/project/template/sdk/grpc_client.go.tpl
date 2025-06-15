@@ -1,4 +1,4 @@
-package client
+package {{APP_NAME}}
 
 import (
 	"context"
@@ -13,9 +13,9 @@ import (
 )
 
 func (s *Service) Conn() (*grpc.ClientConn, string, *ae.Error) {
-	s.mu.RLock()
+	s.mtx.RLock()
 	conn, target := s.conn, s.target
-	s.mu.RUnlock()
+	s.mtx.RUnlock()
 
 	if s.conn != nil {
 		switch conn.GetState() {
@@ -36,8 +36,8 @@ func (s *Service) Conn() (*grpc.ClientConn, string, *ae.Error) {
 		}
 	}
 
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	s.mtx.Lock()
+	defer s.mtx.Unlock()
 
 	// Double-check in case another goroutine already recreated the connection
 	if s.conn != nil && s.conn.GetState() == connectivity.Ready {
@@ -86,8 +86,8 @@ func (s *Service) watchTerminate() {
 	// Wait for application shutdown, including SIGINT, SIGTERM
 	<-s.app.GlobalContext.Done()
 
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	s.mtx.Lock()
+	defer s.mtx.Unlock()
 
 	alog.Stopf("grpc client ({{APP_NAME}}: %s)", s.target)
 	if s.conn != nil {

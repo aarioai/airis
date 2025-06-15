@@ -302,18 +302,22 @@ createGRPCServer(){
     local app_root="$2"
     local app_base="$3"
     local app_name="$4"
-    mkdir -p "${app_root}/grpc/server/helloworld"
-    createCommonServiceFile "${app_root}/grpc/server" "$app_base"
+    mkdir -p "${app_root}/grpc/helloworld"
+    createCommonServiceFile "${app_root}/grpc" "$app_base"
 
+    local need_helloworld=1
+    if [ -f "${app_root}/grpc/server.go" ] && [ -f "${app_root}/grpc/register.go" ]; then
+        need_helloworld=0
+    fi
 
-    local template="${CUR}/template/grpc/server/server.go.tpl"
-    local dst="${app_root}/grpc/server/server.go"
+    local template="${CUR}/template/grpc/server.go.tpl"
+    local dst="${app_root}/grpc/server.go"
     if [ ! -f "$dst" ]; then
         sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
     fi
 
-    local template="${CUR}/template/grpc/server/register.go.tpl"
-    local dst="${app_root}/grpc/server/register.go"
+    local template="${CUR}/template/grpc/register.go.tpl"
+    local dst="${app_root}/grpc/register.go"
     if [ ! -f "$dst" ]; then
         sed -e "s#{{APP_BASE}}#${app_base}#g"           \
             -e "s#{{APP_NAME}}#${app_name}#g"           \
@@ -321,27 +325,13 @@ createGRPCServer(){
             "$template" > "$dst"
     fi
 
-    local template="${CUR}/template/grpc/server/helloworld/helloworld.go.tpl"
-    local dst="${app_root}/grpc/server/helloworld/helloworld.go"
-    if [ ! -f "$dst" ]; then
+    local template="${CUR}/template/grpc/helloworld/helloworld.go.tpl"
+    local dst="${app_root}/grpc/helloworld/helloworld.go"
+    if [ "$need_helloworld" -eq 1 ]; then
         sed -e "s#{{APP_BASE}}#${app_base}#g"           \
             -e "s#{{APP_NAME}}#${app_name}#g"           \
             -e "s#{{PROJECT_BASE}}#${project_base}#g"   \
             "$template" > "$dst"
-    fi
-}
-
-createGRPCClient(){
-    local app_root="$1"
-    local app_base="$2"
-    local app_name="$3"
-    mkdir -p "${app_root}/grpc/client"
-    createCommonServiceFile "${app_root}/grpc/client" "$app_base"
-
-    local template="${CUR}/template/grpc/client/client.go.tpl"
-    local dst="${app_root}/grpc/client/client.go"
-    if [ ! -f "$dst" ]; then
-        sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
     fi
 }
 
@@ -358,9 +348,13 @@ createProto(){
 createGRPCSDK(){
     local project_root="$1"
     local app_name="$2"
-    mkdir -p "${project_root}/sdk/${app_name}"
+    mkdir -p "${project_root}/sdk/${app_name}/dto"
 
-    cp -f "${CUR}/template/sdk/service.go.tpl" "${project_root}/sdk/${app_name}/service.go"
+    local template="${CUR}/template/sdk/service.go.tpl"
+    local dst="${project_root}/sdk/${app_name}/service.go"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+    fi
 
     local template="${CUR}/template/sdk/grpc_client.go.tpl"
     local dst="${project_root}/sdk/${app_name}/grpc_client.go"
@@ -378,7 +372,6 @@ createGRPC(){
 
     cp -f "${CUR}/template/grpc/README.md" "${app_root}/grpc/README.md"
     createGRPCServer "$project_base" "$app_root" "$app_base" "$app_name"
-    createGRPCClient "$app_root" "$app_base" "$app_name"
     createProto "$project_root" "$app_name"
     createGRPCSDK "$project_root" "$app_name"
 }

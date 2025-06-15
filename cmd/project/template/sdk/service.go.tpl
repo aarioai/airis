@@ -1,4 +1,4 @@
-package client
+package {{APP_NAME}}
 
 import (
 	"github.com/aarioai/airis/aa"
@@ -10,7 +10,7 @@ import (
 type Service struct {
 	app    *aa.App
 	loc    *time.Location
-	mu     sync.RWMutex
+	mtx     sync.RWMutex
 	conn   *grpc.ClientConn
 	target string
 }

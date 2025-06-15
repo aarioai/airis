@@ -5,7 +5,7 @@ import (
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
-	"{{APP_BASE}}/grpc/server/helloworld"
+	"{{APP_BASE}}/grpc/helloworld"
 	"{{PROJECT_BASE}}/proto/{{APP_NAME}}/pb"
 )
 
