@@ -19,8 +19,9 @@ readonly GLOBAL_DIRS=(
     frontend/dst            \
     maintain/repair         \
     maintain/tests          \
+    proto                   \
     router/middleware       \
-    sdk                     \
+
 
 )
 readonly APP_GLOBAL_DIRS=(
@@ -54,8 +55,9 @@ createMainGo(){
     local project_root="$1"
     local template="${CUR}/template/main.go.tpl"
     local dst="${project_root}/main.go"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{ROOT}}#${project_root}#g"  "$template" > "$dst"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{ROOT}}#${project_root}#g"  "$template" > "$dst"
+    fi
 }
 
 createDirs(){
@@ -72,16 +74,18 @@ createBaseConfFile(){
     local app_name="$2"
     local template="${CUR}/template/conf_base.go.tpl"
     local dst="${app_root}/conf/base.go"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_NAME}}#${app_name}#g"  "$template" > "$dst"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{APP_NAME}}#${app_name}#g"  "$template" > "$dst"
+    fi
 }
 
 createMiddlewareFile(){
     local project_root="$1"
     local demo="${CUR}/template/router_middleware.go.tpl"
     local dst="${project_root}/router/middleware/middleware.go"
-    [ ! -f "$dst" ] || return 0
-    cp "$demo" "$dst"
+    if [ ! -f "$dst" ]; then
+        cp "$demo" "$dst"
+    fi
 }
 
 
@@ -90,16 +94,18 @@ createRouterFile(){
     local app_name="$2"
     local demo="${CUR}/template/router.go.tpl"
     local dst="${project_root}/router/router.go"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+    fi
 }
 
 createRouterEngineFile(){
     local project_root="$1"
     local demo="${CUR}/template/router_engine.go.tpl"
     local dst="${project_root}/router/engine.go"
-    [ ! -f "$dst" ] || return 0
-    cp "$demo" "$dst"
+    if [ ! -f "$dst" ]; then
+        cp "$demo" "$dst"
+    fi
 }
 
 createCacheFile(){
@@ -107,8 +113,9 @@ createCacheFile(){
     local app_base="$2"
     local template="${CUR}/template/cache.go.tpl"
     local dst="${app_root}/cache/cache.go"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
+    fi
 }
 
 createModuleServiceFile(){
@@ -118,8 +125,9 @@ createModuleServiceFile(){
     local module_dir="$4"
     local template="${CUR}/template/module_service.go.tpl"
     local dst="${module_dir}/service.go"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_BASE}}#${app_base}#g" -e "s#{{MODULE_NAME}}#${module}#g" "$template" > "$dst"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{APP_BASE}}#${app_base}#g" -e "s#{{MODULE_NAME}}#${module}#g" "$template" > "$dst"
+    fi
 }
 
 createModuleModelFile(){
@@ -127,8 +135,9 @@ createModuleModelFile(){
     local model_dir="$2"
     local template="${CUR}/template/model.go.tpl"
     local dst="${model_dir}/model.go"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
+    fi
 }
 createModuleControllerFile(){
     local app_base="$1"
@@ -136,8 +145,9 @@ createModuleControllerFile(){
     local ctrl_dir="$3"
     local template="${CUR}/template/controller.go.tpl"
     local dst="${ctrl_dir}/controller.go"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_BASE}}#${app_base}#g"  -e "s#{{MODULE_NAME}}#${module}#g" "$template" > "$dst"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{APP_BASE}}#${app_base}#g"  -e "s#{{MODULE_NAME}}#${module}#g" "$template" > "$dst"
+    fi
 }
 
 createModules(){
@@ -167,8 +177,9 @@ createBaseServiceFile(){
     local pkg=${dir##*/}
     local template="${CUR}/template/base_service.go.tpl"
     local dst="${dir}/service.go"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{PACKAGE_NAME}}#${pkg}#g" -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{PACKAGE_NAME}}#${pkg}#g" -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
+    fi
 }
 
 
@@ -178,8 +189,9 @@ createServiceFile(){
     local app_base="$2"
     local template="${CUR}/template/service.go.tpl"
     local dst="${app_root}/service/service.go"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
+    fi
 }
 
 
@@ -189,8 +201,9 @@ createJobInitFile(){
     local app_name="$2"
     local template="${CUR}/template/job_init.go.tpl"
     local dst="${app_root}/job/init.go"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+    fi
 }
 
 createJobInitMongodbFile(){
@@ -198,8 +211,9 @@ createJobInitMongodbFile(){
     local app_base="$2"
     local template="${CUR}/template/job_init_mongodb.go.tpl"
     local dst="${app_root}/job/init_mongodb.go"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
+    fi
 }
 
 
@@ -209,8 +223,9 @@ createCommonServiceFile(){
     local pkg=${dir##*/}
     local template="${CUR}/template/common_service.go.tpl"
     local dst="${dir}/service.go"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{PACKAGE_NAME}}#${pkg}#g" -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{PACKAGE_NAME}}#${pkg}#g" -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
+    fi
 }
 
 createConfigFile(){
@@ -219,8 +234,9 @@ createConfigFile(){
     mkdir -p "${project_root}/config"
     local template="${CUR}/template/app-local.ini.tpl"
     local dst="${project_root}/config/app-local.ini"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+    fi
 }
 
 createBootFiles(){
@@ -231,26 +247,30 @@ createBootFiles(){
     # boot/boot.go
     local template="${CUR}/template/boot.go.tpl"
     local dst="${project_root}/boot/boot.go"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+    fi
 
     # boot/init.go
     local template="${CUR}/template/boot_init.go.tpl"
     local dst="${project_root}/boot/init.go"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+    fi
 
     # boot/register.go
     template="${CUR}/template/boot_register.go.tpl"
     dst="${project_root}/boot/register.go"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+    fi
 
     # boot/tests/go
     template="${CUR}/template/boot_tests.go.tpl"
     dst="${project_root}/boot/tests.go"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+    fi
 }
 
 createStorage(){
@@ -279,68 +299,91 @@ createJob(){
 }
 
 createGRPCServer(){
-    local app_root="$1"
-    local app_base="$2"
-    local app_name="$3"
+    local project_root="$1"
+    local app_root="$2"
+    local app_base="$3"
+    local app_name="$4"
     mkdir -p "${app_root}/grpc/server/helloworld"
-    mkdir -p "${app_root}/grpc/server/pb"
     createCommonServiceFile "${app_root}/grpc/server" "$app_base"
-    cp -f "${CUR}/template/grpc/server/helloworld/helloworld.proto" "${app_root}/grpc/server/helloworld/helloworld.proto"
-    cp -f "${CUR}/template/grpc/server/pb/helloworld.pb.go.tpl" "${app_root}/grpc/server/pb/helloworld.pb.go"
-    cp -f "${CUR}/template/grpc/server/pb/helloworld_grpc.pb.go.tpl" "${app_root}/grpc/server/pb/helloworld_grpc.pb.go"
+
 
     local template="${CUR}/template/grpc/server/server.go.tpl"
     local dst="${app_root}/grpc/server/server.go"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+    fi
 
     local template="${CUR}/template/grpc/server/register.go.tpl"
     local dst="${app_root}/grpc/server/register.go"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{APP_BASE}}#${app_base}#g"           \
+            -e "s#{{APP_NAME}}#${app_name}#g"           \
+            -e "s#{{PROJECT_ROOT}}#${project_root}#g"   \
+            "$template" > "$dst"
+    fi
 
     local template="${CUR}/template/grpc/server/helloworld/helloworld.go.tpl"
     local dst="${app_root}/grpc/server/helloworld/helloworld.go"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{APP_BASE}}#${app_base}#g"           \
+            -e "s#{{APP_NAME}}#${app_name}#g"           \
+            -e "s#{{PROJECT_ROOT}}#${project_root}#g"   \
+            "$template" > "$dst"
+    fi
 }
 
 createGRPCClient(){
-    local app_root="$1"
-    local app_base="$2"
-    local app_name="$3"
+    local project_root="$1"
+    local app_root="$2"
+    local app_base="$3"
+    local app_name="$4"
     mkdir -p "${app_root}/grpc/client/pb"
     createCommonServiceFile "${app_root}/grpc/client" "$app_base"
 
     local template="${CUR}/template/grpc/client/client.go.tpl"
     local dst="${app_root}/grpc/client/client.go"
-    [ ! -f "$dst" ] || return 0
-    sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+    fi
+}
+
+createProto(){
+    local project_root="$1"
+    local app_name="$2"
+    mkdir -p "${project_root}/proto/${app_name}/pb"
+
+    cp -f "${CUR}/template/proto/helloworld.proto" "${project_root}/proto/${app_name}/helloworld.proto"
+    cp -f "${CUR}/template/proto/pb/helloworld.pb.go.tpl" "${project_root}/proto/${app_name}/pb/helloworld.pb.go"
+    cp -f "${CUR}/template/proto/pb/helloworld_grpc.pb.go.tpl" "${project_root}/proto/${app_name}/pb/helloworld_grpc.pb.go"
 }
 
 createGRPC(){
-    local app_root="$1"
-    local app_base="$2"
-    local app_name="$3"
+    local project_root="$1"
+    local app_root="$2"
+    local app_base="$3"
+    local app_name="$4"
 
     cp -f "${CUR}/template/grpc/README.md" "${app_root}/grpc/README.md"
-    createGRPCServer "$app_root" "$app_base" "$app_name"
-    createGRPCClient "$app_root" "$app_base" "$app_name"
+    createGRPCServer "$project_root" "$app_root" "$app_base" "$app_name"
+    createGRPCClient "$project_root" "$app_root" "$app_base" "$app_name"
+    createProto "$project_root" "$app_name"
 }
+
+
 
 main(){
     [ $# -ge 2 ] || e_usage "$0 <project root> <app name> [<module>...]${LF}Example: $0 test_app"
 
-    local project_root="$1"
+    local project_root="$1"  # path
     local app_name="$2"
     shift 2
     local project_name="${project_root##*/}"
-    local project_base="project/${project_name}"
+    local project_base="project/${project_name}"  # for package import
 
     createDirs "$project_root" "${GLOBAL_DIRS[@]}"
 
-    local app_root="${project_root}/app/${app_name}"
-    local app_base="${project_base}/app/${app_name}"
+    local app_root="${project_root}/app/${app_name}"    # for path
+    local app_base="${project_base}/app/${app_name}"    # for package import
     mkdir -p "$app_root"
     createDirs "$app_root" "${APP_GLOBAL_DIRS[@]}"
 
@@ -353,7 +396,7 @@ main(){
     createModules "$app_root" "$app_base" "$@"
     createBaseServiceFile "${app_root}/private" "$app_base"
     createServiceFile "$app_root" "$app_base"
-    createGRPC "$app_root" "$app_base" "$app_name"
+    createGRPC "$project_root" "$app_root" "$app_base" "$app_name"
     createJob "$app_root" "$app_base" "$app_name"
     createConfigFile "$project_root" "$app_name"
     createBootFiles "$project_root" "$app_name"

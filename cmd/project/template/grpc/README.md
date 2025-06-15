@@ -2,7 +2,7 @@
 
 https://grpc.io/docs/languages/go/quickstart/
 
-``shell 
+``shell
 # 1. Install protobuf. See https://protobuf.dev/installation/
 apt install -y protobuf-compiler
 protoc --version
@@ -12,9 +12,9 @@ go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
 # 3. Write proto file and build
-cd grpc/server/helloworld
-protoc --go_out=../pb --go_opt=paths=source_relative    \
---go-grpc_out=../pb --go-grpc_opt=paths=source_relative \
+cd sdk/<app>
+protoc --go_out=./pb --go_opt=paths=source_relative    \
+--go-grpc_out=./pb --go-grpc_opt=paths=source_relative \
 ./helloworld.proto
 
 # 4. Write helloworld.go to implement proto

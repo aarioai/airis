@@ -3,7 +3,7 @@ package helloworld
 import (
 	"context"
 	"log"
-	"{{APP_BASE}}/grpc/server/pb"
+	"{{PROJECT_ROOT}}/proto/{{APP_NAME}}/pb"
 	"{{APP_BASE}}/service"
 )
 

@@ -6,7 +6,7 @@ import (
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 	"{{APP_BASE}}/grpc/server/helloworld"
-	"{{APP_BASE}}/grpc/server/pb"
+	"{{PROJECT_ROOT}}/proto/{{APP_NAME}}/pb"
 )
 
 func (s *Service) registerServer() *grpc.Server {
