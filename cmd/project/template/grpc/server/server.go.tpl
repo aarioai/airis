@@ -1,6 +1,8 @@
 package server
 
 import (
+	"errors"
+	"fmt"
 	"github.com/aarioai/airis/aa/ae"
 	"github.com/aarioai/airis/aa/alog"
 	"github.com/aarioai/airis/aa/helpers/debug"
@@ -9,12 +11,12 @@ import (
 	"net"
 )
 
-func (s *Service) Serve(prof *debug.Profile) {
+func (s *Service) Serve(prof *debug.Profile) (*grpc.Server, string, error) {
 	prof.Fork("starting grpc server ({{APP_NAME}})")
 
 	listener, serviceID, err := s.listen()
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	server := s.registerServer()
 
@@ -30,7 +32,7 @@ func (s *Service) Serve(prof *debug.Profile) {
 		ae.PanicOnErrs(server.Serve(listener))
 	}()
 
-	return server, nil
+	return server, serviceID, nil
 }
 
 func (s *Service) listen() (net.Listener, string, error) {

@@ -3,8 +3,8 @@ package helloworld
 import (
 	"context"
 	"log"
-	"{{PROJECT_ROOT}}/proto/{{APP_NAME}}/pb"
 	"{{APP_BASE}}/service"
+	"{{PROJECT_ROOT}}/proto/{{APP_NAME}}/pb"
 )
 
 type HelloWorld struct {

@@ -299,7 +299,7 @@ createJob(){
 }
 
 createGRPCServer(){
-    local project_root="$1"
+    local project_base="$1"
     local app_root="$2"
     local app_base="$3"
     local app_name="$4"
@@ -318,7 +318,7 @@ createGRPCServer(){
     if [ ! -f "$dst" ]; then
         sed -e "s#{{APP_BASE}}#${app_base}#g"           \
             -e "s#{{APP_NAME}}#${app_name}#g"           \
-            -e "s#{{PROJECT_ROOT}}#${project_root}#g"   \
+            -e "s#{{PROJECT_BASE}}#${project_base}#g"   \
             "$template" > "$dst"
     fi
 
@@ -333,11 +333,10 @@ createGRPCServer(){
 }
 
 createGRPCClient(){
-    local project_root="$1"
-    local app_root="$2"
-    local app_base="$3"
-    local app_name="$4"
-    mkdir -p "${app_root}/grpc/client/pb"
+    local app_root="$1"
+    local app_base="$2"
+    local app_name="$3"
+    mkdir -p "${app_root}/grpc/client"
     createCommonServiceFile "${app_root}/grpc/client" "$app_base"
 
     local template="${CUR}/template/grpc/client/client.go.tpl"
@@ -359,13 +358,14 @@ createProto(){
 
 createGRPC(){
     local project_root="$1"
-    local app_root="$2"
-    local app_base="$3"
-    local app_name="$4"
+    local project_base="$2"
+    local app_root="$3"
+    local app_base="$4"
+    local app_name="$5"
 
     cp -f "${CUR}/template/grpc/README.md" "${app_root}/grpc/README.md"
-    createGRPCServer "$project_root" "$app_root" "$app_base" "$app_name"
-    createGRPCClient "$project_root" "$app_root" "$app_base" "$app_name"
+    createGRPCServer "$project_base" "$app_root" "$app_base" "$app_name"
+    createGRPCClient "$app_root" "$app_base" "$app_name"
     createProto "$project_root" "$app_name"
 }
 
@@ -396,7 +396,7 @@ main(){
     createModules "$app_root" "$app_base" "$@"
     createBaseServiceFile "${app_root}/private" "$app_base"
     createServiceFile "$app_root" "$app_base"
-    createGRPC "$project_root" "$app_root" "$app_base" "$app_name"
+    createGRPC "$project_root" "$project_base" "$app_root" "$app_base" "$app_name"
     createJob "$app_root" "$app_base" "$app_name"
     createConfigFile "$project_root" "$app_name"
     createBootFiles "$project_root" "$app_name"
