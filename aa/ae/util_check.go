@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/aarioai/airis/pkg/utils"
+	"strings"
 	"time"
 )
 
@@ -59,4 +60,15 @@ func StopOnFirstError(callables ...func() error) error {
 		}
 	}
 	return nil
+}
+
+func Wrap(head string, err error, tails ...string) error {
+	if err == nil {
+		return nil
+	}
+	tail := ""
+	if len(tails) > 0 {
+		tail = " " + strings.Join(tails, " ")
+	}
+	return errors.New(head + " " + err.Error() + tail)
 }

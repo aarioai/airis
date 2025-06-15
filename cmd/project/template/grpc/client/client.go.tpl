@@ -5,27 +5,8 @@ import (
 )
 
 func (s *Service) Run(prof *debug.Profile) {
-	prof.Fork("staring grpc client ({{APP_NAME}})")
-	//time.Sleep(5 * time.Second)
-	//
-	//addr := "localhost:8000"
-	//conn, err := grpc.NewClient(addr,
-	//	grpc.WithTransportCredentials(insecure.NewCredentials()),
-	//	grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"round_robin"}`),
-	//)
-	//if err != nil {
-	//	log.Fatalf("did not connect: %v", err)
-	//}
-	//defer conn.Close()
-	//
-	//go func() {
-	//	<-s.app.GlobalContext.Done()
-	//	alog.Stopf("grpc client (infra:%s)", addr)
-	//	if conn != nil {
-	//		conn.Close()
-	//	}
-	//}()
-	//
+	//conn, _, err := helloworldsdk.New(s.app).Conn()
+	//ae.PanicOnErrs(err)
 	//c := pb.NewHelloWorldClient(conn)
 	//
 	//for {

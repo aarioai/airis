@@ -21,8 +21,7 @@ readonly GLOBAL_DIRS=(
     maintain/tests          \
     proto                   \
     router/middleware       \
-
-
+    sdk
 )
 readonly APP_GLOBAL_DIRS=(
     bo                  \
@@ -46,8 +45,8 @@ readonly COMMON_MODULES=(
     task
 )
 readonly MODULE_DIRS=(
-    controller
-    dto
+    controller          \
+    dto                 \
     model
 )
 
@@ -356,6 +355,20 @@ createProto(){
     cp -f "${CUR}/template/proto/pb/helloworld_grpc.pb.go.tpl" "${project_root}/proto/${app_name}/pb/helloworld_grpc.pb.go"
 }
 
+createGRPCSDK(){
+    local project_root="$1"
+    local app_name="$2"
+    mkdir -p "${project_root}/sdk/${app_name}"
+
+    cp -f "${CUR}/template/sdk/service.go.tpl" "${project_root}/sdk/${app_name}/service.go"
+
+    local template="${CUR}/template/sdk/grpc_client.go.tpl"
+    local dst="${project_root}/sdk/${app_name}/grpc_client.go"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+    fi
+}
+
 createGRPC(){
     local project_root="$1"
     local project_base="$2"
@@ -367,6 +380,7 @@ createGRPC(){
     createGRPCServer "$project_base" "$app_root" "$app_base" "$app_name"
     createGRPCClient "$app_root" "$app_base" "$app_name"
     createProto "$project_root" "$app_name"
+    createGRPCSDK "$project_root" "$app_name"
 }
 
 
