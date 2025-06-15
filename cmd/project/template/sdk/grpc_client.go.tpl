@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func (s *Service) Conn() (*grpc.ClientConn, string, error) {
+func (s *Service) Conn() (*grpc.ClientConn, string, *ae.Error) {
 	s.mu.RLock()
 	conn, target := s.conn, s.target
 	s.mu.RUnlock()
@@ -44,14 +44,14 @@ func (s *Service) Conn() (*grpc.ClientConn, string, error) {
 		return s.conn, s.target, nil
 	}
 
-	if err := s.initGRPCClient(); err != nil {
-		return nil, "", err
+    if e := s.initGRPCClient(); e != nil {
+		return nil, "", e
 	}
 
 	return s.conn, s.target, nil
 }
 
-func (s *Service) initGRPCClient() error {
+func (s *Service) initGRPCClient() *ae.Error {
 	serviceName := s.app.Config.GetString("{{APP_NAME}}.grpc_service_name", "{{APP_NAME}}")
 	addr := consul.Scheme + ":///" + serviceName
 
@@ -69,7 +69,7 @@ func (s *Service) initGRPCClient() error {
 		}),
 	)
 	if err != nil {
-		return ae.Wrap("failed to create gRPC client for "+addr, err)
+		return ae.NewF(ae.GatewayTimeout, "failed to create gRPC client for %s: %v", addr, err.Error())
 	}
 	s.conn = conn
 	s.target = addr
@@ -78,7 +78,7 @@ func (s *Service) initGRPCClient() error {
 
 func (s *Service) Init(prof *debug.Profile) {
 	prof.Fork("staring grpc client ({{APP_NAME}})")
-	ae.PanicOnErrs(s.initGRPCClient())
+	ae.PanicOn(s.initGRPCClient())
 	go s.watchTerminate()
 }
 

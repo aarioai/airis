@@ -45,7 +45,7 @@ func ErrInvalid(value any, name ...string) error {
 }
 
 func ErrorInvalid(value any, name ...string) *Error {
-	return NewF("invalid input %s", packArg(value, name))
+	return NewErrorf("invalid input %s", packArg(value, name))
 }
 func packArg(value any, name []string) string {
 	var s string

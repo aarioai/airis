@@ -35,6 +35,10 @@ func New(code int, message ...any) *Error {
 	return e
 }
 
+func NewF(code int, format string, args ...any) *Error {
+	return New(code, fmt.Sprintf(format, args...))
+}
+
 func NewError(msg string) *Error {
 	return &Error{
 		Code:   InternalServerError,
@@ -43,7 +47,7 @@ func NewError(msg string) *Error {
 	}
 }
 
-func NewF(format string, args ...any) *Error {
+func NewErrorf(format string, args ...any) *Error {
 	return &Error{
 		Code:   InternalServerError,
 		Msg:    fmt.Sprintf(format, args...),
