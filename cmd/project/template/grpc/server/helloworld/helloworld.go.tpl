@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 	"{{APP_BASE}}/service"
-	"{{PROJECT_ROOT}}/proto/{{APP_NAME}}/pb"
+	"{{PROJECT_BASE}}/proto/{{APP_NAME}}/pb"
 )
 
 type HelloWorld struct {

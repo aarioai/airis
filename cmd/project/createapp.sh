@@ -327,7 +327,7 @@ createGRPCServer(){
     if [ ! -f "$dst" ]; then
         sed -e "s#{{APP_BASE}}#${app_base}#g"           \
             -e "s#{{APP_NAME}}#${app_name}#g"           \
-            -e "s#{{PROJECT_ROOT}}#${project_root}#g"   \
+            -e "s#{{PROJECT_BASE}}#${project_base}#g"   \
             "$template" > "$dst"
     fi
 }
