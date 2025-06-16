@@ -18,9 +18,14 @@ log_symlink = /var/log/app-{{APP_NAME}}.log
 views_root = ./frontend/view
 emb_root = ./storage/emb
 
-[svc_test]
-port = 80
-grpc_port = 8000
+;[app_test]
+;port = 80
+;grpc_port = 8000
+
+;[svc_infra]
+;grpc_addr = 0.0.0.0
+;grpc_check_addr = host.docker.internal
+;grpc_port = 8000
 
 ;[consul]
 ;scheme = http

@@ -91,6 +91,10 @@ createMiddlewareFile(){
 createRouterFile(){
     local project_root="$1"
     local app_name="$2"
+
+    cp -f "${CUR}/template/router_README.md" "${project_root}/router/README.md"
+    cp -f "${CUR}/template/router_README_路由说明.md" "${project_root}/router/README_路由说明.md"
+
     local demo="${CUR}/template/router.go.tpl"
     local dst="${project_root}/router/router.go"
     if [ ! -f "$dst" ]; then
@@ -181,8 +185,6 @@ createBaseServiceFile(){
     fi
 }
 
-
-
 createServiceFile(){
     local app_root="$1"
     local app_base="$2"
@@ -192,8 +194,6 @@ createServiceFile(){
         sed -e "s#{{APP_BASE}}#${app_base}#g" "$template" > "$dst"
     fi
 }
-
-
 
 createJobInitFile(){
     local app_root="$1"
@@ -297,6 +297,15 @@ createJob(){
     createCommonServiceFile "${app_root}/job/queue/consumer" "$app_base"
 }
 
+# app and service config should starts with app_*, svc_* or service_*
+normalizeAppConfigSection(){
+    local app_name="$1"
+    case "$app_name" in
+        app_*|svc_*|service_*) printf '%s' "$app_name" ;;
+        *) printf 'svc_%s' "$config_section" ;;
+    esac
+}
+
 createGRPCServer(){
     local project_base="$1"
     local app_root="$2"
@@ -313,7 +322,10 @@ createGRPCServer(){
     local template="${CUR}/template/grpc/server.go.tpl"
     local dst="${app_root}/grpc/server.go"
     if [ ! -f "$dst" ]; then
-        sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+        config_section=$(normalizeAppConfigSection "$app_name")
+        sed -e "s#{{APP_NAME}}#${app_name}#g"               \
+            -e "s#{{CONFIG_SECTION}}#${config_section}#g"   \
+            "$template" > "$dst"
     fi
 
     local template="${CUR}/template/grpc/register.go.tpl"
@@ -359,7 +371,10 @@ createGRPCSDK(){
     local template="${CUR}/template/sdk/grpc_client.go.tpl"
     local dst="${project_root}/sdk/${app_name}/grpc_client.go"
     if [ ! -f "$dst" ]; then
-        sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+        config_section=$(normalizeAppConfigSection "$app_name")
+        sed -e "s#{{APP_NAME}}#${app_name}#g"               \
+            -e "s#{{CONFIG_SECTION}}#${config_section}#g"   \
+            "$template" > "$dst"
     fi
 }
 

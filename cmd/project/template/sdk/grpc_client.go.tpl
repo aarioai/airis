@@ -12,6 +12,17 @@ import (
 	"time"
 )
 
+func (s *Service) Init(timeout time.Duration, prof *debug.Profile) {
+	prof.Forkf("initial grpc client ({{APP_NAME}}: %s)", s.target)
+	ae.PanicOn(s.initGRPCClient())
+
+    if ok := s.waitForConnectReady(s.conn, timeout); !ok {
+        ae.PanicF("initial grpc client ({{APP_NAME}}: %s) did not become ready", s.target)
+    }
+
+	go s.watchTerminate()
+}
+
 func (s *Service) Conn() (*grpc.ClientConn, string, *ae.Error) {
 	s.mtx.RLock()
 	conn, target := s.conn, s.target
@@ -52,7 +63,7 @@ func (s *Service) Conn() (*grpc.ClientConn, string, *ae.Error) {
 }
 
 func (s *Service) initGRPCClient() *ae.Error {
-	serviceName := s.app.Config.GetString("{{APP_NAME}}.grpc_service_name", "{{APP_NAME}}")
+	serviceName := s.app.Config.GetString("{{CONFIG_SECTION}}.grpc_service_name", "{{APP_NAME}}")
 	addr := consul.Scheme + ":///" + serviceName
 
 	// gRPC is highly efficient and reusable, no need to write a connection pool
@@ -76,10 +87,19 @@ func (s *Service) initGRPCClient() *ae.Error {
 	return nil
 }
 
-func (s *Service) Init(prof *debug.Profile) {
-	prof.Fork("staring grpc client ({{APP_NAME}})")
-	ae.PanicOn(s.initGRPCClient())
-	go s.watchTerminate()
+func (s *Service) waitForConnectReady(conn *grpc.ClientConn, timeout time.Duration) bool {
+	ctx, cancel := context.WithTimeout(s.app.GlobalContext, timeout)
+	defer cancel()
+
+	for {
+		state := conn.GetState()
+		if state == connectivity.Ready || state == connectivity.Idle {
+			return true
+		}
+		if !conn.WaitForStateChange(ctx, state) {
+			return false // Timeout
+		}
+	}
 }
 
 func (s *Service) watchTerminate() {
