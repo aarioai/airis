@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	initConnectTimeout        = 10 * time.Second
+	initConnectTimeout        = 30 * time.Second
 	connectTimeout            = 5 * time.Second
 	connectStateChangeTimeout = 500 * time.Millisecond
 )
