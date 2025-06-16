@@ -1,31 +1,37 @@
 # Iris Router
 
+
 ## Iris Router Middleware App Methods
 
-| App Method | 	Timing             | 	Scope	                   | Executions	        | Typical Use Cases                     |
-|------------|---------------------|---------------------------|--------------------|---------------------------------------|
-| UseGlobal  | 	Earliest           | 	All requests	            | Every request	     | Global logging, basic auth            |
-| UseOnce	   | Registration order	 | Scoped                    | 	Once per request	 | Initialization, DB connections        |
-| UseFunc	   | Registration order  | 	Scoped                   | 	Every request     | 	Third-party middleware integration   |
-| Use        | 	Pre-matching	      | Current group + children	 | Every request      | 	Group auth, pre-processing           |
-| UseRouter	 | Post-matching       | 	Matched routes only	     | Every request	     | Route-specific logic, post-processing |
+Iris official middlewares: accesslog, basicauth, cors, grpc, hcaptcha, jwt, logger, methodoverride, modrevision, monitor, pprof, rate, recaptcha, recover, requestid, rewrite
+
+| App Method | 	Timing               | 	Scope	                   | Executions	        | Typical Use Cases                     |
+|------------|-----------------------|---------------------------|--------------------|---------------------------------------|
+| UseGlobal  | 	Earliest             | 	All requests	            | Every request	     | Global logging, basic auth            |
+| UseOnce	   | Registration order	   | Scoped                    | 	Once per request	 | Initialization, DB connections        |
+| UseFunc	   | Registration order    | 	Scoped                   | 	Every request     | 	Third-party middleware integration   |
+| Use        | 	Pre-matching	        | Current group + children	 | Every request      | 	Group auth, pre-processing           |
+| UseRouter	 | Post-matching         | 	Matched routes only	     | Every request	     | Route-specific logic, post-processing |
+| UseError	  | Request error         | Request error	            | 	Request error     | Global error handler                  |
+| Done	      | After router handlers | All requests	             | 	Every request     | Global metrics                        |
+| DoneGlobal | Latest                | All requests	             | 	Every request     | Global metrics                        |
 
 ```go
 app := iris.New()
 
 app.UseOnce(func(ctx iris.Context) {
-    println("2. UseOnce (single execution)")
-    ctx.Next()
+println("2. UseOnce (single execution)")
+ctx.Next()
 })
 
 app.Use(func(ctx iris.Context) {
-    println("3. Use (pre-matching)")
-    ctx.Next()
+println("3. Use (pre-matching)")
+ctx.Next()
 })
 
 app.UseRouter(func(ctx iris.Context) {
-    println("4. UseRouter (post-matching)")
-    ctx.Next()
+println("4. UseRouter (post-matching)")
+ctx.Next()
 })
 app.UseGlobal(func(ctx iris.Context) {
 println("1. UseGlobal (all requests)")
@@ -34,8 +40,8 @@ ctx.Next()
 
 
 app.Get("/", func(ctx iris.Context) {
-    println("5. Handler")
-    ctx.Text("Hello World")
+println("5. Handler")
+ctx.Text("Hello World")
 })
 ```
 
@@ -50,7 +56,7 @@ app.Get("/", func(ctx iris.Context) {
 ## Iris Router Middleware Party Methods
 
 * **App Middleware**
-  - app.Use() - runs before any route matching 
+  - app.Use() - runs before any route matching
   - app.UseRouter() - runs after route matching
 * **Party (Route Group) Middleware**
   - Party.Use() - runs for all routes in the group (before matching)

@@ -2,30 +2,35 @@
 
 ## Iris App 路由中间件
 
-| APP 方法     | 	顺序     | 	范围	        | 触发	     | 用例         |
-|------------|---------|-------------|---------|------------|
-| UseGlobal  | 	全局最早   | 	所有请求		     | 每次请求    | 全局日志、最基础认证 |
-| UseOnce	   | 按注册顺序		 | 注册的范围       | 	仅执行一次	 | 初始化数据库连接   |
-| UseFunc	   | 按注册顺序	  | 	注册的范围      | 	每次请求   | 	整合第三方中间件  |
-| Use        | 	路由匹配前	 | 当前路由组及子路由		 | 每次请求    | 	路由组认证、预处理 |
-| UseRouter	 | 路由匹配后   | 仅匹配成功的路由	   | 每次请求	   | 路由特定逻辑、后处理 |
+官方中间件：accesslog, basicauth, cors, grpc, hcaptcha, jwt, logger, methodoverride, modrevision, monitor, pprof, rate, recaptcha, recover, requestid, rewrite
+
+| APP 方法      | 	顺序     | 	范围	        | 触发	     | 用例         |
+|-------------|---------|-------------|---------|------------|
+| UseGlobal   | 	最优先    | 	所有请求		     | 每次请求    | 全局日志、最基础认证 |
+| UseOnce	    | 按注册顺序		 | 注册的范围       | 	仅执行一次	 | 初始化数据库连接   |
+| UseFunc	    | 按注册顺序	  | 	注册的范围      | 	每次请求   | 	整合第三方中间件  |
+| Use         | 	路由匹配前	 | 当前路由组及子路由		 | 每次请求    | 	路由组认证、预处理 |
+| UseRouter	  | 路由匹配后   | 仅匹配成功的路由	   | 每次请求	   | 路由特定逻辑、后处理 |
+| UseError	   | 遇到错误时   | 错误请求	       | 	错误请求   | 全局错误处理     |
+| Done	       | 路由执行后   | 所有请求	       | 	每次请求   | 全局统计       |
+| DoneGlobal	 | 最后执行    | 所有请求	       | 	每次请求   | 全局统计       |
 
 ```go
 app := iris.New()
 
 app.UseOnce(func(ctx iris.Context) {
-    println("2. UseOnce (只会出现一次)")
-    ctx.Next()
+println("2. UseOnce (只会出现一次)")
+ctx.Next()
 })
 
 app.Use(func(ctx iris.Context) {
-    println("3. Use")
-    ctx.Next()
+println("3. Use")
+ctx.Next()
 })
 
 app.UseRouter(func(ctx iris.Context) {
-    println("4. UseRouter")
-    ctx.Next()
+println("4. UseRouter")
+ctx.Next()
 })
 
 app.UseGlobal(func(ctx iris.Context) {
@@ -34,8 +39,8 @@ ctx.Next()
 })
 
 app.Get("/", func(ctx iris.Context) {
-    println("5. Handler")
-    ctx.Text("Hello")
+println("5. Handler")
+ctx.Text("Hello")
 })
 
 app.Listen(":8080")

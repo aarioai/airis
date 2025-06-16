@@ -19,7 +19,7 @@ const (
 )
 
 func (s *Service) Init(prof *debug.Profile) {
-	prof.Forkf("initial gRPC client for ({{APP_NAME}}: %s)", s.target)
+	prof.Fork("initial gRPC client for ({{APP_NAME}})")
 	ae.PanicOn(s.initGRPCClient())
 
 	if ok := s.waitForReady(); !ok {
