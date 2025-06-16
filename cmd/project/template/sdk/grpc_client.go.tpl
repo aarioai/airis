@@ -12,11 +12,17 @@ import (
 	"time"
 )
 
-func (s *Service) Init(timeout time.Duration, prof *debug.Profile) {
+const (
+	initConnectTimeout        = 10 * time.Second
+	connectTimeout            = 5 * time.Second
+	connectStateChangeTimeout = 500 * time.Millisecond
+)
+
+func (s *Service) Init(prof *debug.Profile) {
 	prof.Forkf("initial grpc client ({{APP_NAME}}: %s)", s.target)
 	ae.PanicOn(s.initGRPCClient())
 
-    if ok := s.waitForConnectReady(s.conn, timeout); !ok {
+    if ok := s.waitForConnectReady(s.conn); !ok {
         ae.PanicF("initial grpc client ({{APP_NAME}}: %s) did not become ready", s.target)
     }
 
@@ -37,7 +43,7 @@ func (s *Service) Conn() (*grpc.ClientConn, string, *ae.Error) {
 			return conn, target, nil
 		case connectivity.Connecting, connectivity.TransientFailure:
 			// Wait briefly for connection to recover
-			ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+			ctx, cancel := context.WithTimeout(context.Background(), connectStateChangeTimeout)
 			defer cancel()
 			if conn.WaitForStateChange(ctx, conn.GetState()) {
 				if conn.GetState() == connectivity.Ready {
@@ -76,7 +82,7 @@ func (s *Service) initGRPCClient() *ae.Error {
 			}
 		}`),
 		grpc.WithConnectParams(grpc.ConnectParams{
-			MinConnectTimeout: 5 * time.Second,
+			MinConnectTimeout: connectTimeout,
 		}),
 	)
 	if err != nil {
@@ -87,8 +93,8 @@ func (s *Service) initGRPCClient() *ae.Error {
 	return nil
 }
 
-func (s *Service) waitForConnectReady(conn *grpc.ClientConn, timeout time.Duration) bool {
-	ctx, cancel := context.WithTimeout(s.app.GlobalContext, timeout)
+func (s *Service) waitForConnectReady(conn *grpc.ClientConn) bool {
+	ctx, cancel := context.WithTimeout(s.app.GlobalContext, initConnectTimeout)
 	defer cancel()
 
 	for {
