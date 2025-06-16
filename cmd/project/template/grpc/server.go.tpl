@@ -12,8 +12,7 @@ import (
 )
 
 func (s *Service) Serve(prof *debug.Profile) (*grpc.Server, string, error) {
-	prof.Fork("starting grpc server ({{APP_NAME}})")
-
+	prof.Fork("starting gRPC server ({{APP_NAME}})")
 	listener, serviceID, err := s.listen()
 	if err != nil {
 		return nil, "", err
@@ -22,7 +21,7 @@ func (s *Service) Serve(prof *debug.Profile) (*grpc.Server, string, error) {
 
 	go func() {
 		<-s.app.GlobalContext.Done()
-		alog.Stopf("grpc server ({{APP_NAME}})")
+		alog.Stopf("gRPC server ({{APP_NAME}})")
 		s.app.Config.DeregisterGRPCService(serviceID)
 		server.GracefulStop()
 	}()
@@ -31,6 +30,8 @@ func (s *Service) Serve(prof *debug.Profile) (*grpc.Server, string, error) {
 		defer s.app.Config.DeregisterGRPCService(serviceID)
 		ae.PanicOnErrs(server.Serve(listener))
 	}()
+
+	prof.Forkf("register gRPC server ({{APP_NAME}}: %s)", serviceID)
 
 	return server, serviceID, nil
 }

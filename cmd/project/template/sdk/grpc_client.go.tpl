@@ -19,12 +19,12 @@ const (
 )
 
 func (s *Service) Init(prof *debug.Profile) {
-	prof.Forkf("initial grpc client ({{APP_NAME}}: %s)", s.target)
+	prof.Forkf("initial gRPC client for ({{APP_NAME}}: %s)", s.target)
 	ae.PanicOn(s.initGRPCClient())
 
-    if ok := s.waitForConnectReady(s.conn); !ok {
-        ae.PanicF("initial grpc client ({{APP_NAME}}: %s) did not become ready", s.target)
-    }
+	if ok := s.waitForReady(); !ok {
+		ae.PanicF("gRPC client health check failed for ({{APP_NAME}}: %s) check health", s.target)
+	}
 
 	go s.watchTerminate()
 }
@@ -86,36 +86,46 @@ func (s *Service) initGRPCClient() *ae.Error {
 		}),
 	)
 	if err != nil {
-		return ae.NewF(ae.GatewayTimeout, "failed to create gRPC client for %s: %v", addr, err.Error())
+		return ae.NewF(ae.GatewayTimeout, "new gRPC client for ({{APP_NAME}}: %s) error: %s", addr, err.Error())
 	}
 	s.conn = conn
 	s.target = addr
 	return nil
 }
 
-func (s *Service) waitForConnectReady(conn *grpc.ClientConn) bool {
+func (s *Service) waitForReady() bool {
 	ctx, cancel := context.WithTimeout(s.app.GlobalContext, initConnectTimeout)
 	defer cancel()
 
+	client := grpc_health_v1.NewHealthClient(s.conn)
+	ticker := time.NewTicker(100 * time.Millisecond)
+	defer ticker.Stop()
 	for {
-		state := conn.GetState()
-		if state == connectivity.Ready || state == connectivity.Idle {
-			return true
-		}
-		if !conn.WaitForStateChange(ctx, state) {
-			return false // Timeout
+		select {
+		case <-ticker.C:
+			resp, err := client.Check(ctx, &grpc_health_v1.HealthCheckRequest{Service: ""})
+			if err == nil {
+				switch resp.Status {
+				case grpc_health_v1.HealthCheckResponse_SERVING:
+					return true
+				case grpc_health_v1.HealthCheckResponse_NOT_SERVING:
+					continue
+				}
+			}
+		case <-ctx.Done():
+			return false
 		}
 	}
 }
 
 func (s *Service) watchTerminate() {
-	// Wait for application shutdown, including SIGINT, SIGTERM
+	// Stop or GracefulStop, including SIGINT, SIGTERM
 	<-s.app.GlobalContext.Done()
 
 	s.mtx.Lock()
 	defer s.mtx.Unlock()
 
-	alog.Stopf("grpc client ({{APP_NAME}}: %s)", s.target)
+	alog.Stopf("gRPC client for ({{APP_NAME}}: %s)", s.target)
 	if s.conn != nil {
 		s.conn.Close()
 	}
