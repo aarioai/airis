@@ -49,10 +49,11 @@ readonly MODULE_DIRS=(
 
 createMainGo(){
     local project_root="$1"
+    local project_base="$2"
     local template="${CUR}/template/main.go.tpl"
     local dst="${project_root}/main.go"
     if [ ! -f "$dst" ]; then
-        sed -e "s#{{ROOT}}#${project_root}#g"  "$template" > "$dst"
+        sed -e "s#{{PROJECT_BASE}}#${project_base}#g"  "$template" > "$dst"
     fi
 }
 
@@ -406,7 +407,7 @@ main(){
     mkdir -p "$app_root"
     createDirs "$app_root" "${APP_GLOBAL_DIRS[@]}"
 
-    createMainGo "$project_root"
+    createMainGo "$project_root" "$project_base"
     createMiddlewareFile "$project_root"
     createBaseConfFile "$app_root" "$app_name"
     createRouterFile "$project_root" "$app_name"

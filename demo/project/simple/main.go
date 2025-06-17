@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/aarioai/airis/aa/alog"
-	"{{PROJECT_BASE}}/boot"
+	"/data/Aa/proj/go/src/github.com/aarioai/airis/demo/project/simple/boot"
 	"runtime"
 )
 

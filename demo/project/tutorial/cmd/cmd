@@ -1,0 +1,50 @@
+#!/bin/bash
+set -euo pipefail
+
+# Version: 2025-04-06
+
+. /opt/aa/lib/aa-posix-lib.sh
+
+# copy this file to your project <project>/cmd/cmd
+
+readonly AA_GITHUB="github.com/aarioai"
+readonly AIRIS="${AA_GITHUB}/airis"
+readonly MOD_ROOT="${GOPATH}/pkg/mod/${AA_GITHUB}"
+
+CUR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly CUR
+
+ROOT_DIR="$(cd "${CUR}/.." && pwd)"
+readonly ROOT_DIR
+
+declare repo_cmd
+
+findRepoCmdDir(){
+    info "checking go.mod file"
+    if [ ! -f "${ROOT_DIR}/go.mod" ];then
+        go mod init
+    fi
+    go mod tidy
+    go get -u "$AIRIS"
+
+    info "detecting airis version"
+    version=$(grep "$AIRIS v" go.mod | sed -E 's/.*(v[0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+    info "airis version: ${version}"
+    repo_cmd="${MOD_ROOT}/airis@${version}/cmd"
+    [ -d "$repo_cmd" ] || panic "missing ${repo_cmd}"
+ }
+
+ run(){
+    findRepoCmdDir
+    local base="${repo_cmd}/cmd-base.sh"
+    [ -f "$base" ] || panic "$base not found"
+    info "${base} ${ROOT_DIR} ${*}"
+    "$base" "$ROOT_DIR" "$@"
+ }
+
+main(){
+    findRepoCmdDir
+    run "$@"
+}
+
+main "$@"
