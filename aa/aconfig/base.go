@@ -3,20 +3,10 @@ package aconfig
 import (
 	"github.com/hashicorp/consul/api"
 	"io/fs"
-	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
-)
-
-// Environment constants
-const (
-	EnvLocal       Env = "local"
-	EnvDevelopment Env = "development"
-	EnvProduction  Env = "production"
-	EnvTesting     Env = "testing"
-	EnvStaging     Env = "staging"
 )
 
 // Reserved configuration keys
@@ -29,40 +19,8 @@ const (
 )
 
 var (
-	envs   = []string{EnvLocal.String(), EnvDevelopment.String(), EnvProduction.String(), EnvTesting.String(), EnvStaging.String()}
 	cfgMtx sync.RWMutex
 )
-
-type Env string
-
-// NewEnv
-// Example NewEnv("testing") NewEnv("testing_project") NewEnv("project_testing")
-func NewEnv(env string) Env {
-	// keep it, faster than check has prefix and has suffix
-	if slices.Contains(envs, env) {
-		return Env(env)
-	}
-	for _, environment := range envs {
-		if strings.HasPrefix(env, environment+"_") || strings.HasSuffix(env, "_"+environment) {
-			return Env(environment)
-		}
-	}
-	return Env(env)
-}
-
-func (env Env) String() string          { return string(env) }
-func (env Env) IsLocal() bool           { return env == EnvLocal }
-func (env Env) IsDevelopment() bool     { return env == EnvDevelopment }
-func (env Env) IsTesting() bool         { return env == EnvTesting }
-func (env Env) IsStaging() bool         { return env == EnvStaging }
-func (env Env) IsProduction() bool      { return env == EnvProduction }
-func (env Env) BeforeDevelopment() bool { return env.IsLocal() || env.IsDevelopment() }
-func (env Env) BeforeTesting() bool {
-	return env.IsTesting() || env.BeforeDevelopment()
-}
-func (env Env) BeforeStaging() bool { return env.IsStaging() || env.BeforeTesting() }
-func (env Env) AfterStaging() bool  { return env.IsStaging() || env.IsProduction() }
-func (env Env) AfterTesting() bool  { return env.IsTesting() || env.AfterStaging() }
 
 type Snapshot struct {
 	baseConfig  map[string]string

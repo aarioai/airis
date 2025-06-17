@@ -14,9 +14,6 @@ readonly GLOBAL_DIRS=(
     boot                    \
     config                  \
     doc                     \
-    frontend/asset_src      \
-    frontend/view_src       \
-    frontend/dst            \
     maintain/repair         \
     maintain/tests          \
     proto                   \
