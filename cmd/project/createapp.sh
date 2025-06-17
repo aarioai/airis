@@ -77,10 +77,10 @@ createBaseConfFile(){
 
 createMiddlewareFile(){
     local project_root="$1"
-    local demo="${CUR}/template/router_middleware.go.tpl"
+    local template="${CUR}/template/router_middleware.go.tpl"
     local dst="${project_root}/router/middleware/middleware.go"
     if [ ! -f "$dst" ]; then
-        cp "$demo" "$dst"
+        cp "$template" "$dst"
     fi
 }
 
@@ -92,7 +92,7 @@ createRouterFile(){
     cp -f "${CUR}/template/router_README.md" "${project_root}/router/README.md"
     cp -f "${CUR}/template/router_README_路由说明.md" "${project_root}/router/README_路由说明.md"
 
-    local demo="${CUR}/template/router.go.tpl"
+    local template="${CUR}/template/router.go.tpl"
     local dst="${project_root}/router/router.go"
     if [ ! -f "$dst" ]; then
         sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
@@ -101,10 +101,10 @@ createRouterFile(){
 
 createRouterEngineFile(){
     local project_root="$1"
-    local demo="${CUR}/template/router_engine.go.tpl"
+    local template="${CUR}/template/router_engine.go.tpl"
     local dst="${project_root}/router/engine.go"
     if [ ! -f "$dst" ]; then
-        cp "$demo" "$dst"
+        cp "$template" "$dst"
     fi
 }
 
