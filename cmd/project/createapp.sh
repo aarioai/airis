@@ -299,7 +299,7 @@ normalizeAppConfigSection(){
     local app_name="$1"
     case "$app_name" in
         app_*|svc_*|service_*) printf '%s' "$app_name" ;;
-        *) printf 'svc_%s' "$config_section" ;;
+        *) printf 'svc_%s' "$app_name" ;;
     esac
 }
 
