@@ -432,3 +432,8 @@ func (w *Writer) CloseWith(closers ...io.Closer) error {
 	}
 	return w.Close()
 }
+
+func (w *Writer) Next() {
+	w.CloseWith(w.request)
+	w.ictx.Next()
+}

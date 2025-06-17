@@ -18,6 +18,7 @@ readonly GLOBAL_DIRS=(
     maintain/tests          \
     proto                   \
     router/middleware       \
+    router/party            \
     sdk
 )
 readonly APP_GLOBAL_DIRS=(
@@ -68,11 +69,11 @@ createDirs(){
 }
 createBaseConfFile(){
     local app_root="$1"
-    local app_name="$2"
+    local project_name="$2"
     local template="${CUR}/template/conf_base.go.tpl"
     local dst="${app_root}/conf/base.go"
     if [ ! -f "$dst" ]; then
-        sed -e "s#{{APP_NAME}}#${app_name}#g"  "$template" > "$dst"
+        sed -e "s#{{PROJECT_NAME}}#${project_name}#g"  "$template" > "$dst"
     fi
 }
 
@@ -238,14 +239,14 @@ createConfigFile(){
 
 createBootFiles(){
     local project_root="$1"
-    local app_name="$2"
+    local project_base="$2"
     mkdir -p "${project_root}/boot"
 
     # boot/boot.go
     local template="${CUR}/template/boot.go.tpl"
     local dst="${project_root}/boot/boot.go"
     if [ ! -f "$dst" ]; then
-        sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+        sed -e "s#{{PROJECT_BASE}}#${project_base}#g" "$template" > "$dst"
     fi
 
     # boot/init.go
@@ -409,7 +410,7 @@ main(){
 
     createMainGo "$project_root" "$project_base"
     createMiddlewareFile "$project_root"
-    createBaseConfFile "$app_root" "$app_name"
+    createBaseConfFile "$app_root" "$project_name"
     createRouterFile "$project_root" "$app_name"
     createRouterEngineFile "$project_root"
     createCacheFile "$app_root" "$app_base"
@@ -419,7 +420,7 @@ main(){
     createGRPC "$project_root" "$project_base" "$app_root" "$app_base" "$app_name"
     createJob "$app_root" "$app_base" "$app_name"
     createConfigFile "$project_root" "$app_name"
-    createBootFiles "$project_root" "$app_name"
+    createBootFiles "$project_root" "$project_base"
 
     createStorage "$project_root"
 

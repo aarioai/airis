@@ -14,7 +14,7 @@ view_rate_limit = 100,500,1m,5m
 api_rate_limit = 100,500,1m,5m
 log_buffer_size = 0
 log_dir = ./storage/log
-log_symlink = /var/log/app-{{APP_NAME}}.log
+log_symlink = /var/log/app-{{PROJECT_NAME}}.log
 views_root = ./frontend/view
 emb_root = ./storage/emb
 

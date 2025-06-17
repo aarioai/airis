@@ -30,6 +30,10 @@
         <method importPath="github.com/kataras/iris/v12" receiver="*Context" name="Write" />
         <method importPath="database/sql" receiver="*NullString" name="Scan" />
         <method importPath="google.golang.org/grpc/resolver" receiver="ClientConn" name="UpdateState" />
+        <method importPath="github.com/kataras/iris/v12" receiver="*Context" name="WriteString" />
+        <method importPath="github.com/aarioai/airis/aa/httpsvr/request" receiver="*Request" name="Close" />
+        <method importPath="github.com/aarioai/airis/aa/httpsvr/response" receiver="*Writer" name="Close" />
+        <method importPath="github.com/aarioai/airis/aa/httpsvr/response" receiver="*Writer" name="CloseWith" />
       </methods>
     </inspection_tool>
   </profile>
