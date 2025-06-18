@@ -1,8 +1,9 @@
-# airis
+# Airis
 
 Airis 是基于 Iris 开发的 Go 框架，其主要价值在于想实现一种像PHP一样方便的 Controller 层，并且能在微服务项目初期，使用一个进程就能方便启动和管理多个gRPC微服务和HTTP server服务。
 
 # Demo 示例说明
+
 Demo 代码，请参考 demo 目录下。
 
 project 目录下，放了3个示例项目：
