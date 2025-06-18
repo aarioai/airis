@@ -1,7 +1,6 @@
 package boot
 
 import (
-	"context"
 	"github.com/aarioai/airis/aa"
 	"github.com/aarioai/airis/aa/aconfig"
 	"github.com/aarioai/airis/aa/acontext"
@@ -14,8 +13,7 @@ var (
 	ctx, cancel = acontext.WithCancel(acontext.Background())
 )
 
-func initApp(configPath string, selfTest bool, profile *debug.Profile) *aa.App {
-	profile = profile.Fork("init app openlab").WithLabel("boot")
+func initApp(configPath string, selfTest bool) *aa.App {
 	cfg, err := aconfig.New(configPath, configValueProcessor)
 	ae.PanicOnErrs(err)
 

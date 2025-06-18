@@ -6,18 +6,17 @@ import (
 	"github.com/aarioai/airis/aa/helpers/debug"
 	"os"
 	"os/signal"
-	"project/simple/router"
+	"{{PROJECT_BASE}}/router"
 	"syscall"
 )
 
 var (
-	ctx, cancel = acontext.WithCancel(acontext.Background())
 	profile     = debug.DefaultProfile()
 	sigs        = make(chan os.Signal, 1)
 )
 
 func Boot(configPath string, selfTest bool) {
-	app := initApp(ctx, cancel, configPath, selfTest)
+	app := initApp(configPath, selfTest)
 
 	router.Serve(app, profile)
 
