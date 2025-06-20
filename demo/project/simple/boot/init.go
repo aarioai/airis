@@ -17,7 +17,7 @@ func initApp(configPath string, selfTest bool) *aa.App {
 	cfg, err := aconfig.New(configPath, configValueProcessor)
 	ae.PanicOnErrs(err)
 
-	logLevel := alog.NameToLevel(cfg.GetString("log_level", "debug"))
+	logLevel := alog.NameToLevel(cfg.GetString("log_level", "info"))
 	app := aa.New(ctx, cancel, cfg).WithLog(alog.NewDefaultLog(logLevel))
 	redirectLog(app)
 	app.Config.Log()
@@ -35,8 +35,8 @@ func redirectLog(app *aa.App) {
 	cfg := app.Config
 	dir := cfg.GetString("app.log_dir")
 	logBufferSize := cfg.Get("app.log_buffer_size").DefaultInt(0)
-	logSymlink := cfg.GetString("app.log_symlink")
-	err := debug.RedirectLog(dir, 0666, logBufferSize, logSymlink)
+	//logSymlink := cfg.GetString("app.log_symlink")
+	err := debug.RedirectLog(dir, 0666, logBufferSize)
 	if err != nil {
 		panic(err.Error())
 	}

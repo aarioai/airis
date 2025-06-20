@@ -14,4 +14,5 @@ func RegisterAaJS(app *aa.App, parent *iris.Application, w *middleware.Middlewar
 	p.Get("/ping", bs.GetPing)
 
 	registerAaJSV1(app, parent, w)
+	registerAaJSV1Authed(app, parent, w)
 }

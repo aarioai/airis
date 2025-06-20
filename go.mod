@@ -5,7 +5,7 @@ go 1.24
 require (
 	github.com/hashicorp/consul/api v1.32.1
 	github.com/kataras/iris/v12 v12.2.11
-	golang.org/x/exp v0.0.0-20250606033433-dcc06ee1d476
+	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b
 	golang.org/x/sys v0.33.0
 	golang.org/x/text v0.26.0
 	google.golang.org/grpc v1.73.0

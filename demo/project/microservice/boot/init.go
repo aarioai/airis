@@ -17,7 +17,7 @@ func initApp(configPath string, selfTest bool) *aa.App {
 	cfg, err := aconfig.New(configPath, configValueProcessor)
 	ae.PanicOnErrs(err)
 
-	logLevel := alog.NameToLevel(cfg.GetString("log_level", "debug"))
+	logLevel := alog.NameToLevel(cfg.GetString("log_level", "info"))
 	app := aa.New(ctx, cancel, cfg).WithLog(alog.NewDefaultLog(logLevel))
 	redirectLog(app)
 	app.Config.Log()
