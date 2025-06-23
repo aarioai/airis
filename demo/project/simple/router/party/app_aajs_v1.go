@@ -19,6 +19,13 @@ func registerAaJSV1(app *aa.App, parent *iris.Application, w *middleware.Middlew
 	p.Get("/users/sex/{sex:uint8}/page/{page:uint8}", bs.GetUsersWithPaging)
 	p.Get("/users/{uid:uint64}", bs.GetUser)
 
+	p.Head("/restful", bs.HeadRestful)
+	p.Post("/restful", bs.PostRestful)
+	p.Put("/restful", bs.PutRestful)
+	p.Patch("/restful", bs.PatchRestful)
+	p.Get("/restful", bs.GetRestful)
+	p.Delete("/restful", bs.DeleteRestful)
+
 	p.Post("/login", bs.PostLogin)                 // password login
 	p.Head("/auth/access_token", bs.HeadUserToken) // detect access token validate
 	p.Put("/auth/access_token", bs.GrantUserToken) // refresh access token

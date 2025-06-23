@@ -39,6 +39,7 @@
         <method importPath="github.com/aarioai/airis/aa/httpsvr/response" receiver="*Writer" name="TryWrite" />
         <method importPath="github.com/aarioai/airis/aa/httpsvr/response" receiver="*Writer" name="WriteE" />
         <method importPath="github.com/aarioai/airis/aa/aconfig" receiver="*Config" name="DeregisterGRPCService" />
+        <method importPath="github.com/aarioai/airis/aa/httpsvr/response" receiver="*Writer" name="WriteOK" />
       </methods>
     </inspection_tool>
   </profile>

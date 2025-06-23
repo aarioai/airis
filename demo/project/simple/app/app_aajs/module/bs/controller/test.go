@@ -1,0 +1,47 @@
+package controller
+
+import (
+	"github.com/aarioai/airis/aa/httpsvr"
+	"github.com/kataras/iris/v12"
+)
+
+func (c *Controller) HeadRestful(ictx iris.Context) {
+	ictx.StatusCode(200)
+}
+func (c *Controller) PostRestful(ictx iris.Context) {
+	r, resp, _ := httpsvr.New(ictx)
+	defer resp.Next()
+	say, _ := r.BodyString("say", false)
+
+	resp.Write(map[string]string{"say": say})
+}
+
+func (c *Controller) PutRestful(ictx iris.Context) {
+	r, resp, _ := httpsvr.New(ictx)
+	defer resp.Next()
+	say, _ := r.BodyString("say", false)
+
+	resp.Write(map[string]string{"say": say})
+}
+
+func (c *Controller) PatchRestful(ictx iris.Context) {
+	r, resp, _ := httpsvr.New(ictx)
+	defer resp.Next()
+	num, _ := r.BodyInt("num", false)
+
+	resp.Write(map[string]int{"num": num})
+}
+
+func (c *Controller) GetRestful(ictx iris.Context) {
+	_, resp, _ := httpsvr.New(ictx)
+	defer resp.Next()
+
+	resp.Write(map[string]string{"say": "hello"})
+}
+
+func (c *Controller) DeleteRestful(ictx iris.Context) {
+	_, resp, _ := httpsvr.New(ictx)
+	defer resp.Next()
+
+	resp.WriteOK()
+}
