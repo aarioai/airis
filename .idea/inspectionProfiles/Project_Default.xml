@@ -13,6 +13,7 @@
         <function importPath="math/rand" name="Read" />
         <function importPath="fmt" name="Printf" />
         <function importPath="github.com/aarioai/airis/pkg/types" name="Close" />
+        <function importPath="github.com/aarioai/airis/aa/httpsvr/response" name="JsonE" />
       </functions>
       <methods>
         <method importPath="strings" receiver="*Builder" name="WriteByte" />

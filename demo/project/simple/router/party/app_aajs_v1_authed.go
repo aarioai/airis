@@ -8,7 +8,7 @@ import (
 )
 
 func registerAaJSV1Authed(app *aa.App, parent *iris.Application, w *middleware.Middleware) {
-	p := parent.Party("/v1/authed")
+	p := parent.Party("/v1/authed", w.Auth)
 
 	bs := controller.New(app)
 

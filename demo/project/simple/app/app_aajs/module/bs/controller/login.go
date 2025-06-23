@@ -19,12 +19,7 @@ func (c *Controller) PostLogin(ictx iris.Context) {
 }
 
 func (c *Controller) HeadUserToken(ictx iris.Context) {
-	auth := ictx.GetHeader("Authorization")
-	if auth == "Bearer helloworld" {
-		ictx.StatusCode(iris.StatusOK)
-		return
-	}
-	ictx.StatusCode(iris.StatusNotAcceptable)
+	ictx.StatusCode(iris.StatusOK)
 }
 
 func (c *Controller) GrantUserToken(ictx iris.Context) {
