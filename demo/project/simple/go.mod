@@ -3,7 +3,7 @@ module project/simple
 go 1.24.3
 
 require (
-	github.com/aarioai/airis v0.1.271
+	github.com/aarioai/airis v0.1.277
 	github.com/aarioai/airis-driver v0.0.62
 	github.com/iris-contrib/middleware/cors v0.0.0-20250207234507-372f6828ef8c
 	github.com/kataras/iris/v12 v12.2.11
@@ -79,7 +79,7 @@ require (
 	github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78 // indirect
 	go.mongodb.org/mongo-driver/v2 v2.2.2 // indirect
 	golang.org/x/crypto v0.39.0 // indirect
-	golang.org/x/exp v0.0.0-20250606033433-dcc06ee1d476 // indirect
+	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b // indirect
 	golang.org/x/net v0.41.0 // indirect
 	golang.org/x/sync v0.15.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
