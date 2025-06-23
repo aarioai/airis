@@ -1,12 +1,11 @@
 package middleware
 
 import (
-	"github.com/aarioai/golib/sdk/irisz/middlewarez"
 	"github.com/iris-contrib/middleware/cors"
 )
 
 var CORS = cors.New(cors.Options{
-	AllowOriginFunc:    middlewarez.AllowDomainsFunc("luexu.com"),
+	AllowedOrigins:     []string{"*"},
 	AllowedMethods:     []string{"*"},
 	AllowedHeaders:     []string{"*"},
 	ExposedHeaders:     []string{"*"},

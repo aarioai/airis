@@ -5,7 +5,6 @@ go 1.24.3
 require (
 	github.com/aarioai/airis v0.1.271
 	github.com/aarioai/airis-driver v0.0.62
-	github.com/aarioai/golib v0.0.78
 	github.com/iris-contrib/middleware/cors v0.0.0-20250207234507-372f6828ef8c
 	github.com/kataras/iris/v12 v12.2.11
 	github.com/redis/go-redis/v9 v9.10.0
