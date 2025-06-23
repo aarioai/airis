@@ -14,6 +14,9 @@
         <function importPath="fmt" name="Printf" />
         <function importPath="github.com/aarioai/airis/pkg/types" name="Close" />
         <function importPath="github.com/aarioai/airis/aa/httpsvr/response" name="JsonE" />
+        <function importPath="os" name="Remove" />
+        <function importPath="path/filepath" name="Walk" />
+        <function importPath="golang.org/x/sys/windows" name="CloseHandle" />
       </functions>
       <methods>
         <method importPath="strings" receiver="*Builder" name="WriteByte" />
@@ -40,6 +43,7 @@
         <method importPath="github.com/aarioai/airis/aa/httpsvr/response" receiver="*Writer" name="WriteE" />
         <method importPath="github.com/aarioai/airis/aa/aconfig" receiver="*Config" name="DeregisterGRPCService" />
         <method importPath="github.com/aarioai/airis/aa/httpsvr/response" receiver="*Writer" name="WriteOK" />
+        <method importPath="os" receiver="*File" name="Close" />
       </methods>
     </inspection_tool>
   </profile>

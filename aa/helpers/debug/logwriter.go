@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	defaultLogRetention           = -time.Hour * 24 * 90 // 保留日志的天数
+	defaultLogRetention           = -time.Hour * 24 * 90
 	defaultLogFileDateFormat      = "2006-01-02"
 	defaultLogSuffix              = ".log"
 	defaultLogBufferFlushInterval = time.Second * 3
@@ -34,8 +34,8 @@ type LogWriter struct {
 	done          chan struct{}
 	bufSize       int
 	bufWriter     *bufio.Writer
-	lastFlush     time.Time     // 添加最后刷新时间
-	flushInterval time.Duration // 添加刷新间隔
+	lastFlush     time.Time
+	flushInterval time.Duration
 
 	dateFormat string
 	suffix     string
@@ -66,7 +66,6 @@ func Console(args ...any) {
 		return
 	}
 
-	// 移除尾部换行符
 	msg = strings.TrimSuffix(msg, "\n")
 
 	// 方便运行程序时直接显示
@@ -75,13 +74,11 @@ func Console(args ...any) {
 	log.Println(msg)
 }
 
-// RedirectLog 重定向标准日志和panic输出
 func RedirectLog(dir string, perm os.FileMode, bufSize int, symlink ...string) error {
-	dir, err := ios.MkdirAll(dir, perm)
-	if err != nil {
+	var err error
+	if dir, err = ios.MkdirAll(dir, perm); err != nil {
 		return err
 	}
-	// 清除目录下所有空的日志文件
 	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil || info.IsDir() || !strings.HasSuffix(info.Name(), ".log") {
 			return nil
@@ -93,21 +90,19 @@ func RedirectLog(dir string, perm os.FileMode, bufSize int, symlink ...string) e
 	})
 
 	panicLog := path.Join(dir, fmt.Sprintf("panic-%s.log", time.Now().Format("2006-01-02")))
-	panicFile, err := os.OpenFile(panicLog, os.O_CREATE|os.O_APPEND|os.O_WRONLY, perm)
-	if err != nil {
+	var panicFile *os.File
+	if panicFile, err = os.OpenFile(panicLog, os.O_CREATE|os.O_APPEND|os.O_WRONLY, perm); err != nil {
 		return fmt.Errorf("failed to open crash file: %w", err)
 	}
 	defer panicFile.Close()
 
-	// 重定向标准错误输出
-	if err := redirectStderr(panicFile); err != nil {
+	if err = redirectStderr(panicFile); err != nil {
 		return fmt.Errorf("failed to redirect stderr: %w", err)
 	}
-	lw, err := NewLogWriter(dir, perm, bufSize, symlink...)
-	if err != nil {
+	var lw *LogWriter
+	if lw, err = NewLogWriter(dir, perm, bufSize, symlink...); err != nil {
 		return fmt.Errorf("failed to create log writer: %w", err)
 	}
-	// 设置日志输出
 	log.SetOutput(lw)
 	log.SetFlags(log.Ltime)
 	return nil
@@ -116,15 +111,14 @@ func RedirectLog(dir string, perm os.FileMode, bufSize int, symlink ...string) e
 // NewLogWriter 单例模式创建新的日志写入器
 // @warn docker 内使用，需要注意单独添加软链接映射，如 -v /var/log/symlink.log:/var/log/symlink.log
 func NewLogWriter(dir string, perm os.FileMode, bufSize int, symlinks ...string) (*LogWriter, error) {
+	var err error
 	defer func() {
-		err := generateRmlogScript(dir)
-		if err != nil {
+		if err = generateRmlogScript(dir); err != nil {
 			Console("generate rmlog script failed: %v", err)
 		}
 	}()
 
-	dir, err := ios.MkdirAll(dir, perm)
-	if err != nil {
+	if dir, err = ios.MkdirAll(dir, perm); err != nil {
 		return nil, err
 	}
 	// 这里会同时判断 symlinks[0] 是否为空字符串，兼容性更强
@@ -155,7 +149,6 @@ func NewLogWriter(dir string, perm os.FileMode, bufSize int, symlinks ...string)
 		logWriter.startCleanupRoutine()
 	})
 
-	// 检查并更新配置
 	if needsUpdate := logWriter.updateConfig(dir, symlink, bufSize); needsUpdate {
 		logWriter.initialize()
 	}
@@ -279,7 +272,6 @@ func (lw *LogWriter) Write(p []byte) (n int, err error) {
 }
 
 func (lw *LogWriter) openFile() error {
-	// 关闭现有文件和缓冲区
 	if lw.bufWriter != nil {
 		_ = lw.bufWriter.Flush()
 		lw.bufWriter = nil
@@ -308,7 +300,7 @@ func (lw *LogWriter) openFile() error {
 	}
 
 	lw.logName = newLogFile
-	lw.file = f // 不要关闭 f
+	lw.file = f //  Do not close this file descriptor
 	if lw.bufSize > 0 {
 		lw.bufWriter = bufio.NewWriterSize(f, lw.bufSize)
 	}
@@ -355,7 +347,6 @@ func (lw *LogWriter) cleanOldLogs() {
 	})
 }
 
-// Shutdown 正常该日志函数应该是伴随程序终生的，不应该关闭
 func (lw *LogWriter) Shutdown() error {
 	lw.mu.Lock()
 	defer lw.mu.Unlock()
@@ -383,9 +374,7 @@ func (lw *LogWriter) Shutdown() error {
 	return nil
 }
 
-// redirectStderr 重定向标准错误输出
 func redirectStderr(f *os.File) error {
-	// 使用平台特定的系统调用
 	if err := utils.Dup2(f.Fd(), 2); err != nil {
 		return fmt.Errorf("failed to dup fd: %w", err)
 	}

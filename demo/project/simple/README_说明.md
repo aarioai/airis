@@ -6,9 +6,11 @@
 2. 安装完成后，可以询问deepseek，如何配置golang环境，并修改 goproxy 为中国源
 3. 将 airis/demo 下载到你配置 GOPATH 目录下
 4. 进入 project/simple 目录
-5. 通过“终端管理员”，输入并运行 `go mod tidy` 下载依赖的包
-6. 通过“终端管理员”，运行 `go run main.go` 即运行程序。
-7. 浏览器打开 `http://localhost:8080/v1/ping`   如果浏览器显示 "PONG" ，则表示运行成功
+5. 查看 go.mod `github.com/aarioai/airis v<版本号>` 是不是最新版本，如果不是[最新版本](https://github.com/aarioai/airis/tags)，手动改为最新版本
+6. 通过“终端管理员”，输入并运行 `go mod tidy` 下载依赖的包，这一步如果网络不好，自行解决外网访问问题或GO PROXY源问题
+7. 通过“终端管理员”，输入并运行 `go get -u -v ./...` 更新依赖包，这一步如果网络不好，自行解决外网访问问题或GO PROXY源问题
+8. 通过“终端管理员”，运行 `go run main.go` 即运行程序。
+9. 浏览器打开 `http://localhost:8080/v1/ping`   如果浏览器显示 "PONG" ，则表示运行成功
 
 ### 配置golang环境，并修改为中国源
 安装完成后，可以询问deepseek，如何配置golang环境，并修改 goproxy 为中国源。

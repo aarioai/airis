@@ -3,7 +3,7 @@ module project/simple
 go 1.24.3
 
 require (
-	github.com/aarioai/airis v0.1.277
+	github.com/aarioai/airis v0.1.279
 	github.com/aarioai/airis-driver v0.0.62
 	github.com/iris-contrib/middleware/cors v0.0.0-20250207234507-372f6828ef8c
 	github.com/kataras/iris/v12 v12.2.11
@@ -84,7 +84,7 @@ require (
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/text v0.26.0 // indirect
 	golang.org/x/time v0.12.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250324211829-b45e905df463 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250603155806-513f23925822 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

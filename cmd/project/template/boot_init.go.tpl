@@ -36,10 +36,7 @@ func redirectLog(app *aa.App) {
 	dir := cfg.GetString("app.log_dir")
 	logBufferSize := cfg.Get("app.log_buffer_size").DefaultInt(0)
 	logSymlink := cfg.GetString("app.log_symlink")
-	err := debug.RedirectLog(dir, 0666, logBufferSize, logSymlink)
-	if err != nil {
-		panic(err.Error())
-	}
+	ae.PanicOnErrs(debug.RedirectLog(dir, 0666, logBufferSize, logSymlink))
 }
 
 func configValueProcessor(key string, value string) (string, error) { return value, nil }
