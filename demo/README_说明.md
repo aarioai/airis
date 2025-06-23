@@ -1,9 +1,9 @@
 # 示例说明
 
 project 目录下，放了3个示例项目：
-* tutorial  生成代码目录前的项目初始化状态
-* simple 纯HTTP Server服务的项目
-* microservice 同时提供 gRPC 微服务和HTTP Server服务的项目
+* [tutorial](./tutorial/README_说明.md)  生成代码目录前的项目初始化状态
+* [simple](./simple/README_说明.md) 纯HTTP Server服务的项目
+* [microservice](./microservice/README_说明.md) 同时提供 gRPC 微服务和HTTP Server服务的项目
 
 项目名称，应根据业务需求具体命名。项目内，可以设置不同的APP。APP 本质上也是一种 service，是可以对外开放的 service。
 

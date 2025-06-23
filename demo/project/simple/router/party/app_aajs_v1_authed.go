@@ -12,12 +12,6 @@ func registerAaJSV1Authed(app *aa.App, parent *iris.Application, w *middleware.M
 
 	bs := controller.New(app)
 
-	p.Get("/users", bs.GetUsersWithPaging)
-	p.Get("/users/page/{page:uint8}", bs.GetUsersWithPaging)
-	p.Get("/users/{uid:uint64}", bs.GetUser)
-	p.Get("/users/sex/{sex:uint8}", bs.GetUsersWithPaging)
-	p.Get("/users/sex/{sex:uint8}/page/{page:uint8}", bs.GetUsersWithPaging)
-
 	p.Get("/users2", bs.GetUsers)
 	p.Get("/users2/uid/{uid:string}", bs.GetUsers)
 
