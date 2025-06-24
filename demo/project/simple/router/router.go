@@ -6,5 +6,5 @@ import (
 )
 
 func Serve(app *aa.App, prof *debug.Profile) {
-	serveHTTP(app, "app_test")
+	serveHTTP(app, "app_aajs")
 }
