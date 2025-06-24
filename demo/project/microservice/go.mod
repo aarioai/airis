@@ -3,7 +3,7 @@ module project/microservice
 go 1.24.3
 
 require (
-	github.com/aarioai/airis v0.1.277
+	github.com/aarioai/airis v0.1.280
 	github.com/aarioai/airis-driver v0.0.62
 	github.com/kataras/iris/v12 v12.2.11
 	github.com/redis/go-redis/v9 v9.10.0
