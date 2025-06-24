@@ -20,9 +20,16 @@ func (c *Controller) PostRestful(ictx iris.Context) {
 func (c *Controller) PutRestful(ictx iris.Context) {
 	r, resp, _ := httpsvr.New(ictx)
 	defer resp.Next()
+	id, e0 := r.QueryInt("id")
 	say, _ := r.BodyString("say", false)
+	if e := resp.FirstError(e0); e != nil {
+		return
+	}
 
-	resp.Write(map[string]string{"say": say})
+	resp.Write(map[string]any{
+		"id":  id,
+		"say": say,
+	})
 }
 
 func (c *Controller) PatchRestful(ictx iris.Context) {
@@ -34,10 +41,16 @@ func (c *Controller) PatchRestful(ictx iris.Context) {
 }
 
 func (c *Controller) GetRestful(ictx iris.Context) {
-	_, resp, _ := httpsvr.New(ictx)
+	r, resp, _ := httpsvr.New(ictx)
 	defer resp.Next()
 
-	resp.Write(map[string]string{"say": "hello"})
+	response, _ := r.QueryString("response", false)
+	hello, _ := r.QueryString("hello", false)
+
+	resp.Write(map[string]string{
+		"response": response,
+		"hello":    hello,
+	})
 }
 
 func (c *Controller) DeleteRestful(ictx iris.Context) {
