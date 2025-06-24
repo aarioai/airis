@@ -35,6 +35,7 @@ func (c *Controller) GrantUserToken(ictx iris.Context) {
 	case "authorization_code":
 	case "refresh_token":
 		resp.TryWrite(c.s.RefreshUserToken(ctx, code.String()))
+		return
 	}
 	resp.WriteE(ae.NewBadParam("grant_type"))
 }
