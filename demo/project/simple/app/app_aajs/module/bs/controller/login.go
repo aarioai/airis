@@ -26,15 +26,15 @@ func (c *Controller) HeadUserToken(ictx iris.Context) {
 func (c *Controller) GrantUserToken(ictx iris.Context) {
 	r, resp, ctx := httpsvr.New(ictx)
 	defer resp.Next()
-	grantType, e0 := r.Body("grant_type", `^(authorization_code|refresh_token)$`)
-	code, e1 := r.Body("code")
+	grantType, e0 := r.BodyString("grant_type", `^(authorization_code|refresh_token)$`)
+	code, e1 := r.BodyString("code")
 	if e := ae.First(e0, e1); e != nil {
 		return
 	}
-	switch grantType.String() {
+	switch grantType {
 	case "authorization_code":
 	case "refresh_token":
-		resp.TryWrite(c.s.RefreshUserToken(ctx, code.String()))
+		resp.TryWrite(c.s.RefreshUserToken(ctx, code))
 		return
 	}
 	resp.WriteE(ae.NewBadParam("grant_type"))

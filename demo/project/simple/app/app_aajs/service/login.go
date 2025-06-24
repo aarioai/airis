@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/aarioai/airis/aa/ae"
 	"github.com/aarioai/airis/aa/atype"
 	"project/simple/app/app_aajs/module/bs/dto"
@@ -29,6 +30,7 @@ func (s *Service) Login(ctx context.Context, account, password, state string) (d
 }
 
 func (s *Service) RefreshUserToken(ctx context.Context, refreshToken string) (dto.UserToken, *ae.Error) {
+	fmt.Println(refreshToken)
 	if refreshToken != "refresh_helloworld" {
 		return dto.UserToken{}, ae.ErrorNotAcceptable
 	}
@@ -46,5 +48,6 @@ func (s *Service) RefreshUserToken(ctx context.Context, refreshToken string) (dt
 		},
 		Scope: nil,
 	}
+	fmt.Println(token)
 	return token, nil
 }

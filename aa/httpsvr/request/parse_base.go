@@ -199,11 +199,9 @@ func (r *Request) query(name string, patterns ...any) (*RawValue, *ae.Error) {
 	return r.find(r.injectedQueries, userData, name, patterns...)
 }
 
-// Headers 获取所有headers
-// 这个读取少，直接每次独立解析即可
 func (r *Request) queries(programData map[string]any, userData map[string][]string) map[string]any {
 	data := make(map[string]any)
-	// 优先级最低，读取用户data
+	// Lower priority, read from user data
 	if programData != nil {
 		for k, vs := range userData {
 			if len(vs) != 0 && vs[0] != "" {
@@ -211,7 +209,7 @@ func (r *Request) queries(programData map[string]any, userData map[string][]stri
 			}
 		}
 	}
-	// 优先级高，读取程序设置的header
+	// High priority, read injected header
 	if programData != nil {
 		for k, v := range r.injectedHeaders {
 			data[k] = v
@@ -242,7 +240,7 @@ func (r *Request) setPartialBodyData(data map[string][]string) {
 		r.injectedBodies = make(map[string]any, len(data))
 	}
 	for k, v := range data {
-		// 只返回首个元素
+		// Only return first
 		// @see http.Request.FormValue()
 		if len(v) > 0 {
 			r.injectedBodies[k] = v[0]
@@ -250,11 +248,11 @@ func (r *Request) setPartialBodyData(data map[string][]string) {
 	}
 }
 
-// parseBodyStream 解析请求体
+// parseBodyStream
 // @see http.parsePostForm()
 func (r *Request) parseBodyStream() *ae.Error {
 	defer func() { r.bodyParsed = true }()
-	// body 可以不传数据
+	// Body can be nil
 	if r.r == nil || r.r.Body == nil {
 		return nil
 	}
@@ -264,7 +262,7 @@ func (r *Request) parseBodyStream() *ae.Error {
 		return ae.NewUnsupportedMedia()
 	}
 	switch ct {
-	case CtJSON.String(), CtOctetStream.String(), CtForm.String():
+	case "", CtJSON.String(), CtOctetStream.String(), CtForm.String():
 		return r.parseSimpleBody()
 	case CtFormData.String():
 		return r.parseMultipartBody(params["boundary"])
@@ -272,7 +270,6 @@ func (r *Request) parseBodyStream() *ae.Error {
 	return nil
 }
 
-// parseSimpleBody 解析简单请求体
 func (r *Request) parseSimpleBody() *ae.Error {
 	var reader io.Reader = r.r.Body
 	if _, ok := reader.(*maxBytesReader); !ok {
@@ -294,7 +291,7 @@ func (r *Request) parseSimpleBody() *ae.Error {
 	// @see http.ParseMultipartForm
 	// .MultipartForm "multipart/form-data" ||  "multipart/mixed"
 	// .PostFormValue  "application/x-www-form-urlencoded" url.ParseQuery(body) + .MultipartForm
-	// .FormValue() 调用 .Form  =  url.ParseQuery(r.URL.RawQuery) + .PostFormValue
+	// .FormValue() calls .Form  =  url.ParseQuery(r.URL.RawQuery) + .PostFormValue
 }
 
 func (r *Request) parseFormBody(b []byte) *ae.Error {
@@ -315,7 +312,6 @@ func (r *Request) parseJSONBody(b []byte) *ae.Error {
 	return nil
 }
 
-// parseMultipartBody 解析multipart请求体
 func (r *Request) parseMultipartBody(boundary string) *ae.Error {
 	if boundary == "" {
 		return ae.NewPreconditionFailed("missing boundary")
