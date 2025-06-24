@@ -6,6 +6,7 @@ import (
 )
 
 func (c *Controller) HeadRestful(ictx iris.Context) {
+	defer ictx.Next()
 	ictx.StatusCode(200)
 }
 func (c *Controller) PostRestful(ictx iris.Context) {

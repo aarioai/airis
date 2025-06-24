@@ -19,6 +19,7 @@ func (c *Controller) PostLogin(ictx iris.Context) {
 }
 
 func (c *Controller) HeadUserToken(ictx iris.Context) {
+	defer ictx.Next()
 	ictx.StatusCode(iris.StatusOK)
 }
 

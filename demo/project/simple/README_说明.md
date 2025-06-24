@@ -13,8 +13,8 @@
 6. 通过SSH命令行输入并运行 `go mod tidy` 下载依赖的包，这一步如果网络不好，自行解决外网访问问题或GO PROXY源问题
 7. 通过SSH命令行输入并运行 `go get -u -v ./...` 更新依赖包，这一步如果网络不好，自行解决外网访问问题或GO PROXY源问题
 8. 通过SSH命令行输入并运行 `go run main.go` 即运行程序。
-9. 浏览器打开 `http://localhost:8080/v1/ping`   如果浏览器显示 "PONG" ，则表示运行成功
-10. 如果端口冲突，可以修改 config/app-local.ini 里面 `port = 8080` 为你本机空闲端口即可
+9. 浏览器打开 `http://localhost/v1/ping`   如果浏览器显示 "PONG" ，则表示运行成功
+10. 如果端口冲突，可以修改 config/app-local.ini 里面 `port = 80` 为你本机空闲端口即可
 
 ## Windows 下运行说明
 
@@ -28,8 +28,8 @@ Windows 环境仅作参考，很多脚本尚未兼容 Windows
 6. 通过“终端管理员”，输入并运行 `go mod tidy` 下载依赖的包，这一步如果网络不好，自行解决外网访问问题或GO PROXY源问题
 7. 通过“终端管理员”，输入并运行 `go get -u -v ./...` 更新依赖包，这一步如果网络不好，自行解决外网访问问题或GO PROXY源问题
 8. 通过“终端管理员”，运行 `go run main.go` 即运行程序。
-9. 浏览器打开 `http://localhost:8080/v1/ping`   如果浏览器显示 "PONG" ，则表示运行成功
-10. 如果端口冲突，可以修改 config/app-local.ini 里面 `port = 8080` 为你本机空闲端口即可
+9. 浏览器打开 `http://localhost/v1/ping`   如果浏览器显示 "PONG" ，则表示运行成功
+10. 如果端口冲突，可以修改 config/app-local.ini 里面 `port = 80` 为你本机空闲端口即可
 
 ## 配置golang环境，并修改为中国源
 安装完成后，可以询问deepseek，如何配置golang环境，并修改 goproxy 为中国源。
@@ -65,7 +65,7 @@ go env -w GOPROXY=https://goproxy.cn,direct
 5. 如果需要创建更多app，直接执行 `./cmd/cmd new <APP名>` 即可
 
 
-运行main.go后，访问  `http://localhost:8080/ping`
+运行main.go后，访问  `http://localhost/ping`
 ```shell
 go run main.go
 ```
