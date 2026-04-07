@@ -1,6 +1,6 @@
 module github.com/aarioai/airis
 
-go 1.24
+go 1.25
 
 require (
 	github.com/hashicorp/consul/api v1.32.1
