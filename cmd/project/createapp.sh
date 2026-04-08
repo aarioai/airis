@@ -228,11 +228,14 @@ createCommonServiceFile(){
 
 createConfigFile(){
     local project_root="$1"
-    local app_name="$2"
+    local project_name="$2"
+    local app_name="$3"
     mkdir -p "${project_root}/config"
     local template="${CUR}/template/app-local.ini.tpl"
     local dst="${project_root}/config/app-local.ini"
     if [ ! -f "$dst" ]; then
+        sed -e "s#{{PROJECT_ROOT}}#${project_root}#g" "$template" > "$dst"
+        sed -e "s#{{PROJECT_NAME}}#${project_name}#g" "$template" > "$dst"
         sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
     fi
 }
@@ -419,7 +422,7 @@ main(){
     createServiceFile "$app_root" "$app_base"
     createGRPC "$project_root" "$project_base" "$app_root" "$app_base" "$app_name"
     createJob "$app_root" "$app_base" "$app_name"
-    createConfigFile "$project_root" "$app_name"
+    createConfigFile "$project_root" "$project_name" "$app_name"
     createBootFiles "$project_root" "$project_base"
 
     createStorage "$project_root"
