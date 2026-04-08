@@ -16,7 +16,7 @@ needCloseVPN=0
 incrTag=1
 
 usage() {
-    cat << EOF
+  cat << EOF
 Usage: $0 [options] [commit message]
 Options:
     -u          Upgrade go.mod
@@ -24,102 +24,102 @@ Options:
     -i          Skip go mod update
     -h          Show this help message
 EOF
-    exit 1
+  exit 1
 }
 
 while getopts "utih" opt; do
-    case "$opt" in
-        t) incrTag=0 ;;
-        h) usage ;;
-        *) usage ;;
-    esac
+  case "$opt" in
+    t) incrTag=0 ;;
+    h) usage ;;
+    *) usage ;;
+  esac
 done
 shift $((OPTIND-1))
 
 if [ $# -gt 0 ]; then
-    comment="$1"
+  comment="$1"
 fi
 
  # @DEPRECATED
 build() {
-    cd "$ROOT_DIR/cmd" || Panic "failed to cd $ROOT_DIR/cmd"
-    Info "building project..."
-    # @DEPRECATED
-    go run build.go --root="$ROOT_DIR" --js="/data/Aa/proj/go/src/project/xixi/deploy/asset_src/lib_dev/aa-js/src/f_oss_filetype_readonly.js" || Panic "Build failed"
+  cd "$ROOT_DIR/cmd" || Panic "failed to cd $ROOT_DIR/cmd"
+  Info "building project..."
+  # @DEPRECATED
+  go run build.go --root="$ROOT_DIR" --js="/data/Aa/proj/go/src/project/xixi/deploy/asset_src/lib_dev/aa-js/src/f_oss_filetype_readonly.js" || Panic "Build failed"
 }
 
 handleUpdateMod(){
-    local latest_update=''
-    local today
-    today="$(date +"%Y-%m-%d")"
-    if [ -s "${MOD_UPDATE_FILE}" ]; then
-        latest_update=$(cat "${MOD_UPDATE_FILE}")
-    fi
+  local latest_update=''
+  local today
+  today="$(date +"%Y-%m-%d")"
+  if [ -s "${MOD_UPDATE_FILE}" ]; then
+      latest_update=$(cat "${MOD_UPDATE_FILE}")
+  fi
 
-    if [[ "$today" = "$latest_update" ]]; then
-        return 0
-    fi
-    Info "go get -u -v ./..."
-    if ! go get -u -v ./... >/dev/null 2>&1; then
-        Warn "update go modules failed"
-    fi
+  if [[ "$today" = "$latest_update" ]]; then
+    return 0
+  fi
+  Info "go get -u -v ./..."
+  if ! go get -u -v ./... >/dev/null 2>&1; then
+    Warn "update go modules failed"
+  fi
 
-    [ -f "$MOD_UPDATE_FILE" ] || touch "$MOD_UPDATE_FILE"
-    [ -w "$MOD_UPDATE_FILE" ] || sudo chmod a+rw "$MOD_UPDATE_FILE"
-    Info "save update mod date to $MOD_UPDATE_FILE"
-    printf '%s' "$today" > "$MOD_UPDATE_FILE"
-    cat "$MOD_UPDATE_FILE"
+  [ -f "$MOD_UPDATE_FILE" ] || touch "$MOD_UPDATE_FILE"
+  [ -w "$MOD_UPDATE_FILE" ] || sudo chmod a+rw "$MOD_UPDATE_FILE"
+  Info "save update mod date to $MOD_UPDATE_FILE"
+  printf '%s' "$today" > "$MOD_UPDATE_FILE"
+  cat "$MOD_UPDATE_FILE"
 }
 
 pushAndUpgradeMod() {
-    Info "push and upgrade go mod"
-    cd "$ROOT_DIR" || Panic "failed to cd $ROOT_DIR"
+  Info "push and upgrade go mod"
+  cd "$ROOT_DIR" || Panic "failed to cd $ROOT_DIR"
 
-    handleUpdateMod
+  handleUpdateMod
 
-    Info "go mod tidy"
-    [ -f "go.mod" ] || go mod init
-    go mod tidy || Panic "failed go mod tidy"
+  Info "go mod tidy"
+  [ -f "go.mod" ] || go mod init
+  go mod tidy || Panic "failed go mod tidy"
 
-    Info "go test ./..."
-    go test ./... || Panic "failed go test ./... failed"
+  Info "go test ./..."
+  go test ./... || Panic "failed go test ./... failed"
 
-    # check there are changes or not
-    if [ -z "$(git status --porcelain)" ]; then
-        Info "No changes to commit"
-        exit 0
-    fi
-    Info "committing changes..."
-    git add -A . || Panic "failed git add -A ."
-    git commit -m "$comment" || Panic "failed git commit -m $comment"
-    git push origin main || Panic "failed git push origin main"
+  # check there are changes or not
+  if [ -z "$(git status --porcelain)" ]; then
+    Info "No changes to commit"
+    exit 0
+  fi
+  Info "committing changes..."
+  git add -A . || Panic "failed git add -A ."
+  git commit -m "$comment" || Panic "failed git commit -m $comment"
+  git push origin main || Panic "failed git push origin main"
 
-    if [ $incrTag -eq 1 ]; then
-        handle_tags
-    fi
+  if [ $incrTag -eq 1 ]; then
+    handle_tags
+  fi
 }
 
 handle_tags() {
-    Info "managing tags..."
-    git pull origin --tags
-    git tag -l | xargs git tag -d
-    git fetch origin --prune
-    latestTag=$(git describe --tags "$(git rev-list --tags --max-count=1)" 2>/dev/null || echo "")
-    
-    if [ -n "$latestTag" ]; then
-        tag=${latestTag%.*}
-        id=${latestTag##*.}
-        id=$((id+1))
-        newTag="$tag.$id"
-        
-        Info "removing old tag: $latestTag"
-        git tag -d "$latestTag"
-        git push origin --delete tag "$latestTag"
-        
-        git tag "$newTag"
-        git push origin --tags
-        Info "new tag created: $newTag"
-    fi
+  Info "managing tags..."
+  git pull origin --tags
+  git tag -l | xargs git tag -d
+  git fetch origin --prune
+  latestTag=$(git describe --tags "$(git rev-list --tags --max-count=1)" 2>/dev/null || echo "")
+
+  if [ -n "$latestTag" ]; then
+    tag=${latestTag%.*}
+    id=${latestTag##*.}
+    id=$((id+1))
+    newTag="$tag.$id"
+
+    Info "removing old tag: $latestTag"
+    git tag -d "$latestTag"
+    git push origin --delete tag "$latestTag"
+
+    git tag "$newTag"
+    git push origin --tags
+    Info "new tag created: $newTag"
+  fi
 }
 
 

@@ -16,7 +16,7 @@ ROOT_DIR="$(cd "${CUR}/.." && pwd)"
 readonly ROOT_DIR
 
 usage(){
-    cat << EOF
+  cat << EOF
 Usage: $0 <project_project_root> <command>
     $0 <project_root> new|createapp <app name>
     $0 <project_root> protoc [libprotoc_version]
@@ -24,30 +24,30 @@ Example:
     $0 ../ new test
     $0 ../ protoc 29.3
 EOF
-    exit 1
+  exit 1
 }
 
 main(){
-    [ "$#" -ge 2 ] || usage
-    local project_root="$1"
-    local cmd="$2"
-    shift 2
-    local args=("$@")
-    Info "$cmd -> ${args[*]}"
+  [ "$#" -ge 2 ] || usage
+  local project_root="$1"
+  local cmd="$2"
+  shift 2
+  local args=("$@")
+  Info "$cmd -> ${args[*]}"
 
-    case "$cmd" in
-        new|createapp|createapp.sh)
-            Info "${CUR}/project/createapp.sh $project_root ${args[*]}"
-            "${CUR}"/project/createapp.sh "$project_root" "${args[@]}"
-            ;;
-        protoc|protoc.sh)
-            local protoc_version="${1-"$PROTOC_VERSION"}"
-            Info "${CUR}/project/protoc.sh $project_root $protoc_version"
-            "${CUR}"/project/protoc.sh "$project_root" "$protoc_version"
-            ;;
-        *)
-            Panic "invalid command: ${cmd}"
-    esac
+  case "$cmd" in
+    new|createapp|createapp.sh)
+      Info "${CUR}/project/createapp.sh $project_root ${args[*]}"
+      "${CUR}"/project/createapp.sh "$project_root" "${args[@]}"
+      ;;
+    protoc|protoc.sh)
+      local protoc_version="${1-"$PROTOC_VERSION"}"
+      Info "${CUR}/project/protoc.sh $project_root $protoc_version"
+      "${CUR}"/project/protoc.sh "$project_root" "$protoc_version"
+      ;;
+    *)
+        Panic "invalid command: ${cmd}"
+  esac
 }
 
 main "$@"
