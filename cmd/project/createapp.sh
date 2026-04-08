@@ -1,6 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
+# https://github.com/aarioai/opt
 . /opt/aa/lib/aa-posix-lib.sh
 
 # createapp.sh

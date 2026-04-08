@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-. /opt/aa/lib/aa-posix-lib.sh
+# https://github.com/aarioai/opt
 
 # protoc.sh
 # 在项目内自动查找.proto文件，并生成对应protobuf go文件的脚本

@@ -1,6 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
+# https://github.com/aarioai/opt
+. /opt/aa/lib/aa-posix-lib.sh
+
 CUR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly CUR
 # aarioai/airis
@@ -11,31 +14,6 @@ readonly MOD_UPDATE_FILE="${ROOT_DIR}/._update"
 declare comment
 needCloseVPN=0
 incrTag=1
-
-readonly RED='\033[0;31m'
-readonly GREEN='\033[0;32m'
-readonly YELLOW='\033[1;33m'
-readonly NC='\033[0m' # No Color
-
-_log() {
-    local level=$1
-    local color=$2
-    local message=$3
-    echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${color}${level:+[$level] }${message}${NC}"
-}
-
-Info(){
-    _log "info" "${GREEN}" "$1"
-}
-
-Warn(){
-    _log "warn" "${YELLOW}" "$1" >&2
-}
-
-Panic() {
-    _log "error" "${RED}" "$1" >&2
-    exit 1
-}
 
 usage() {
     cat << EOF
@@ -148,11 +126,11 @@ handle_tags() {
 unsetVPN() {
   Info "unset VPN"
   if [[ $1 -eq 1 ]]; then
-      echo "unset VPN"
-      export http_proxy=""
-      export https_proxy=""
-      unset http_proxy
-      unset https_poxy
+    echo "unset VPN"
+    export http_proxy=""
+    export https_proxy=""
+    unset http_proxy
+    unset https_poxy
   fi
 }
 
@@ -166,17 +144,12 @@ setVPN() {
   export http_proxy=http://127.0.0.1:8118
   export https_proxy=http://127.0.0.1:8118
 
-  local http_code
-
-  Info "curl --max-time 3 -s -w '%{http_code}\n' -o /dev/null google.com"
-  http_code=$(curl --max-time 3 -s -w '%{http_code}\n' -o /dev/null google.com || printf '')
-
-  if [[ $http_code =~ ^[23][0-9]{2}$ ]]; then
+  if HttpOK 'google.com'; then
     needCloseVPN=1
-    echo "start VPN (HTTP $http_code)"
+    Info "start VPN"
   else
     unsetVPN 1
-    echo "check VPN failed (HTTP $http_code)"
+    Info "check VPN failed"
   fi
 }
 
