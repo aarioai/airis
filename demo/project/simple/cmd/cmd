@@ -20,7 +20,7 @@ readonly ROOT_DIR
 declare repo_cmd
 
 findRepoCmdDir(){
-    info "checking go.mod file"
+    Info "checking go.mod file"
     if [ ! -f "${ROOT_DIR}/go.mod" ];then
         go mod init
     fi
@@ -28,9 +28,9 @@ findRepoCmdDir(){
     go get -u "$AIRIS"
     go get -u "$AIRIS"  # double check update
 
-    info "detecting airis version"
+    Info "detecting airis version"
     version=$(grep "$AIRIS v" go.mod | sed -E 's/.*(v[0-9]+\.[0-9]+\.[0-9]+).*/\1/')
-    info "airis version: ${version}"
+    Info "airis version: ${version}"
     repo_cmd="${MOD_ROOT}/airis@${version}/cmd"
     [ -d "$repo_cmd" ] || panic "missing ${repo_cmd}"
  }
@@ -39,7 +39,7 @@ findRepoCmdDir(){
     findRepoCmdDir
     local base="${repo_cmd}/cmd-base.sh"
     [ -f "$base" ] || panic "$base not found"
-    info "${base} ${ROOT_DIR} ${*}"
+    Info "${base} ${ROOT_DIR} ${*}"
     "$base" "$ROOT_DIR" "$@"
  }
 

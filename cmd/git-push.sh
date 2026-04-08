@@ -6,7 +6,7 @@ readonly CUR
 # aarioai/airis
 ROOT_DIR="$(cd "${CUR}/.." && pwd)"
 readonly ROOT_DIR
-readonly MOD_UPDATE_FILE="${ROOT_DIR}/.aa-update"
+readonly MOD_UPDATE_FILE="${ROOT_DIR}/._update"
 
 declare comment
 needCloseVPN=0
@@ -24,19 +24,19 @@ _log() {
     echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${color}${level:+[$level] }${message}${NC}"
 }
 
-log() {
+Log() {
     _log "" "" "$1"
 }
 
-info(){
+Info(){
     _log "info" "${GREEN}" "$1"
 }
 
-warn(){
+Warn(){
     _log "warn" "${YELLOW}" "$1" >&2
 }
 
-panic() {
+Panic() {
     _log "error" "${RED}" "$1" >&2
     exit 1
 }
@@ -68,10 +68,10 @@ fi
 
  # @DEPRECATED
 build() {
-    cd "$ROOT_DIR/cmd" || panic "failed to cd $ROOT_DIR/cmd"
-    info "building project..."
+    cd "$ROOT_DIR/cmd" || Panic "failed to cd $ROOT_DIR/cmd"
+    Info "building project..."
     # @DEPRECATED
-    go run build.go --root="$ROOT_DIR" --js="/data/Aa/proj/go/src/project/xixi/deploy/asset_src/lib_dev/aa-js/src/f_oss_filetype_readonly.js" || panic "Build failed"
+    go run build.go --root="$ROOT_DIR" --js="/data/Aa/proj/go/src/project/xixi/deploy/asset_src/lib_dev/aa-js/src/f_oss_filetype_readonly.js" || Panic "Build failed"
 }
 
 handleUpdateMod(){
@@ -85,39 +85,40 @@ handleUpdateMod(){
     if [[ "$today" = "$latest_update" ]]; then
         return 0
     fi
-    info "go get -u -v ./..."
+    Info "go get -u -v ./..."
     if ! go get -u -v ./... >/dev/null 2>&1; then
-        warn "update go modules failed"
+        Warn "update go modules failed"
     fi
 
     [ -f "$MOD_UPDATE_FILE" ] || touch "$MOD_UPDATE_FILE"
     [ -w "$MOD_UPDATE_FILE" ] || sudo chmod a+rw "$MOD_UPDATE_FILE"
-    info "save update mod date to $MOD_UPDATE_FILE"
+    Info "save update mod date to $MOD_UPDATE_FILE"
     printf '%s' "$today" > "$MOD_UPDATE_FILE"
     cat "$MOD_UPDATE_FILE"
 }
 
 pushAndUpgradeMod() {
-    cd "$ROOT_DIR" || panic "failed to cd $ROOT_DIR"
+    Info "push and upgrade go mod"
+    cd "$ROOT_DIR" || Panic "failed to cd $ROOT_DIR"
 
     handleUpdateMod
 
-    info "go mod tidy"
+    Info "go mod tidy"
     [ -f "go.mod" ] || go mod init
-    go mod tidy || panic "failed go mod tidy"
+    go mod tidy || Panic "failed go mod tidy"
 
-    info "go test ./..."
-    go test ./... || panic "failed go test ./... failed"
+    Info "go test ./..."
+    go test ./... || Panic "failed go test ./... failed"
 
     # check there are changes or not
     if [ -z "$(git status --porcelain)" ]; then
-        info "No changes to commit"
+        Info "No changes to commit"
         exit 0
     fi
-    info "committing changes..."
-    git add -A . || panic "failed git add -A ."
-    git commit -m "$comment" || panic "failed git commit -m $comment"
-    git push origin main || panic "failed git push origin main"
+    Info "committing changes..."
+    git add -A . || Panic "failed git add -A ."
+    git commit -m "$comment" || Panic "failed git commit -m $comment"
+    git push origin main || Panic "failed git push origin main"
 
     if [ $incrTag -eq 1 ]; then
         handle_tags
@@ -125,7 +126,7 @@ pushAndUpgradeMod() {
 }
 
 handle_tags() {
-    info "managing tags..."
+    Info "managing tags..."
     git pull origin --tags
     git tag -l | xargs git tag -d
     git fetch origin --prune
@@ -137,18 +138,19 @@ handle_tags() {
         id=$((id+1))
         newTag="$tag.$id"
         
-        info "removing old tag: $latestTag"
+        Info "removing old tag: $latestTag"
         git tag -d "$latestTag"
         git push origin --delete tag "$latestTag"
         
         git tag "$newTag"
         git push origin --tags
-        info "new tag created: $newTag"
+        Info "new tag created: $newTag"
     fi
 }
 
 
 unsetVPN() {
+  Info "unset VPN"
   if [[ $1 -eq 1 ]]; then
       echo "unset VPN"
       export http_proxy=""
@@ -159,8 +161,9 @@ unsetVPN() {
 }
 
 setVPN() {
+  Info "setting VPN"
   if [ -n "${http_proxy:-}" ]; then
-    info "proxy ${http_proxy} ${https_proxy}"
+    Info "proxy ${http_proxy} ${https_proxy}"
     return
   fi
 
@@ -168,7 +171,10 @@ setVPN() {
   export https_proxy=http://127.0.0.1:8118
 
   local http_code
-  http_code=$(curl --max-time 3 -s -w '%{http_code}\n' -o /dev/null google.com)
+
+  Info "curl --max-time 3 -s -w '%{http_code}\n' -o /dev/null google.com"
+  http_code=$(curl --max-time 3 -s -w '%{http_code}\n' -o /dev/null google.com || echo "000")
+
   if [[ $http_code =~ ^[23][0-9]{2}$ ]]; then
     needCloseVPN=1
     echo "start VPN (HTTP $http_code)"
@@ -180,11 +186,12 @@ setVPN() {
 
 
 main() {
+  Info "starting..."
   setVPN
  # build
   pushAndUpgradeMod
   unsetVPN "$needCloseVPN"
-  info "success!"
+  Info "success!"
 }
 
 main

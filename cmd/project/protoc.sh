@@ -13,7 +13,7 @@ installProtoc(){
         protoc --version
         return 0
     fi
-    cdOrPanic "/usr/local/src"
+    CdOrPanic "/usr/local/src"
 
     local zipfile="https://github.com/protocolbuffers/protobuf/releases/download/v${protoc_version}/protoc-${protoc_version}-linux-x86_64.zip"
 
@@ -23,7 +23,7 @@ installProtoc(){
     unzip "$zip_filename" -d "${zip_filename}.d"
     sudo mv "${zip_filename}.d/bin/"* /usr/local/bin/
 
-    cdOrPanic "$project_root"
+    CdOrPanic "$project_root"
     go get -u google.golang.org/grpc
     go get -u google.golang.org/protobuf
     # Must use github.com/golang/protobuf, but not google.golang.org/protobuf
@@ -35,12 +35,12 @@ installProtoc(){
 parseProto(){
     local project_root="$1"
     local rpc_root="${project_root}/app/rpc"
-    cdOrPanic "$rpc_root"
+    CdOrPanic "$rpc_root"
     for dir in "$rpc_root"/*; do
         [ -d "$dir" ] || continue
         dir=$(realpath "$dir")
         echo "$dir"
-        cdOrPanic "$dir"
+        CdOrPanic "$dir"
         for proto in *.proto; do
             [[ -f "$proto" ]] || continue
             local dst="${dir}/pb"

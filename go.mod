@@ -1,6 +1,6 @@
 module github.com/aarioai/airis
 
-go 1.25
+go 1.24
 
 require (
 	github.com/hashicorp/consul/api v1.32.1
@@ -21,7 +21,7 @@ require (
 	github.com/andybalholm/brotli v1.2.0 // indirect
 	github.com/armon/go-metrics v0.4.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
-	github.com/fatih/color v1.18.0 // indirect
+	github.com/fatih/color v1.16.0 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/flosch/pongo2/v4 v4.0.2 // indirect
 	github.com/golang/snappy v1.0.0 // indirect

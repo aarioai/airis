@@ -32,20 +32,20 @@ main(){
     local cmd="$2"
     shift 2
     local args=("$@")
-    info "$cmd -> ${args[*]}"
+    Info "$cmd -> ${args[*]}"
 
     case "$cmd" in
         new|createapp|createapp.sh)
-            info "${CUR}/project/createapp.sh $project_root ${args[*]}"
+            Info "${CUR}/project/createapp.sh $project_root ${args[*]}"
             "${CUR}"/project/createapp.sh "$project_root" "${args[@]}"
             ;;
         protoc|protoc.sh)
             local protoc_version="${1-"$PROTOC_VERSION"}"
-            info "${CUR}/project/protoc.sh $project_root $protoc_version"
+            Info "${CUR}/project/protoc.sh $project_root $protoc_version"
             "${CUR}"/project/protoc.sh "$project_root" "$protoc_version"
             ;;
         *)
-            panic "invalid command: ${cmd}"
+            Panic "invalid command: ${cmd}"
     esac
 }
 

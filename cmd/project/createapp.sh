@@ -279,7 +279,7 @@ createStorage(){
 goModTidy(){
     local project_root="$1"
     local project_base="$2"
-    cdOrPanic "$project_root"
+    CdOrPanic "$project_root"
     if [ ! -f "go.mod" ]; then
         go mod init "$project_base"
     fi
@@ -425,7 +425,7 @@ main(){
     createStorage "$project_root"
 
     goModTidy "$project_root" "$project_base"
-    info "created app ${app_name} (${app_root})"
+    Info "created app ${app_name} (${app_root})"
 }
 
 main "$@"
