@@ -67,13 +67,15 @@ createDirs(){
         fi
     done
 }
+
 createBaseConfFile(){
     local app_root="$1"
-    local project_name="$2"
+    local app_name="$2"
+    local project_name="$3"
     local template="${CUR}/template/conf_base.go.tpl"
     local dst="${app_root}/conf/base.go"
     if [ ! -f "$dst" ]; then
-        sed -e "s#{{PROJECT_NAME}}#${project_name}#g"  "$template" > "$dst"
+        sed -e "s#{{APP_NAME}}#${app_name}#g" -e "s#{{PROJECT_NAME}}#${project_name}#g"  "$template" > "$dst"
     fi
 }
 
@@ -411,7 +413,7 @@ main(){
 
     createMainGo "$project_root" "$project_base"
     createMiddlewareFile "$project_root"
-    createBaseConfFile "$app_root" "$project_name"
+    createBaseConfFile "$app_root" "$app_name" "$project_name"
     createRouterFile "$project_root" "$app_name"
     createRouterEngineFile "$project_root"
     createCacheFile "$app_root" "$app_base"
