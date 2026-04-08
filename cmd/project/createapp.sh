@@ -234,9 +234,7 @@ createConfigFile(){
     local template="${CUR}/template/app-local.ini.tpl"
     local dst="${project_root}/config/app-local.ini"
     if [ ! -f "$dst" ]; then
-        sed -e "s#{{PROJECT_ROOT}}#${project_root}#g" "$template" > "$dst"
-        sed -e "s#{{PROJECT_NAME}}#${project_name}#g" "$template" > "$dst"
-        sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+        sed -e "s#{{PROJECT_ROOT}}#${project_root}#g" -e "s#{{PROJECT_NAME}}#${project_name}#g" -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
     fi
 }
 
