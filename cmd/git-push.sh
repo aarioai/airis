@@ -24,10 +24,6 @@ _log() {
     echo -e "$(date '+%Y-%m-%d %H:%M:%S') ${color}${level:+[$level] }${message}${NC}"
 }
 
-Log() {
-    _log "" "" "$1"
-}
-
 Info(){
     _log "info" "${GREEN}" "$1"
 }
@@ -173,7 +169,7 @@ setVPN() {
   local http_code
 
   Info "curl --max-time 3 -s -w '%{http_code}\n' -o /dev/null google.com"
-  http_code=$(curl --max-time 3 -s -w '%{http_code}\n' -o /dev/null google.com || echo "000")
+  http_code=$(curl --max-time 3 -s -w '%{http_code}\n' -o /dev/null google.com || printf '')
 
   if [[ $http_code =~ ^[23][0-9]{2}$ ]]; then
     needCloseVPN=1
