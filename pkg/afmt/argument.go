@@ -2,6 +2,7 @@ package afmt
 
 import (
 	"fmt"
+
 	"github.com/aarioai/airis/pkg/types"
 )
 
@@ -20,6 +21,19 @@ func First[T any](args []T) T {
 		return zero
 	}
 	return args[0]
+}
+
+func FirstNotEmpty[T comparable](args []T) T {
+	var zero T
+	if len(args) == 0 {
+		return zero
+	}
+	for _, arg := range args {
+		if arg != zero {
+			return arg
+		}
+	}
+	return zero
 }
 
 // SprintfArgs 针对可选参数，格式化字符串

@@ -1,12 +1,13 @@
 package request
 
 import (
+	"html/template"
+	"time"
+
 	"github.com/aarioai/airis/aa/ae"
 	"github.com/aarioai/airis/aa/atype"
 	"github.com/aarioai/airis/aa/atype/aenum"
 	"github.com/aarioai/airis/pkg/afmt"
-	"html/template"
-	"time"
 )
 
 func (r *Request) BodyAudio(p string, required ...bool) (atype.AudioPath, *ae.Error) {
@@ -184,8 +185,21 @@ func (r *Request) BodyProvince(p string, required ...bool) (atype.Province, *ae.
 func (r *Request) BodySex(p string, xargs ...bool) (aenum.Sex, *ae.Error) {
 	return parseSex(r.BodyUint8, p, xargs...)
 }
+
 func (r *Request) BodyStatus(p string, xargs ...bool) (aenum.Status, *ae.Error) {
 	return parseStatus(r.BodyInt8, p, xargs...)
+}
+func (r *Request) BodyStatusEnum(p string, enums ...aenum.Status) (aenum.Status, *ae.Error) {
+	status, e := parseStatus(r.BodyInt8, p)
+	if e != nil || len(enums) == 0 {
+		return status, e
+	}
+	for _, x := range enums {
+		if x == status {
+			return x, nil
+		}
+	}
+	return status, ae.NewBadParam(p, "check status enum")
 }
 
 func (r *Request) BodyText(p string, required ...any) (atype.Text, *ae.Error) {

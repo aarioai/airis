@@ -3,17 +3,18 @@ package ae
 import (
 	"errors"
 	"fmt"
-	"github.com/aarioai/airis/pkg/afmt"
-	"github.com/aarioai/airis/pkg/utils"
 	"strings"
 	"time"
+
+	"github.com/aarioai/airis/pkg/afmt"
+	"github.com/aarioai/airis/pkg/utils"
 )
 
 func First(es ...*Error) *Error {
-	return afmt.First(es)
+	return afmt.FirstNotEmpty(es)
 }
 func FirstError(errs ...error) error {
-	return afmt.First(errs)
+	return afmt.FirstNotEmpty(errs)
 }
 func IsNotFound(err error) bool {
 	return errors.Is(err, ErrNotFound)

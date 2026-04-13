@@ -25,7 +25,7 @@ func registerAaJSV1(app *aa.App, parent *iris.Application, w *middleware.Middlew
 	p.Put("/restful/{id:int}", bs.PutRestful)
 	p.Patch("/restful", bs.PatchRestful)
 	p.Get("/restful/{response:string}", bs.GetRestful)
-	p.Delete("/restful", bs.DeleteRestful)
+	p.Delete("/restful/{id:int}", bs.DeleteRestful)
 
 	p.Post("/login", bs.PostLogin)                 // password login
 	p.Head("/auth/access_token", bs.HeadUserToken) // detect access token validate

@@ -3,11 +3,6 @@ package request
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/aarioai/airis/aa/ae"
-	"github.com/aarioai/airis/aa/atype"
-	"github.com/aarioai/airis/pkg/utils"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 	"io"
 	"mime"
 	"mime/multipart"
@@ -15,6 +10,12 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+
+	"github.com/aarioai/airis/aa/ae"
+	"github.com/aarioai/airis/aa/atype"
+	"github.com/aarioai/airis/pkg/utils"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type userDataInterface interface {

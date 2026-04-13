@@ -35,7 +35,7 @@ func (c *Controller) PutRestful(ictx iris.Context) {
 func (c *Controller) PatchRestful(ictx iris.Context) {
 	r, resp, _ := httpsvr.New(ictx)
 	defer resp.Next()
-	num, _ := r.BodyInt("num", false)
+	num, _ := r.BodyInt("num")
 
 	resp.Write(map[string]int{"num": num})
 }

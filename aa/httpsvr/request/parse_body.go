@@ -1,9 +1,10 @@
 package request
 
 import (
-	"github.com/aarioai/airis/aa/ae"
 	"mime/multipart"
 	"strings"
+
+	"github.com/aarioai/airis/aa/ae"
 )
 
 func (r *Request) Files(p string, required ...bool) ([]*multipart.FileHeader, *ae.Error) {
