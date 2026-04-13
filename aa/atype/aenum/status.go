@@ -40,8 +40,9 @@ var (
 
 func NewStatus(sts int8) (Status, bool) {
 	s := Status(sts)
-	ok := s == SysRevoked || s == Expired || s == NotExists || s == Deleted || s == Failed
-	ok = ok || (s >= Pending && s <= Passed) || s == SysTakeover
+	ok := s == SysRevoked || s == Expired || s == NotExists || s == Deleted
+	ok = ok || s == Supervised || s == Deleting || s == Suspend || s == Failed
+	ok = ok || (s >= Pending && s <= Pending9) || s == Created || s == Passed || s == SysTakeover
 	return s, ok
 }
 func (s Status) Int8() int8     { return int8(s) }
