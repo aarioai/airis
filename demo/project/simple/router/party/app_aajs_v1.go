@@ -13,6 +13,8 @@ func registerAaJSV1(app *aa.App, parent *iris.Application, w *middleware.Middlew
 
 	bs := controller.New(app)
 	p.Get("/ping", bs.Ping)
+	p.Get("/health", bs.Health)            // alive health
+	p.Get("/health/ready", bs.HealthReady) // service is ready or not
 
 	p.Get("/users", bs.GetUsersWithPaging)
 	p.Get("/users/page/{page:uint8}", bs.GetUsersWithPaging)

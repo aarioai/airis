@@ -26,6 +26,13 @@ func SetServReady()     { servHealth.Store(ServHeathReady) }
 func SetServStopping()  { servHealth.Store(ServHeathStopping) }
 func SetServUnhealthy() { servHealth.Store(ServHeathUnhealthy) }
 
+// ServFallbackReady only if the status is still starting, no any error issues, fallback to set to ready
+func ServFallbackReady() {
+	if ServHealth().IsStarting() {
+		servHealth.Store(ServHeathReady)
+	}
+}
+
 func ServHealth() ServHealthEnum {
 	if val := servHealth.Load(); val != nil {
 		return val.(ServHealthEnum)

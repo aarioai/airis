@@ -8,7 +8,6 @@ import (
 
 	"github.com/aarioai/airis-driver/driver"
 	"github.com/aarioai/airis/aa"
-	"github.com/aarioai/airis/aa/acontext"
 	"github.com/aarioai/airis/aa/helpers/debug"
 )
 
@@ -24,7 +23,6 @@ func Boot(configPath string, selfTest bool) {
 
 	waitTerminate(app)
 
-	acontext.SetServReady()
 }
 
 func waitTerminate(app *aa.App) {
