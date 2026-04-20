@@ -52,10 +52,11 @@ readonly MODULE_DIRS=(
 createMainGo(){
     local project_root="$1"
     local project_base="$2"
+    local app_name="$3"
     local template="${CUR}/template/main.go.tpl"
     local dst="${project_root}/main.go"
     if [ ! -f "$dst" ]; then
-        sed -e "s#{{PROJECT_BASE}}#${project_base}#g"  "$template" > "$dst"
+        sed -e "s#{{APP_NAME}}#${app_name}#g" -e "s#{{PROJECT_BASE}}#${project_base}#g"  "$template" > "$dst"
     fi
 }
 
@@ -234,8 +235,8 @@ createConfigFile(){
     local project_name="$2"
     local app_name="$3"
     mkdir -p "${project_root}/config"
-    local template="${CUR}/template/app-local.ini.tpl"
-    local dst="${project_root}/config/app-local.ini"
+    local template="${CUR}/template/app.ini.tpl"
+    local dst="${project_root}/config/app_${app_name}.ini"
     if [ ! -f "$dst" ]; then
         sed -e "s#{{PROJECT_ROOT}}#${project_root}#g" -e "s#{{PROJECT_NAME}}#${project_name}#g" -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
     fi
@@ -412,7 +413,7 @@ main(){
     mkdir -p "$app_root"
     createDirs "$app_root" "${APP_GLOBAL_DIRS[@]}"
 
-    createMainGo "$project_root" "$project_base"
+    createMainGo "$project_root" "$project_base" "$app_name"
     createMiddlewareFile "$project_root"
     createBaseConfFile "$app_root" "$app_name" "$project_name"
     createRouterFile "$project_root" "$app_name"

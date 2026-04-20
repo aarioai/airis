@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	configPath  = flag.String("config", "./config/app-local.ini", "config path")
+	configPath  = flag.String("config", "./config/app_{{APP_NAME}}.ini", "config path")
 	selfTest    = flag.Bool("selftest", false, "self test")
 )
 

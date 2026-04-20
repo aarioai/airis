@@ -17,6 +17,7 @@ import (
 // Writer
 // @extend io.Closer
 type Writer struct {
+	ErrorAsStatus     bool // response error as http status code
 	SerializeTag      string
 	serveContentTypes []string
 
@@ -27,8 +28,6 @@ type Writer struct {
 
 	ictx    iris.Context
 	request *request.Request
-
-	errorAsStatus bool // response error as http status code
 
 	code          int
 	headers       map[string]string // 每个请求独立 Writer，不需要异步操作
@@ -66,7 +65,7 @@ func NewWriter(ictx iris.Context, req *request.Request) *Writer {
 		errorHandler:      nil,
 		ictx:              ictx,
 		request:           req,
-		errorAsStatus:     errorAsStatus,
+		ErrorAsStatus:     errorAsStatus,
 		code:              0,
 		headers:           headers,
 		content:           nil,
@@ -308,7 +307,7 @@ func (w *Writer) Write(a any) (int, error) {
 }
 
 func (w *Writer) WriteOK() (int, error) {
-	if w.errorAsStatus {
+	if w.ErrorAsStatus {
 		w.StatusCode(ae.OK)
 		return 0, nil
 	}
@@ -319,7 +318,7 @@ func (w *Writer) WriteOK() (int, error) {
 	})
 }
 func (w *Writer) WriteCreated(object []byte) (int, error) {
-	if w.errorAsStatus {
+	if w.ErrorAsStatus {
 		w.StatusCode(ae.Created)
 		return 0, nil
 	}
@@ -330,7 +329,7 @@ func (w *Writer) WriteCreated(object []byte) (int, error) {
 	})
 }
 func (w *Writer) WriteAccepted() (int, error) {
-	if w.errorAsStatus {
+	if w.ErrorAsStatus {
 		w.StatusCode(ae.Accepted)
 		return 0, nil
 	}
@@ -341,7 +340,7 @@ func (w *Writer) WriteAccepted() (int, error) {
 	})
 }
 func (w *Writer) WriteCode(code int) (int, error) {
-	if w.errorAsStatus {
+	if w.ErrorAsStatus {
 		w.StatusCode(code)
 		return 0, nil
 	}
@@ -356,7 +355,7 @@ func (w *Writer) WriteE(e *ae.Error) (int, error) {
 		return w.WriteCode(ae.OK)
 	}
 
-	if w.errorAsStatus {
+	if w.ErrorAsStatus {
 		w.StatusCode(e.Code)
 		return 0, nil
 	}
@@ -372,7 +371,7 @@ func (w *Writer) WriteErr(err error) (int, error) {
 		return w.WriteCode(ae.OK)
 	}
 
-	if w.errorAsStatus {
+	if w.ErrorAsStatus {
 		w.StatusCode(ae.InternalServerError)
 		return 0, nil
 	}
@@ -384,7 +383,7 @@ func (w *Writer) WriteErr(err error) (int, error) {
 }
 
 func (w *Writer) WriteMsg(code int, msg string) (int, error) {
-	if w.errorAsStatus {
+	if w.ErrorAsStatus {
 		w.StatusCode(code)
 		return 0, nil
 	}

@@ -3,14 +3,15 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/aarioai/airis/aa/alog"
 	"project/simple/boot"
 	"runtime"
+
+	"github.com/aarioai/airis/aa/alog"
 )
 
 var (
-	configPath  = flag.String("config", "./config/app-local.ini", "config path")
-	selfTest    = flag.Bool("selftest", false, "self test")
+	configPath = flag.String("config", "./config/app_simple.ini", "config path")
+	selfTest   = flag.Bool("selftest", false, "self test")
 )
 
 func main() {

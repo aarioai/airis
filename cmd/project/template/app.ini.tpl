@@ -18,7 +18,7 @@ log_symlink = /var/log/app-{{PROJECT_NAME}}.log
 views_root = ./frontend/view
 emb_root = ./storage/emb
 
-;[app_test]
+;[app_{{APP_NAME}}]
 ;port = 80
 ;grpc_port = 8000
 
@@ -52,7 +52,7 @@ password =
 min_pool_size = 3
 max_pool_size = 100
 
-[mongodb_test]
+[mongodb_{{APP_NAME}}]
 db = test
 
 [mysql]
@@ -66,7 +66,7 @@ pool_max_open_conns = 0
 pool_conn_max_life_time = 0
 pool_conn_max_idle_time = 0
 
-[mysql_test]
+[mysql_{{APP_NAME}}]
 schema = test
 
 [redis]
@@ -81,7 +81,7 @@ max_retries=3
 min_retry_backoff=8ms
 max_retry_backoff=512ms
 
-[redis_test]
+[redis_{{APP_NAME}}]
 db = 15
 
 [rabbitmq]
