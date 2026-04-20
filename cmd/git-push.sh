@@ -4,12 +4,13 @@ set -euo pipefail
 # https://github.com/aarioai/opt
 . /opt/aa/lib/aa-posix-lib.sh
 
-CUR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly CUR
-# aarioai/airis
-ROOT_DIR="$(cd "${CUR}/.." && pwd)"
-readonly ROOT_DIR
-readonly MOD_UPDATE_FILE="${ROOT_DIR}/._update"
+ME=$(AbsPath "${BASH_SOURCE[0]}")
+readonly ME
+
+ROOT="$(ParentDir "$ME")"
+readonly ROOT
+
+readonly MOD_UPDATE_FILE="${ROOT}/._update"
 
 declare comment
 needCloseVPN=0
@@ -40,14 +41,6 @@ if [ $# -gt 0 ]; then
   comment="$1"
 fi
 
- # @DEPRECATED
-build() {
-  cd "$ROOT_DIR/cmd" || Panic "failed to cd $ROOT_DIR/cmd"
-  Info "building project..."
-  # @DEPRECATED
-  go run build.go --root="$ROOT_DIR" --js="/data/Aa/proj/go/src/project/xixi/deploy/asset_src/lib_dev/aa-js/src/f_oss_filetype_readonly.js" || Panic "Build failed"
-}
-
 handleUpdateMod(){
   local latest_update=''
   local today
@@ -73,7 +66,7 @@ handleUpdateMod(){
 
 pushAndUpgradeMod() {
   Info "push and upgrade go mod"
-  cd "$ROOT_DIR" || Panic "failed to cd $ROOT_DIR"
+  cd "$ROOT" || Panic "failed to cd $ROOT"
 
   handleUpdateMod
 
@@ -157,7 +150,7 @@ setVPN() {
 main() {
   Info "starting..."
   setVPN
- # build
+
   pushAndUpgradeMod
   unsetVPN "$needCloseVPN"
   Info "success!"

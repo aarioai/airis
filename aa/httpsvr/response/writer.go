@@ -3,13 +3,15 @@ package response
 import (
 	"errors"
 	"fmt"
+	"io"
+	"log"
+	"slices"
+	"sync"
+
 	"github.com/aarioai/airis/aa/acontext"
 	"github.com/aarioai/airis/aa/ae"
 	"github.com/aarioai/airis/aa/httpsvr/request"
 	"github.com/kataras/iris/v12"
-	"io"
-	"slices"
-	"sync"
 )
 
 // Writer
@@ -26,6 +28,8 @@ type Writer struct {
 	ictx    iris.Context
 	request *request.Request
 
+	errorAsStatus bool // response error as http status code
+
 	code          int
 	headers       map[string]string // 每个请求独立 Writer，不需要异步操作
 	content       []byte
@@ -36,14 +40,23 @@ var (
 	// 对象池，减少内存分配
 	// sync.Pool 通常不需要手动释放对象，当创建的对象，没有引用时会自动回收
 	writerPool = sync.Pool{
-		New: func() interface{} {
+		New: func() any {
 			return new(Writer)
 		},
 	}
 )
 
-func NewWriter(ictx iris.Context, request *request.Request) *Writer {
+func NewWriter(ictx iris.Context, req *request.Request) *Writer {
 	var headers map[string]string
+
+	var errorAsStatus bool
+	s := req.HeaderFast(request.HeaderErrorAsStatus)
+	if s != "" {
+		errorAsStatus = s == "1" || s == "true" || s == "TRUE" || s == "True"
+	} else {
+		errorAsStatus, _ = req.QueryBool(request.ParamErrorAsStatus)
+	}
+
 	w := Writer{
 		SerializeTag:      "",
 		serveContentTypes: nil,
@@ -52,7 +65,8 @@ func NewWriter(ictx iris.Context, request *request.Request) *Writer {
 		serialize:         nil,
 		errorHandler:      nil,
 		ictx:              ictx,
-		request:           request,
+		request:           req,
+		errorAsStatus:     errorAsStatus,
 		code:              0,
 		headers:           headers,
 		content:           nil,
@@ -80,12 +94,14 @@ func (w *Writer) WithHeader(key, value string) *Writer {
 	w.headers[key] = value
 	return w
 }
+
 func (w *Writer) WithHeaders(headers map[string]string) *Writer {
 	for k, v := range headers {
 		w.WithHeader(k, v)
 	}
 	return w
 }
+
 func (w *Writer) WithServeContentTypes(contentTypes []string) *Writer {
 	if len(contentTypes) == 0 {
 		ae.Panic("must register at least one content type")
@@ -96,6 +112,7 @@ func (w *Writer) WithServeContentTypes(contentTypes []string) *Writer {
 func (w *Writer) WithContentType(contentType string) *Writer {
 	return w.WithHeader("Content-Type", contentType)
 }
+
 func (w *Writer) Header(key string) string {
 	if w.headers == nil {
 		return ""
@@ -146,10 +163,12 @@ func (w *Writer) DeleteHeader(key string) *Writer {
 	}
 	return w
 }
+
 func (w *Writer) WithErrorHandler(handler func(ictx iris.Context, request *request.Request, contentType string, d Body) (int, error, bool)) *Writer {
 	w.errorHandler = handler
 	return w
 }
+
 func (w *Writer) WithBeforeFlush(fn func(*Writer)) *Writer {
 	if w.beforeFlush == nil {
 		w.beforeFlush = make([]func(*Writer), 0)
@@ -157,6 +176,7 @@ func (w *Writer) WithBeforeFlush(fn func(*Writer)) *Writer {
 	w.beforeFlush = append(w.beforeFlush, fn)
 	return w
 }
+
 func (w *Writer) WithBeforeSerialize(beforeSerialize func(ictx iris.Context, contentType string, d Body) Body) *Writer {
 	if w.beforeSerialize == nil {
 		w.beforeSerialize = make([]func(ictx iris.Context, contentType string, d Body) Body, 0)
@@ -164,10 +184,12 @@ func (w *Writer) WithBeforeSerialize(beforeSerialize func(ictx iris.Context, con
 	w.beforeSerialize = append(w.beforeSerialize, beforeSerialize)
 	return w
 }
+
 func (w *Writer) WithSerialize(f func(contentType string, d Body) (bytes []byte, newContentType string, err error)) *Writer {
 	w.serialize = f
 	return w
 }
+
 func (w *Writer) Context() iris.Context {
 	return w.ictx
 }
@@ -259,6 +281,11 @@ func (w *Writer) writeDTO(d Body) (int, error) {
 		b, newContentType, err = defaultSerialize(ct, d)
 	}
 	if err != nil {
+		if w.errorHandler != nil {
+			w.StatusCode(ae.InternalServerError)
+			log.Printf("response serialize error: %s\n", err)
+			return 0, nil
+		}
 		b = []byte(fmt.Sprintf(`{"code":500,"msg":"response serialize error: %s","data":null}`, err.Error()))
 		return w.write(b)
 	}
@@ -281,6 +308,10 @@ func (w *Writer) Write(a any) (int, error) {
 }
 
 func (w *Writer) WriteOK() (int, error) {
+	if w.errorAsStatus {
+		w.StatusCode(ae.OK)
+		return 0, nil
+	}
 	return w.writeDTO(Body{
 		Code: ae.OK,
 		Msg:  "OK",
@@ -288,6 +319,10 @@ func (w *Writer) WriteOK() (int, error) {
 	})
 }
 func (w *Writer) WriteCreated(object []byte) (int, error) {
+	if w.errorAsStatus {
+		w.StatusCode(ae.Created)
+		return 0, nil
+	}
 	return w.writeDTO(Body{
 		Code: ae.Created,
 		Msg:  "Created",
@@ -295,6 +330,10 @@ func (w *Writer) WriteCreated(object []byte) (int, error) {
 	})
 }
 func (w *Writer) WriteAccepted() (int, error) {
+	if w.errorAsStatus {
+		w.StatusCode(ae.Accepted)
+		return 0, nil
+	}
 	return w.writeDTO(Body{
 		Code: ae.Accepted,
 		Msg:  "Accepted",
@@ -302,6 +341,10 @@ func (w *Writer) WriteAccepted() (int, error) {
 	})
 }
 func (w *Writer) WriteCode(code int) (int, error) {
+	if w.errorAsStatus {
+		w.StatusCode(code)
+		return 0, nil
+	}
 	return w.writeDTO(Body{
 		Code: code,
 		Msg:  ae.Text(code),
@@ -312,6 +355,12 @@ func (w *Writer) WriteE(e *ae.Error) (int, error) {
 	if e == nil {
 		return w.WriteCode(ae.OK)
 	}
+
+	if w.errorAsStatus {
+		w.StatusCode(e.Code)
+		return 0, nil
+	}
+
 	return w.writeDTO(Body{
 		Code: e.Code,
 		Msg:  e.Msg,
@@ -322,6 +371,12 @@ func (w *Writer) WriteErr(err error) (int, error) {
 	if err == nil {
 		return w.WriteCode(ae.OK)
 	}
+
+	if w.errorAsStatus {
+		w.StatusCode(ae.InternalServerError)
+		return 0, nil
+	}
+
 	return w.writeDTO(Body{
 		Code: ae.InternalServerError,
 		Msg:  err.Error(),
@@ -329,6 +384,11 @@ func (w *Writer) WriteErr(err error) (int, error) {
 }
 
 func (w *Writer) WriteMsg(code int, msg string) (int, error) {
+	if w.errorAsStatus {
+		w.StatusCode(code)
+		return 0, nil
+	}
+
 	return w.writeDTO(Body{
 		Code: code,
 		Msg:  msg,

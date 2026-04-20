@@ -54,15 +54,18 @@ func RegisterGlobalServeContentTypes(contentTypes []string) {
 	}
 	globalServeContentTypes = contentTypes
 }
+
 func RegisterGlobalErrorHandler(f func(ictx iris.Context, request *request.Request, contentType string, d Body) (int, error, bool)) {
 	globalErrorHandler = f
 }
+
 func RegisterGlobalBeforeSerialize(f func(ictx iris.Context, contentType string, d Body) Body) {
 	if globalBeforeSerialize == nil {
 		globalBeforeSerialize = make([]func(ictx iris.Context, contentType string, d Body) Body, 0)
 	}
 	globalBeforeSerialize = append(globalBeforeSerialize, f)
 }
+
 func RegisterGlobalSerialize(f func(contentType string, d Body) (bytes []byte, newContentType string, err error)) {
 	globalSerialize = f
 }

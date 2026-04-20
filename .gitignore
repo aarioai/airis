@@ -1,7 +1,7 @@
 # General Git Ignore File
 # https://github.com/aarioai/rules/blob/main/config/.gitignore
 # https://www.atlassian.com/git/tutorials/saving-changes/gitignore
-# 2026-04-07
+# 2026-04-20
 
 # ._env, ._update
 ._*
@@ -17,6 +17,8 @@
 
 # jetbrain IDE config directory
 .idea
+!.idea/dictionaries/
+!.idea/dictionaries/**
 
 # python venv
 .venv

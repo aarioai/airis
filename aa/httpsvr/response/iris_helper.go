@@ -26,6 +26,7 @@ func JsonCode(ictx iris.Context, code int, opts ...iris.JSON) error {
 	}
 	return ictx.JSON(d, opts...)
 }
+
 func JsonError(ictx iris.Context, code int, msg string, opts ...iris.JSON) error {
 	d := Body{
 		Code: code,
@@ -34,6 +35,7 @@ func JsonError(ictx iris.Context, code int, msg string, opts ...iris.JSON) error
 	}
 	return ictx.JSON(d, opts...)
 }
+
 func JsonE(ictx iris.Context, e *ae.Error, opts ...iris.JSON) error {
 	if e == nil {
 		return JsonOK(ictx)
@@ -52,6 +54,7 @@ func StatusHandler(status int) func(iris.Context) {
 		ictx.StatusCode(status)
 	}
 }
+
 func WriteHandler[T string | []byte](msg T) func(iris.Context) {
 	return func(ictx iris.Context) {
 		defer ictx.Next()
