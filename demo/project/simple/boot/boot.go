@@ -1,13 +1,15 @@
 package boot
 
 import (
-	"github.com/aarioai/airis-driver/driver"
-	"github.com/aarioai/airis/aa"
-	"github.com/aarioai/airis/aa/helpers/debug"
 	"os"
 	"os/signal"
 	"project/simple/router"
 	"syscall"
+
+	"github.com/aarioai/airis-driver/driver"
+	"github.com/aarioai/airis/aa"
+	"github.com/aarioai/airis/aa/acontext"
+	"github.com/aarioai/airis/aa/helpers/debug"
 )
 
 var (
@@ -21,6 +23,8 @@ func Boot(configPath string, selfTest bool) {
 	router.Serve(app, profile)
 
 	waitTerminate(app)
+
+	acontext.SetServReady()
 }
 
 func waitTerminate(app *aa.App) {

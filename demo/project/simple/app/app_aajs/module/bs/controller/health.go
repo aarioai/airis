@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"github.com/aarioai/airis/aa/acontext"
+	"github.com/aarioai/airis/aa/ae"
 	"github.com/aarioai/airis/aa/httpsvr"
 	"github.com/kataras/iris/v12"
 )
@@ -27,9 +29,7 @@ func (c *Controller) Health(ictx iris.Context) {
 	_, resp, _ := httpsvr.New(ictx)
 	defer resp.Next()
 	resp.ErrorAsStatus = true
-	
 	resp.WriteOK()
-
 }
 
 func (c *Controller) HealthReady(ictx iris.Context) {
@@ -37,5 +37,9 @@ func (c *Controller) HealthReady(ictx iris.Context) {
 	defer resp.Next()
 	resp.ErrorAsStatus = true
 
-	resp.WriteOK()
+	if acontext.ServHealth().IsReady() {
+		resp.WriteOK()
+		return
+	}
+	resp.WriteCode(ae.ServiceUnavailable)
 }

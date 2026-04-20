@@ -19,9 +19,12 @@ var (
 	}()
 )
 
-func SetServHealth(health ServHealthEnum) {
-	servHealth.Store(health)
-}
+// No need to overthink the issue of concurrent modifications more
+
+func SetServStarting()  { servHealth.Store(ServHealthStarting) }
+func SetServReady()     { servHealth.Store(ServHeathReady) }
+func SetServStopping()  { servHealth.Store(ServHeathStopping) }
+func SetServUnhealthy() { servHealth.Store(ServHeathUnhealthy) }
 
 func ServHealth() ServHealthEnum {
 	if val := servHealth.Load(); val != nil {
