@@ -16,6 +16,9 @@ func RegisterAaJS(app *aa.App, parent *iris.Application, w *middleware.Middlewar
 	p.Get("/ping/redis", bs.PingRedis)
 	p.Get("/ping/mysql", bs.PingMySQL)
 
+	p.Get("/health", bs.Health)
+	p.Get("/health/ready", bs.HealthReady)
+
 	registerAaJSV1(app, parent, w)
 	registerAaJSV1Authed(app, parent, w)
 }

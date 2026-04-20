@@ -22,3 +22,20 @@ func (c *Controller) PingMySQL(ictx iris.Context) {
 	defer resp.Next()
 	ictx.WriteString(c.m.Ping(ctx))
 }
+
+func (c *Controller) Health(ictx iris.Context) {
+	_, resp, _ := httpsvr.New(ictx)
+	defer resp.Next()
+	resp.ErrorAsStatus = true
+	
+	resp.WriteOK()
+
+}
+
+func (c *Controller) HealthReady(ictx iris.Context) {
+	_, resp, _ := httpsvr.New(ictx)
+	defer resp.Next()
+	resp.ErrorAsStatus = true
+
+	resp.WriteOK()
+}

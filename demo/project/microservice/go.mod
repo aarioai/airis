@@ -3,6 +3,7 @@ module project/microservice
 go 1.24
 
 require (
+	// airis 和 airis-driver 需要改成最新版本
 	github.com/aarioai/airis v0.1.280
 	github.com/aarioai/airis-driver v0.0.62
 	github.com/kataras/iris/v12 v12.2.11
