@@ -16,8 +16,8 @@ var (
 	sigs    = make(chan os.Signal, 1)
 )
 
-func Boot(configPath string, selfTest bool) {
-	app := initApp(configPath, selfTest)
+func Boot(configPath string) {
+	app := initApp(configPath)
 
 	router.Serve(app, profile)
 

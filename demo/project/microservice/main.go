@@ -3,14 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/aarioai/airis/aa/alog"
 	"project/microservice/boot"
 	"runtime"
+
+	"github.com/aarioai/airis/aa/alog"
 )
 
 var (
-	configPath  = flag.String("config", "./config/app-local.ini", "config path")
-	selfTest    = flag.Bool("selftest", false, "self test")
+	configPath = flag.String("config", "./config/app-local.ini", "config path")
 )
 
 func main() {
@@ -22,7 +22,7 @@ func main() {
 		}
 	}()
 
-	alog.Printf("config: %s, self test: %v", *configPath, *selfTest)
+	alog.Printf("config: %s", *configPath)
 
-	boot.Boot(*configPath, *selfTest)
+	boot.Boot(*configPath)
 }

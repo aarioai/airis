@@ -1,13 +1,14 @@
 package boot
 
 import (
-	"github.com/aarioai/airis-driver/driver"
-	"github.com/aarioai/airis/aa"
-	"github.com/aarioai/airis/aa/helpers/debug"
 	"os"
 	"os/signal"
 	"project/microservice/router"
 	"syscall"
+
+	"github.com/aarioai/airis-driver/driver"
+	"github.com/aarioai/airis/aa"
+	"github.com/aarioai/airis/aa/helpers/debug"
 )
 
 var (
@@ -15,8 +16,8 @@ var (
 	sigs    = make(chan os.Signal, 1)
 )
 
-func Boot(configPath string, selfTest bool) {
-	app := initApp(configPath, selfTest)
+func Boot(configPath string) {
+	app := initApp(configPath)
 
 	router.Serve(app, profile)
 

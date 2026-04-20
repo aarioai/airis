@@ -11,7 +11,6 @@ import (
 
 var (
 	configPath = flag.String("config", "./config/app_simple.ini", "config path")
-	selfTest   = flag.Bool("selftest", false, "self test")
 )
 
 func main() {
@@ -23,7 +22,7 @@ func main() {
 		}
 	}()
 
-	alog.Printf("config: %s, self test: %v", *configPath, *selfTest)
+	alog.Printf("config: %s", *configPath)
 
-	boot.Boot(*configPath, *selfTest)
+	boot.Boot(*configPath)
 }

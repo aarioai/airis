@@ -13,7 +13,7 @@ var (
 	ctx, cancel = acontext.WithCancel(acontext.Background())
 )
 
-func initApp(configPath string, selfTest bool) *aa.App {
+func initApp(configPath string) *aa.App {
 	cfg, err := aconfig.New(configPath, configValueProcessor)
 	ae.PanicOnErrs(err)
 
@@ -23,9 +23,7 @@ func initApp(configPath string, selfTest bool) *aa.App {
 	app.Config.Log()
 	// loadOtherConfigs(app)
 
-	if selfTest {
-		SelfTest(app)
-	}
+	SelfTest(app)
 
 	register(app)
 	return app
