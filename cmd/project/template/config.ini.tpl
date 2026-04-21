@@ -3,8 +3,8 @@ log_level = debug
 timezone_id = Asia/Shanghai
 time_format = 2006-02-01 15:04:05
 mock = 0
-text_config_dirs = ./config/rsa
-text_config_rsa_checks=app-1024,app-2048,app-4096
+;text_config_dirs = ./config/rsa
+;text_config_rsa_checks=app-1024,app-2048,app-4096
 pprof = 0
 
 [app]
@@ -13,9 +13,9 @@ view_rate_limit = 100,500,1m,5m
 api_rate_limit = 100,500,1m,5m
 log_buffer_size = 0
 log_dir = ./storage/log
-log_symlink = /var/log/app-{{PROJECT_NAME}}.log
-views_root = ./frontend/view
-emb_root = ./storage/emb
+log_symlink = ./storage/log/{{PROJECT_NAME}}.log
+;views_root = ./frontend/view
+;emb_root = ./storage/emb
 
 ;[app_{{APP_NAME}}]
 ;port = 80

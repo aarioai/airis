@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	configPath = flag.String("config", "./config/app-local.ini", "config path")
+	configPath = flag.String("config", "./config/{{PROJECT_NAME}}.ini", "config path")
 	alt        = flag.Bool("alt", false, "switch to alternated function")
 )
 

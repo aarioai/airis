@@ -235,8 +235,8 @@ createConfigFile(){
     local project_name="$2"
     local app_name="$3"
     mkdir -p "${project_root}/config"
-    local template="${CUR}/template/app.ini.tpl"
-    local dst="${project_root}/config/app_${app_name}.ini"
+    local template="${CUR}/template/config.ini.tpl"
+    local dst="${project_root}/config/${project_name}.ini"
     if [ ! -f "$dst" ]; then
         sed -e "s#{{PROJECT_ROOT}}#${project_root}#g" -e "s#{{PROJECT_NAME}}#${project_name}#g" -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
     fi

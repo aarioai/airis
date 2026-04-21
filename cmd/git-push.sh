@@ -5,12 +5,8 @@ set -euo pipefail
 . /opt/aa/lib/aa-posix-lib.sh
 
 ME=$(AbsPath "${BASH_SOURCE[0]}")
-readonly ME
-
 ROOT="$(ParentDir "$ME")"
-readonly ROOT
-
-readonly MOD_UPDATE_FILE="${ROOT}/._update"
+MOD_UPDATE_FILE="${ROOT}/._update"
 
 handleUpdateMod(){
   local latest_update=''
@@ -38,7 +34,7 @@ handleUpdateMod(){
 pushAndUpgradeMod() {
   local comment="$1"
   Info "push and upgrade go mod"
-  cd "$ROOT" || Panic "failed to cd $ROOT"
+  CdOrPanic "$ROOT"
 
   handleUpdateMod
 
@@ -61,10 +57,12 @@ pushAndUpgradeMod() {
 
   Info "increase git tag and sync to remote"
   IncrRemoteGitTag -d
+
+  Info "success. go visit: https://github.com/aarioai/airis/tags"
 }
 
 main() {
-  Usage $# -eq 1 './git-push.sh <git comment>'
+  Usage $# -eq 1 './cmd/git-push.sh <git comment>'
   pushAndUpgradeMod "$1"
 }
 
