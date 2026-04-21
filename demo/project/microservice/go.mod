@@ -4,8 +4,8 @@ go 1.24
 
 require (
 	// airis 和 airis-driver 需要改成最新版本
-	github.com/aarioai/airis v0.1.296
-	github.com/aarioai/airis-driver v0.0.62
+	github.com/aarioai/airis v0.1.299
+	github.com/aarioai/airis-driver v0.0.74
 	github.com/kataras/iris/v12 v12.2.11
 	github.com/redis/go-redis/v9 v9.10.0
 	google.golang.org/grpc v1.73.0
