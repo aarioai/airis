@@ -2,8 +2,9 @@ package boot
 
 import "github.com/aarioai/airis/aa"
 
-func SelfTest(app *aa.App) {
-    acontext.ServFallbackReady()
+func SelfTest(app *aa.App) bool {
+	acontext.ServFallbackReady()
+	return true
 }
 
 

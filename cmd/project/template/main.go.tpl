@@ -9,7 +9,8 @@ import (
 )
 
 var (
-	configPath  = flag.String("config", "./config/app_{{APP_NAME}}.ini", "config path")
+	configPath = flag.String("config", "./config/app_{{APP_NAME}}.ini", "config path")
+	alt        = flag.Bool("alt", false, "switch to alternated function")
 )
 
 func main() {
@@ -21,7 +22,6 @@ func main() {
 		}
 	}()
 
-	alog.Printf("config: %s", *configPath)
-
-	boot.Boot(*configPath)
+	alog.Printf("config: %s, alt: %v", *configPath, *alt)
+	boot.Boot(*configPath, *alt)
 }

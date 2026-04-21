@@ -28,18 +28,21 @@ func (c *Controller) PingMySQL(ictx iris.Context) {
 func (c *Controller) Health(ictx iris.Context) {
 	_, resp, _ := httpsvr.New(ictx)
 	defer resp.Next()
-	resp.ErrorAsStatus = true
-	resp.WriteOK()
+	if acontext.ServHealth().IsReady() {
+		resp.WriteOK()
+		return
+	}
+	//resp.ErrorAsStatus = true
+	resp.StatusCode(ae.ServiceUnavailable)
 }
 
 func (c *Controller) HealthReady(ictx iris.Context) {
 	_, resp, _ := httpsvr.New(ictx)
 	defer resp.Next()
-	resp.ErrorAsStatus = true
-
 	if acontext.ServHealth().IsReady() {
 		resp.WriteOK()
 		return
 	}
-	resp.WriteCode(ae.ServiceUnavailable)
+	//resp.ErrorAsStatus = true
+	resp.StatusCode(ae.ServiceUnavailable)
 }

@@ -247,6 +247,13 @@ createBootFiles(){
     local project_base="$2"
     mkdir -p "${project_root}/boot"
 
+    # boot/alt/go
+    template="${CUR}/template/boot_alt.go.tpl"
+    dst="${project_root}/boot/alt.go"
+    if [ ! -f "$dst" ]; then
+        sed -e "s#{{APP_NAME}}#${app_name}#g" "$template" > "$dst"
+    fi
+
     # boot/boot.go
     local template="${CUR}/template/boot.go.tpl"
     local dst="${project_root}/boot/boot.go"

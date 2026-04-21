@@ -15,11 +15,13 @@ var (
 	sigs        = make(chan os.Signal, 1)
 )
 
-func Boot(configPath string) {
-	app := initApp(configPath)
+func Boot(configPath string, alt bool) {
+	app, ok := initApp(configPath, alt)
+	if !ok {
+		return
+	}
 
 	router.Serve(app, profile)
-
 	waitTerminate(app)
 }
 

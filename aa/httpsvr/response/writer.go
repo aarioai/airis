@@ -280,7 +280,7 @@ func (w *Writer) writeDTO(d Body) (int, error) {
 		b, newContentType, err = defaultSerialize(ct, d)
 	}
 	if err != nil {
-		if w.errorHandler != nil {
+		if w.ErrorAsStatus {
 			w.StatusCode(ae.InternalServerError)
 			log.Printf("response serialize error: %s\n", err)
 			return 0, nil
@@ -291,6 +291,16 @@ func (w *Writer) writeDTO(d Body) (int, error) {
 	if newContentType != "" && newContentType != ct {
 		w.WithContentType(newContentType)
 	}
+
+	// status code=200 is default, no need to send
+	if w.ErrorAsStatus && d.Code != ae.OK {
+		w.StatusCode(d.Code)
+		// status code =[1xx, 204, 205, 304] are not allowed to send response body
+		if d.Code < ae.OK || d.Code == ae.NoContent || d.Code == ae.ResetContent || d.Code == ae.NotModified {
+			return 0, nil
+		}
+	}
+
 	return w.write(b)
 }
 
@@ -307,32 +317,22 @@ func (w *Writer) Write(a any) (int, error) {
 }
 
 func (w *Writer) WriteOK() (int, error) {
-	if w.ErrorAsStatus {
-		w.StatusCode(ae.OK)
-		return 0, nil
-	}
 	return w.writeDTO(Body{
 		Code: ae.OK,
 		Msg:  "OK",
 		Data: nil,
 	})
 }
+
 func (w *Writer) WriteCreated(object []byte) (int, error) {
-	if w.ErrorAsStatus {
-		w.StatusCode(ae.Created)
-		return 0, nil
-	}
 	return w.writeDTO(Body{
 		Code: ae.Created,
 		Msg:  "Created",
 		Data: object,
 	})
 }
+
 func (w *Writer) WriteAccepted() (int, error) {
-	if w.ErrorAsStatus {
-		w.StatusCode(ae.Accepted)
-		return 0, nil
-	}
 	return w.writeDTO(Body{
 		Code: ae.Accepted,
 		Msg:  "Accepted",
@@ -340,10 +340,6 @@ func (w *Writer) WriteAccepted() (int, error) {
 	})
 }
 func (w *Writer) WriteCode(code int) (int, error) {
-	if w.ErrorAsStatus {
-		w.StatusCode(code)
-		return 0, nil
-	}
 	return w.writeDTO(Body{
 		Code: code,
 		Msg:  ae.Text(code),
@@ -353,11 +349,6 @@ func (w *Writer) WriteCode(code int) (int, error) {
 func (w *Writer) WriteE(e *ae.Error) (int, error) {
 	if e == nil {
 		return w.WriteCode(ae.OK)
-	}
-
-	if w.ErrorAsStatus {
-		w.StatusCode(e.Code)
-		return 0, nil
 	}
 
 	return w.writeDTO(Body{
@@ -371,11 +362,6 @@ func (w *Writer) WriteErr(err error) (int, error) {
 		return w.WriteCode(ae.OK)
 	}
 
-	if w.ErrorAsStatus {
-		w.StatusCode(ae.InternalServerError)
-		return 0, nil
-	}
-
 	return w.writeDTO(Body{
 		Code: ae.InternalServerError,
 		Msg:  err.Error(),
@@ -383,11 +369,6 @@ func (w *Writer) WriteErr(err error) (int, error) {
 }
 
 func (w *Writer) WriteMsg(code int, msg string) (int, error) {
-	if w.ErrorAsStatus {
-		w.StatusCode(code)
-		return 0, nil
-	}
-
 	return w.writeDTO(Body{
 		Code: code,
 		Msg:  msg,

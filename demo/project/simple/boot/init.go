@@ -13,7 +13,7 @@ var (
 	ctx, cancel = acontext.WithCancel(acontext.Background())
 )
 
-func initApp(configPath string) *aa.App {
+func initApp(configPath string, alt bool) (*aa.App, bool) {
 	cfg, err := aconfig.New(configPath, configValueProcessor)
 	ae.PanicOnErrs(err)
 
@@ -23,10 +23,16 @@ func initApp(configPath string) *aa.App {
 	app.Config.Log()
 	// loadOtherConfigs(app)
 
-	SelfTest(app)
-	
+	if alt {
+		return app, altFunc(app)
+	}
+
+	if !SelfTest(app) {
+		return app, false
+	}
+
 	register(app)
-	return app
+	return app, true
 }
 
 func redirectLog(app *aa.App) {
