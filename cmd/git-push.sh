@@ -12,35 +12,6 @@ readonly ROOT
 
 readonly MOD_UPDATE_FILE="${ROOT}/._update"
 
-declare comment
-needCloseVPN=0
-incrTag=1
-
-usage() {
-  cat << EOF
-Usage: $0 [options] [commit message]
-Options:
-    -u          Upgrade go.mod
-    -t          Skip tag increment
-    -i          Skip go mod update
-    -h          Show this help message
-EOF
-  exit 1
-}
-
-while getopts "utih" opt; do
-  case "$opt" in
-    t) incrTag=0 ;;
-    h) usage ;;
-    *) usage ;;
-  esac
-done
-shift $((OPTIND-1))
-
-if [ $# -gt 0 ]; then
-  comment="$1"
-fi
-
 handleUpdateMod(){
   local latest_update=''
   local today
@@ -65,6 +36,7 @@ handleUpdateMod(){
 }
 
 pushAndUpgradeMod() {
+  local comment="$1"
   Info "push and upgrade go mod"
   cd "$ROOT" || Panic "failed to cd $ROOT"
 
@@ -87,73 +59,13 @@ pushAndUpgradeMod() {
   git commit -m "$comment" || Panic "failed git commit -m $comment"
   git push origin main || Panic "failed git push origin main"
 
-  if [ $incrTag -eq 1 ]; then
-    handle_tags
-  fi
+  Info "increase git tag and sync to remote"
+  IncrRemoteGitTag -d
 }
-
-handle_tags() {
-  Info "managing tags..."
-  git pull origin --tags
-  git tag -l | xargs git tag -d
-  git fetch origin --prune
-  latestTag=$(git describe --tags "$(git rev-list --tags --max-count=1)" 2>/dev/null || echo "")
-
-  if [ -n "$latestTag" ]; then
-    tag=${latestTag%.*}
-    id=${latestTag##*.}
-    id=$((id+1))
-    newTag="$tag.$id"
-
-    Info "removing old tag: $latestTag"
-    git tag -d "$latestTag"
-    git push origin --delete tag "$latestTag"
-
-    git tag "$newTag"
-    git push origin --tags
-    Info "new tag created: $newTag"
-  fi
-}
-
-
-unsetVPN() {
-  Info "unset VPN"
-  if [[ $1 -eq 1 ]]; then
-    echo "unset VPN"
-    export http_proxy=""
-    export https_proxy=""
-    unset http_proxy
-    unset https_poxy
-  fi
-}
-
-setVPN() {
-  Info "setting VPN"
-  if [ -n "${http_proxy:-}" ]; then
-    Info "proxy ${http_proxy} ${https_proxy}"
-    return
-  fi
-
-  export http_proxy=http://127.0.0.1:8118
-  export https_proxy=http://127.0.0.1:8118
-
-  if HttpOK 'google.com'; then
-    needCloseVPN=1
-    Info "start VPN"
-  else
-    unsetVPN 1
-    Info "check VPN failed"
-  fi
-}
-
 
 main() {
-  Info "starting..."
-  setVPN
-
-  pushAndUpgradeMod
-  unsetVPN "$needCloseVPN"
-  Info "success!"
+  Usage $# -eq 1 './git-push.sh <git comment>'
+  pushAndUpgradeMod "$1"
 }
 
-main
+main "$@"
