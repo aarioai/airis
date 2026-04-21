@@ -2,12 +2,15 @@ package aconfig
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
+	"strings"
+
 	"github.com/aarioai/airis/aa/ae"
 	"github.com/aarioai/airis/aa/alog"
 	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/aarioai/airis/pkg/arrmap"
 	"github.com/aarioai/airis/pkg/utils"
-	"strings"
 )
 
 func (c *Config) PanicIfNotEqual(key, want string) {
@@ -17,13 +20,20 @@ func (c *Config) PanicIfNotEqual(key, want string) {
 	}
 }
 func (c *Config) Log() {
+	execPath, err := exec.LookPath(os.Args[0])
+	if err != nil {
+		execPath = err.Error()
+	}
+
 	info := fmt.Sprintf(`
 Launch Config:
+  exec path: %s
   git version: %s
   env: %s
   timezone: %s
   mock: %v
 `,
+		execPath,
 		utils.GitVersion(),
 		c.Env,
 		c.TimezoneID,

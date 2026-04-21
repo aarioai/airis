@@ -20,11 +20,30 @@ usage(){
 Usage: $0 <project_project_root> <command>
     $0 <project_root> new|createapp <app name>
     $0 <project_root> protoc [libprotoc_version]
+Command:
+    new|createapp|createapp.sh
+    protoc|protoc.sh
+    build [dst]
 Example:
     $0 ../ new test
     $0 ../ protoc 29.3
 EOF
   exit 1
+}
+
+build(){
+  local dst="${1:-main}"
+
+  Info "go build -o $dst main.go"
+  go build -o "$dst" main.go
+  # get commit ID, pad with underlines when less than 40 characters
+  commit_id=$(git rev-parse HEAD 2>/dev/null)
+  if [ -z "$commit_id" ]; then
+    Info ".git directory missing, git version omitted"
+    return
+  fi
+  # total 41 characters
+  printf '\n%s' "$(StrPadLeft "$commit_id" 40)" >> "$dst"
 }
 
 main(){
@@ -44,6 +63,9 @@ main(){
       local protoc_version="${1-"$PROTOC_VERSION"}"
       Info "${CUR}/project/protoc.sh $project_root $protoc_version"
       "${CUR}"/project/protoc.sh "$project_root" "$protoc_version"
+      ;;
+    build)
+      build "${args[@]}"
       ;;
     *)
         Panic "invalid command: ${cmd}"
