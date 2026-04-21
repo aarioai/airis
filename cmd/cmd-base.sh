@@ -6,14 +6,8 @@ set -euo pipefail
 
 PROTOC_VERSION="29.3"
 
-AA_GITHUB="github.com/aarioai"
-MOD_ROOT="${GOPATH}/pkg/mod/${AA_GITHUB}"
-
-CUR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly CUR
-
-ROOT_DIR="$(cd "${CUR}/.." && pwd)"
-readonly ROOT_DIR
+HERE="$(AbsDir "${BASH_SOURCE[0]}")"
+readonly HERE
 
 usage(){
   cat << EOF
@@ -56,13 +50,13 @@ main(){
 
   case "$cmd" in
     new|createapp|createapp.sh)
-      Info "${CUR}/project/createapp.sh $project_root ${args[*]}"
-      "${CUR}"/project/createapp.sh "$project_root" "${args[@]}"
+      Info "${HERE}/project/createapp.sh $project_root ${args[*]}"
+      "${HERE}"/project/createapp.sh "$project_root" "${args[@]}"
       ;;
     protoc|protoc.sh)
       local protoc_version="${1-"$PROTOC_VERSION"}"
-      Info "${CUR}/project/protoc.sh $project_root $protoc_version"
-      "${CUR}"/project/protoc.sh "$project_root" "$protoc_version"
+      Info "${HERE}/project/protoc.sh $project_root $protoc_version"
+      "${HERE}"/project/protoc.sh "$project_root" "$protoc_version"
       ;;
     build)
       build "${args[@]}"
