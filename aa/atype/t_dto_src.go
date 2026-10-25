@@ -1,15 +1,17 @@
 package atype
 
 import (
-	"github.com/aarioai/airis/pkg/types"
+	"html/template"
 	"regexp"
+
+	"github.com/aarioai/airis/pkg/types"
 )
 
 var imagePatternTag = regexp.MustCompile(`([a-z]+)(\d+)`)
 
 func (s AudioSrcOld) Filename() AudioPath { return AudioPath(s.Path) }
 
-func (s AudioSrcOld) Adjust(quality string) URL {
+func (s AudioSrcOld) Adjust(quality string) template.URL {
 	return s.Pattern.ReplaceAll("quality", "int", quality).URL()
 }
 
@@ -21,7 +23,7 @@ func (s FileSrcOld) Filename() FilePath { return FilePath(s.Path) }
 
 func (s ImgSrcOld) Filename() ImagePath { return ImagePath(s.Path) }
 
-func (s ImgSrcOld) Crop(width, height int) URL {
+func (s ImgSrcOld) Crop(width, height int) template.URL {
 	if s.Provider == 0 {
 		return s.Origin
 	}
@@ -80,7 +82,7 @@ func (s ImgSrcOld) Crop(width, height int) URL {
 	}).URL()
 }
 
-func (s ImgSrcOld) Resize(maxWidth int) URL {
+func (s ImgSrcOld) Resize(maxWidth int) template.URL {
 	if s.Provider == 0 {
 		return s.Origin
 	}
@@ -127,7 +129,7 @@ func (s ImgSrcOld) Resize(maxWidth int) URL {
 }
 
 func (s VideoSrcOld) Filename() VideoPath { return VideoPath(s.Path) }
-func (s VideoSrcOld) Adjust(quality string) URL {
+func (s VideoSrcOld) Adjust(quality string) template.URL {
 	return s.Pattern.ReplaceAll("quality", ":int", quality).URL()
 }
 

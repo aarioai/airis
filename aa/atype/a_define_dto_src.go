@@ -1,5 +1,7 @@
 package atype
 
+import "html/template"
+
 type VideoPattern struct {
 }
 
@@ -13,17 +15,17 @@ type ImagePattern struct {
 }
 
 type FileSrc struct {
-	Provider        int        `json:"provider"`
-	URL             URL        `json:"url"`         // e.g. https://xxx/img.jpg
-	UrlPattern      UrlPattern `json:"url_pattern"` // e.g. https://xxx/img.jpg?maxwidth={max_width:int}
-	AlterUrlPattern UrlPattern `json:"alter_url_pattern"`
-	BaseURL         URL        `json:"base_url"`
-	Path            Path       `json:"path"`
-	Filetype        FileType   `json:"filetype"`
-	Filesize        int        `json:"filesize"`
-	Info            string     `json:"info"`
-	Checksum        string     `json:"checksum"`
-	Jsonkey         string     `json:"jsonkey"`
+	Provider        int          `json:"provider"`
+	URL             template.URL `json:"url"`         // e.g. https://xxx/img.jpg
+	UrlPattern      UrlPattern   `json:"url_pattern"` // e.g. https://xxx/img.jpg?maxwidth={max_width:int}
+	AlterUrlPattern UrlPattern   `json:"alter_url_pattern"`
+	BaseURL         template.URL `json:"base_url"`
+	Path            Path         `json:"path"`
+	Filetype        FileType     `json:"filetype"`
+	Filesize        int          `json:"filesize"`
+	Info            string       `json:"info"`
+	Checksum        string       `json:"checksum"`
+	Jsonkey         string       `json:"jsonkey"`
 }
 
 type AudioSrc struct {

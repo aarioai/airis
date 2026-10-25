@@ -24,7 +24,7 @@ func TestUseRouterUseDoneOrder(t *testing.T) {
 	rt.Get("/ping", func(c *Context) {
 		order = append(order, "handler")
 		c.WriteString("ok")
-		c.Next() // required for Done, same as iris
+		c.Next() // required for Done
 	})
 
 	rec := httptest.NewRecorder()

@@ -1,6 +1,9 @@
 package atype
 
-import "strings"
+import (
+	"html/template"
+	"strings"
+)
 
 func (t Ext) Extension() Extension {
 	return Extension("." + t)
@@ -99,4 +102,4 @@ func (p UrlPattern) ReplaceMany(d map[string]string) UrlPattern {
 	}
 	return UrlPattern(s)
 }
-func (p UrlPattern) URL() URL { return URL(p) }
+func (p UrlPattern) URL() template.URL { return template.URL(p) }

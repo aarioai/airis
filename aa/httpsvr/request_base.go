@@ -3,11 +3,6 @@ package httpsvr
 import (
 	json "encoding/json/v2"
 	"fmt"
-	"github.com/aarioai/airis/aa/ae"
-	"github.com/aarioai/airis/aa/atype"
-	"github.com/aarioai/airis/pkg/utils"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 	"io"
 	"mime"
 	"mime/multipart"
@@ -15,6 +10,12 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+
+	"github.com/aarioai/airis/aa/ae"
+	"github.com/aarioai/airis/aa/atype"
+	"github.com/aarioai/airis/pkg/utils"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // englishTitle is stateless and safe to reuse concurrently. Avoid building a caser on every header read.

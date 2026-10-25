@@ -1,8 +1,11 @@
 package utils
 
 import (
+	"bytes"
+	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"sync"
 )
 
@@ -23,34 +26,68 @@ func GitVersion() string {
 	return gitHash
 }
 
-// loadGitHash loads the Git hash from the executable.
+// loadGitHash loads the Git hash appended to the executable.
+// Expected format: a newline plus a 40-byte hash (left-padded with spaces; TrimLeft after read).
+// printf '\n%s' "$(git rev-parse HEAD 2>/dev/null)" >> main
+// Even on read errors the hash can be verified against real git, so impact is minimal.
 func loadGitHash() string {
-	execPath, err := exec.LookPath(os.Args[0])
-	if err != nil {
+	var (
+		execPath string
+		file     *os.File
+		finfo    os.FileInfo
+		err      error
+	)
+
+	if execPath, err = lookExecPath(); err != nil {
 		return ""
 	}
 
-	file, err := os.OpenFile(execPath, os.O_RDONLY, 0666)
-	if err != nil {
+	if file, err = os.Open(execPath); err != nil {
 		return ""
 	}
 	defer file.Close()
 
-	finfo, err := file.Stat()
-	if err != nil {
+	if finfo, err = file.Stat(); err != nil {
 		return ""
 	}
-
+	size := finfo.Size()
+	if size <= gitHashLength {
+		return ""
+	}
 	hash := make([]byte, gitHashLength)
-	if _, err := file.ReadAt(hash, finfo.Size()-gitHashLength-1); err != nil {
+	if _, err = file.ReadAt(hash, size-gitHashLength-1); err != nil {
 		return ""
 	}
-
+	if hash[0] != '\n' {
+		return ""
+	}
+	hash = hash[1:]
+	hash = bytes.TrimLeft(hash, " ")
 	if !isValidGitHash(hash) {
 		return ""
 	}
-
 	return string(hash)
+}
+
+// lookExecPath returns the real path of the current executable.
+func lookExecPath() (string, error) {
+	// Prefer os.Executable() as it's more reliable
+	execPath, err := os.Executable()
+	if err != nil {
+		// Fallback to exec.LookPath
+		execPath, err = exec.LookPath(os.Args[0])
+		if err != nil {
+			return "", fmt.Errorf("failed to get executable path: %w", err)
+		}
+	}
+
+	// Resolve symlinks if any
+	var realPath string
+	if realPath, err = filepath.EvalSymlinks(execPath); err == nil {
+		execPath = realPath
+	}
+
+	return execPath, nil
 }
 
 // isValidGitHash reports whether hash is a valid Git hash.

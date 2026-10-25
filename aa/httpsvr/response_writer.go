@@ -3,6 +3,7 @@ package httpsvr
 import (
 	"errors"
 	"fmt"
+	"log"
 	"slices"
 	"strconv"
 	"strings"
@@ -253,12 +254,29 @@ func (c *Context) writeDTO(d Body) (int, error) {
 		b, newContentType, err = defaultSerialize(ct, d)
 	}
 	if err != nil {
+		if c.ErrorAsStatus {
+			c.StatusCode(ae.InternalServerError)
+			log.Printf("response serialize error: %s\n", err)
+			c.FlushStatus()
+			return 0, nil
+		}
 		b = []byte(fmt.Sprintf(`{"code":500,"msg":"response serialize error: %s","data":null}`, err.Error()))
 		return c.writeDTOBytes(b)
 	}
 	if newContentType != "" && newContentType != ct {
 		c.WithContentType(newContentType)
 	}
+
+	// status code=200 is default, no need to send
+	if c.ErrorAsStatus && d.Code != ae.OK {
+		c.StatusCode(d.Code)
+		// status code =[1xx, 204, 205, 304] are not allowed to send response body
+		if d.Code < ae.OK || d.Code == ae.NoContent || d.Code == ae.ResetContent || d.Code == ae.NotModified {
+			c.FlushStatus()
+			return 0, nil
+		}
+	}
+
 	return c.writeDTOBytes(b)
 }
 

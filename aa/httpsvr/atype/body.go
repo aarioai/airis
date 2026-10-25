@@ -218,6 +218,19 @@ func (a Body) Status(p string, xargs ...bool) (aenum.Status, *ae.Error) {
 	return parseStatus(a.Src.BodyInt8, p, xargs...)
 }
 
+func (a Body) StatusEnum(p string, enums ...aenum.Status) (aenum.Status, *ae.Error) {
+	status, e := parseStatus(a.Src.BodyInt8, p)
+	if e != nil || len(enums) == 0 {
+		return status, e
+	}
+	for _, x := range enums {
+		if x == status {
+			return x, nil
+		}
+	}
+	return status, ae.NewBadParam(p, "check status enum")
+}
+
 func (a Body) Text(p string, required ...any) (datatype.Text, *ae.Error) {
 	x, e := a.Src.BodyString(p, required...)
 	if e != nil {

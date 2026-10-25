@@ -33,7 +33,7 @@ type Router struct {
 
 	root *Party
 
-	// routerFilters run before route matching (iris UseRouter), e.g. CORS / recover.
+	// routerFilters run before route matching (UseRouter), e.g. CORS / recover.
 	routerFilters []Handler
 
 	byMethod map[string][]route
@@ -45,15 +45,15 @@ type Router struct {
 	srv   *http.Server
 }
 
-// Party groups routes under a shared prefix and middleware (iris Party).
+// Party groups routes under a shared prefix and middleware (Party).
 type Party struct {
 	router *Router
 	prefix string
-	begin  []Handler // iris Use
-	done   []Handler // iris Done
+	begin  []Handler // Use
+	done   []Handler // Done
 }
 
-// New is an alias of NewRouter (iris.New).
+// New is an alias of NewRouter.
 func New() *Router { return NewRouter() }
 
 func NewRouter() *Router {
@@ -68,25 +68,25 @@ func NewRouter() *Router {
 // UseHooks attaches a value copied onto every request context.
 func (rt *Router) UseHooks(hooks any) { rt.hooks = hooks }
 
-// UseRouter registers handlers that run before route matching (iris Party.UseRouter).
+// UseRouter registers handlers that run before route matching.
 // They always execute for every request, including 404/405.
 func (rt *Router) UseRouter(handlers ...Handler) {
 	rt.routerFilters = append(rt.routerFilters, handlers...)
 }
 
-// Use appends begin middleware on the root party (iris Application.Use).
+// Use appends begin middleware on the root party.
 func (rt *Router) Use(handlers ...Handler) { rt.root.Use(handlers...) }
 
-// UseOnce inserts or replaces a begin handler by function identity (iris UseOnce).
+// UseOnce inserts or replaces a begin handler by function identity.
 func (rt *Router) UseOnce(handlers ...Handler) { rt.root.UseOnce(handlers...) }
 
-// Done appends end middleware on the root party (iris Application.Done).
+// Done appends end middleware on the root party.
 func (rt *Router) Done(handlers ...Handler) { rt.root.Done(handlers...) }
 
-// Reset clears root begin/done middleware (iris Party.Reset).
+// Reset clears root begin/done middleware.
 func (rt *Router) Reset() *Party { return rt.root.Reset() }
 
-// OnErrorCode registers handlers for an HTTP error status (iris OnErrorCode).
+// OnErrorCode registers handlers for an HTTP error status.
 func (rt *Router) OnErrorCode(statusCode int, handlers ...Handler) {
 	if len(handlers) == 0 {
 		return
@@ -171,7 +171,7 @@ func (p *Party) PartyFunc(relativePath string, fn func(*Party)) *Party {
 	return child
 }
 
-// UseRouter registers pre-match filters on the parent router (iris Party.UseRouter).
+// UseRouter registers pre-match filters on the parent router.
 func (p *Party) UseRouter(handlers ...Handler) {
 	p.router.UseRouter(handlers...)
 }
@@ -181,12 +181,12 @@ func (p *Party) OnErrorCode(statusCode int, handlers ...Handler) {
 	p.router.OnErrorCode(statusCode, handlers...)
 }
 
-// Use appends begin middleware for this party and future children (iris Party.Use).
+// Use appends begin middleware for this party and future children.
 func (p *Party) Use(handlers ...Handler) {
 	p.begin = append(p.begin, handlers...)
 }
 
-// UseOnce inserts or replaces begin middleware by function pointer (iris UseOnce).
+// UseOnce inserts or replaces begin middleware by function pointer.
 func (p *Party) UseOnce(handlers ...Handler) {
 	for _, h := range handlers {
 		if i := handlerIndex(p.begin, h); i >= 0 {
@@ -197,7 +197,7 @@ func (p *Party) UseOnce(handlers ...Handler) {
 	}
 }
 
-// Done appends end middleware for this party and future children (iris Party.Done).
+// Done appends end middleware for this party and future children.
 func (p *Party) Done(handlers ...Handler) {
 	p.done = append(p.done, handlers...)
 }
@@ -237,7 +237,7 @@ func (p *Party) Trace(path string, handlers ...Handler) {
 	p.handle(http.MethodTrace, path, handlers...)
 }
 
-// Any registers the handlers for all standard HTTP methods (iris Party.Any).
+// Any registers the handlers for all standard HTTP methods.
 func (p *Party) Any(path string, handlers ...Handler) {
 	for _, m := range []string{
 		http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch,
@@ -270,7 +270,7 @@ func (p *Party) handle(method, path string, handlers ...Handler) {
 			paramN++
 		}
 	}
-	// iris order: begin (Use) → route handlers → done (Done)
+	// order: begin (Use) → route handlers → done (Done)
 	chain := make([]Handler, 0, len(p.begin)+len(handlers)+len(p.done))
 	chain = append(chain, p.begin...)
 	chain = append(chain, handlers...)
@@ -379,7 +379,7 @@ func (rt *Router) writeError(c *Context, status int) {
 	http.Error(c.ResponseWriter(), http.StatusText(status), status)
 }
 
-// Run / Listen start the HTTP server (iris Run / Listen).
+// Run / Listen start the HTTP server.
 func (rt *Router) Run(addr string) error { return rt.Listen(addr) }
 
 func (rt *Router) Listen(addr string) error {

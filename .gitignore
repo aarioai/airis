@@ -5,8 +5,8 @@ airis-tool
 # https://www.atlassian.com/git/tutorials/saving-changes/gitignore
 # 2026-10-25
 
-# .aa-env, .aa-update
-.aa-*
+# ._env, ._update
+._*
 
 # Compiled Java class files
 *.class

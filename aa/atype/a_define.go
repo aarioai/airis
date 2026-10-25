@@ -1,6 +1,8 @@
 package atype
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 // See ./t_basic.go
 
@@ -32,14 +34,14 @@ type Weekday int8 // [0-6] from sunday to saturday, -1 to invalid weekday
 
 // See ./t_path.go
 
-type Ext string             // extension name, e.g., jpg
-type Extension string       // extension name starts with a dot, e.g., .jpg
-type FileType string        // e.g. .jpg
-type StdFilename string     // [\w-.]+ // standard file name
-type Filename string        // [\w-.!@#$%^&(){}~]+ , unicode filename
-type StdPath string         // [\w-.\/]+
-type Path string            // [\w-.!@#$%^&(){}~/]+ , unicode path
-type URL string             // e.g. https://xxx/video.avi?quality=80
+type Ext string         // extension name, e.g., jpg
+type Extension string   // extension name starts with a dot, e.g., .jpg
+type FileType string    // e.g. .jpg
+type StdFilename string // [\w-.]+ // standard file name
+type Filename string    // [\w-.!@#$%^&(){}~]+ , unicode filename
+type StdPath string     // [\w-.\/]+
+type Path string        // [\w-.!@#$%^&(){}~/]+ , unicode path
+// type URL template.URL       //  use template.URL e.g. https://xxx/video.avi?quality=80
 type FilenamePattern string //  e.g. {name}_{size:int}.avi
 type PathPattern string     //  e.g. /a/b/{name}_{size:int}.avi
 type UrlPattern string      // e.g. https://xxx/{user}/video.avi?quality={quality:int}
@@ -123,7 +125,7 @@ type SepUint64s string // 1,2,3,4
 // See ./t_text.go
 
 type Text string // Text 65535 bytes
-
+//type HTML template.HTML // use template.HTML
 // See ./t_complex_bytes.go
 
 type Position struct{ sql.NullString } // []byte // postion, coordinate or point

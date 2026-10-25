@@ -154,6 +154,19 @@ func (a Query) Status(p string, xargs ...bool) (aenum.Status, *ae.Error) {
 	return parseStatus(a.Src.QueryInt8, p, xargs...)
 }
 
+func (a Query) StatusEnum(p string, enums ...aenum.Status) (aenum.Status, *ae.Error) {
+	status, e := parseStatus(a.Src.QueryInt8, p)
+	if e != nil || len(enums) == 0 {
+		return status, e
+	}
+	for _, x := range enums {
+		if x == status {
+			return x, nil
+		}
+	}
+	return status, ae.NewBadParam(p, "check status enum")
+}
+
 func (a Query) Uint24(p string, required ...bool) (datatype.Uint24, *ae.Error) {
 	s, e := a.Src.QueryString(p, isRequired(required))
 	if e != nil {

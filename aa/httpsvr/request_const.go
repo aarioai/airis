@@ -18,12 +18,14 @@ const (
 )
 
 const (
-	HeaderStringify = "X-Stringify"
-	ParamStringify  = "x-stringify"
-	ParamField      = "_field"
-	ParamPage       = "page"
-	ParamPageSize   = "page_size"
-	ParamPageEnd    = "page_end"
+	HeaderStringify     = "X-Stringify"       // convert all bigint numbers into string
+	HeaderErrorAsStatus = "X-Error-As-Status" // response error as http status code
+	ParamStringify      = "x-stringify"       // see HeaderStringify
+	ParamErrorAsStatus  = "x-error-as-status" // see HeaderErrorAsStatus
+	ParamField          = "x-field"
+	ParamPage           = "page"
+	ParamPageSize       = "page_size"
+	ParamPageEnd        = "page_end"
 )
 
 func (t ContentTypes) String() string {

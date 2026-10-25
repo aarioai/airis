@@ -272,6 +272,7 @@ type Context struct {
 	paramsInjected   bool
 
 	// DTO response (former httpsvr/response.Writer)
+	ErrorAsStatus     bool // response error as http status code
 	SerializeTag      string
 	serveContentTypes []string
 	beforeFlush       []func(*Context)
@@ -316,6 +317,7 @@ func acquireContext(w http.ResponseWriter, r *http.Request, params Params, handl
 	c.injectedBodies = nil
 	c.injectedFiles = nil
 	c.paramsInjected = false
+	c.ErrorAsStatus = resolveErrorAsStatus(c)
 	c.SerializeTag = ""
 	c.serveContentTypes = nil
 	c.beforeFlush = nil
@@ -327,6 +329,15 @@ func acquireContext(w http.ResponseWriter, r *http.Request, params Params, handl
 	c.QueryAtype = ctxatype.Query{Src: c}
 	c.BodyAtype = ctxatype.Body{Src: c}
 	return c
+}
+
+func resolveErrorAsStatus(c *Context) bool {
+	s := c.HeaderFast(HeaderErrorAsStatus)
+	if s != "" {
+		return s == "1" || s == "true" || s == "TRUE" || s == "True"
+	}
+	v, _ := c.QueryBool(ParamErrorAsStatus)
+	return v
 }
 
 func releaseContext(c *Context) {
@@ -613,7 +624,7 @@ func (c *Context) View(name string) error {
 	return c.views.ExecuteTemplate(c.w, name, c.viewData)
 }
 
-// Next runs the next handler in the chain (iris Context.Next).
+// Next runs the next handler in the chain (Context.Next).
 // Handlers must call Next to continue; Done middleware only runs if the chain reaches them.
 func (c *Context) Next() {
 	if c.stopped {
@@ -625,13 +636,13 @@ func (c *Context) Next() {
 	}
 }
 
-// StopExecution skips the rest of the handler chain (iris Context.StopExecution).
+// StopExecution skips the rest of the handler chain (Context.StopExecution).
 func (c *Context) StopExecution() { c.stopped = true }
 
 // IsStopped reports whether StopExecution was called.
 func (c *Context) IsStopped() bool { return c.stopped }
 
-// Proceed runs h and reports whether the chain may continue (iris Context.Proceed).
+// Proceed runs h and reports whether the chain may continue (Context.Proceed).
 func (c *Context) Proceed(h Handler) bool {
 	if c.stopped || h == nil {
 		return false
