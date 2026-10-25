@@ -49,53 +49,53 @@ var (
 )
 
 func NameToLevel(name string) ErrorLevel {
-	return nameToLevel[strings.ToLower(name)] // 人为崩溃原则
+	return nameToLevel[strings.ToLower(name)] // fail-fast: an unknown name is a programmer error
 }
 func (lvl ErrorLevel) Name() string {
 	return levelToName[lvl]
 }
 
 type LogInterface interface {
-	// New 添加前缀、后缀到输出
+	// New adds a prefix and an optional suffix to the output.
 	New(prefix string, f func(context.Context, string, ...any), suffix ...string) func(context.Context, string, ...any)
 
-	// Debug 包含详细的开发情报的信息，通常只在调试一个程序时使用
+	// Debug carries detailed development information, usually only while debugging a program.
 	Debug(ctx context.Context, msg string)
 	Debugf(ctx context.Context, format string, args ...any)
 
-	// Info 情报信息，正常的系统消息，比如骚扰报告，带宽数据等，不需要处理。
+	// Info is informational: normal system messages, such as reports gathered for monitoring and bandwidth data, that need no action.
 	Info(ctx context.Context, msg string)
 	Infof(ctx context.Context, format string, args ...any)
 
-	// Notice 不是错误情况，也不需要立即处理。
+	// Notice is not an error and does not need immediate handling.
 	Notice(ctx context.Context, msg string)
 	Noticef(ctx context.Context, format string, args ...any)
 
-	// Warn 警告信息，不是错误，比如系统磁盘使用了85%等。
+	// Warn is a warning, not an error, for example when a disk is 85% full.
 	Warn(ctx context.Context, msg string)
 	Warnf(ctx context.Context, format string, args ...any)
 
-	// Error 错误，不是非常紧急，在一定时间内修复即可。
+	// Error is an error that is not urgent and can be fixed within some time.
 	Error(ctx context.Context, msg string)
 	Errorf(ctx context.Context, format string, args ...any)
 
 	E(ctx context.Context, e *ae.Error, msg ...any)
 
-	// Fatal 重要情况，如硬盘错误，备用连接丢失
+	// Fatal is a critical condition, such as a disk error or loss of a backup link.
 	Fatal(ctx context.Context, msg string)
 	Fatalf(ctx context.Context, format string, args ...any)
 
-	// Alert 应该被立即改正的问题，如系统数据库被破坏，ISP连接丢失。
+	// Alert is a problem that must be corrected immediately, such as a corrupted system database or a lost ISP link.
 	Alert(ctx context.Context, msg string)
 	Alertf(ctx context.Context, format string, args ...any)
 
-	// LevelEmerg 紧急情况，需要立即通知技术人员。
+	// LevelEmerg is an emergency that requires notifying technicians immediately.
 	Emerg(ctx context.Context, msg string)
 	Emergf(ctx context.Context, format string, args ...any)
 
 	Print(ctx context.Context, msg string)
 	Printf(ctx context.Context, format string, args ...any)
 
-	// Trace 跟踪请求链路，或性能监控
+	// Trace follows a request chain, or monitors performance.
 	Trace(ctx context.Context)
 }

@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// Version 版本，nginx 等比较版本，就是转为每节3位数字的整数进行比较
+// Version. nginx and similar tools compare versions by turning each segment into a 3-digit integer.
 // Semantic Versioning https://semver.org/lang/zh-CN/
 // [tag 0 release, 1 alpha, 2 beta,3 RC, 4 Revision][major 000-999][minor 000-999][build/patch 000-999]
 

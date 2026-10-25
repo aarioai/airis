@@ -13,7 +13,7 @@ func DefaultIfZero[T types.BasicType](v, defaultV T) T {
 	return v
 }
 
-// First 获取第一个参数，如果切片为空则返回零值。一般用于动态参数获取
+// First returns the first argument, or the zero value when the slice is empty. Typically used to read variadic arguments.
 func First[T any](args []T) T {
 	if len(args) == 0 {
 		var zero T
@@ -22,7 +22,7 @@ func First[T any](args []T) T {
 	return args[0]
 }
 
-// SprintfArgs 针对可选参数，格式化字符串
+// SprintfArgs formats a string from optional arguments.
 func SprintfArgs[T any](args []T) string {
 	if len(args) == 0 {
 		return ""
@@ -39,7 +39,7 @@ func SprintfArgs[T any](args []T) string {
 	case 2:
 		return fmt.Sprintf(format, any(args[1]))
 	default:
-		// 将剩余参数转换为 []any 类型
+		// Convert the remaining arguments to []any.
 		rest := make([]any, len(args)-1)
 		for i, arg := range args[1:] {
 			rest[i] = any(arg)

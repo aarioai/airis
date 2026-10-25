@@ -7,7 +7,6 @@ import (
 	"github.com/aarioai/airis/pkg/utils"
 	"log"
 	"strings"
-	"sync"
 
 	"github.com/aarioai/airis/aa/ae"
 )
@@ -16,18 +15,8 @@ type xlog struct {
 	Level ErrorLevel
 }
 
-var (
-	xlogOnce     sync.Once
-	xlogInstance *xlog
-)
-
 func NewDefaultLog(level ErrorLevel) LogInterface {
-	xlogOnce.Do(func() {
-		xlogInstance = &xlog{
-			Level: level,
-		}
-	})
-	return xlogInstance
+	return &xlog{Level: level}
 }
 func packMessage(ctx context.Context, level ErrorLevel, caller, msg string) string {
 	traceInfo := acontext.TraceInfo(ctx)

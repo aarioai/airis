@@ -167,7 +167,7 @@ const (
 	Curacao                      Country = 599
 	NetherlandsAntilles          Country = 50599
 	EastTimor                    Country = 670
-	// Antarctica                   Country = 672  南极洲
+	// Antarctica                   Country = 672  Antarctica
 	Brunei             Country = 673
 	Nauru              Country = 674
 	PapuaNewGuinea     Country = 675

@@ -1,20 +1,20 @@
 package atype
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
 	"errors"
 	"github.com/aarioai/airis/pkg/types"
 	"strconv"
 )
 
-// MarshalUint8s 将 uint8 切片转换为 JSON 数组
-// json.Marshal() 不能正常转换 []byte 及 []uint8
-func MarshalUint8s(bytes []uint8) (json.RawMessage, bool) {
+// MarshalUint8s converts a uint8 slice to a JSON array of numbers.
+// encoding/json/v2 represents []byte as Base64; this keeps a numeric array.
+func MarshalUint8s(bytes []uint8) (jsontext.Value, bool) {
 	if len(bytes) == 0 {
 		return nil, true
 	}
 
-	// 预分配足够的空间
+	// Preallocate enough space
 	result := make([]byte, 0, len(bytes)*4+2)
 	result = append(result, '[')
 
@@ -29,7 +29,7 @@ func MarshalUint8s(bytes []uint8) (json.RawMessage, bool) {
 	return result, true
 }
 
-func UnmarshalUint8s(x json.RawMessage) ([]uint8, error) {
+func UnmarshalUint8s(x jsontext.Value) ([]uint8, error) {
 	if x == nil || len(x) < 2 {
 		return nil, nil
 	}

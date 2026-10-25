@@ -4,20 +4,20 @@ import (
 	"github.com/aarioai/airis/pkg/types"
 )
 
-type Status int8 // status 字段禁止默认为0，防止意外情况
+type Status int8 // the status field must not default to 0, to avoid accidents
 
 const (
-	SysRevoked Status = -128 // 已注销，系统删除（可能审核失败）
-	Expired    Status = -121 // 已失效/已过期，后面系统会自动删除
-	NotExists  Status = -114 // 数据不存在 --> 一般用于初始化一个字段，不常用
-	Deleted    Status = -100 // 用户已删除，谁都不可见
-	/********************* <=-100  属于需要删除的内容，方便分区删除整个分区 ************************/
-	Supervised  Status = -90 // 系统检测到异常，自动锁定帐户。等待异常解除。
-	Deleting    Status = -89 // 删除中；冷静期后，才进入 Deleted
-	Suspend     Status = -80 // 暂停/暂时隐藏，由用户设置
-	Failed      Status = -20 // censor failed 审核失败，让用户可以修改，仅用户可见  --> 无论之前设置什么，这里统一一个失败状态，修改的时候再设置
-	Pending     Status = -10 // 审核中，用户保留修改权，可以重新提交审核
-	Pending1    Status = -9  // censor 1 审核1通过 --> 进入阶段性审核流程，就会阻却用户修改权；发现异常，系统锁定也会进入这个状态
+	SysRevoked Status = -128 // revoked; deleted by the system (review may have failed)
+	Expired    Status = -121 // invalid or expired; the system deletes it later
+	NotExists  Status = -114 // data does not exist --> usually to initialize a field; uncommon
+	Deleted    Status = -100 // deleted by the user; visible to nobody
+	/********************* values <= -100 are content to delete, so a whole partition can be dropped ************************/
+	Supervised  Status = -90 // the system detected an anomaly and locked the account; waiting for the anomaly to clear
+	Deleting    Status = -89 // deleting; enters Deleted only after the cooling-off period
+	Suspend     Status = -80 // paused or temporarily hidden, set by the user
+	Failed      Status = -20 // censor failed: review failed, the user may edit, visible only to the user --> whatever was set before, this is the single failure state; set the real status again on edit
+	Pending     Status = -10 // under review; the user keeps edit rights and may resubmit
+	Pending1    Status = -9  // censor 1 passed --> staged review removes the user's edit rights; a system lock on anomaly also enters this state
 	Pending2    Status = -8
 	Pending3    Status = -7
 	Pending4    Status = -6
@@ -26,16 +26,16 @@ const (
 	Pending7    Status = -3
 	Pending8    Status = -2
 	Pending9    Status = -1
-	Created     Status = 0   // 新创建，审核中，但是显示；用户保留修改权
-	Passed      Status = 1   // 审核通过
-	SysTakeover Status = 127 // 系统已锁定，用户不得再修改；PS：允许删除，可执行解绑软删除，或硬删除，具体情况具体对待
+	Created     Status = 0   // newly created, under review, but shown; the user keeps edit rights
+	Passed      Status = 1   // review passed
+	SysTakeover Status = 127 // locked by the system; the user must not edit. Deletion is allowed: unbind with a soft delete, or hard-delete, depending on the case
 
 )
 
 var (
 	deletedStr      = types.Itoa(Deleted)
 	pendingLimit    = types.Itoa(Pending - 1)
-	MeReadableRange = [2]Status{Failed, SysTakeover} // 会显示在我列表的区间
+	MeReadableRange = [2]Status{Failed, SysTakeover} // range shown in the user's own list
 )
 
 func NewStatus(sts int8) (Status, bool) {
@@ -56,28 +56,28 @@ func (s Status) In(a ...Status) bool {
 	return false
 }
 
-// 显示与不显示的零界点
+// Boundary between shown and hidden
 func (s Status) IsOk() bool  { return s >= Created }
 func (s Status) NotOk() bool { return s < Created }
 
-// 是否审核通过
+// Whether review has passed
 func (s Status) IsPassed() bool  { return s >= Passed }
 func (s Status) NotPassed() bool { return s < Passed }
 
-// Created 也是待审核状态
+// Created is also a pending-review state
 func (s Status) IsPending() bool { return s >= Pending && s <= Created }
 func (s Status) IsFailed() bool  { return s <= Failed }
 func (s Status) IsDiscard() bool { return s <= Deleting }
 func (s Status) NotExits() bool  { return s == NotExists }
 
-// After/Before 不包括； From/Within 包括
-// FromPending 一般用户检测某个状态是否在审核中，或者已审核通过。
+// After/Before are exclusive; From/Within are inclusive.
+// FromPending is generally used to check whether a status is under review or already approved.
 func (s Status) FromPending() bool { return s >= Pending }
 
-// 用户自己是否可见
+// Whether the user themself can see it
 func (s Status) MeReadable() bool { return s >= MeReadableRange[0] && s <= MeReadableRange[1] }
 
-// 用户是否可以修改、删除
+// Whether the user may edit or delete
 func (s Status) Modifiable() bool { return s.In(Failed, Pending, Created, Passed) }
 
 func StsInvalid(k string) string    { return k + "<0" }
@@ -86,18 +86,18 @@ func StsPassed(k string) string     { return k + ">0" }
 func StsNotPassed(k string) string  { return k + "<1" }
 func StsNotDiscard(k string) string { return k + ">-90" }
 
-// 公开可见的状态，即审核中、创建、审核通过
+// Publicly visible statuses: under review, created, and approved
 func StsVisible(k string) string { return k + ">" + pendingLimit }
 
-// 纯审核中
+// Strictly under review
 func StsPending(k string) string {
 	return k + ">" + pendingLimit + " AND " + k + "<0"
 }
 
-// 审核中、创建的状态
+// Under review or created
 func StsPendingC(k string) string {
 	return k + ">" + pendingLimit + " AND " + k + "<1"
 }
 
-// 自己可见
+// Visible to oneself
 func StsVis(k string) string { return k + ">" + deletedStr }

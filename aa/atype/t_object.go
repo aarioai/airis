@@ -1,7 +1,7 @@
 package atype
 
 import (
-	"encoding/json"
+	json "encoding/json/v2"
 )
 
 func NewNullUint64(value uint64) NullUint64 {

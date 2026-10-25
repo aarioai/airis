@@ -1,7 +1,8 @@
 package atype
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	json "encoding/json/v2"
 	"reflect"
 )
 
@@ -209,9 +210,9 @@ func (p *Atype) ReleaseFloat64s() ([]float64, bool) {
 	return p.Float64s()
 }
 
-func (p *Atype) ArrayJson(allowNil bool) (json.RawMessage, bool) {
+func (p *Atype) ArrayJson(allowNil bool) (jsontext.Value, bool) {
 	switch v := p.raw.(type) {
-	case json.RawMessage:
+	case jsontext.Value:
 		return v, true
 	case []uint8:
 		if bytes, ok := MarshalUint8s(v); ok {
@@ -237,12 +238,12 @@ func (p *Atype) ArrayJson(allowNil bool) (json.RawMessage, bool) {
 
 	return nil, false
 }
-func (p *Atype) ReleaseArrayJson(allowNil bool) (json.RawMessage, bool) {
+func (p *Atype) ReleaseArrayJson(allowNil bool) (jsontext.Value, bool) {
 	defer p.Close()
 	return p.ArrayJson(allowNil)
 }
 
-func (p *Atype) MapJson(allowNil bool) (json.RawMessage, bool) {
+func (p *Atype) MapJson(allowNil bool) (jsontext.Value, bool) {
 	switch v := p.raw.(type) {
 	case map[string]any:
 		if bytes, err := json.Marshal(v); err == nil {
@@ -268,7 +269,7 @@ func (p *Atype) MapJson(allowNil bool) (json.RawMessage, bool) {
 
 	return nil, false
 }
-func (p *Atype) ReleaseMapJson(allowNil bool) (json.RawMessage, bool) {
+func (p *Atype) ReleaseMapJson(allowNil bool) (jsontext.Value, bool) {
 	defer p.Close()
 	return p.MapJson(allowNil)
 }

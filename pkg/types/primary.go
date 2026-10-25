@@ -31,9 +31,9 @@ import (
 // String
 // Struct
 // UnsafePointer
-// 获取原始类型  i 用指针
-// @param i 必须为指针
-// @return 除了 reflect.Ptr 外其他类型；包括 interface
+// Get the primitive type. Pass i as a pointer.
+// @param i must be a pointer
+// @return any kind other than reflect.Ptr, including interface
 func PrimitiveType(i any) reflect.Kind {
 	if i == nil {
 		return reflect.Invalid // nil
@@ -63,7 +63,7 @@ func PrimitiveType(i any) reflect.Kind {
 	return k
 }
 
-// 可能为指针，或者其他
+// May be a pointer, or some other kind.
 func PType(i any) reflect.Kind {
 	if i == nil {
 		return reflect.UnsafePointer // nil
@@ -74,7 +74,7 @@ func PType(i any) reflect.Kind {
 	if k == reflect.Invalid {
 		return reflect.Invalid // nil
 	}
-	// 指针
+	// Pointer.
 	if k == reflect.Ptr {
 		return PrimitiveType(i)
 	}

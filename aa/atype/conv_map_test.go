@@ -1,7 +1,7 @@
 package atype_test
 
 import (
-	"encoding/json"
+	json "encoding/json/v2"
 	"github.com/aarioai/airis/aa/atype"
 	"testing"
 )

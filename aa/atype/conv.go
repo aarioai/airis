@@ -27,7 +27,7 @@ func String(d any) string {
 	case bool:
 		return strconv.FormatBool(v)
 
-		// 整数
+		// integers
 	case int64:
 		return types.FormatInt(v)
 	case int:
@@ -43,7 +43,7 @@ func String(d any) string {
 	case int8:
 		return types.FormatInt(int64(v))
 
-		// 无符号整数
+		// unsigned integers
 	case uint64:
 		return types.FormatUint(v)
 	case uint:
@@ -61,13 +61,13 @@ func String(d any) string {
 	case Booln:
 		return types.FormatUint(uint64(v))
 
-		// 浮点数
+		// floating-point numbers
 	case float64:
 		return types.FormatFloat(v, 64)
 	case float32:
 		return types.FormatFloat(float64(v), 32)
 	}
-	// 有些类型type vt uint  var a, b vt 这样就无法识别为 uint；所以尝试通过字符串方式转一下
+	// Defined types such as `type vt uint; var a, b vt` are not recognized as uint, so try converting via string.
 	return fmt.Sprint(d)
 }
 
@@ -83,8 +83,8 @@ func Bytes(d any) []byte {
 	case Char:
 		return []byte{byte(v)}
 	}
-	// 很少会有number/bool转bytes的情况，因此，不需要过度优化
-	// 其他类型通过 String 转换
+	// Converting number/bool to bytes is rare, so do not over-optimize.
+	// Other types are converted via String.
 	return []byte(String(d))
 }
 
@@ -107,7 +107,7 @@ func Bool(d any) (bool, error) {
 	case int:
 		return v > 0, nil
 	}
-	// 有些类型type vt uint  var a, b vt 这样就无法识别为 uint；所以尝试通过字符串方式转一下
+	// Defined types such as `type vt uint; var a, b vt` are not recognized as uint, so try converting via string.
 	return strconv.ParseBool(String(d))
 }
 
@@ -177,7 +177,7 @@ func Int64Base(d any, bitSize int) (int64, error) {
 	case float64:
 		return int64(v), nil
 	}
-	// 有些类型type vt uint  var a, b vt 这样就无法识别为 uint；所以尝试通过字符串方式转一下
+	// Defined types such as `type vt uint; var a, b vt` are not recognized as uint, so try converting via string.
 	return types.ParseInt64(String(d), bitSize)
 }
 
@@ -230,7 +230,7 @@ func Uint64Base(d any, bitSize int) (uint64, error) {
 		return uint64(v), nil
 	case int64:
 		return uint64(v), nil
-	case byte: // 等同uint8
+	case byte: // equivalent to uint8
 		return uint64(v), nil
 	case Booln:
 		return uint64(v), nil
@@ -249,7 +249,7 @@ func Uint64Base(d any, bitSize int) (uint64, error) {
 	case float64:
 		return uint64(v), nil
 	}
-	// 有些类型type vt uint  var a, b vt 这样就无法识别为 uint；所以尝试通过字符串方式转一下
+	// Defined types such as `type vt uint; var a, b vt` are not recognized as uint, so try converting via string.
 	return types.ParseUint64(String(d), bitSize)
 }
 func Float32(d any) (float32, error) {
@@ -303,6 +303,6 @@ func Float64(d any, bitSize int) (float64, error) {
 	case float64:
 		return v, nil
 	}
-	// 有些类型type vt uint  var a, b vt 这样就无法识别为 uint；所以尝试通过字符串方式转一下
+	// Defined types such as `type vt uint; var a, b vt` are not recognized as uint, so try converting via string.
 	return strconv.ParseFloat(String(d), bitSize)
 }

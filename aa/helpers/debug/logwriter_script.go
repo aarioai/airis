@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 )
 
-// generateRmlogScript 生成删除日志的脚本
+// generateRmlogScript writes a script that deletes logs.
 func generateRmlogScript(targetDir string) error {
-	// 这里一般仅使用一次，不用移到常驻常量，浪费内存
+	// Used only once, so do not keep it as a long-lived constant and waste memory.
 	const scriptContent = `#!/bin/bash
 set -euo pipefail
 

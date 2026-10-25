@@ -29,11 +29,11 @@ func (l Location) Position() Position {
 }
 
 /*
-一般point 需要建 spatial 索引，就需要单独到一个表里，不应该放在一起
+A point generally needs a spatial index, so it belongs in its own table and should not be stored together with other columns.
 */
 // https://dev.mysql.com/doc/refman/8.0/en/gis-data-formats.html
 //	The value length is 25 bytes, made up of these components (as can be seen from the hexadecimal value):
-//	4 bytes for integer SRID (0)       4326 是GPS   WGS84，表示按 lat-lng 保存
+//	4 bytes for integer SRID (0)       4326 is GPS WGS84, stored as lat-lng
 //	1 byte for integer byte order (1 = little-endian)
 //	4 bytes for integer type information (1 = Point)
 //	8 bytes for double-precision X coordinate (1)
@@ -43,7 +43,7 @@ func ToPositionBase(srid uint32, order byte, typ uint32, x, y float64) Position 
 	var pos Position
 	buf := new(bytes.Buffer)
 	buf.Grow(25)
-	// uint32就是4个字节
+	// uint32 is 4 bytes
 	binary.Write(buf, binary.LittleEndian, srid)
 	binary.Write(buf, binary.LittleEndian, order)
 	binary.Write(buf, binary.LittleEndian, typ)
@@ -56,7 +56,7 @@ func ToPosition(coord *Coordinate) Position {
 	if coord == nil {
 		return Position{}
 	}
-	//  4326 是GPS   WGS84，表示按 lat-lng 保存
+	// 4326 is GPS WGS84, stored as lat-lng
 	return ToPositionBase(4326, 1, 1, coord.Latitude, coord.Longitude)
 }
 func binaryRead(r io.Reader, littleEndian bool, data any) error {
@@ -71,7 +71,7 @@ func (p Position) Parse() (srid uint32, order byte, typ uint32, x float64, y flo
 		return
 	}
 	buf := bytes.NewReader(b[4:5])
-	binary.Read(buf, binary.LittleEndian, &order) // 只有1字节，无论bigEndian，还是littleEndian，结果都一样
+	binary.Read(buf, binary.LittleEndian, &order) // only 1 byte, so big-endian and little-endian give the same result
 	littleEndian := order == 1
 	buf = bytes.NewReader(b[0:4])
 	binaryRead(buf, littleEndian, &srid)
@@ -115,7 +115,7 @@ func (t SepStrings) Strings(delimiters ...string) []string {
 }
 
 func ToSepUint8s(elems []uint8, delimiters ...string) SepUint8s {
-	// strings.Concat 类同
+	// same approach as strings.Concat
 	switch len(elems) {
 	case 0:
 		return ""
@@ -148,7 +148,7 @@ func (t SepUint8s) Uint8s(delimiters ...string) []uint8 {
 }
 
 func ToSepUint16s(elems []uint16, delimiters ...string) SepUint16s {
-	// strings.Concat 类同
+	// same approach as strings.Concat
 	switch len(elems) {
 	case 0:
 		return ""
@@ -180,7 +180,7 @@ func (t SepUint16s) Uint16s(delimiters ...string) []uint16 {
 }
 
 func ToSepUint24s(elems []Uint24, delimiters ...string) SepUint24s {
-	// strings.Concat 类同
+	// same approach as strings.Concat
 	switch len(elems) {
 	case 0:
 		return ""
@@ -213,7 +213,7 @@ func (t SepUint24s) Uint32s(delimiters ...string) []Uint24 {
 }
 
 func ToSepInts(elems []int, delimiters ...string) SepInts {
-	// strings.Concat 类同
+	// same approach as strings.Concat
 	switch len(elems) {
 	case 0:
 		return ""
@@ -246,7 +246,7 @@ func (t SepInts) Ints(delimiters ...string) []int {
 }
 
 func ToSepUints(elems []uint, delimiters ...string) SepUints {
-	// strings.Concat 类同
+	// same approach as strings.Concat
 	switch len(elems) {
 	case 0:
 		return ""
@@ -279,7 +279,7 @@ func (t SepUints) Uints(delimiters ...string) []uint {
 }
 
 func ToSepUint64s(elems []uint64, delimiters ...string) SepUint64s {
-	// strings.Concat 类同
+	// same approach as strings.Concat
 	switch len(elems) {
 	case 0:
 		return ""

@@ -8,7 +8,6 @@ import (
 	"github.com/aarioai/airis/pkg/utils"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -41,11 +40,6 @@ type LogWriter struct {
 	suffix     string
 }
 
-var (
-	onceLogWriter sync.Once
-	logWriter     *LogWriter
-)
-
 func Console(args ...any) {
 	if len(args) == 1 {
 		switch v := args[0].(type) {
@@ -68,16 +62,16 @@ func Console(args ...any) {
 
 	msg = strings.TrimSuffix(msg, "\n")
 
-	// 方便运行程序时直接显示
+	// Print immediately so it shows while the program is running.
 	fmt.Println(msg)
-	// 记录进日志，方便通过消息队列通知
+	// Also write to the log so a message queue can notify on it.
 	log.Println(msg)
 }
 
-func RedirectLog(dir string, perm os.FileMode, bufSize int, symlink ...string) error {
+func RedirectLog(dir string, perm os.FileMode, bufSize int, symlink ...string) (*LogWriter, error) {
 	var err error
 	if dir, err = ios.MkdirAll(dir, perm); err != nil {
-		return err
+		return nil, err
 	}
 	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil || info.IsDir() || !strings.HasSuffix(info.Name(), ".log") {
@@ -89,42 +83,42 @@ func RedirectLog(dir string, perm os.FileMode, bufSize int, symlink ...string) e
 		return nil
 	})
 
-	panicLog := path.Join(dir, fmt.Sprintf("panic-%s.log", time.Now().Format("2006-01-02")))
+	panicLog := filepath.Join(dir, fmt.Sprintf("panic-%s.log", time.Now().Format("2006-01-02")))
 	var panicFile *os.File
 	if panicFile, err = os.OpenFile(panicLog, os.O_CREATE|os.O_APPEND|os.O_WRONLY, perm); err != nil {
-		return fmt.Errorf("failed to open crash file: %w", err)
+		return nil, fmt.Errorf("failed to open crash file: %w", err)
 	}
 	defer panicFile.Close()
 
 	if err = redirectStderr(panicFile); err != nil {
-		return fmt.Errorf("failed to redirect stderr: %w", err)
+		return nil, fmt.Errorf("failed to redirect stderr: %w", err)
 	}
 	var lw *LogWriter
 	if lw, err = NewLogWriter(dir, perm, bufSize, symlink...); err != nil {
-		return fmt.Errorf("failed to create log writer: %w", err)
+		return nil, fmt.Errorf("failed to create log writer: %w", err)
 	}
 	log.SetOutput(lw)
 	log.SetFlags(log.Ltime)
-	return nil
+	return lw, nil
 }
 
-// NewLogWriter 单例模式创建新的日志写入器
-// @warn docker 内使用，需要注意单独添加软链接映射，如 -v /var/log/symlink.log:/var/log/symlink.log
+// NewLogWriter opens a daily log file and a stable path that points at it.
+// @warn When used inside Docker, map the symlink on its own, for example -v /var/log/symlink.log:/var/log/symlink.log.
 func NewLogWriter(dir string, perm os.FileMode, bufSize int, symlinks ...string) (*LogWriter, error) {
 	var err error
 	defer func() {
-		if err = generateRmlogScript(dir); err != nil {
-			Console("generate rmlog script failed: %v", err)
+		if scriptErr := generateRmlogScript(dir); scriptErr != nil {
+			Console("generate rmlog script failed: %v", scriptErr)
 		}
 	}()
 
 	if dir, err = ios.MkdirAll(dir, perm); err != nil {
 		return nil, err
 	}
-	// 这里会同时判断 symlinks[0] 是否为空字符串，兼容性更强
+	// This also treats an empty symlinks[0] as unset, which is more compatible.
 	symlink := afmt.First(symlinks)
 	if symlink == "" {
-		symlink = path.Join(dir, "app.log")
+		symlink = filepath.Join(dir, "app.log")
 	} else {
 		symlink, _, err = ios.PrepareFile(symlink, os.ModePerm)
 		if err != nil {
@@ -132,28 +126,21 @@ func NewLogWriter(dir string, perm os.FileMode, bufSize int, symlinks ...string)
 		}
 	}
 
-	onceLogWriter.Do(func() {
-		logWriter = &LogWriter{
-			retention:     defaultLogRetention,
-			perm:          perm,
-			dir:           dir,
-			symlink:       symlink,
-			bufSize:       bufSize, // 这个可以决定输出方式，因此尽量实例化之初指定，不要后来重新指定
-			done:          make(chan struct{}),
-			flushInterval: defaultLogBufferFlushInterval,
+	lw := &LogWriter{
+		retention:     defaultLogRetention,
+		perm:          perm,
+		dir:           dir,
+		symlink:       symlink,
+		bufSize:       bufSize, // this chooses the write mode, so set it when the instance is created and do not change it later
+		done:          make(chan struct{}),
+		flushInterval: defaultLogBufferFlushInterval,
 
-			dateFormat: defaultLogFileDateFormat,
-			suffix:     defaultLogSuffix,
-		}
-		logWriter.initialize()
-		logWriter.startCleanupRoutine()
-	})
-
-	if needsUpdate := logWriter.updateConfig(dir, symlink, bufSize); needsUpdate {
-		logWriter.initialize()
+		dateFormat: defaultLogFileDateFormat,
+		suffix:     defaultLogSuffix,
 	}
-
-	return logWriter, nil
+	lw.initialize()
+	lw.startCleanupRoutine()
+	return lw, nil
 }
 func (lw *LogWriter) WithRetentionDays(retentionDays time.Duration) *LogWriter {
 	lw.retention = retentionDays
@@ -190,7 +177,7 @@ func (lw *LogWriter) updateConfig(dir, symlink string, bufSize int) bool {
 }
 
 func (lw *LogWriter) currentPath() string {
-	return path.Join(lw.dir, time.Now().Format(lw.dateFormat)+lw.suffix)
+	return filepath.Join(lw.dir, time.Now().Format(lw.dateFormat)+lw.suffix)
 }
 func (lw *LogWriter) write(p []byte) (n int, err error) {
 	lw.mu.Lock()
@@ -217,7 +204,7 @@ func (lw *LogWriter) writeBuffer(p []byte) (n int, err error) {
 	if err != nil {
 		return n, fmt.Errorf("log writer failed to write to buffer: %v", err)
 	}
-	// 优化刷新逻辑
+	// Optimize the flush logic.
 	shouldFlush := len(p) > lw.bufSize/2 ||
 		strings.HasSuffix(string(p), "\n") ||
 		time.Since(lw.lastFlush) > lw.flushInterval
@@ -231,7 +218,7 @@ func (lw *LogWriter) writeBuffer(p []byte) (n int, err error) {
 	return n, err
 }
 
-// 不加锁的，供内部使用
+// Unlocked. For internal use.
 func (lw *LogWriter) flushBuffer() error {
 	if lw.bufWriter == nil {
 		return nil
@@ -240,7 +227,7 @@ func (lw *LogWriter) flushBuffer() error {
 		return fmt.Errorf("failed to flush buffer: %w", err)
 	}
 
-	// 同时刷新底层文件
+	// Also flush the underlying file.
 	if lw.file != nil {
 		if err := lw.file.Sync(); err != nil {
 			return fmt.Errorf("failed to sync file: %w", err)
@@ -250,7 +237,7 @@ func (lw *LogWriter) flushBuffer() error {
 	return nil
 }
 
-// Flush 加锁的，仅供外部使用
+// Flush is locked. For external use only.
 func (lw *LogWriter) Flush() error {
 	lw.mu.Lock()
 	defer lw.mu.Unlock()
@@ -263,7 +250,7 @@ func (lw *LogWriter) Write(p []byte) (n int, err error) {
 		if err == nil {
 			return n, nil
 		}
-		// buffer 方式写入错误，就尝试直接写
+		// If the buffered write fails, try a direct write.
 		if _, err = lw.write([]byte("write log buffer failed: " + err.Error())); err != nil {
 			Console("failed to write log: " + err.Error())
 		}
@@ -287,16 +274,9 @@ func (lw *LogWriter) openFile() error {
 		return fmt.Errorf("failed to open new log file: %w", err)
 	}
 
-	_ = os.Remove(lw.symlink)
-	symdir := filepath.Dir(lw.symlink)
-	if filepath.Dir(newLogFile) == symdir {
-		// 使用相对路径，对于容器挂载路径方式更友好
-		if err = os.Chdir(symdir); err == nil {
-			_ = os.Symlink(filepath.Base(newLogFile), filepath.Base(lw.symlink))
-		}
-	} else {
-		// 对于虚拟机共享文件夹，可能创建软链会失败，这无影响
-		_ = os.Symlink(newLogFile, lw.symlink)
+	if err = linkStablePath(newLogFile, lw.symlink); err != nil {
+		// Failure of the stable path does not stop log writes.
+		Console("log writer stable path: %v", err)
 	}
 
 	lw.logName = newLogFile
@@ -347,31 +327,59 @@ func (lw *LogWriter) cleanOldLogs() {
 	})
 }
 
+// linkStablePath points a fixed path at the current log file.
+// In the same directory, use a relative symlink so a container mount works. Without permission to create a symlink (common on Windows), fall back to a same-volume hard link.
+func linkStablePath(src, link string) error {
+	_ = os.Remove(link)
+	target := src
+	if filepath.Dir(src) == filepath.Dir(link) {
+		target = filepath.Base(src)
+	}
+	if err := os.Symlink(target, link); err == nil {
+		return nil
+	} else if linkErr := os.Link(src, link); linkErr != nil {
+		return fmt.Errorf("symlink: %v; hardlink: %w", err, linkErr)
+	}
+	return nil
+}
+
+// Close stops the cleanup goroutine and releases the log file.
+func (lw *LogWriter) Close() error {
+	return lw.Shutdown()
+}
+
+func (lw *LogWriter) closeFile() error {
+	var err error
+	if lw.bufWriter != nil {
+		err = lw.bufWriter.Flush()
+		lw.bufWriter = nil
+	}
+	if lw.file != nil {
+		if e := lw.file.Close(); err == nil {
+			err = e
+		}
+		lw.file = nil
+	}
+	return err
+}
+
 func (lw *LogWriter) Shutdown() error {
 	lw.mu.Lock()
 	defer lw.mu.Unlock()
 
-	close(lw.done)
+	if lw.done != nil {
+		select {
+		case <-lw.done:
+		default:
+			close(lw.done)
+		}
+	}
 
 	if lw.cleanupTicker != nil {
 		lw.cleanupTicker.Stop()
+		lw.cleanupTicker = nil
 	}
-	var errs []error
-	if lw.bufWriter != nil {
-		if err := lw.bufWriter.Flush(); err != nil {
-			errs = append(errs, fmt.Errorf("failed to flush buffer: %w", err))
-		}
-	}
-
-	if lw.file != nil {
-		if err := lw.file.Close(); err != nil {
-			errs = append(errs, fmt.Errorf("failed to close file: %w", err))
-		}
-	}
-	if len(errs) > 0 {
-		return fmt.Errorf("close log writer errros: %v", errs)
-	}
-	return nil
+	return lw.closeFile()
 }
 
 func redirectStderr(f *os.File) error {

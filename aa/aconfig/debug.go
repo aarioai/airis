@@ -34,9 +34,9 @@ Launch Config:
 
 func (c *Config) Dump() {
 	all := c.All()
-	// 黄色 \033[33m
-	// 结束符 \033[0m
-	// 每行尽量保持小于80字符长度
+	// Yellow \033[33m
+	// Reset \033[0m
+	// Keep each line under 80 characters when possible.
 
 	afmt.PrintBorder("Config Dump", afmt.Yellow, afmt.Bold)
 
@@ -75,18 +75,18 @@ func sortConfigKeys[T string | []rune | []byte](data map[string]T) [][3]string {
 	sectionKeys := make([]string, 0)
 	keys := arrmap.SortedKeys(data)
 	for _, key := range keys {
-		// 没有section的key
+		// Keys with no section.
 		if !strings.Contains(key, ".") {
 			defaultSectionKeys = append(defaultSectionKeys, key)
 		} else {
 			sectionKeys = append(sectionKeys, key)
 		}
 	}
-	// 1. 没有section的优先
+	// 1. Keys with no section come first.
 	for _, key := range defaultSectionKeys {
 		result = append(result, [3]string{key, string(data[key])})
 	}
-	// 2. 有section的key
+	// 2. Keys that have a section.
 	for _, key := range sectionKeys {
 		result = append(result, [3]string{key, string(data[key])})
 	}
@@ -103,24 +103,24 @@ func existsKey(arr [][3]string, key string) (string, bool) {
 func handleReplace(result map[string][][3]string, lowerPrioritySection string, prioritySection string) {
 	for i, low := range result[lowerPrioritySection] {
 		if newV, exists := existsKey(result[prioritySection], low[0]); exists {
-			// 不能用 low，必须指定完整指针位置
+			// Do not write through low; it is a copy. Address the full index.
 			result[lowerPrioritySection][i][2] = fmt.Sprintf("replaced by [%s] %s=%s", prioritySection, low[0], newV)
 		}
 	}
 }
 
-// All 获取全部配置，仅用于调试
+// All returns every config entry. For debugging only.
 func (c *Config) All() map[string][][3]string {
 	cfgMtx.RLock()
 	defer cfgMtx.RUnlock()
 
-	// 返回数组，可以保证输出key排序后的值
+	// Return slices so keys can be emitted in sorted order.
 	result := map[string][][3]string{
 		"other": make([][3]string, 0),
 		"text":  make([][3]string, 0),
 		"base":  make([][3]string, 0),
 	}
-	// 优先级: other > rsa > ini
+	// Priority: other > text > yaml base.
 	result["other"] = sortConfigKeys(c.otherConfig)
 	result["text"] = sortConfigKeys(c.textConfig)
 	result["base"] = sortConfigKeys(c.baseConfig)

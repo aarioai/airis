@@ -1,12 +1,12 @@
 package atype
 
 import (
-	"encoding/json"
+	json "encoding/json/v2"
 	"strings"
 )
 
-// 文本不存在太长的；不要使用 null string，否则插入空字符串比较麻烦
-// HTML 一律采用 template.HTML
+// Text is never very long. Do not use a null string; inserting an empty string is otherwise awkward.
+// HTML always uses template.HTML
 
 func (p FilePath) String() string                                  { return string(p) }
 func (p FilePath) Src(filler func(string) *FileSrcOld) *FileSrcOld { return filler(p.String()) }

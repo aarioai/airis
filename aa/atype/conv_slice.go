@@ -5,7 +5,7 @@ import (
 	"reflect"
 )
 
-// Slice 将任意值转换为 []any
+// Slice converts any value to []any
 func Slice(v any) ([]any, error) {
 	if v == nil {
 		return nil, nil
@@ -27,7 +27,7 @@ func Slice(v any) ([]any, error) {
 	return result, nil
 }
 
-// ToAnySlice 将任意类型切片转换为 []any
+// ToAnySlice converts a slice of any type to []any
 func ToAnySlice[T any](v []T) []any {
 	if len(v) == 0 {
 		return nil

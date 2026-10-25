@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-// Extend 扩展 other configs，后面扩展的配置会替换已存在的配置
+// Extend adds other configs. Later entries replace keys that already exist.
 func (c *Config) Extend(otherConfigs ...map[string]string) error {
 	c.startWrite()
 	defer c.endWrite()
@@ -18,7 +18,7 @@ func (c *Config) Extend(otherConfigs ...map[string]string) error {
 		return err
 	}
 
-	// 写锁范围一定要越小越好
+	// Keep the write-lock scope as small as possible.
 	cfgMtx.Lock()
 	for k, v := range cfgs {
 		c.otherConfig[k] = v
@@ -29,8 +29,8 @@ func (c *Config) Extend(otherConfigs ...map[string]string) error {
 
 func (c *Config) startWrite() {
 	for {
-		// 更新过程中，可能有其他线程也在更新（理论上几乎不存在并发重置配置，但是这样处理并发性能消耗不大，所以就这么处理下）
-		// 比较 最新的 c.onWrite.Load() 等于false。若不等于false，则表示其他写操作正在进行，需要等待。若为false，则置为true
+		// Another goroutine may also be updating (concurrent config resets are almost nonexistent, but this handling is cheap, so do it this way).
+		// Compare-and-swap the latest c.onWrite.Load() from false. If it is not false, another write is in progress and this one waits. If it is false, set it to true.
 		if c.onWrite.CompareAndSwap(false, true) {
 			break
 		}
@@ -68,7 +68,7 @@ func (c *Config) initializeTimezone() error {
 	return nil
 }
 
-// 将空格隔开的配置，转换为数组
+// Convert the space-separated config into a slice.
 func (c *Config) loadAllTextConfigs(value string) (map[string]string, error) {
 	dirs := textConfigDirs(value)
 	if len(dirs) == 0 {
@@ -99,7 +99,7 @@ func (c *Config) loadTextConfigs(dir string) (map[string]string, error) {
 	}
 
 	rsaFiles := make(map[string]string, len(entries))
-	// 因为file config是配对出现的，所以要整体加载
+	// File configs come in pairs, so load the directory as a whole.
 	for _, entry := range entries {
 		if isNotValidFile(entry) {
 			continue
@@ -114,7 +114,7 @@ func (c *Config) loadTextConfigs(dir string) (map[string]string, error) {
 	return nil, nil
 }
 
-// loadTextFile 加载单个text config文件
+// loadTextFile loads a single text config file.
 func (c *Config) loadTextFile(root string, entry fs.DirEntry, rsaFiles map[string]string) error {
 	filePath := filepath.Join(root, entry.Name())
 
@@ -126,7 +126,7 @@ func (c *Config) loadTextFile(root string, entry fs.DirEntry, rsaFiles map[strin
 	if len(data) == 0 {
 		return fmt.Errorf("bin config file is empty: %s", filePath)
 	}
-	// 目录名.文件名
+	// directory name + "." + file name
 	k := filepath.Base(root) + "." + entry.Name()
 	v := string(data)
 	if c.valueProcessor != nil {
@@ -138,7 +138,7 @@ func (c *Config) loadTextFile(root string, entry fs.DirEntry, rsaFiles map[strin
 	return nil
 }
 
-// 不要获取太细分，否则容易导致错误不容易被排查
+// Do not fetch at too fine a granularity, or errors become hard to trace.
 func (c *Config) getTextData(name string) string {
 	if c.isOnWrite() {
 		cfgMtx.RLock()

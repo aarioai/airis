@@ -6,15 +6,15 @@ import (
 	"sync"
 )
 
-// Atype 提供类型安全和高效的类型转换
+// Atype provides type-safe, efficient type conversion
 // @extend type T interface{Close()error}
 type Atype struct {
 	raw any
 }
 
 var (
-	// 对象池，减少内存分配
-	// sync.Pool 通常不需要手动释放对象，当创建的对象，没有引用时会自动回收
+	// Object pool, to reduce allocations.
+	// sync.Pool usually needs no manual free; an object is reclaimed automatically once nothing references it.
 	atypePool = sync.Pool{
 		New: func() interface{} {
 			return new(Atype)
@@ -22,8 +22,8 @@ var (
 	}
 )
 
-// New 从对象池获取一个*Atype实例
-// 注意释放。即使不释放，也不影响。
+// New takes a *Atype from the object pool.
+// Remember to release it. Leaving it unreleased is also fine.
 func New(data ...any) *Atype {
 	var v any
 	if len(data) > 0 {
@@ -36,26 +36,26 @@ func New(data ...any) *Atype {
 	return a
 }
 
-// Release 释放实例到对象池
-// 即使这个atype 不是从对象池中获取的，也会放入对象池。不影响使用。
+// Release returns the instance to the object pool.
+// Even an Atype that did not come from the pool is put into the pool. Use is unaffected.
 func (p *Atype) Close() error {
 	p.raw = nil
 	atypePool.Put(p)
 	return nil
 }
 
-// Raw 返回原始数据
+// Raw returns the original data
 func (p *Atype) Raw() any {
 	return p.raw
 }
 
-// Reload 重新加载数据
+// Reload replaces the stored data
 func (p *Atype) Reload(v any) *Atype {
 	p.raw = v
 	return p
 }
 
-// Get 从 map[string]any 中获取嵌套值
+// Get reads a nested value from map[string]any
 // p.Get("users.1.name") is short for p.Get("user", "1", "name")
 // @warn p.Get("user", "1", "name") is diffirent with p.Get("user", 1, "name")
 func (p *Atype) Get(keys ...any) (*Atype, error) {
@@ -63,7 +63,7 @@ func (p *Atype) Get(keys ...any) (*Atype, error) {
 	return New(v), err
 }
 
-// 基本类型转换方法
+// Basic type conversion methods
 func (p *Atype) String() string {
 	return String(p.raw)
 }

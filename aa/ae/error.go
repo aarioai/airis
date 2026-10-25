@@ -1,16 +1,16 @@
 package ae
 
 import (
+	"context"
 	"fmt"
 	"github.com/aarioai/airis/aa/acontext"
 	"github.com/aarioai/airis/pkg/afmt"
 	"github.com/aarioai/airis/pkg/types"
 	"github.com/aarioai/airis/pkg/utils"
-	"github.com/kataras/iris/v12"
 	"strings"
 )
 
-// Error 定义标准错误结构
+// Error defines the standard error structure.
 type Error struct {
 	Code      int    `json:"code"`
 	Msg       string `json:"msg"`
@@ -79,7 +79,7 @@ func (e *Error) handleLock() *Error {
 	return e
 }
 
-// Lock 锁定后不可再修改或复用，一般作为常量使用
+// Lock freezes the error so it can no longer be modified or reused. Typically used for constants.
 func (e *Error) Lock() *Error {
 	e.locked = true
 	return e
@@ -99,7 +99,7 @@ func (e *Error) WithMsgf(format string, args ...any) *Error {
 	return e.WithMsg(fmt.Sprintf(format, args...))
 }
 
-// AppendMsg 尝试添加消息
+// AppendMsg tries to append a message.
 func (e *Error) AppendMsg(message ...any) *Error {
 	msg := afmt.SprintfArgs(message)
 	if msg == "" {
@@ -111,7 +111,7 @@ func (e *Error) AppendMsg(message ...any) *Error {
 	return newE
 }
 
-// WithCaller 添加调用者信息
+// WithCaller adds caller information.
 func (e *Error) WithCaller(skip int) *Error {
 	newE := e.handleLock()
 	newE.Caller = utils.Caller(skip)
@@ -125,13 +125,13 @@ func (e *Error) WithDetail(detail ...any) *Error {
 	return newE
 }
 
-func (e *Error) WithTraceInfo(ctx iris.Context) *Error {
+func (e *Error) WithTraceInfo(ctx context.Context) *Error {
 	newE := e.handleLock()
 	newE.TraceInfo = acontext.TraceInfo(ctx)
 	return newE
 }
 
-// String 输出错误信息，最好不要使用 Error，避免跟 error 一致，导致人写的时候发生失误
+// String formats the error. Prefer this over Error so it does not match the error interface and callers do not use it by mistake.
 // $caller {$trace_info} code:$code $msg\n$detail
 func (e *Error) String() string {
 	capacity := len(e.TraceInfo) + len(e.Msg) + len(e.Detail) + 10
@@ -156,7 +156,7 @@ func (e *Error) Text() string {
 	return e.Caller + " " + e.String()
 }
 
-func (e *Error) Trace(ctx iris.Context) string {
+func (e *Error) Trace(ctx context.Context) string {
 	return e.WithTraceInfo(ctx).String()
 }
 

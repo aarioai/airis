@@ -9,9 +9,9 @@ import (
 var (
 	localPublicIP     string
 	defaultUDPServers = []string{
-		"223.5.5.5:80",       // 阿里云公共DNS
-		"114.114.114.114:80", // 114公共DNS
-		"8.8.8.8:80",         // Google公共DNS
+		"223.5.5.5:80",       // Alibaba Cloud public DNS
+		"114.114.114.114:80", // 114 public DNS
+		"8.8.8.8:80",         // Google public DNS
 	}
 )
 

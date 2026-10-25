@@ -58,13 +58,20 @@ func (c *Config) RegisterGRPCService(serviceName, serviceID, address, checkAddr 
 		},
 	}
 	client := c.DefaultConsul()
+	if client == nil {
+		return fmt.Errorf("consul client not configured")
+	}
 
 	// Register self to consul, each service instance should register once
 	return client.Agent().ServiceRegister(&reg)
 }
 
 func (c *Config) DeregisterGRPCService(serviceID string) error {
-	return c.DefaultConsul().Agent().ServiceDeregister(serviceID)
+	client := c.DefaultConsul()
+	if client == nil {
+		return fmt.Errorf("consul client not configured")
+	}
+	return client.Agent().ServiceDeregister(serviceID)
 }
 
 // DiscoverGRPCServices

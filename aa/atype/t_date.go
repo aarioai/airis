@@ -50,7 +50,7 @@ func (y Year) String() string      { return types.FormatUint(y) }
 func (y YearMonth) String() string { return types.FormatUint(y) }
 func (y YMD) String() string       { return types.FormatUint(y) }
 
-// years/months 可为负数
+// years and months may be negative
 func (y YearMonth) Add(years int, months int, loc *time.Location) YearMonth {
 	tm := y.Time(loc).AddDate(years, months, 0)
 	return ToYearMonth(tm.Year(), tm.Month())
@@ -87,7 +87,7 @@ func (y YMD) Date() Date {
 	return Date(x)
 }
 
-// time.Now().In()  loc 直接通过 in 传递
+// As with time.Now().In(), loc is passed in directly
 func NewDate(s string, loc *time.Location) Date {
 	if IsZeroDate(s) {
 		return MinDate

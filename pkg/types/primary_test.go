@@ -8,28 +8,28 @@ import (
 
 type FakeInt24 int32
 type FakeImgSrc struct {
-	Provider      int    `json:"provider"`       // 图片处理ID，如阿里云图片处理、网易云图片处理等
+	Provider      int    `json:"provider"`       // Image-processing ID, such as Alibaba Cloud or NetEase Cloud image processing.
 	CropPattern   string `json:"crop_pattern"`   // e.g.  https://xxx/img.jpg?width={width:int}&height={height:int}
 	ResizePattern string `json:"resize_pattern"` // e.g. https://xxx/img.jpg?maxwidth={max_width:int}
-	Origin        string `json:"origin"`         // 不一定是真实的
-	Path          string `json:"path"`           // path 可能是 filename，也可能是 带文件夹的文件名
+	Origin        string `json:"origin"`         // Not necessarily the real origin.
+	Path          string `json:"path"`           // path may be a filename, or a filename that includes a directory
 	/*
-	   不要独立出来 filename，一方面太多内容了；另一方面增加业务侧复杂度
+	   Do not split filename into its own field. There is already too much content, and it increases complexity on the business side.
 	*/
-	//Filename  string `json:"filename"`  // basename + extension  直接交path给服务端处理
+	//Filename  string `json:"filename"`  // basename + extension; hand path to the server instead
 	Filetype FakeInt24 `json:"filetype"`
 	Size     int       `json:"size"`
 	Width    int       `json:"width"`
 	Height   int       `json:"height"`
-	Allowed  [][2]int  `json:"allowed"` // 允许的width,height
-	Jsonkey  string    `json:"jsonkey"` // 特殊约定字段
+	Allowed  [][2]int  `json:"allowed"` // Allowed width and height.
+	Jsonkey  string    `json:"jsonkey"` // Field with a special convention.
 }
 
 func f0(i any) reflect.Kind {
 	return types.PrimitiveType(&i)
 }
 
-// 获取原始类型
+// Get the primitive type.
 func TestPrimitiveType(t *testing.T) {
 	type safeInt FakeInt24
 	type b safeInt

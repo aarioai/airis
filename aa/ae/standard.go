@@ -5,19 +5,19 @@ import (
 	"fmt"
 )
 
-// 定义标准错误，节省内存开销以及方便通用处理
-// 这里的错误，都是代码内部错误，不对外暴露
+// Standard errors, defined once to save memory and share handling.
+// These are internal errors and are not exposed outside the code.
 
-// 标准错误
-// ErrorXXX/ErrXXX  都应被视为常量，不应修改
+// Standard errors.
+// ErrorXXX/ErrXXX must be treated as constants and must not be modified.
 var (
-	ErrNotImplemented     = errors.New("not implemented") // 未实现的功能
+	ErrNotImplemented     = errors.New("not implemented") // feature not implemented
 	ErrServiceUnavailable = errors.New("service unavailable")
-	ErrDeprecated         = errors.New("deprecated") // 已废弃的功能
+	ErrDeprecated         = errors.New("deprecated") // deprecated feature
 
-	ErrInvalidInput     = errors.New("invalid input") // 存在无效的参数
+	ErrInvalidInput     = errors.New("invalid input") // an invalid parameter is present
 	ErrInputWrongLength = errors.New("input wrong length")
-	ErrEmptyInput       = errors.New("input is empty") // 必需的参数未传递，或者传递为空
+	ErrEmptyInput       = errors.New("input is empty") // a required parameter was omitted or passed empty
 	ErrInputTooLong     = errors.New("input is too long")
 	ErrInputTooShort    = errors.New("input is too short")
 	ErrInputTooBig      = errors.New("input is too big")
@@ -27,7 +27,7 @@ var (
 )
 
 // *Error
-// ErrorXXX/ErrXXX  都应被视为常量，不应修改
+// ErrorXXX/ErrXXX must be treated as constants and must not be modified.
 var (
 	ErrorDeprecated = NewErr(ErrDeprecated).WithCaller(2).Lock()
 

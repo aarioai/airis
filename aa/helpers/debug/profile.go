@@ -118,7 +118,7 @@ func (p *Profile) Mark(mark string) int32 {
 		return p.seq.Load()
 	}
 
-	// 程序并不重要，不存在并发，不必过度优化
+	// This path is not critical and is not concurrent, so do not over-optimize it.
 	seq := p.seq.Add(1)
 	now := time.Now()
 	nowMicro := now.UnixMicro()
@@ -129,7 +129,7 @@ func (p *Profile) Mark(mark string) int32 {
 		p.bufferPool.Put(buf)
 	}()
 
-	estimatedSize := maxProfileLabelWidth + len(p.label) + len(mark) + 10 + buf.Len() // 10 是 \n 等其他字符估计值；buf.Len 是保留以后扩展允许临时插入
+	estimatedSize := maxProfileLabelWidth + len(p.label) + len(mark) + 10 + buf.Len() // 10 estimates "\n" and other characters; buf.Len reserves room for a later temporary insert
 	buf.Grow(estimatedSize)
 
 	p.writePrefix(buf, seq)
@@ -144,7 +144,7 @@ func (p *Profile) Markf(format string, args ...any) int32 {
 	return p.Mark(fmt.Sprintf(format, args...))
 }
 
-// writePrefix 写入前缀信息
+// writePrefix writes the prefix.
 func (p *Profile) writePrefix(buf *strings.Builder, id int32) {
 	if p.label != "" {
 		buf.WriteString(p.label)
@@ -154,7 +154,7 @@ func (p *Profile) writePrefix(buf *strings.Builder, id int32) {
 	buf.WriteByte(']')
 }
 
-// writeTimeInfo 写入时间信息
+// writeTimeInfo writes the time.
 func (p *Profile) writeTimeInfo(buf *strings.Builder, id int32, now time.Time, nowMicro int64) int {
 	prevStartTime := p.startTime
 	p.startTime = nowMicro
@@ -167,12 +167,12 @@ func (p *Profile) writeTimeInfo(buf *strings.Builder, id int32, now time.Time, n
 	}
 	if delta := nowMicro - prevStartTime; delta > 0 {
 		fmt.Fprintf(buf, "+%dμs", delta)
-		return 1 // μ 是2个字节，需要增加1位
+		return 1 // μ is 2 bytes, so add 1 to the width
 	}
 	return 0
 }
 
-// writeMsg 写入标记信息
+// writeMsg writes the mark.
 func (p *Profile) writeMsg(buf *strings.Builder, msg string, n int) {
 	if msg == "" {
 		return

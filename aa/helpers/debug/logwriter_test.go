@@ -4,18 +4,19 @@ import (
 	"fmt"
 	"github.com/aarioai/airis/aa/helpers/debug"
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 	"time"
 )
 
 func testLogWriterBuffer(t *testing.T, bufferSize int) {
 	dir := t.TempDir()
-	symlink := path.Join(t.TempDir(), "logwriter_symlink_test.log")
+	symlink := filepath.Join(t.TempDir(), "logwriter_symlink_test.log")
 	lw, err := debug.NewLogWriter(dir, 0777, bufferSize, symlink)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
+	defer lw.Close()
 
 	now := time.Now().Format("2006-01-02 15:04:05")
 	testData := []byte(fmt.Sprintf(now+" buffer:%d\n", bufferSize))
@@ -40,13 +41,13 @@ func testLogWriterBuffer(t *testing.T, bufferSize int) {
 	}
 }
 
-// 测试无缓冲，直接输出
+// Test unbuffered, direct output.
 func TestLogWriter(t *testing.T) {
 	testLogWriterBuffer(t, 0)
 	testLogWriterBuffer(t, 0)
 }
 
-// 测试缓冲输出，直接输出
+// Test buffered output, written out directly.
 func TestLogWriterBuffer(t *testing.T) {
 	testLogWriterBuffer(t, 2048)
 }

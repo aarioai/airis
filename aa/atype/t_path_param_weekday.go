@@ -5,8 +5,7 @@ import (
 	"strings"
 )
 
-// Iris path parameter types
-// See https://iris-go.gitbook.io/iris/contents/routing/routing-path-parameter-types
+// Weekday path-parameter helpers used by httpsvr ({name:weekday}).
 
 const (
 	InvalidWeekday Weekday = -1

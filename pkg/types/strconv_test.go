@@ -139,7 +139,7 @@ func TestFormatBase64Int(t *testing.T) {
 	}
 }
 func TestParseInt(t *testing.T) {
-	// 测试小数字
+	// Test small numbers.
 	for i := 0; i < math.MaxUint8; i++ {
 		s := types.FormatInt(i)
 		got, err := types.ParseInt(s)
@@ -152,7 +152,22 @@ func TestParseInt(t *testing.T) {
 		}
 	}
 
-	// 测试FormatInt/ParseInt64
+	mins := []struct {
+		got  string
+		want string
+	}{
+		{types.FormatInt(int8(math.MinInt8)), "-128"},
+		{types.FormatInt(int16(math.MinInt16)), "-32768"},
+		{types.FormatInt(int32(math.MinInt32)), "-2147483648"},
+		{types.FormatInt(int64(math.MinInt64)), "-9223372036854775808"},
+	}
+	for _, c := range mins {
+		if c.got != c.want {
+			t.Errorf("FormatInt min = %s, want %s", c.got, c.want)
+		}
+	}
+
+	// Test FormatInt/ParseInt64.
 	for i := 0; i < 1000; i++ {
 		n := rand.Int64N(math.MaxInt64)
 		if i%2 == 0 {
@@ -199,25 +214,25 @@ func TestConvertBase(t *testing.T) {
 		want     string
 		wantErr  bool
 	}{
-		// 基本测试用例
+		// Basic test cases.
 		//	{"decimal to hex", "255", 10, 16, "ff", false},
 		{"hex to decimal", "ff", 16, 10, "255", false},
 		//{"binary to decimal", "1010", 2, 10, "10", false},
 		//{"decimal to binary", "10", 10, 2, "1010", false},
 		//
-		//// 负数测试
+		//// Negative-number tests.
 		//{"negative decimal to hex", "-255", 10, 16, "-ff", false},
 		//{"negative hex to decimal", "-ff", 16, 10, "-255", false},
 		//
-		//// 边界情况
+		//// Edge cases.
 		//{"empty string", "", 10, 16, "", true},
 		//{"zero value", "0", 10, 16, "0", false},
 		//
-		//// 大数测试
+		//// Large-number tests.
 		//{"large number", "9223372036854775807", 10, 16, "7fffffffffffffff", false},
 		//{"negative large number", "-9223372036854775808", 10, 16, "-8000000000000000", false},
 		//
-		//// 无效输入
+		//// Invalid input.
 		//{"invalid hex", "gg", 16, 10, "", true},
 		//{"invalid decimal", "12a", 10, 16, "", true},
 	}

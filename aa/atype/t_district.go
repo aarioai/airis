@@ -6,18 +6,18 @@ import (
 )
 
 var (
-	// 直辖市：北京、上海、天津、重庆
+	// Municipalities: Beijing, Shanghai, Tianjin, Chongqing
 	Municipalities = []Distri{110000, 310000, 120000, 500000}
-	// 经济特区：海南、深圳、厦门、珠海、汕头
+	// Special Economic Zones: Hainan, Shenzhen, Xiamen, Zhuhai, Shantou
 	SEZs = []Distri{460000, 440300, 350200, 440400, 440500}
-	// 自治区：新疆、西藏、宁夏、内蒙古、广西
+	// Autonomous regions: Xinjiang, Tibet, Ningxia, Inner Mongolia, Guangxi
 	AutonomousRegions = []Distri{650000, 540000, 640000, 150000, 450000}
-	// 特区：香港、澳门
+	// Special Administrative Regions: Hong Kong, Macau
 	SARs = []Distri{810000, 820000}
 )
 
 func NewDistri(d Uint24) Distri {
-	// 保持6位数字
+	// Keep 6 digits
 	if d == 0 {
 		return 0
 	}
@@ -70,7 +70,7 @@ func ParseDist(s string) (Dist, error) {
 	return dist, nil
 }
 
-// 某个地区是否在另外一个地区内部
+// Whether one district is inside another
 func (d Distri) Inside(p Distri) bool {
 	if d == p {
 		return true

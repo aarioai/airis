@@ -37,7 +37,7 @@ const (
 	Reset     = "\033[0m"
 )
 
-// PrintBorder 命令行中，输出边界
+// PrintBorder prints a border on the command line.
 func PrintBorder(msg string, styles ...string) {
 	msg = PadBoth(strings.ToUpper(msg), "=", 80)
 	Printc("\n"+msg+"\n", styles...)
@@ -46,7 +46,7 @@ func Console(msg string, styles ...string) {
 	Printc(msg+"\n", styles...)
 }
 
-// Printc 命令行中，输出带颜色等样式的信息
+// Printc prints styled text, including color, on the command line.
 func Printc(msg string, styles ...string) {
 	fmt.Print(WithStyle(msg, styles...))
 }

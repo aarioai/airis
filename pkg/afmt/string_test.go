@@ -41,14 +41,14 @@ func TestPadBoth(t *testing.T) {
 	testPadBoth(t, []byte("Hello Aario"), "0", 80, false)
 	testPadBoth(t, []byte("Hello Aario"), "._-", 80, false)
 
-	// 测试 trimEdge=false
+	// Test trimEdge=false.
 	want := "|~_~||~_~ Hello Aario ~_~||~_~|"
 	got := afmt.PadBoth(" Hello Aario ", "|~_~|", len(want))
 	if got != want {
 		t.Errorf("PadBoth got: %s; want: %s", got, want)
 	}
 
-	// 测试 trimEdge=true
+	// Test trimEdge=true.
 	want = "~_~||~_~| Hello Aario |~_~||~_~"
 	got = afmt.PadBoth(" Hello Aario ", "|~_~|", len(want), true)
 	if got != want {
@@ -67,7 +67,7 @@ func TestPadLeft(t *testing.T) {
 		t.Error("PadLeft " + afmt.ErrmsgSideEffect(base))
 	}
 
-	// 测试 trimEdge=false
+	// Test trimEdge=false.
 	want = "|~_~||~_~Hello Aario"
 	got = afmt.PadLeft(base, "|~_~|", len(want))
 	if got != want {
@@ -77,7 +77,7 @@ func TestPadLeft(t *testing.T) {
 		t.Error("PadLeft " + afmt.ErrmsgSideEffect(base))
 	}
 
-	// 测试 trimEdge=true
+	// Test trimEdge=true.
 	want = "~_~||~_~|Hello Aario"
 	got = afmt.PadLeft(base, "|~_~|", len(want), true)
 	if got != want {
@@ -90,7 +90,7 @@ func TestPadLeft(t *testing.T) {
 func TestPaRight(t *testing.T) {
 	base := []byte("Hello Aario")
 	baseClone := bytes.Clone(base)
-	want := fmt.Sprintf("%-20s", base) // fmt.Sprintf 只能：左右填充空格，或左边填充0
+	want := fmt.Sprintf("%-20s", base) // fmt.Sprintf can only pad with spaces on either side, or with 0 on the left.
 	got := afmt.PadRight(base, ' ', 20)
 	if len(got) != 20 || got != want {
 		t.Errorf("PadRight wrong: %s (len:%d), want %s", got, len(got), want)
@@ -99,7 +99,7 @@ func TestPaRight(t *testing.T) {
 		t.Error("PadRight " + afmt.ErrmsgSideEffect(base))
 	}
 
-	// 测试 trimEdge=false
+	// Test trimEdge=false.
 	want = "Hello Aario~_~||~_~|"
 	got = afmt.PadRight(base, "|~_~|", len(want))
 	if got != want {
@@ -109,7 +109,7 @@ func TestPaRight(t *testing.T) {
 		t.Error("PadRight " + afmt.ErrmsgSideEffect(base))
 	}
 
-	// 测试 trimEdge=true
+	// Test trimEdge=true.
 	want = "Hello Aario|~_~||~_~"
 	got = afmt.PadRight(base, "|~_~|", len(want), true)
 	if got != want {

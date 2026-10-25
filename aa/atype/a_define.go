@@ -100,7 +100,7 @@ type NullInts struct{ sql.NullString }              // int json array
 type NullUints struct{ sql.NullString }             // uint json array
 type NullUint64s struct{ sql.NullString }           // uint64 json array
 type NullStrings struct{ sql.NullString }           // string json array
-type NullStringMap struct{ sql.NullString }         // map[string]string   // JSON 规范，key 必须为字符串
+type NullStringMap struct{ sql.NullString }         // map[string]string   // JSON spec: keys must be strings
 type NullStringMapsMap struct{ sql.NullString }     // map[string][]map[string]string
 type NullStringsMap struct{ sql.NullString }        // map[string][]string
 type NullComplexStringMap struct{ sql.NullString }  // map[string]map[string]string
@@ -127,4 +127,4 @@ type Text string // Text 65535 bytes
 // See ./t_complex_bytes.go
 
 type Position struct{ sql.NullString } // []byte // postion, coordinate or point
-type IP struct{ sql.NullString }       //  VARBINARY(16) | BINARY(16) 固定16位长度 net.IP               // IP Address
+type IP struct{ sql.NullString }       //  VARBINARY(16) | BINARY(16) fixed 16-byte length net.IP               // IP Address

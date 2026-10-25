@@ -55,14 +55,14 @@ func (r RoundType) Round(x float64) float64 {
 	return math.Round(x)
 }
 
-// separator:[计] 分隔符,倾向于可显示字符，通常单个字符或字符串
-// delimiter:[计] 定界符,用于可显示字符和不可显示字符；通常成对出现，比如（）、《》、""、“” 等
+// separator: [computing] separator; prefers displayable characters, usually one character or a string
+// delimiter: [computing] delimiter; used with displayable and non-displayable characters; usually paired, e.g. (), 《》, "", “”
 type DecimalFormat struct {
-	SegmentSize uint8     // 整数部分每segmentSize位使用separator隔开
-	Separator   string    // 整数部分分隔符，如英文每3位一个逗号；中文每4位一个空格等表示方法
-	Scale       uint8     // 保留小数位数，0则表示不限制
-	TrimScale   bool      // 是否删除小数尾部无效的0
-	ScaleRound  RoundType //   @warn 如果进位到整数，则只保留.999...；负数按正数部分round
+	SegmentSize uint8     // separate every segmentSize digits of the integer part with separator
+	Separator   string    // integer-part separator, e.g. a comma every 3 digits in English, or a space every 4 digits in Chinese
+	Scale       uint8     // decimal places to keep; 0 means unlimited
+	TrimScale   bool      // whether to drop trailing insignificant zeros in the fractional part
+	ScaleRound  RoundType //   @warn if rounding carries into the integer, keep only .999...; negatives are rounded on the absolute value
 }
 
 func NewDecimalFormat(format *DecimalFormat) *DecimalFormat {

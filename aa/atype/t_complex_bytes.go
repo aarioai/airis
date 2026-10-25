@@ -14,17 +14,17 @@ func (p Position) Ok() bool {
 	return p.Valid && len(p.String) == 25
 }
 
-// sql 可以使用 select *， cast(ip as CHAR) from table_name   进行显示
+// SQL can display it with select *, cast(ip as CHAR) from table_name
 func ToIP(addr string) IP {
 	var ip IP
 	if addr == "" {
 		return ip
 	}
-	nip := net.ParseIP(addr) // 无论是IPv4还是IPv6都是16字节
+	nip := net.ParseIP(addr) // both IPv4 and IPv6 parse to 16 bytes
 	if nip == nil {
 		return ip
 	}
-	ip2 := nip.To4() // 将IPv4的转为4字节
+	ip2 := nip.To4() // convert IPv4 to 4 bytes
 	if ip2 != nil {
 		nip = ip2
 	}
@@ -50,18 +50,18 @@ func (ip IP) Net() net.IP {
 	return b
 }
 
-// 是不是 IPv4
+// Whether this is IPv4
 func (ip IP) Is4() bool {
 	return len(ip.String) == net.IPv4len
 }
 
-// 无论是4字节的IPv4，还是16字节的IPv4或IPv6，都能输出可阅读的IP地址
+// 4-byte IPv4 and 16-byte IPv4 or IPv6 all produce a readable IP address
 func (ip IP) To16() string {
 	ip2 := ip.Net()
-	// 包括ipv4 / ipv16
-	nip := ip2.To16() // 此时IP长度为16
+	// includes IPv4 / IPv6
+	nip := ip2.To16() // IP length is 16 here
 	if nip == nil {
 		return ""
 	}
-	return nip.String() // 返回IPv4样式IP地址
+	return nip.String() // return an IPv4-style IP address
 }

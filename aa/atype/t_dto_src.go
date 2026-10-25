@@ -5,17 +5,19 @@ import (
 	"regexp"
 )
 
+var imagePatternTag = regexp.MustCompile(`([a-z]+)(\d+)`)
+
 func (s AudioSrcOld) Filename() AudioPath { return AudioPath(s.Path) }
 
 func (s AudioSrcOld) Adjust(quality string) URL {
 	return s.Pattern.ReplaceAll("quality", "int", quality).URL()
 }
 
-// 存储在数据库里面，图片列表，为了节省空间，用数组来；具体见 atype.NullStrings or string
+// Stored in the database. Image lists use arrays to save space; see atype.NullStrings or string.
 
 func (s FileSrcOld) Filename() FilePath { return FilePath(s.Path) }
 
-// 存储在数据库里面，图片列表，为了节省空间，用数组来；具体见 atype.NullStrings or string
+// Stored in the database. Image lists use arrays to save space; see atype.NullStrings or string.
 
 func (s ImgSrcOld) Filename() ImagePath { return ImagePath(s.Path) }
 
@@ -43,14 +45,14 @@ func (s ImgSrcOld) Crop(width, height int) URL {
 					mw = aw
 					mh = ah
 				}
-				// 首先找到比缩放比例大过需求的
+				// First find a size whose scale is larger than required
 				if aw >= w && ah >= h {
 					w = aw
 					h = ah
 					matched = true
 				}
 			} else {
-				// 后面的都跟第一次匹配的比，找到最小匹配
+				// Compare the rest with the first match and pick the smallest match
 				if aw >= width && aw <= w && ah >= height && ah <= h {
 					w = aw
 					h = ah
@@ -100,13 +102,13 @@ func (s ImgSrcOld) Resize(maxWidth int) URL {
 				if aw > mw {
 					mw = aw
 				}
-				// 首先找到比缩放比例大过需求的
+				// First find a size whose scale is larger than required
 				if aw >= w {
 					w = aw
 					matched = true
 				}
 			} else {
-				// 后面的都跟第一次匹配的比，找到最小匹配
+				// Compare the rest with the first match and pick the smallest match
 				if aw >= maxWidth && aw <= w {
 					w = aw
 				}
@@ -136,15 +138,14 @@ func ImageFitWidth(maxWidth int) ImagePattern {
 	return ImagePattern{MaxWidth: maxWidth}
 }
 func ToImagePattern(tag string) ImagePattern {
-	reg, _ := regexp.Compile(`([a-z]+)(\d+)`)
-	matches := reg.FindAllStringSubmatch(tag, -1)
+	matches := imagePatternTag.FindAllStringSubmatch(tag, -1)
 	var p ImagePattern
 	for _, match := range matches {
 		v, _ := types.Atoi(match[2])
 		/**
 		 * w width, h height, q quanlity, v max width, g max height
-		 *    	img.width <= v ,   img.width = w  两者区别
-		 * xN  有意义，对于不定尺寸的白名单，自动化方案是：先获取 x1 的尺寸，然后 xN ，之后把 source 裁剪
+		 *    	img.width <= v ,   img.width = w  difference between the two
+		 * xN is meaningful. For an allowlist of variable sizes, the automated scheme is: obtain the x1 size first, then xN, then crop the source
 		 */
 		t := match[1]
 		switch t {

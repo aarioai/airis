@@ -6,7 +6,7 @@ import (
 	"github.com/aarioai/airis/pkg/types"
 )
 
-// Resize 将[]byte/[]rune slice 填充到指定长度，超过长度需要截断
+// Resize pads a []byte or []rune slice to the given length, and truncates it when it is longer.
 func Resize[T ~byte | ~rune](s []T, pad T, length int, padHead bool) []T {
 	paddingLen := length - len(s)
 	if length < 0 || paddingLen == 0 {
@@ -29,28 +29,28 @@ func Resize[T ~byte | ~rune](s []T, pad T, length int, padHead bool) []T {
 	return s[:length]
 }
 
-// PadBoth 在字符串两端添加填充字符，使其达到指定长度。返回的长度大于等于 length，除非 padStr 为空
-// 如果 padStr 太长，无法适应 length，则会从末尾被截断。这个跟 JS padStart/padEnd 一致
-// 通常使用于短字符填充，因此直接返回字符串
+// PadBoth pads both ends of a string so it reaches the given length. The result is at least length, unless padStr is empty.
+// If padStr is too long to fit in length, it is truncated from the end. This matches JS padStart/padEnd.
+// Usually used to pad short strings, so it returns a string directly.
 //
-// @param trimEdge 从两边截取多余填充，如 ~_~||~_~|AARIO|~_~||~_~；否则就是从中间截取 如 |~_~||~_~AARIO~_~||~_~|
+// @param trimEdge trims extra padding from both outer edges, e.g. ~_~||~_~|AARIO|~_~||~_~; otherwise trims from the inner side, e.g. |~_~||~_~AARIO~_~||~_~|
 //
-// @note slice 入参安全
+// @note slice arguments are safe
 func PadBoth[T1, T2 types.Stringable](base T1, pad T2, length int, trimEdge ...bool) string {
 	s := string(base)
 	padStr := string(pad)
 	paddingLen := length - len(s)
 
-	// 如果不需要填充，直接返回原字符串
+	// If no padding is needed, return the original string.
 	if paddingLen <= 0 || padStr == "" {
 		return s
 	}
 
-	// 计算两侧需要的填充长度
+	// Compute the padding length for each side.
 	leftPadLen := paddingLen / 2
 	rightPadLen := paddingLen - leftPadLen
 
-	// 生成填充字符串
+	// Build the padding strings.
 	leftRepeatCount := leftPadLen
 	rightRepeatCount := rightPadLen
 	psLen := len(padStr)
@@ -61,12 +61,12 @@ func PadBoth[T1, T2 types.Stringable](base T1, pad T2, length int, trimEdge ...b
 	leftPadding := strings.Repeat(padStr, leftRepeatCount)
 	rightPadding := strings.Repeat(padStr, rightRepeatCount)
 
-	// 从两边截取多余填充，如 ~_~||~_~|AARIO|~_~||~_~
+	// Trim extra padding from both outer edges, e.g. ~_~||~_~|AARIO|~_~||~_~.
 	if First(trimEdge) {
 		leftPadding = leftPadding[len(leftPadding)-leftPadLen:]
 		rightPadding = rightPadding[:rightPadLen]
 	} else {
-		// 从中间截取多余填充 如 |~_~||~_~AARIO~_~||~_~|
+		// Trim extra padding from the inner side, e.g. |~_~||~_~AARIO~_~||~_~|.
 		leftPadding = leftPadding[:leftPadLen]
 		rightPadding = rightPadding[len(rightPadding)-rightPadLen:]
 	}
@@ -75,12 +75,12 @@ func PadBoth[T1, T2 types.Stringable](base T1, pad T2, length int, trimEdge ...b
 }
 
 // PadLeft
-// fmt.Sprintf("%04d", 10)    fmt.Sprintf("%-04d", 3)  只能：左右填充空格，或左边填充0
-// 通常使用于短字符填充，因此直接返回字符串
+// fmt.Sprintf("%04d", 10) and fmt.Sprintf("%-04d", 3) can only pad with spaces on either side, or with 0 on the left.
+// Usually used to pad short strings, so it returns a string directly.
 //
-// @param trimEdge 从边缘截取多余填充，如 ~_~||~_~|AARIO；否则就是从中间截取 如 |~_~||~_~AARIO
+// @param trimEdge trims extra padding from the outer edge, e.g. ~_~||~_~|AARIO; otherwise trims from the inner side, e.g. |~_~||~_~AARIO
 //
-// @note slice 入参安全
+// @note slice arguments are safe
 func PadLeft[T1, T2 types.Stringable](base T1, pad T2, length int, trimEdge ...bool) string {
 	s := string(base)
 	padStr := string(pad)
@@ -102,11 +102,11 @@ func PadLeft[T1, T2 types.Stringable](base T1, pad T2, length int, trimEdge ...b
 }
 
 // PadRight
-// 通常使用于短字符填充，因此直接返回字符串
+// Usually used to pad short strings, so it returns a string directly.
 //
-// @param trimEdge 从边缘截取多余填充，如 AARIO|~_~||~_~；否则就是从中间截取 如 AARIO~_~||~_~|
+// @param trimEdge trims extra padding from the outer edge, e.g. AARIO|~_~||~_~; otherwise trims from the inner side, e.g. AARIO~_~||~_~|
 //
-// @note slice 入参安全
+// @note slice arguments are safe
 func PadRight[T1, T2 types.Stringable](base T1, pad T2, length int, trimEdge ...bool) string {
 	s := string(base)
 	padStr := string(pad)
@@ -128,18 +128,18 @@ func PadRight[T1, T2 types.Stringable](base T1, pad T2, length int, trimEdge ...
 	return s + padding
 }
 
-// TrimRight 截断右侧所有cut字符。若想cut字符串，应该使用 strings/bytes.Trim/TrimFunc等
-// 这里是对 byte = 0 情况的扩展（DES加密对齐使用byte(0))
+// TrimRight cuts every trailing cut element. To trim a string, use strings.Trim, bytes.Trim, or TrimFunc.
+// This extends the byte == 0 case (DES padding alignment uses byte(0)).
 //
-// @note slice 入参安全
-// @warn 出参可能会产生副作用，即有些情况会返回入参slice部分
+// @note slice arguments are safe
+// @warn the result may alias part of the input slice
 func TrimRight[T ~byte | ~rune](s []T, cut T) []T {
-	// var zero byte 不能使用 len(zero) 会报错，需要转为 len(string(zero)) = 1；或者直接判断是否为0
+	// var zero byte cannot use len(zero); that does not compile. Use len(string(zero)) == 1, or test whether the value is 0.
 	var length int
 	if cut == 0 {
 		length = 1
 	} else {
-		length = len(s) // []rune length 是 rune 个数，而不是字节数
+		length = len(s) // For []rune, length is the number of runes, not the number of bytes.
 	}
 	i := length - 1
 	for ; i > -1; i-- {
@@ -151,7 +151,7 @@ func TrimRight[T ~byte | ~rune](s []T, cut T) []T {
 }
 
 func TrimLeft[T ~byte | ~rune](s []T, cut T) []T {
-	// var zero byte 不能使用 len(zero)
+	// var zero byte cannot use len(zero).
 	var length int
 	if cut == 0 {
 		length = 1

@@ -9,12 +9,12 @@ import (
 // https://www.splashlearn.com/math-vocabulary/decimals/decimal-point
 // https://learn.microsoft.com/en-us/sql/t-sql/data-types/precision-scale-and-length-transact-sql?view=sql-server-ver16
 // [whole -> precision - scale][decimal point = .][mantissa -> scale]
-// mantissa // 小数值
-// whole // 整数值
-//precision   // 精度，如 12345.6789.precision   ==> 9 = len('12345') + len('6789')
-// scale = C.DecimalScale// 小数位数，如 12345.6789.scale  ==> 4 = len('6789')
+// mantissa // fractional value
+// whole // integer value
+//precision   // precision, e.g. 12345.6789.precision   ==> 9 = len('12345') + len('6789')
+// scale = C.DecimalScale// decimal places, e.g. 12345.6789.scale  ==> 4 = len('6789')
 
-// Decimal 万分之一
+// Decimal is one ten-thousandth
 //
 //	int    ---> [-214748.3648, 214748.3647]    [-21474836.48%, 21474836.47%]
 //	int24  ---> [-838.8608, 838.8607]        [-83886.08%, 83886.07%]
@@ -22,8 +22,8 @@ import (
 //	int16  ---> [-3.2768, 3.2767]           [-327.68%, 327.67%]
 
 const (
-	Thousandth Decimal = 10  // 千分比
-	Percent    Decimal = 100 // 百分比
+	Thousandth Decimal = 10  // per-mille
+	Percent    Decimal = 100 // percent
 
 	DecimalScale        uint8   = 4
 	decimalUnitsInt64   int64   = 10000
@@ -43,10 +43,10 @@ const (
 	MaxDecimal    Decimal = 1<<63 - 1
 )
 
-// 不要直接 int(float) 转换，否则容易出错。比如 int(60135.0000) == 60134
+// Do not convert with a bare int(float); it is error-prone. For example int(60135.0000) == 60134
 func DecimalUnitsX(n float64) Decimal { return Decimal(math.Round(n * decimalUnitsFloat64)) }
 
-// 如果是整数，直接  100 * Percent 即可
+// For an integer, multiply directly, e.g. 100 * Percent
 func HundredPercent(n float64) Decimal { return Decimal(math.Round(n * 100.0)) }
 
 func (p Decimal) Int64() int64   { return int64(p) }
@@ -59,7 +59,7 @@ func (p Decimal) MulN(n int64) Decimal {
 //	0.8 * 0.8 = 0.64 (6400)   =====>   8000 * 8000  =  6400 [0000]
 //
 // 1.6 * 0.8 = 1.28 (12800)    =====>  16000 * 8000 = 12800 [0000]
-// 0.009 * 0.04 =0.0003[6] (3)   -->   90 * 400  = 3[6000]     舍去最后一位
+// 0.009 * 0.04 =0.0003[6] (3)   -->   90 * 400  = 3[6000]     drop the last digit
 func (p Decimal) Mul(b Decimal, intHandler func(float64) float64) Decimal {
 	return Decimal(intHandler(float64(p*b) / decimalUnitsFloat64))
 }
@@ -87,7 +87,7 @@ func (p Decimal) Sign() string {
 	return ""
 }
 
-// 精度
+// Precision
 func (p Decimal) Precision() int {
 	n := len(types.FormatInt(p))
 	if p < 0 {
@@ -98,10 +98,10 @@ func (p Decimal) Precision() int {
 
 func (p Decimal) ToReal() float64 { return float64(p) / decimalUnitsFloat64 }
 
-// 整数部分
+// Integer part
 func (p Decimal) Whole() int64 { return p.Int64() / decimalUnitsInt64 }
 
-// 小数部分   -->  使用小数表示，不能用整数，因为  123.0001   ---> 0001
+// Fractional part. Represent it as a fraction, not an integer, because 123.0001 ---> 0001
 func (p Decimal) Mantissa(withSign bool) float64 {
 	mantissa := float64(p%DecimalUnits) / decimalUnitsFloat64
 	if !withSign && mantissa < 0 {
@@ -110,8 +110,8 @@ func (p Decimal) Mantissa(withSign bool) float64 {
 	return mantissa
 }
 
-// FormatWhole 格式化整数部分
-// 类型：  1,000,000 这种
+// FormatWhole formats the integer part
+// Style such as 1,000,000
 func (p Decimal) FormatWhole(style *DecimalFormat) string {
 	s := types.FormatInt(p.Whole())
 	if style == nil {
@@ -141,7 +141,7 @@ func (p Decimal) FormatMantissa(style *DecimalFormat) string {
 	s := types.FormatInt(p)
 	g := len(s) - int(MoneyScale)
 	if g > 0 {
-		s = s[g:] // 取小数部分
+		s = s[g:] // take the fractional part
 	}
 
 	var ok bool
@@ -157,7 +157,7 @@ func (p Decimal) FormatMantissa(style *DecimalFormat) string {
 		k := style.ScaleRound.IsCeil() || (style.ScaleRound.IsRound() && strings.IndexByte("0123456789", b) > 4)
 		s = s[:scale]
 		if k {
-			// 0.999... 就不用进位了
+			// 0.999... does not need to carry
 			repeat9 := true
 			for _, ss := range s {
 				if ss != '9' {
@@ -170,7 +170,7 @@ func (p Decimal) FormatMantissa(style *DecimalFormat) string {
 				s = types.FormatUint(x + 1)
 			}
 		}
-		// s 发生变化
+		// s has changed
 		if s, ok = mantissaOk(s, scale, style.TrimScale); !ok {
 			return s
 		}
@@ -183,7 +183,7 @@ func (p Decimal) Format(style *DecimalFormat) string {
 	return p.FormatWhole(style) + p.FormatMantissa(style)
 }
 
-// 无参数，提供给 go template 使用
+// No parameters; provided for Go templates
 func (p Decimal) FmtWhole() string {
 	return p.FormatWhole(nil)
 }

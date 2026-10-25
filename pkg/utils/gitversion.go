@@ -15,7 +15,7 @@ var (
 	once    sync.Once
 )
 
-// GitVersion 获取Git版本哈希值
+// GitVersion returns the Git commit hash.
 func GitVersion() string {
 	once.Do(func() {
 		gitHash = loadGitHash()
@@ -23,7 +23,7 @@ func GitVersion() string {
 	return gitHash
 }
 
-// loadGitHash 从可执行文件中加载Git哈希值
+// loadGitHash loads the Git hash from the executable.
 func loadGitHash() string {
 	execPath, err := exec.LookPath(os.Args[0])
 	if err != nil {
@@ -53,7 +53,7 @@ func loadGitHash() string {
 	return string(hash)
 }
 
-// isValidGitHash 验证是否为有效的Git哈希值
+// isValidGitHash reports whether hash is a valid Git hash.
 func isValidGitHash(hash []byte) bool {
 	for _, h := range hash {
 		if !((h >= '0' && h <= '9') || (h >= 'a' && h <= 'z')) {

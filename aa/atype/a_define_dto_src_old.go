@@ -11,8 +11,8 @@ type AudioSrcOld struct {
 	Path     Path           `json:"path"`
 	Filetype aenum.FileType `json:"filetype"` // aenum.Filetype.Int8()
 	Size     int            `json:"size"`     // atype.Uint24.Int8()
-	Duration int            `json:"duration"` // 时长，秒
-	Jsonkey  string         `json:"jsonkey"`  // 特殊约定字段
+	Duration int            `json:"duration"` // duration, in seconds
+	Jsonkey  string         `json:"jsonkey"`  // specially agreed field
 }
 
 type DocumentSrcOld struct {
@@ -21,55 +21,55 @@ type DocumentSrcOld struct {
 	Url      URL            `json:"url"`
 	Filetype aenum.FileType `json:"filetype"` // aenum.Filetype.Int8()
 	Size     int            `json:"size"`     // atype.Uint24.Int8()
-	Checksum string         `json:"checksum"` // 图片、视频、音频会被压缩，checksum 无意义；这类文件不能被压缩
-	Info     string         `json:"info"`     // 冗余数据
-	Jsonkey  string         `json:"jsonkey"`  // 特殊约定字段
+	Checksum string         `json:"checksum"` // images, video, and audio are compressed, so checksum is meaningless; such files must not be compressed
+	Info     string         `json:"info"`     // redundant data
+	Jsonkey  string         `json:"jsonkey"`  // specially agreed field
 }
 
 type FileSrcOld struct {
-	Provider int  `json:"provider"` // 图片处理ID，如阿里云图片处理、网易云图片处理等
-	Path     Path `json:"path"`     // path 可能是 filename，也可能是 带文件夹的文件名
+	Provider int  `json:"provider"` // image-processing ID, e.g. Alibaba Cloud or NetEase Cloud image processing
+	Path     Path `json:"path"`     // path may be a filename, or a filename that includes directories
 	/*
-	   不要独立出来 filename，一方面太多内容了；另一方面增加业务侧复杂度
+	   Do not split filename out. There is too much content, and it adds complexity on the business side.
 	*/
-	//StdFilename  string `json:"filename"`  // basename + extension  直接交path给服务端处理
+	//StdFilename  string `json:"filename"`  // basename + extension; hand path to the server directly
 	Filetype aenum.FileType `json:"filetype"` // aenum.Filetype.Int8()
 	Size     int            `json:"size"`     // atype.Uint24.Int8()
-	Checksum string         `json:"checksum"` // 图片、视频、音频会被压缩，checksum 无意义；这类文件不能被压缩
-	Info     string         `json:"info"`     // 冗余数据
-	Jsonkey  string         `json:"jsonkey"`  // 特殊约定字段
+	Checksum string         `json:"checksum"` // images, video, and audio are compressed, so checksum is meaningless; such files must not be compressed
+	Info     string         `json:"info"`     // redundant data
+	Jsonkey  string         `json:"jsonkey"`  // specially agreed field
 }
 
 type ImgSrcOld struct {
-	Provider      int        `json:"provider"`       // 图片处理ID，如阿里云图片处理、网易云图片处理等
+	Provider      int        `json:"provider"`       // image-processing ID, e.g. Alibaba Cloud or NetEase Cloud image processing
 	CropPattern   UrlPattern `json:"crop_pattern"`   // e.g.  https://xxx/img.jpg?width={width:int}&height={height:int}
 	ResizePattern UrlPattern `json:"resize_pattern"` // e.g. https://xxx/img.jpg?maxwidth={max_width:int}
-	Origin        URL        `json:"origin"`         // 不一定是真实的
-	Path          Path       `json:"path"`           // path 可能是 filename，也可能是 带文件夹的文件名
+	Origin        URL        `json:"origin"`         // not necessarily the real origin
+	Path          Path       `json:"path"`           // path may be a filename, or a filename that includes directories
 	/*
-	   不要独立出来 filename，一方面太多内容了；另一方面增加业务侧复杂度
+	   Do not split filename out. There is too much content, and it adds complexity on the business side.
 	*/
-	//StdFilename  string `json:"filename"`  // basename + extension  直接交path给服务端处理
+	//StdFilename  string `json:"filename"`  // basename + extension; hand path to the server directly
 	Filetype aenum.FileType `json:"filetype"` // aenum.Filetype.Int8()
 	Size     int            `json:"size"`     // atype.Uint24.Int8()
 	Width    int            `json:"width"`
 	Height   int            `json:"height"`
-	Allowed  [][2]int       `json:"allowed"` // 允许的width,height
-	Jsonkey  string         `json:"jsonkey"` // 特殊约定字段
+	Allowed  [][2]int       `json:"allowed"` // allowed width,height
+	Jsonkey  string         `json:"jsonkey"` // specially agreed field
 }
 
 type VideoSrcOld struct {
 	Provider int        `json:"provider"`
 	Pattern  UrlPattern `json:"pattern"` // e.g.  https://xxx/video.avi?quality={quality:int}
-	Origin   URL        `json:"origin"`  // 不一定是真实的
+	Origin   URL        `json:"origin"`  // not necessarily the real origin
 	Path     Path       `json:"path"`
-	Preview  URL        `json:"preview"` // 一般是 gif 格式动图，所以不能缩放，直接url即可
-	//StdFilename  string `json:"filename"` // basename + extension   直接交path给服务端处理
+	Preview  URL        `json:"preview"` // usually a GIF animation, so it cannot be scaled; use the URL directly
+	//StdFilename  string `json:"filename"` // basename + extension; hand path to the server directly
 	Filetype aenum.FileType `json:"filetype"` // aenum.Filetype.Int8()
 	Size     int            `json:"size"`     // atype.Uint24.Int8()
 	Width    int            `json:"width"`
 	Height   int            `json:"height"`
-	Duration int            `json:"duration"` // 时长，秒
-	Allowed  [][2]int       `json:"allowed"`  // 限定允许的width,height
-	Jsonkey  string         `json:"jsonkey"`  // 特殊约定字段
+	Duration int            `json:"duration"` // duration, in seconds
+	Allowed  [][2]int       `json:"allowed"`  // restricted set of allowed width,height
+	Jsonkey  string         `json:"jsonkey"`  // specially agreed field
 }

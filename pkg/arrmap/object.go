@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// JoinKeys 将map的key用sep连接起来
+// JoinKeys joins the map keys with sep.
 func JoinKeys[A byte | rune | string](m map[A]any, sep string, sort bool) string {
 	if len(m) == 0 {
 		return ""
@@ -21,7 +21,7 @@ func JoinKeys[A byte | rune | string](m map[A]any, sep string, sort bool) string
 	return strings.Join(keys, sep)
 }
 
-// SortedKeys 获取map的key列表，并排序
+// SortedKeys returns the map keys, sorted.
 func SortedKeys[A types.MapKeyType, T any](m map[A]T) []A {
 	keys := Keys(m)
 	if len(keys) == 0 {
@@ -31,7 +31,7 @@ func SortedKeys[A types.MapKeyType, T any](m map[A]T) []A {
 	return keys
 }
 
-// SortedKeysFunc 获取map的key列表，并排序。命令规则类似 bytes.TrimFunc()
+// SortedKeysFunc returns the map keys, sorted. The filter rule is similar to bytes.TrimFunc().
 func SortedKeysFunc[A types.MapKeyType, T any](m map[A]T, filter func(key A, value T) (A, bool)) []A {
 	keys := KeysFunc(m, filter)
 	if len(keys) == 0 {
@@ -41,8 +41,8 @@ func SortedKeysFunc[A types.MapKeyType, T any](m map[A]T, filter func(key A, val
 	return keys
 }
 
-// Keys 获取map的key列表
-// maps.Keys() 是一个iter.Seq[K]，通过 for  k := range maps.Keys(m) 使用
+// Keys returns the map keys.
+// maps.Keys() is an iter.Seq[K], used as: for k := range maps.Keys(m)
 func Keys[A types.MapKeyType, T any](m map[A]T) []A {
 	if len(m) == 0 {
 		return nil
@@ -54,8 +54,8 @@ func Keys[A types.MapKeyType, T any](m map[A]T) []A {
 	return keys
 }
 
-// KeysFunc 获取map的key列表。命令规则类似 bytes.TrimFunc()
-// maps.Keys() 是一个iter.Seq[K]，通过 for  k := range maps.Keys(m) 使用
+// KeysFunc returns the map keys. The filter rule is similar to bytes.TrimFunc().
+// maps.Keys() is an iter.Seq[K], used as: for k := range maps.Keys(m)
 func KeysFunc[A types.MapKeyType, T any](m map[A]T, filter func(key A, value T) (A, bool)) []A {
 	if len(m) == 0 {
 		return nil

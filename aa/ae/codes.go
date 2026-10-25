@@ -168,7 +168,7 @@ var (
 )
 
 func NewFailedAndSeeOther(redirect string) *Error {
-	return New(FailedAndSeeOther, redirect) // 特殊错误码，msg 用于跳转
+	return New(FailedAndSeeOther, redirect) // special error code; msg is the redirect target
 }
 func NewConflictWith(msg string) *Error {
 	return New(ConflictWith, msg)

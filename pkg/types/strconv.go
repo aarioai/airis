@@ -10,15 +10,15 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
-// 标准以：+/  ； URL 模式以 -_   ；  这里要贴合数字，尽量不要用数学符号，因此选用 _ ~
+// Standard Base64 uses +/; URL-safe Base64 uses -_. This alphabet should stay close to digits and avoid math symbols, so it uses _ and ~.
 const Base64Digits = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_~"
 
 const NSmalls = math.MaxUint8 + 1 // small number less than this
 
-// 为了提高性能，可以添加常用数字的字符串缓存。小数字在query string 或body传参中会很常见
-// 虽然 strconv.ParseInt 里面是用数字字符串段方式逐步截取的。不过没有对常用小数缓存优化。这里对常用小数字用查表法
+// Cache common numbers as strings for performance. Small numbers are common in query-string and body parameters.
+// strconv.ParseInt scans digit by digit and does not cache common small numbers. Small numbers are looked up in a table here.
 var (
-	smallNumbers    [NSmalls]string // 暂时保持 uint8 最高范围
+	smallNumbers    [NSmalls]string // Keep the uint8 upper bound for now.
 	smallNumberKeys = make(map[string]int, len(smallNumbers))
 
 	smallBase64Numbers    [NSmalls]string
@@ -111,14 +111,14 @@ func FormatBase64Int[T constraints.Signed](u T) string {
 	return s
 }
 func FormatBase64Uint[T constraints.Unsigned](v T) string {
-	u := uint64(v) // 必须要转换，否则无法比较
+	u := uint64(v) // Must convert; otherwise the values cannot be compared.
 	if u < NSmalls {
 		return smallBase64Numbers[int(u)]
 	}
 	return formatBase64Uint(u)
 }
 
-// 64 = 2^6 可以使用位移取代 %
+// 64 = 2^6, so a shift can replace %.
 func formatBase64Uint[T constraints.Unsigned](v T) string {
 	base := uint(64)
 	u := uint64(v)
@@ -137,15 +137,15 @@ func formatBase64Uint[T constraints.Unsigned](v T) string {
 	return string(a[i:])
 }
 
-// 人为崩溃原则。strconv 也是这样做的
+// Panic on an illegal base. strconv does the same.
 func checkBase(base int) {
 	if base < 2 || (base > 32 && base != 64) {
 		panic("atype: illegal number base")
 	}
 }
 
-// ConvertBase 数字型字符串进制转换
-// base 支持2~32，64
+// ConvertBase converts a numeric string from one base to another.
+// base supports 2-32 and 64.
 func ConvertBase(s string, fromBase, toBase int) (string, error) {
 	if s == "" {
 		return "", errors.New("string is empty")
@@ -202,46 +202,44 @@ func ConvertBase(s string, fromBase, toBase int) (string, error) {
 	}
 }
 
-// FormatUint8 直接查表
-// 小数字在query string 或body传参中会很常见
+// FormatUint8 looks the value up in the table.
+// Small numbers are common in query-string and body parameters.
 func FormatUint8(v uint8) string {
 	return smallNumbers[v]
 }
 
-// FormatInt 将int64转换为字符串，小数字直接使用查表法
+// FormatInt converts a signed integer to a string. Small numbers are looked up in the table.
+// Widen to int64 before negating, so negating MinInt8/16/32 does not overflow and then sign-extend into the wrong absolute value.
 func FormatInt[T constraints.Signed](value T) string {
 	if value == 0 {
 		return "0"
 	}
-	neg := value < 0
-	if neg {
-		value = -value
+	if value > 0 {
+		return FormatUint(uint64(value))
 	}
-	s := FormatUint(uint64(value))
-	if neg {
-		return "-" + s
-	}
-	return s
+	v := int64(value)
+	// Negating MinInt64 wraps around; interpreted as uint64, that bit pattern is exactly 1<<63.
+	return "-" + FormatUint(uint64(-v))
 }
 func Itoa[T constraints.Signed](value T) string {
 	return FormatInt(value)
 }
 
-// FormatUint 将uint64转换为字符串，小数字直接使用查表法
+// FormatUint converts an unsigned integer to a string. Small numbers are looked up in the table.
 func FormatUint[T constraints.Unsigned](value T) string {
 	v := uint64(value)
-	// 小数字使用查表法
+	// Look up small numbers in the table.
 	if v < NSmalls {
 		return smallNumbers[v]
 	}
 	return strconv.FormatUint(v, 10)
 }
 
-// FormatFloat 将float转换为字符串，整数部分使用FormatInt，小数部分使用strconv.FormatFloat
+// FormatFloat converts a float to a string. The integer part uses FormatInt; the fractional part uses strconv.FormatFloat.
 func FormatFloat[T constraints.Float](value T, bitSize ...int) string {
 	v := float64(value)
 	intPart := int64(v)
-	// 处理int性能更好
+	// Handling an integer value is faster.
 	if v == float64(intPart) {
 		return FormatInt(intPart)
 	}
@@ -357,7 +355,7 @@ func ParseUint64(s string, bitSize ...int) (uint64, error) {
 	return ParseUnsigned[uint64](s, 10, bs)
 }
 
-// ParseSigned 通用数字解析函数
+// ParseSigned is a generic signed-integer parser.
 // @example ParseSigned[int8]("123", 10, 8)    ParseSigned[uint8]("123", 10, 8)
 func ParseSigned[T ~int8 | ~int16 | ~int32 | ~int | ~int64](s string, base int, bitSize int) (T, error) {
 	if num, ok := smallNumberKeys[s]; ok {
@@ -367,7 +365,7 @@ func ParseSigned[T ~int8 | ~int16 | ~int32 | ~int | ~int64](s string, base int, 
 	return T(v), err
 }
 
-// ParseUnsigned 通用无符号数字解析函数
+// ParseUnsigned is a generic unsigned-integer parser.
 // @example ParseUnsigned[uint8]("123", 10, 8)    ParseUnsigned[uint16]("123", 10, 8)
 func ParseUnsigned[T ~uint8 | ~uint16 | ~uint32 | ~uint | ~uint64](s string, base int, bitSize int) (T, error) {
 	if num, ok := smallNumberKeys[s]; ok {

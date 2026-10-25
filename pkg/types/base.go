@@ -6,29 +6,29 @@ import (
 	"reflect"
 )
 
-// Number 表示所有数字类型
+// Number is every numeric type.
 type Number interface {
 	constraints.Integer | constraints.Float
 }
 
-// BasicType 表示所有基本类型
+// BasicType is every basic type.
 type BasicType interface {
 	~bool | ~byte | ~rune | ~string | Number
 }
 
-// MapKeyType 允许的map key类型
-// 事实上Go map key 还支持struct，但是不建议使用
+// MapKeyType is an allowed map key type.
+// Go map keys can also be structs, but that is not recommended.
 type MapKeyType interface {
 	cmp.Ordered // rune = int32, byte = uint8
 }
 
-// Stringable 可以直接使用 string(T) 转换的类型。  单词 stringable 被Laravel、Apache等使用
-// ~ 表示底层类型，如 atype.Uint24 底层类型是 uint32
+// Stringable is a type that can be converted with string(T). The word stringable is used by Laravel, Apache, and others.
+// ~ denotes the underlying type. For example, the underlying type of atype.Uint24 is uint32.
 type Stringable interface {
 	~[]byte | ~[]rune | ~byte | ~rune | ~string // rune = int32, byte = uint8
 }
 
-// 其他的使用 math.MaxInt64
+// For the other integer limits, use math.MaxInt64.
 const MaxInt24 = 1<<23 - 1
 const MinInt24 = -1 << 23
 const MaxUint24 = 1<<24 - 1
@@ -67,9 +67,9 @@ func Deref[T any](n *T) T {
 	return *n
 }
 
-// IsNil 在Go语言中，一个any类型的变量包含了2个指针，一个指针指向值的在编译时确定的类型，另外一个指针指向实际的值。
+// IsNil reports whether x is nil. In Go, an any value holds two pointers: one to the compile-time type, and one to the actual value.
 func IsNil(x any) bool {
-	// @warn 断言和反射性能不是特别好，如果不得已再使用，控制使用有助于提升程序性能。
+	// @warn Type assertions and reflection are not particularly fast. Use them only when necessary; limiting their use helps performance.
 	if x == nil {
 		return true
 	}
@@ -122,7 +122,7 @@ func NotEmpty(v any) bool {
 	return !IsEmpty(v)
 }
 
-// IsUnsigned 判断类型是否为无符号整数
+// IsUnsigned reports whether the type is an unsigned integer.
 func IsUnsigned[T constraints.Integer](_ T) bool {
 	var zero T
 	switch any(zero).(type) {

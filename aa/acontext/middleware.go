@@ -1,10 +1,7 @@
 package acontext
 
-import (
-	"github.com/kataras/iris/v12"
-)
-
-func IrisWithRemoteUser(ictx iris.Context, user string) iris.Context {
-	ictx.Values().Set(CtxRemoteUser, user)
-	return ictx
+// WithRemoteUser stores the authenticated user on the request.
+func WithRemoteUser[T interface{ SetValue(string, any) }](ctx T, user string) T {
+	ctx.SetValue(CtxRemoteUser, user)
+	return ctx
 }

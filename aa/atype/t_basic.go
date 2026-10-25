@@ -81,7 +81,7 @@ func ParseUint24(s string) (Uint24, error) {
 	return Uint24(v), err
 }
 
-// DerefInt24 专门处理 Int24 类型的指针解引用
+// DerefInt24 specifically dereferences an Int24 pointer
 func DerefInt24(n *Uint24) Uint24 {
 	if n == nil {
 		return 0
@@ -89,7 +89,7 @@ func DerefInt24(n *Uint24) Uint24 {
 	return *n
 }
 
-// DerefUint24 专门处理 Uint24 类型的指针解引用
+// DerefUint24 specifically dereferences a Uint24 pointer
 func DerefUint24(n *Uint24) Uint24 {
 	if n == nil {
 		return 0

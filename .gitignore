@@ -1,12 +1,9 @@
-# Golang Git Ignore File
-# https://github.com/aarioai/rules/blob/main/config/go.gitignore
-# 2025-06-17
-
+airis-tool
 
 # General Git Ignore File
 # https://github.com/aarioai/rules/blob/main/config/.gitignore
 # https://www.atlassian.com/git/tutorials/saving-changes/gitignore
-# 2025-06-17
+# 2026-10-25
 
 # .aa-env, .aa-update
 .aa-*
@@ -21,8 +18,7 @@
 .DS_Store
 
 # jetbrain IDE config directory
-# keep it
-#.idea
+.idea
 
 # python venv
 .venv
@@ -50,3 +46,6 @@ package-lock.json
 
 # Windows auto generated file
 Thumbs.db
+
+# js yarn
+yarn.lock

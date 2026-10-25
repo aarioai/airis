@@ -15,7 +15,7 @@ func TestSortedKeys(t *testing.T) {
 	}
 	want := []string{"a", "b", "c"}
 	got := arrmap.SortedKeys(m)
-	// 顺序必须一致
+	// Order must match.
 	if !slices.Equal(got, want) {
 		t.Errorf("SortedKeys(%v) = %v; want %v", m, got, want)
 	}
@@ -27,7 +27,7 @@ func TestJoinKeysStringMap(t *testing.T) {
 		"a": 1,
 		"c": 3,
 	}
-	// 不对key排序，则无法判断正确的顺序
+	// Without sorting the keys, the correct order cannot be asserted.
 	want := "a,b,c"
 	got := arrmap.JoinKeys(m, ",", true)
 	if got != want {

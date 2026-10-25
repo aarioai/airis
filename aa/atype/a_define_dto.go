@@ -14,14 +14,14 @@ type Location struct {
 	Valid     bool    `json:"-"`
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
-	Height    float64 `json:"height"` // 保留
+	Height    float64 `json:"height"` // reserved
 	Name      string  `json:"name"`
 	Address   string  `json:"address"`
 }
 type Coordinate struct {
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
-	Height    float64 `json:"height"` // 保留
+	Height    float64 `json:"height"` // reserved
 }
 
 type Point struct {

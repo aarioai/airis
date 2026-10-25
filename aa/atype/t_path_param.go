@@ -5,8 +5,7 @@ import (
 	"strings"
 )
 
-// Iris path parameter types
-// See https://iris-go.gitbook.io/iris/contents/routing/routing-path-parameter-types
+// Path parameter types accepted by httpsvr, written as {name:type}.
 
 var ParamTypes = []string{
 	":bool",

@@ -19,8 +19,8 @@ func TestPercent(t *testing.T) {
 func TestDecimal(t *testing.T) {
 	const n = 100
 	for i := 0; i < n; i++ {
-		a := math.Floor(rand.Float64()*10000*10000) / 10000 // 保留4位小数
-		b := math.Floor(rand.Float64()*n*10000) / 10000     // 保留4位小数
+		a := math.Floor(rand.Float64()*10000*10000) / 10000 // keep 4 decimal places
+		b := math.Floor(rand.Float64()*n*10000) / 10000     // keep 4 decimal places
 		c := math.Round(a*b*10000) / 10000
 		x := atype.DecimalUnitsX(a).MulRound(atype.DecimalUnitsX(b))
 		if x != atype.DecimalUnitsX(c) {

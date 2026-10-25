@@ -13,7 +13,7 @@ import (
 const (
 	CkEnv            = "env"
 	CkMock           = "mock"
-	CkTextConfigDirs = "text_config_dirs" // 使用空格隔开
+	CkTextConfigDirs = "text_config_dirs" // space-separated
 	CkTimeFormat     = "time_format"
 	CkTimezoneID     = "timezone_id"
 )
@@ -44,8 +44,8 @@ type Config struct {
 	onWrite     atomic.Bool
 	path        string
 	baseConfig  map[string]string
-	textConfig  map[string]string // 使用字符串保存，避免[]byte被业务层修改
-	otherConfig map[string]string // 不要使用 sync.Map， 直接对整个map加锁设置
+	textConfig  map[string]string // stored as string so the business layer cannot mutate a []byte
+	otherConfig map[string]string // do not use sync.Map; lock the whole map and assign it directly
 	consulMap   map[string]*api.Client
 	snapshot    atomic.Pointer[Snapshot]
 
@@ -68,24 +68,14 @@ func New(path string, valueProcessor func(key string, value string) (string, err
 	return cfg, err
 }
 
-// splitDots splits dot-separated strings into parts
-// @example ["a.b.c", "d.e"] -> ["a", "b", "c", "d", "e"]
-func splitDots(keys ...string) []string {
-	n := make([]string, 0)
-	for _, key := range keys {
-		n = append(n, strings.Split(key, ".")...)
-	}
-	return n
-}
-
-// shouldSkipFile 判断是否应该跳过该文件
-// 跳过目录和隐藏文件
+// shouldSkipFile reports whether the file should be skipped.
+// Skip directories and hidden files.
 func isNotValidFile(entry fs.DirEntry) bool {
 	name := entry.Name()
 	return entry.IsDir() || len(name) == 0 || name[0] == '.'
 }
 
-// 转化为数组，多个目录
+// Convert a space-separated value into a slice of directories.
 func textConfigDirs(value string) []string {
 	if value == "" {
 		return nil

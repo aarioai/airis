@@ -7,14 +7,14 @@ import (
 	"strings"
 )
 
-// 汇率一般保留4位小数，所以这里金额 * 10000
-// 数据库有 money() 函数 money 支持正负；
-// SmallMoney:  UNSIGNED INT 范围：42万元左右；
-// Money:      BIGINT 范围：正负100亿元；
+// Exchange rates usually keep 4 decimal places, so amounts here are value * 10000.
+// The database money() function supports signed money.
+// SmallMoney: UNSIGNED INT range, about 420,000 yuan.
+// Money:      BIGINT range, about ±10 billion yuan.
 
 const (
-	// 1 元 = 100 分 = 1000 毫 = 10000 money
-	// 10 律币 = 100 律分 = 1000 律厘  = 1000 律毫 = 10000 coin
+	// 1 yuan = 100 fen = 1000 hao = 10000 money
+	// 10 lu-coins = 100 lu-fen = 1000 lu-li = 1000 lu-hao = 10000 coin
 
 	MoneyScale        uint8   = 4
 	Cent              Money   = 100 // 0.01
@@ -44,7 +44,7 @@ const (
 	MaxMoney    Money = 1<<63 - 1
 )
 
-// int64 就直接乘就行，  100 * atype.Yuan
+// For an int64, multiply directly, e.g. 100 * atype.Yuan
 func MoneyUnitsX(n float64) Money { return Money(math.Round(n * moneyUnitsFloat64)) }
 func YuanX(n float64) Money       { return MoneyUnitsX(n) }
 func DollarX(n float64) Money     { return MoneyUnitsX(n) }
@@ -52,10 +52,10 @@ func DollarX(n float64) Money     { return MoneyUnitsX(n) }
 func (a Money) Int64() int64   { return int64(a) }
 func (a Money) String() string { return types.FormatInt(a) }
 
-// 计算总价
+// Compute the total price
 func (a Money) MulN(n uint) Money { return a * Money(n) }
 
-// 计算折扣价
+// Compute the discounted price
 func (a Money) MulF(p float64, intHandler func(float64) float64) Money {
 	return Money(intHandler(float64(a) * p))
 }
@@ -63,7 +63,7 @@ func (a Money) MulRoundF(p float64) Money { return a.MulF(p, math.Round) }
 func (a Money) MulCeilF(p float64) Money  { return a.MulF(p, math.Ceil) }
 func (a Money) MulFloorF(p float64) Money { return a.MulF(p, math.Floor) }
 
-// 计算折扣价
+// Compute the discounted price
 func (a Money) Mul(p Decimal, intHandler func(float64) float64) Money {
 	return Money(intHandler(float64(a*Money(p)) / decimalUnitsFloat64))
 }
@@ -71,7 +71,7 @@ func (a Money) MulRound(p Decimal) Money { return a.Mul(p, math.Round) }
 func (a Money) MulCeil(p Decimal) Money  { return a.Mul(p, math.Ceil) }
 func (a Money) MulFloor(p Decimal) Money { return a * Money(p) / Money(decimalUnitsInt64) }
 
-// 计算折扣前价格
+// Compute the pre-discount price
 func (a Money) Div(p Decimal, intHandler func(float64) float64) Money {
 	return Money(intHandler(float64(a.Int64()*decimalUnitsInt64) / float64(p)))
 }
@@ -79,7 +79,7 @@ func (a Money) DivRound(p Decimal) Money { return a.Div(p, math.Round) }
 func (a Money) DivCeil(p Decimal) Money  { return a.Div(p, math.Ceil) }
 func (a Money) DivFloor(p Decimal) Money { return a * Money(decimalUnitsInt64) / Money(p) }
 
-// 计算单价
+// Compute the unit price
 func (a Money) DivN(n uint, intHandler func(float64) float64) Money {
 	return a.Div(Decimal(n)*DecimalUnits, intHandler)
 }
@@ -87,7 +87,7 @@ func (a Money) DivRoundN(n uint) Money { return a.DivN(n, math.Round) }
 func (a Money) DivCeilN(n uint) Money  { return a.DivN(n, math.Ceil) }
 func (a Money) DivFloorN(n uint) Money { return a.DivFloor(Decimal(n) * DecimalUnits) }
 
-// 某个费用占总费用的比例
+// Ratio of one charge to the total charge
 func (a Money) Of(b Money, intHandler func(float64) float64) Decimal {
 	return Decimal(intHandler(float64(a.Int64()*decimalUnitsInt64) / float64(b)))
 }
@@ -95,7 +95,7 @@ func (a Money) OfRound(b Money) Decimal { return a.Of(b, math.Round) }
 func (a Money) OfCeil(b Money) Decimal  { return a.Of(b, math.Ceil) }
 func (a Money) OfFloor(b Money) Decimal { return Decimal(a) * DecimalUnits / Decimal(b) }
 
-// 符号
+// Sign
 func (a Money) Sign() string {
 	if a > 0 {
 		return "-"
@@ -103,7 +103,7 @@ func (a Money) Sign() string {
 	return ""
 }
 
-// 精度
+// Precision
 func (a Money) Precision() int {
 	n := len(types.FormatInt(a.Int64()))
 	if a < 0 {
@@ -112,14 +112,14 @@ func (a Money) Precision() int {
 	return n
 }
 
-// 实数形式
+// Real-number form
 func (a Money) ToReal() float64 { return float64(a) / moneyUnitsFloat64 }
 
-// 整数部分
+// Integer part
 func (a Money) Whole() int64  { return int64(a) / int64(Yuan) }
 func (a Money) ToCent() int64 { return int64(a) / int64(Cent) }
 
-// 小数部分   -->  使用小数表示，不能用整数，因为  123.0001   ---> 0001
+// Fractional part. Represent it as a fraction, not an integer, because 123.0001 ---> 0001
 func (a Money) Mantissa(withSign bool) float64 {
 	mantissa := float64(a%MoneyUnits) / moneyUnitsFloat64
 	if !withSign && mantissa < 0 {
@@ -128,7 +128,7 @@ func (a Money) Mantissa(withSign bool) float64 {
 	return mantissa
 }
 
-// 类型：  1,000,000 这种
+// Style such as 1,000,000
 func (a Money) FormatWhole(style *DecimalFormat) string {
 	s := types.FormatInt(a.Whole())
 	if style == nil {
@@ -137,7 +137,7 @@ func (a Money) FormatWhole(style *DecimalFormat) string {
 	return formatWhole(s, style.SegmentSize, style.Separator)
 }
 
-// @warn 如果进位到整数，则只保留.999...；负数按正数部分round
+// @warn If rounding carries into the integer, keep only .999...; negatives are rounded on the absolute value
 func (a Money) FormatMantissa(style *DecimalFormat) string {
 	style = NewDecimalFormat(style)
 	scale := int(style.Scale)
@@ -145,7 +145,7 @@ func (a Money) FormatMantissa(style *DecimalFormat) string {
 	s := types.FormatInt(a.Int64())
 	g := len(s) - int(MoneyScale)
 	if g > 0 {
-		s = s[g:] // 取小数部分
+		s = s[g:] // take the fractional part
 	}
 	var ok bool
 	if s, ok = mantissaOk(s, scale, style.TrimScale); !ok {
@@ -159,7 +159,7 @@ func (a Money) FormatMantissa(style *DecimalFormat) string {
 		k := style.ScaleRound.IsCeil() || (style.ScaleRound.IsRound() && strings.IndexByte("0123456789", b) > 4)
 		s = s[:scale]
 		if k {
-			// 0.999... 就不用进位了
+			// 0.999... does not need to carry
 			repeat9 := true
 			for _, ss := range s {
 				if ss != '9' {
@@ -172,7 +172,7 @@ func (a Money) FormatMantissa(style *DecimalFormat) string {
 				s = types.FormatUint(x + 1)
 			}
 		}
-		// s 发生变化
+		// s has changed
 		if s, ok = mantissaOk(s, scale, style.TrimScale); !ok {
 			return s
 		}
@@ -189,7 +189,7 @@ func (a Money) Format(style *DecimalFormat) string {
 	return a.FormatWhole(style) + a.FormatMantissa(style)
 }
 
-// 无参数，提供给 go template 使用
+// No parameters; provided for Go templates
 func (a Money) FmtWhole() string {
 	return a.FormatWhole(nil)
 }

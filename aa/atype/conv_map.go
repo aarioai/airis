@@ -5,7 +5,7 @@ import (
 	"reflect"
 )
 
-// ToMap 将任意值转换为 map[any]any
+// ToMap converts any value to map[any]any
 func ToMap(value any) (map[any]any, bool) {
 	switch v := value.(type) {
 	case map[any]any:
@@ -24,7 +24,7 @@ func ToMap(value any) (map[any]any, bool) {
 		return m, true
 	}
 
-	// 使用反射处理其他 map 类型
+	// Use reflection for other map types
 	rv := reflect.ValueOf(value)
 	if rv.Kind() != reflect.Map {
 		return nil, false

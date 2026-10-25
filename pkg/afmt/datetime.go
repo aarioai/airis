@@ -130,9 +130,9 @@ func loadTimeDiff(layout []rune, p map[rune]*int) map[rune]bool {
 	return ls
 }
 
-// 计算两个日期之差
-// @param layout:  %Y %M %D %H %I %S  e.g. `{%Y年}{%M个月}`
-// @param noCarry  true 尾数忽略；false 尾数后面>0，就+1
+// Difference between two times.
+// @param layout: %Y %M %D %H %I %S, e.g. `{%Y years}{%M months}`
+// @param noCarry: true drops the leftover fraction; false adds 1 when any smaller unit is > 0
 func TimeDiff(layout string, d1 time.Time, d2 time.Time, noCarry bool) string {
 	if layout == "" {
 		return ""
@@ -160,7 +160,7 @@ func TimeDiff(layout string, d1 time.Time, d2 time.Time, noCarry bool) string {
 		*p['Y'] = 0
 	}
 	if *p['M'] > 0 && !ls['M'] {
-		*p['D'] += *p['M'] * 30 // 近似天数
+		*p['D'] += *p['M'] * 30 // Approximate day count.
 		*p['M'] = 0
 	}
 	if *p['D'] > 0 && !ls['D'] {
@@ -218,10 +218,10 @@ func DurationInChinese(d time.Duration) string {
 	return s
 }
 
-// 格式化 Duration
-// time.Duration.String()  返回如：895061h51m1.00001s
-// 这里对系统功能进行扩展，支持多种语言，但是只支持到整数秒。
-// layout -> d:h:m:s ，如  Days`Hours`Minutes`Duration   Hours`Minutes`Duration  天`小时`分`秒 小时`分`秒
+// Format a Duration.
+// time.Duration.String() returns values such as 895061h51m1.00001s.
+// This extends that behavior for multiple languages, but only to whole seconds.
+// layout is d:h:m:s, for example Days`Hours`Minutes`Seconds, Hours`Minutes`Seconds, or day`hour`min`sec.
 // singlelar -> Day.Hour.Minute.Second D.H.M.S
 
 func DurationString(d time.Duration, layout string, singlelar ...string) (string, error) {
@@ -271,7 +271,7 @@ func DurationString(d time.Duration, layout string, singlelar ...string) (string
 	} else {
 		pattern = la[len(la)-1] // second's pattern
 		w -= len(pattern)
-		copy(buf[w:], la[len(la)-1]) // end with second's pattern, e.g. "s", "Second", "Duration", "秒"
+		copy(buf[w:], la[len(la)-1]) // end with the seconds pattern, e.g. "s", "Second", "Duration", "sec"
 	}
 
 	// u is now integer seconds
